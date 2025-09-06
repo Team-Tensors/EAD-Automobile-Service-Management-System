@@ -1,0 +1,261 @@
+# EAD Automobile Service Management System - GitIgnore File
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+.metadata/
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.netbeans/
+nbproject/
+
+# Java / Spring Boot
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+target/
+build/
+out/
+bin/
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Node.js / npm / yarn
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.yarn/
+.pnp.*
+package-lock.json
+yarn.lock
+
+# React / Angular / Vue.js
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.angular/
+coverage/
+nyc_output/
+
+# .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.vspscc
+*.vssscc
+.builds/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.accdb
+*.dbf
+database.yml
+application-local.properties
+application-dev.properties
+
+# Configuration Files with Sensitive Data
+config/database.yml
+config/secrets.yml
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+application-local.yml
+application-secrets.yml
+*.key
+*.pem
+*.crt
+*.p12
+*.jks
+secrets.properties
+
+# Logs
+*.log
+logs/
+log/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime and Temporary Files
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+.nyc_output/
+.grunt/
+.lock-wscript/
+.wafpickle-N
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env
+.cache/
+.parcel-cache/
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Testing
+coverage/
+*.lcov
+.nyc_output/
+junit.xml
+test-results/
+allure-results/
+screenshots/
+test-output/
+
+# Production Builds
+/dist
+/build
+/public/build
+*.tgz
+*.tar.gz
+
+# Backup Files
+*.bak
+*.backup
+*~
+*.orig
+*.save
+*.swp
+*.swo
+
+# Certificate Files
+*.p7b
+*.p7r
+*.spc
+*.cer
+*.der
+
+# Application Specific
+uploads/
+temp/
+cache/
+storage/
+public/uploads/
+public/storage/
+media/
+static/media/
+
+# Terraform (if using Infrastructure as Code)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Cloud Platform Files
+.aws/
+.azure/
+.gcp/
+
+# Monitoring and Analytics
+.newrelic.yml
+newrelic.yml
+
+# Package Managers
+.pnpm-store/
+.rush/
+.lerna/
+
+# Local Environment Configuration
+.local
+local.properties
+local.yml
+
+# Generated Documentation
+docs/build/
+site/
+
+# Jupyter Notebooks (if used for data analysis)
+.ipynb_checkpoints/
+*.ipynb
+
+# Large Files (consider using Git LFS)
+*.iso
+*.dmg
+*.exe
+*.msi
+*.deb
+*.rpm
+
+# Custom Application Files
+# Add any specific files/folders for your automobile service system
+service-reports/
+customer-documents/
+vehicle-images/
+backup-files/
+
+# End of GitIgnore File
