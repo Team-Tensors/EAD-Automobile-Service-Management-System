@@ -47,7 +47,7 @@ This is an Enterprise Application Development (EAD) project that implements a co
 
 ### Backend
 - **Technology**: Java Spring Boot / .NET Core / Node.js
-- **Architecture**: RESTful API, Microservices pattern
+- **Architecture**: RESTful API, Layered Architecture
 - **Security**: Role-based access control, data encryption
 
 ### Database
