@@ -2,13 +2,11 @@ package com.ead.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import javax.management.relation.Role;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Data
 public class User {
 
