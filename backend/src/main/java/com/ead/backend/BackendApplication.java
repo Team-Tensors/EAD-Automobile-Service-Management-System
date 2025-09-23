@@ -30,7 +30,7 @@ public class BackendApplication {
             // Create admin user only if it doesn't exist
             if (userRepo.findByEmail("admin@example.com").isEmpty()) {
                 User adminUser = new User();
-                adminUser.setUsername("admin");
+//                adminUser.setUsername("admin");
                 adminUser.setEmail("admin@example.com");
                 adminUser.setPassword(encoder.encode("adminpass"));
                 adminUser.getRoles().add(adminRole);
