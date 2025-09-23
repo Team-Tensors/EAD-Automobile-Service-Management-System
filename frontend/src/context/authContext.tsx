@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAuthToken(token);
   };
 
-  // Login function
+  // Login function - Updated for JWT-based backend authentication
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       dispatch({ type: 'AUTH_START' });
@@ -144,6 +144,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password: credentials.password 
       });
       
+      // Backend returns: { token, refreshToken, type, id, email, fullName, roles }
       if (response.token) {
         // Transform backend response to User format
         const user: User = {
@@ -151,12 +152,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.email,
           fullName: response.fullName,
           roles: response.roles,
-          // Legacy support
+          // Legacy support for backward compatibility
           firstName: response.fullName.split(' ')[0],
           lastName: response.fullName.split(' ').slice(1).join(' '),
           role: response.roles[0] as UserRole
         };
         
+        // Store JWT token and refresh token
         storeAuthData(user, response.token, response.refreshToken);
         
         dispatch({
@@ -173,7 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Register function
+  // Register function - Updated for JWT-based backend authentication
   const register = async (data: RegisterData): Promise<void> => {
     try {
       dispatch({ type: 'AUTH_START' });
@@ -182,10 +184,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.registerCustomer(data);
       console.log('Step 2: Registration response:', response);
       
-      // Check if registration returned full auth response (new backend behavior)
+      // Check if registration returned full auth response with JWT token
       if (response.token && response.id) {
-        console.log('Step 3: Registration returned full auth response - direct login!');
-        console.log('Token received:', typeof response.token, response.token?.substring(0, 50) + '...');
+        console.log('Step 3: Registration returned JWT token - auto-login successful!');
         
         // Transform backend response to User format
         const user: User = {
@@ -193,14 +194,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           email: response.email,
           fullName: response.fullName,
           roles: response.roles,
-          // Legacy support
+          // Legacy support for backward compatibility
           firstName: response.fullName.split(' ')[0],
           lastName: response.fullName.split(' ').slice(1).join(' '),
           role: response.roles[0] as UserRole
         };
         
         console.log('Step 4: User object created:', user);
-        console.log('Step 5: Storing auth data...');
+        console.log('Step 5: Storing JWT token and auth data...');
         
         storeAuthData(user, response.token, response.refreshToken);
         
@@ -212,7 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         console.log('Step 7: Registration with auto-login completed successfully!');
       }
-      // Fallback: Check if registration was successful but no token (old backend behavior)
+      // Fallback: Registration successful but no JWT token (manual login required)
       else if (response.success || response.message?.includes('successfully')) {
         console.log('Step 3: Registration successful, now logging in separately...');
         
@@ -226,7 +227,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.log('Step 4: Login response after registration:', loginResponse);
           
           if (loginResponse.token) {
-            console.log('Step 5: Processing login response...');
+            console.log('Step 5: Processing login response with JWT token...');
             
             // Transform backend response to User format
             const user: User = {
@@ -234,7 +235,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               email: loginResponse.email,
               fullName: loginResponse.fullName,
               roles: loginResponse.roles,
-              // Legacy support
+              // Legacy support for backward compatibility
               firstName: loginResponse.fullName.split(' ')[0],
               lastName: loginResponse.fullName.split(' ').slice(1).join(' '),
               role: loginResponse.roles[0] as UserRole
@@ -250,7 +251,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             console.log('Step 7: Registration and separate login completed successfully!');
           } else {
-            throw new Error('Login after registration failed - no token received');
+            throw new Error('Login after registration failed - no JWT token received');
           }
         } catch (loginError) {
           console.error('Login after registration failed:', loginError);

@@ -15,10 +15,15 @@ export const api = axios.create({
   timeout: 10000, // 10 seconds timeout
 });
 
-//Add a request interceptor
+//Add a request interceptor for JWT-based authentication
 api.interceptors.request.use(
   (config) => {
-    // Check if token exists before each request
+    // Ensure Content-Type is set for all requests
+    if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+    
+    // Check if token exists before each request and add Authorization header
     const token = localStorage.getItem('token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -26,9 +31,9 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    // Handle the error
+    // Handle the request error
     if (error.response) {
-        console.error('API Error:', error.response.data);
+        console.error('API Request Error:', error.response.data);
     }
     return Promise.reject(error);
   }
@@ -54,7 +59,7 @@ const processQueue = (error: Error | null, token: string | null = null) => {
   failedQueue = [];
 };
 
-// add a response interceptor
+// Add response interceptor for JWT-based authentication and error handling
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -62,13 +67,17 @@ api.interceptors.response.use(
 
     // Handle common errors
     if (error.response) {
-      // Server responded with a status outside 2xx range
-      if (error.response.status === 401 && !originalRequest._retry) {
-        const errorMessage = error.response.data?.message || '';
+      const { status, data } = error.response;
+      
+      // Handle 401 Unauthorized - JWT token expired or invalid
+      if (status === 401 && !originalRequest._retry) {
+        const errorMessage = data?.message || '';
         
-        // Check if this is a token expiration (not missing token)
-        if (errorMessage.includes('expired') || errorMessage.includes('invalid')) {
-          // Try to refresh the token
+        // Check if this is a token expiration (attempt refresh)
+        if (errorMessage.includes('expired') || errorMessage.includes('invalid') || 
+            errorMessage.includes('jwt') || errorMessage.includes('token')) {
+          
+          // Prevent infinite refresh loops
           if (isRefreshing) {
             // If already refreshing, queue this request
             return new Promise((resolve, reject) => {
@@ -88,35 +97,37 @@ api.interceptors.response.use(
           
           if (refreshToken) {
             try {
+              // Call your backend's refresh token endpoint
               const response = await axios.post(`${API_URL}/auth/refresh-token`, {
                 refreshToken: refreshToken
               });
 
               const { token, refreshToken: newRefreshToken } = response.data;
               
-              // Store new tokens
+              // Store new JWT tokens
               localStorage.setItem('token', token);
               if (newRefreshToken) {
                 localStorage.setItem('refresh_token', newRefreshToken);
               }
 
-              // Update axios default headers
+              // Update axios default headers with new JWT token
               api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
               
-              // Process queued requests
+              // Process queued requests with new token
               processQueue(null, token);
               
-              // Retry original request
+              // Retry original request with new JWT token
               originalRequest.headers['Authorization'] = `Bearer ${token}`;
               return api(originalRequest);
               
             } catch (refreshError) {
-              // Refresh failed - clear everything and redirect
+              // Refresh failed - clear everything and redirect to login
               processQueue(refreshError as Error, null);
               localStorage.removeItem('token');
               localStorage.removeItem('refresh_token');
               localStorage.removeItem('user');
               
+              // Redirect to login page
               if (!window.location.pathname.includes('/login')) {
                 window.location.href = '/login';
               }
@@ -126,7 +137,7 @@ api.interceptors.response.use(
               isRefreshing = false;
             }
           } else {
-            // No refresh token - clear everything and redirect
+            // No refresh token available - clear everything and redirect
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             
@@ -134,9 +145,8 @@ api.interceptors.response.use(
               window.location.href = '/login';
             }
           }
-        } else if (errorMessage.includes('No token') || 
-                   errorMessage.includes('authorization denied')) {
-          // Missing token - clear everything and redirect
+        } else {
+          // Other 401 errors (missing token, etc.) - clear everything
           localStorage.removeItem('token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('user');
@@ -146,12 +156,22 @@ api.interceptors.response.use(
           }
         }
       }
+      
+      // Handle 403 Forbidden - User lacks required role/permission
+      else if (status === 403) {
+        const errorMessage = data?.message || 'Access denied. You do not have permission to access this resource.';
+        console.error('403 Forbidden:', errorMessage);
+        
+        // Don't redirect for 403 - user is authenticated but lacks permission
+        // Let the component handle this error appropriately
+        return Promise.reject(new Error(errorMessage));
+      }
 
-      // Format error message from server
-      const errorMessage = error.response.data?.message || 'Something went wrong';
+      // Format other error messages from server
+      const errorMessage = data?.message || 'Something went wrong';
       return Promise.reject(new Error(errorMessage));
     } else if (error.request) {
-      // Request was made but no response received
+      // Request was made but no response received (network error)
       return Promise.reject(new Error('Network error. Please check your connection.'));
     } else {
       // Something went wrong with setting up the request
