@@ -8,6 +8,8 @@ import com.ead.backend.dto.RefreshTokenRequest;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import com.ead.backend.service.RefreshTokenService;
+import com.ead.backend.annotation.JwtSecurityAnnotations.AdminOnly;
+import com.ead.backend.annotation.JwtSecurityAnnotations.Authenticated;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +37,7 @@ public class AuthController {
     public AuthController(AuthService authService, RefreshTokenService refreshTokenService) {
         this.authService = authService;
         this.refreshTokenService = refreshTokenService;
-        logger.info("AuthController initialized successfully");
+        logger.info("AuthController initialized successfully with JWT-based role authorization");
     }
 
     /**
@@ -166,9 +168,10 @@ public class AuthController {
     }
 
     /**
-     * Employee Registration - Specific endpoint for employees (admin access required)
+     * Employee Registration - Now uses JWT-based role checking instead of hardcoded security rules
      */
     @PostMapping("/register/employee")
+    @AdminOnly // Only admins can create employees - checked via JWT token
     public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
         logger.info("=== EMPLOYEE REGISTRATION REQUEST RECEIVED ===");
         logger.info("Employee Email: {}", request.getEmail());
@@ -241,9 +244,10 @@ public class AuthController {
     }
 
     /**
-     * Logout from all devices - Revokes all refresh tokens for the user
+     * Logout from all devices - Uses JWT-based authentication check
      */
     @PostMapping("/logout-all")
+    @Authenticated // Requires valid JWT token with any role
     public ResponseEntity<?> logoutFromAllDevices(Authentication authentication) {
         logger.info("=== LOGOUT ALL DEVICES REQUEST RECEIVED ===");
         logger.info("User email: {}", authentication.getName());
@@ -261,9 +265,10 @@ public class AuthController {
     }
 
     /**
-     * Get active sessions (refresh tokens) for current user
+     * Get active sessions - Uses JWT-based authentication check
      */
     @GetMapping("/active-sessions")
+    @Authenticated // Requires valid JWT token with any role
     public ResponseEntity<?> getActiveSessions(Authentication authentication) {
         logger.info("=== GET ACTIVE SESSIONS REQUEST RECEIVED ===");
         logger.info("User email: {}", authentication.getName());
