@@ -195,21 +195,6 @@ const LoginPage: React.FC = () => {
           >
             Google
           </button>
-          <button 
-            type="button" 
-            style={{
-              flex: 1,
-              padding: '10px',
-              backgroundColor: '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-            onClick={() => console.log('GitHub OAuth coming soon!')}
-          >
-            GitHub
-          </button>
         </div>
         
         <div style={{ textAlign: 'center' }}>
