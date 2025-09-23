@@ -11,16 +11,18 @@ export interface RegisterCustomerData {
 }
 
 export const authService = {
-    // Login user
+    // Login user - Updated to match backend API specification
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
         const response = await api.post("/auth/login", {
             email: credentials.email,
             password: credentials.password
         });
+        
+        // Backend returns the response in the format specified
         return response.data;
     },
 
-    // Register customer
+    // Register customer - Updated to match backend API specification
     registerCustomer: async (userData: RegisterData): Promise<AuthResponse> => {
         const registrationData = {
             email: userData.email,
@@ -32,16 +34,10 @@ export const authService = {
         };
         
         console.log('Sending registration data to backend:', registrationData);
-        console.log('Each field:', {
-            email: registrationData.email,
-            password: registrationData.password?.substring(0, 3) + '***',
-            fullName: registrationData.fullName,
-            phoneNumber: registrationData.phoneNumber,
-            address: registrationData.address,
-            role: registrationData.role
-        });
         
         const response = await api.post("/auth/register/customer", registrationData);
+        
+        // Backend should return the same format as login response if auto-login is enabled
         return response.data;
     },
 
@@ -86,9 +82,13 @@ export const authService = {
         }
     },
 
-    // Refresh access token
+    // Refresh access token - Updated for JWT backend
     refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-        const response = await api.post("/auth/refresh-token", { refreshToken });
+        const response = await api.post("/auth/refresh-token", { 
+            refreshToken: refreshToken 
+        });
+        
+        // Backend returns new JWT token in same format as login
         return response.data;
     },
 
@@ -146,10 +146,14 @@ export const authService = {
     },
 };
 
+// Set or remove authentication token for all API requests
+// This ensures all authenticated requests include the proper Authorization header
 export const setAuthToken = (token: string | null) => {
   if (token) {
+    // Set the Authorization header for all subsequent requests
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   } else {
+    // Remove the Authorization header
     delete api.defaults.headers.common['Authorization'];
   }
 };
