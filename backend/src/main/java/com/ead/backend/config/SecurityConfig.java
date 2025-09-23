@@ -1,4 +1,5 @@
 package com.ead.backend.config;
+
 import com.ead.backend.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,13 +14,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -30,21 +33,67 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()  // Public: login/signup
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
-                        .requestMatchers("/customer/**").hasAnyRole("CUSTOMER", "ADMIN")
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);  // JWT middleware
+        http
+            // CORS Configuration for React frontend
+            .cors(cors -> cors.configurationSource(request -> {
+                var config = new org.springframework.web.cors.CorsConfiguration();
+                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                config.setAllowCredentials(true);
+                return config;
+            }))
 
-        // OAuth2 config (e.g., Google login)
-        http.oauth2Login(oauth2 -> oauth2
-                .loginPage("/login")  // Custom if needed
-                .defaultSuccessUrl("/dashboard")
+            // Disable CSRF for REST API
+            .csrf(csrf -> csrf.disable())
+
+            // Authorization rules for Automobile Service Management System
+            .authorizeHttpRequests(auth -> auth
+                // Public endpoints
+                .requestMatchers("/auth/**", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/health", "/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                // Admin-only endpoints
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/auth/register/employee").hasRole("ADMIN") // Only admin can create employees
+
+                // Employee endpoints (employees and admins)
+                .requestMatchers("/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                .requestMatchers("/services/manage/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                .requestMatchers("/appointments/manage/**").hasAnyRole("EMPLOYEE", "ADMIN")
+                .requestMatchers("/projects/manage/**").hasAnyRole("EMPLOYEE", "ADMIN")
+
+                // Customer endpoints (customers, employees, and admins)
+                .requestMatchers("/customer/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                .requestMatchers("/appointments/book").hasAnyRole("CUSTOMER", "ADMIN")
+                .requestMatchers("/services/view/**").hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                .requestMatchers("/projects/request").hasAnyRole("CUSTOMER", "ADMIN")
+
+                // Protected endpoints requiring any authenticated user
+                .requestMatchers("/profile/**").authenticated()
+                .requestMatchers("/dashboard/**").authenticated()
+
+                // All other requests require authentication
+                .anyRequest().authenticated()
+            )
+
+            // Stateless session management for JWT
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            // OAuth2 Login Configuration
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login") // Custom login page if needed
+                .defaultSuccessUrl("/auth/oauth2/success", true) // Redirect to our handler
+                .failureUrl("/login?error=oauth_failed")
+            )
+
+            // Add JWT filter before UsernamePasswordAuthenticationFilter
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Allow H2 console frame options (for development) - Updated for Spring Boot 3.x
+        http.headers(headers -> headers
+            .frameOptions(frame -> frame.sameOrigin())
         );
 
         return http.build();
