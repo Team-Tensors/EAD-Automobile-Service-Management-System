@@ -24,7 +24,7 @@ export const authService = {
 
     // Register new customer
     Register: async (customerData: RegisterCustomerData) => {
-            const response = await api.post("/auth/register", customerData);
+            const response = await api.post("/auth/signup", customerData);
             return response.data;
     },
 };
