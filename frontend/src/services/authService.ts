@@ -17,7 +17,7 @@ export const authService = {
             email: credentials.email,
             password: credentials.password
         });
-        
+        console.log('Login response from backend:', response.data);
         // Backend returns the response in the format specified
         return response.data;
     },
