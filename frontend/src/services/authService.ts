@@ -29,4 +29,10 @@ export const authService = {
     },
 };
 
-
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common['x-auth-token'] = token;
+  } else {
+    delete api.defaults.headers.common['x-auth-token'];
+  }
+};
