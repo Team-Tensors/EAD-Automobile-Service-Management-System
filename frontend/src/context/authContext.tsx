@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authService, setAuthToken } from '../services/authService';
 
 interface AuthContextType {
@@ -15,7 +15,6 @@ export interface User {
   role: string;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
