@@ -9,15 +9,20 @@ export const UserRole = {
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: number;
   email: string;
+  fullName: string;
+  phoneNumber?: string;
+  address?: string;
+  roles: string[];
+  // Legacy support for backward compatibility
+  firstName?: string;
+  lastName?: string;
   phone?: string;
-  role: UserRole;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  role?: UserRole;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   // Additional fields based on role
   employeeId?: string; // For employees
   customerId?: string; // For customers
@@ -35,28 +40,35 @@ export interface AuthState {
 }
 
 export interface LoginCredentials {
-  email: string;
+  email: string;  // Use email for login
   password: string;
   rememberMe?: boolean;
 }
 
 export interface RegisterData {
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  phone: string;
+  fullName: string;
+  phoneNumber: string;
+  address: string;
   role: UserRole;
+  confirmPassword?: string;
   // Additional fields for employees
   employeeId?: string;
   department?: string;
 }
 
 export interface AuthResponse {
-  success: boolean;
-  message: string;
-  data: {
+  token: string;
+  refreshToken: string;
+  type: string;
+  id: number;
+  email: string;
+  fullName: string;
+  roles: string[];
+  success?: boolean;
+  message?: string;
+  data?: {
     user: User;
     token: string;
     refreshToken: string;

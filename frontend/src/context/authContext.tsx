@@ -139,23 +139,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Use legacy Login method for backward compatibility
-      const response = await authService.Login({ 
-        email: credentials.email, 
+      const response = await authService.login({ 
+        email: credentials.email,
         password: credentials.password 
       });
       
-      if (response.token && response.user) {
-        const { user, token, refreshToken } = response;
+      if (response.token) {
+        // Transform backend response to User format
+        const user: User = {
+          id: response.id,
+          email: response.email,
+          fullName: response.fullName,
+          roles: response.roles,
+          // Legacy support
+          firstName: response.fullName.split(' ')[0],
+          lastName: response.fullName.split(' ').slice(1).join(' '),
+          role: response.roles[0] as UserRole
+        };
         
-        storeAuthData(user, token, refreshToken);
+        storeAuthData(user, response.token, response.refreshToken);
         
         dispatch({
           type: 'AUTH_SUCCESS',
-          payload: { user, token, refreshToken },
+          payload: { user, token: response.token, refreshToken: response.refreshToken },
         });
       } else {
-        throw new Error(response.message || ERROR_MESSAGES.INVALID_CREDENTIALS);
+        throw new Error(ERROR_MESSAGES.INVALID_CREDENTIALS);
       }
     } catch (error: unknown) {
       const errorMessage = (error as Error).message || ERROR_MESSAGES.NETWORK_ERROR;
@@ -169,29 +178,89 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'AUTH_START' });
       
-      // Use legacy Register method for backward compatibility
-      const response = await authService.Register({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-        phone: data.phone,
-        role: data.role,
-      });
+      console.log('Step 1: Starting registration...');
+      const response = await authService.registerCustomer(data);
+      console.log('Step 2: Registration response:', response);
       
-      if (response.token && response.user) {
-        const { user, token, refreshToken } = response;
+      // Check if registration returned full auth response (new backend behavior)
+      if (response.token && response.id) {
+        console.log('Step 3: Registration returned full auth response - direct login!');
+        console.log('Token received:', typeof response.token, response.token?.substring(0, 50) + '...');
         
-        storeAuthData(user, token, refreshToken);
+        // Transform backend response to User format
+        const user: User = {
+          id: response.id,
+          email: response.email,
+          fullName: response.fullName,
+          roles: response.roles,
+          // Legacy support
+          firstName: response.fullName.split(' ')[0],
+          lastName: response.fullName.split(' ').slice(1).join(' '),
+          role: response.roles[0] as UserRole
+        };
         
+        console.log('Step 4: User object created:', user);
+        console.log('Step 5: Storing auth data...');
+        
+        storeAuthData(user, response.token, response.refreshToken);
+        
+        console.log('Step 6: Dispatching auth success...');
         dispatch({
           type: 'AUTH_SUCCESS',
-          payload: { user, token, refreshToken },
+          payload: { user, token: response.token, refreshToken: response.refreshToken },
         });
+        
+        console.log('Step 7: Registration with auto-login completed successfully!');
+      }
+      // Fallback: Check if registration was successful but no token (old backend behavior)
+      else if (response.success || response.message?.includes('successfully')) {
+        console.log('Step 3: Registration successful, now logging in separately...');
+        
+        try {
+          // After successful registration, automatically log the user in
+          const loginResponse = await authService.login({
+            email: data.email,
+            password: data.password
+          });
+          
+          console.log('Step 4: Login response after registration:', loginResponse);
+          
+          if (loginResponse.token) {
+            console.log('Step 5: Processing login response...');
+            
+            // Transform backend response to User format
+            const user: User = {
+              id: loginResponse.id,
+              email: loginResponse.email,
+              fullName: loginResponse.fullName,
+              roles: loginResponse.roles,
+              // Legacy support
+              firstName: loginResponse.fullName.split(' ')[0],
+              lastName: loginResponse.fullName.split(' ').slice(1).join(' '),
+              role: loginResponse.roles[0] as UserRole
+            };
+            
+            console.log('Step 6: User object created:', user);
+            storeAuthData(user, loginResponse.token, loginResponse.refreshToken);
+            
+            dispatch({
+              type: 'AUTH_SUCCESS',
+              payload: { user, token: loginResponse.token, refreshToken: loginResponse.refreshToken },
+            });
+            
+            console.log('Step 7: Registration and separate login completed successfully!');
+          } else {
+            throw new Error('Login after registration failed - no token received');
+          }
+        } catch (loginError) {
+          console.error('Login after registration failed:', loginError);
+          throw new Error(`Login after registration failed: ${(loginError as Error).message}`);
+        }
       } else {
         throw new Error(response.message || ERROR_MESSAGES.VALIDATION_ERROR);
       }
     } catch (error: unknown) {
+      console.error('Registration process failed:', error);
       const errorMessage = (error as Error).message || ERROR_MESSAGES.NETWORK_ERROR;
       dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
       throw new Error(errorMessage);
@@ -201,9 +270,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Logout function
   const logout = async (): Promise<void> => {
     try {
-      if (state.token) {
-        await authService.logout(state.token);
-      }
+      await authService.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -223,14 +290,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const response = await authService.refreshToken(storedRefreshToken);
       
-      if (response.success) {
-        const { user, token, refreshToken: newRefreshToken } = response.data;
+      if (response.token) {
+        // Transform backend response to User format
+        const user: User = {
+          id: response.id,
+          email: response.email,
+          fullName: response.fullName,
+          roles: response.roles,
+          // Legacy support
+          firstName: response.fullName.split(' ')[0],
+          lastName: response.fullName.split(' ').slice(1).join(' '),
+          role: response.roles[0] as UserRole
+        };
         
-        storeAuthData(user, token, newRefreshToken);
+        storeAuthData(user, response.token, response.refreshToken);
         
         dispatch({
           type: 'AUTH_SUCCESS',
-          payload: { user, token, refreshToken: newRefreshToken },
+          payload: { user, token: response.token, refreshToken: response.refreshToken },
         });
       } else {
         throw new Error('Token refresh failed');

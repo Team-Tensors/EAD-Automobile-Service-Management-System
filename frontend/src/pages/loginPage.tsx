@@ -39,8 +39,6 @@ const LoginPage: React.FC = () => {
     
     if (!formData.email) {
       errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid';
     }
     
     if (!formData.password) {
@@ -102,7 +100,7 @@ const LoginPage: React.FC = () => {
               borderRadius: '4px',
               fontSize: '16px'
             }}
-            placeholder="Enter your email"
+            placeholder="Enter your email address"
             autoComplete="email"
           />
           {formErrors.email && (

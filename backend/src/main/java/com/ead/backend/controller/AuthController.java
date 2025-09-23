@@ -4,8 +4,10 @@ import com.ead.backend.dto.AuthResponse;
 import com.ead.backend.dto.LoginRequest;
 import com.ead.backend.dto.SignupRequest;
 import com.ead.backend.dto.MessageResponse;
+import com.ead.backend.dto.RefreshTokenRequest;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
+import com.ead.backend.service.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,31 +15,102 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/auth")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000") // For React frontend
 public class AuthController {
-    private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+    private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
+
+    public AuthController(AuthService authService, RefreshTokenService refreshTokenService) {
         this.authService = authService;
+        this.refreshTokenService = refreshTokenService;
+        logger.info("AuthController initialized successfully");
     }
 
     /**
-     * Customer & Employee Login - Returns JWT token with user details
+     * Customer & Employee Login - Returns JWT token with user details and refresh token
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        logger.info("=== LOGIN REQUEST RECEIVED ===");
+        logger.info("Request URL: {}", httpRequest.getRequestURL());
+        logger.info("Request Method: {}", httpRequest.getMethod());
+        logger.info("Email: {}", request.getEmail());
+        logger.info("Client IP: {}", getClientIpAddress(httpRequest));
+        logger.info("User-Agent: {}", httpRequest.getHeader("User-Agent"));
+
         try {
-            AuthResponse response = authService.login(request);
+            String deviceInfo = extractDeviceInfo(httpRequest);
+            logger.info("Device Info: {}", deviceInfo);
+
+            AuthResponse response = authService.login(request, deviceInfo);
+            logger.info("Login successful for user: {}", request.getEmail());
+            logger.info("Generated JWT token length: {}", response.getToken().length());
+            logger.info("Generated refresh token: {}", response.getRefreshToken());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Login failed for user: {} - Error: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Invalid username or password", false));
+                    .body(new MessageResponse("Invalid email or password", false));
+        }
+    }
+
+    /**
+     * Refresh JWT token using refresh token
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        logger.info("=== REFRESH TOKEN REQUEST RECEIVED ===");
+        logger.info("Refresh token: {}", request.getRefreshToken());
+
+        try {
+            AuthResponse response = authService.refreshToken(request.getRefreshToken());
+            logger.info("Token refresh successful");
+            logger.info("New JWT token length: {}", response.getToken().length());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Token refresh failed - Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid or expired refresh token", false));
+        }
+    }
+
+    /**
+     * Rotate refresh token (get new refresh token)
+     */
+    @PostMapping("/rotate-refresh-token")
+    public ResponseEntity<?> rotateRefreshToken(@Valid @RequestBody RefreshTokenRequest request,
+                                                HttpServletRequest httpRequest) {
+        logger.info("=== ROTATE REFRESH TOKEN REQUEST RECEIVED ===");
+        logger.info("Old refresh token: {}", request.getRefreshToken());
+
+        try {
+            String deviceInfo = extractDeviceInfo(httpRequest);
+            var newRefreshToken = refreshTokenService.rotateRefreshToken(
+                request.getRefreshToken(), deviceInfo);
+
+            logger.info("Refresh token rotation successful");
+            logger.info("New refresh token: {}", newRefreshToken.getToken());
+
+            return ResponseEntity.ok(new MessageResponse(
+                "Refresh token rotated successfully. New token: " + newRefreshToken.getToken()));
+        } catch (Exception e) {
+            logger.error("Refresh token rotation failed - Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Unable to rotate refresh token: " + e.getMessage(), false));
         }
     }
 
@@ -45,15 +118,36 @@ public class AuthController {
      * Customer & Employee Registration - For automobile service management
      */
     @PostMapping("/register")
-    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+        logger.info("=== REGISTRATION REQUEST RECEIVED ===");
+        logger.info("Email: {}", request.getEmail());
+        logger.info("Full Name: {}", request.getFullName());
+        logger.info("Role: {}", request.getRole());
+        logger.info("Phone: {}", request.getPhoneNumber());
+
         try {
-            MessageResponse response = authService.signup(request);
-            if (response.isSuccess()) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            MessageResponse signupResponse = authService.signup(request);
+            if (signupResponse.isSuccess()) {
+                logger.info("Registration successful for user: {}", request.getEmail());
+
+                // Auto-login after successful registration
+                String deviceInfo = extractDeviceInfo(httpRequest);
+                LoginRequest loginRequest = new LoginRequest();
+                loginRequest.setEmail(request.getEmail());
+                loginRequest.setPassword(request.getPassword());
+
+                AuthResponse authResponse = authService.login(loginRequest, deviceInfo);
+                logger.info("Auto-login successful after registration for user: {}", request.getEmail());
+                logger.info("Generated JWT token length: {}", authResponse.getToken().length());
+                logger.info("Generated refresh token: {}", authResponse.getRefreshToken());
+
+                return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                logger.warn("Registration failed for user: {} - Reason: {}", request.getEmail(), signupResponse.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(signupResponse);
             }
         } catch (Exception e) {
+            logger.error("Registration failed for user: {} - Error: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponse("Registration failed: " + e.getMessage(), false));
         }
@@ -63,93 +157,167 @@ public class AuthController {
      * Customer Registration - Specific endpoint for customers
      */
     @PostMapping("/register/customer")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<?> registerCustomer(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+        logger.info("=== CUSTOMER REGISTRATION REQUEST RECEIVED ===");
+        logger.info("Customer Email: {}", request.getEmail());
+
         request.setRole("CUSTOMER"); // Force customer role
-        return signup(request);
+        return signup(request, httpRequest);
     }
 
     /**
      * Employee Registration - Specific endpoint for employees (admin access required)
      */
     @PostMapping("/register/employee")
-    public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+        logger.info("=== EMPLOYEE REGISTRATION REQUEST RECEIVED ===");
+        logger.info("Employee Email: {}", request.getEmail());
+
         request.setRole("EMPLOYEE"); // Force employee role
-        return signup(request);
+        return signup(request, httpRequest);
     }
 
     /**
-     * OAuth2 Success Handler - For Google OAuth integration
+     * OAuth2 Success Handler - For Google OAuth integration with refresh token
      */
     @GetMapping("/oauth2/success")
-    public void oauth2Success(Authentication authentication, HttpServletResponse response) throws IOException {
+    public void oauth2Success(Authentication authentication, HttpServletRequest httpRequest,
+                             HttpServletResponse response) throws IOException {
+        logger.info("=== OAUTH2 SUCCESS REQUEST RECEIVED ===");
+        logger.info("Authentication: {}", authentication.getName());
+
         try {
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
             String email = oauth2User.getAttribute("email");
             String name = oauth2User.getAttribute("name");
+            String deviceInfo = extractDeviceInfo(httpRequest);
+
+            logger.info("OAuth2 user email: {}", email);
+            logger.info("OAuth2 user name: {}", name);
 
             // Create or update OAuth user
             User user = authService.createOrUpdateOAuthUser(email, name, "google",
                     oauth2User.getAttribute("sub"));
 
-            // Generate token for OAuth user
-            AuthResponse authResponse = authService.generateTokenForOAuthUser(user);
+            // Generate token with refresh token for OAuth user
+            AuthResponse authResponse = authService.generateTokenForOAuthUser(user, deviceInfo);
 
-            // Redirect to frontend with token (you can customize this URL)
+            logger.info("OAuth2 authentication successful for user: {}", email);
+
+            // Redirect to frontend with both tokens
             String frontendUrl = "http://localhost:3000/oauth/callback?token=" +
-                    authResponse.getToken() + "&user=" + user.getId();
+                    authResponse.getToken() + "&refreshToken=" + authResponse.getRefreshToken() +
+                    "&user=" + user.getId();
             response.sendRedirect(frontendUrl);
 
         } catch (Exception e) {
+            logger.error("OAuth2 authentication failed - Error: {}", e.getMessage());
             response.sendRedirect("http://localhost:3000/login?error=oauth_failed");
         }
     }
 
     /**
-     * Get current user profile
+     * Logout with refresh token revocation
      */
-    @GetMapping("/profile")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        try {
-            String username = authentication.getName();
-            User user = authService.findUserByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody(required = false) RefreshTokenRequest request) {
+        logger.info("=== LOGOUT REQUEST RECEIVED ===");
 
-            // Return user without password
-            user.setPassword(null);
-            return ResponseEntity.ok(user);
+        try {
+            if (request != null && request.getRefreshToken() != null) {
+                logger.info("Logout with refresh token: {}", request.getRefreshToken());
+                authService.logout(request.getRefreshToken());
+                logger.info("Logout successful with token revocation");
+                return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
+            } else {
+                logger.info("Client-side logout (no refresh token provided)");
+                return ResponseEntity.ok(new MessageResponse("Logged out successfully (client-side only)"));
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new MessageResponse("User not found", false));
+            logger.error("Logout failed - Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Logout failed: " + e.getMessage(), false));
         }
     }
 
     /**
-     * Logout endpoint (client-side token invalidation)
+     * Logout from all devices - Revokes all refresh tokens for the user
      */
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
+    @PostMapping("/logout-all")
+    public ResponseEntity<?> logoutFromAllDevices(Authentication authentication) {
+        logger.info("=== LOGOUT ALL DEVICES REQUEST RECEIVED ===");
+        logger.info("User email: {}", authentication.getName());
+
+        try {
+            String email = authentication.getName(); // This will be the email since we use email as username
+            authService.logoutFromAllDevices(email);
+            logger.info("Logout from all devices successful for user: {}", email);
+            return ResponseEntity.ok(new MessageResponse("Logged out from all devices successfully"));
+        } catch (Exception e) {
+            logger.error("Logout from all devices failed for user: {} - Error: {}", authentication.getName(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponse("Logout from all devices failed: " + e.getMessage(), false));
+        }
     }
 
     /**
-     * Check if user exists by email (for registration validation)
+     * Get active sessions (refresh tokens) for current user
      */
-    @GetMapping("/check-email/{email}")
-    public ResponseEntity<?> checkEmailExists(@PathVariable String email) {
-        boolean exists = authService.findUserByEmail(email).isPresent();
-        return ResponseEntity.ok(new MessageResponse(
-                exists ? "Email already exists" : "Email available",
-                !exists));
+    @GetMapping("/active-sessions")
+    public ResponseEntity<?> getActiveSessions(Authentication authentication) {
+        logger.info("=== GET ACTIVE SESSIONS REQUEST RECEIVED ===");
+        logger.info("User email: {}", authentication.getName());
+
+        try {
+            String email = authentication.getName(); // This will be the email since we use email as username
+            User user = authService.findUserByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            var activeTokens = refreshTokenService.getActiveTokensForUser(user);
+            logger.info("Found {} active sessions for user: {}", activeTokens.size(), email);
+
+            // Convert to a safe response (don't expose actual tokens)
+            var sessions = activeTokens.stream().map(token -> {
+                var sessionInfo = new java.util.HashMap<String, Object>();
+                sessionInfo.put("id", token.getId());
+                sessionInfo.put("deviceInfo", token.getDeviceInfo());
+                sessionInfo.put("createdAt", token.getCreatedAt());
+                sessionInfo.put("lastUsedAt", token.getLastUsedAt());
+                return sessionInfo;
+            }).toList();
+
+            return ResponseEntity.ok(sessions);
+        } catch (Exception e) {
+            logger.error("Failed to fetch active sessions for user: {} - Error: {}", authentication.getName(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Unable to fetch active sessions", false));
+        }
     }
 
     /**
-     * Check if username exists (for registration validation)
+     * Extract device information from HTTP request
      */
-    @GetMapping("/check-username/{username}")
-    public ResponseEntity<?> checkUsernameExists(@PathVariable String username) {
-        boolean exists = authService.findUserByUsername(username).isPresent();
-        return ResponseEntity.ok(new MessageResponse(
-                exists ? "Username already exists" : "Username available",
-                !exists));
+    private String extractDeviceInfo(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        String ipAddress = getClientIpAddress(request);
+        return String.format("IP: %s, Agent: %s",
+                            ipAddress != null ? ipAddress : "unknown",
+                            userAgent != null ? userAgent.substring(0, Math.min(userAgent.length(), 100)) : "unknown");
+    }
+
+    /**
+     * Get client IP address considering proxy headers
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        String[] headers = {"X-Forwarded-For", "X-Real-IP", "Proxy-Client-IP", "WL-Proxy-Client-IP"};
+
+        for (String header : headers) {
+            String ip = request.getHeader(header);
+            if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip.split(",")[0].trim();
+            }
+        }
+
+        return request.getRemoteAddr();
     }
 }

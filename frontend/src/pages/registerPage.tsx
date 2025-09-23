@@ -10,13 +10,13 @@ const RegisterPage: React.FC = () => {
   const { register, isLoading, error, clearError } = useAuth();
   
   const [formData, setFormData] = useState<RegisterData>({
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    phone: '',
+    fullName: '',
+    phoneNumber: '',
+    address: '',
     role: UserRole.CUSTOMER,
+    confirmPassword: '',
   });
   
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -42,12 +42,8 @@ const RegisterPage: React.FC = () => {
   const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
     
-    if (!formData.firstName.trim()) {
-      errors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      errors.lastName = 'Last name is required';
+    if (!formData.fullName?.trim()) {
+      errors.fullName = 'Full name is required';
     }
     
     if (!formData.email) {
@@ -68,8 +64,8 @@ const RegisterPage: React.FC = () => {
       errors.confirmPassword = 'Passwords do not match';
     }
     
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
+    if (!formData.phoneNumber?.trim()) {
+      errors.phoneNumber = 'Phone number is required';
     }
     
     setFormErrors(errors);
@@ -79,10 +75,32 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    console.log('Form submitted with data:', formData); // Debug log
+    
+    if (!validateForm()) {
+      console.log('Form validation failed:', formErrors); // Debug log
+      return;
+    }
     
     try {
-      await register(formData);
+      console.log('Attempting registration...'); // Debug log
+      
+      // Ensure all required fields have values
+      const registrationData = {
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address || '',
+        role: formData.role,
+        // Include confirmation password for validation
+        confirmPassword: formData.confirmPassword,
+      };
+      
+      console.log('Sending registration data:', registrationData); // Debug log
+      
+      await register(registrationData);
+      console.log('Registration successful!'); // Debug log
       navigate('/dashboard'); // Redirect to dashboard after successful registration
     } catch (err) {
       // Error is handled by the auth context
@@ -110,58 +128,30 @@ const RegisterPage: React.FC = () => {
           </div>
         )}
         
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-          <div style={{ flex: 1 }}>
-            <label htmlFor="firstName" style={{ display: 'block', marginBottom: '5px' }}>
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              style={{ 
-                width: '100%', 
-                padding: '10px', 
-                border: formErrors.firstName ? '1px solid red' : '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-              placeholder="First name"
-            />
-            {formErrors.firstName && (
-              <span style={{ color: 'red', fontSize: '14px' }}>
-                {formErrors.firstName}
-              </span>
-            )}
-          </div>
-          
-          <div style={{ flex: 1 }}>
-            <label htmlFor="lastName" style={{ display: 'block', marginBottom: '5px' }}>
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              style={{ 
-                width: '100%', 
-                padding: '10px', 
-                border: formErrors.lastName ? '1px solid red' : '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-              placeholder="Last name"
-            />
-            {formErrors.lastName && (
-              <span style={{ color: 'red', fontSize: '14px' }}>
-                {formErrors.lastName}
-              </span>
-            )}
-          </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="fullName" style={{ display: 'block', marginBottom: '5px' }}>
+            Full Name
+          </label>
+          <input
+            type="text"
+            id="fullName"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            style={{ 
+              width: '100%', 
+              padding: '10px', 
+              border: formErrors.fullName ? '1px solid red' : '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '16px'
+            }}
+            placeholder="Enter your full name"
+          />
+          {formErrors.fullName && (
+            <span style={{ color: 'red', fontSize: '14px' }}>
+              {formErrors.fullName}
+            </span>
+          )}
         </div>
         
         <div style={{ marginBottom: '15px' }}>
@@ -192,28 +182,54 @@ const RegisterPage: React.FC = () => {
         </div>
         
         <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="phone" style={{ display: 'block', marginBottom: '5px' }}>
+          <label htmlFor="phoneNumber" style={{ display: 'block', marginBottom: '5px' }}>
             Phone Number
           </label>
           <input
             type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
+            id="phoneNumber"
+            name="phoneNumber"
+            value={formData.phoneNumber}
             onChange={handleChange}
             style={{ 
               width: '100%', 
               padding: '10px', 
-              border: formErrors.phone ? '1px solid red' : '1px solid #ccc',
+              border: formErrors.phoneNumber ? '1px solid red' : '1px solid #ccc',
               borderRadius: '4px',
               fontSize: '16px'
             }}
             placeholder="Enter your phone number"
             autoComplete="tel"
           />
-          {formErrors.phone && (
+          {formErrors.phoneNumber && (
             <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.phone}
+              {formErrors.phoneNumber}
+            </span>
+          )}
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="address" style={{ display: 'block', marginBottom: '5px' }}>
+            Address
+          </label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            style={{ 
+              width: '100%', 
+              padding: '10px', 
+              border: formErrors.address ? '1px solid red' : '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '16px'
+            }}
+            placeholder="Enter your address (optional)"
+          />
+          {formErrors.address && (
+            <span style={{ color: 'red', fontSize: '14px' }}>
+              {formErrors.address}
             </span>
           )}
         </div>
@@ -296,6 +312,10 @@ const RegisterPage: React.FC = () => {
         
         <button 
           type="submit" 
+          onClick={() => {
+            console.log('Button clicked!'); // Debug log
+            // Don't prevent default here, let form submission handle it
+          }}
           style={{
             width: '100%',
             padding: '12px',

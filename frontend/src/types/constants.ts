@@ -24,9 +24,9 @@ export const API_ENDPOINTS = {
 
 // Local Storage Keys
 export const STORAGE_KEYS = {
-  TOKEN: 'auth_token',
+  TOKEN: 'token',
   REFRESH_TOKEN: 'refresh_token',
-  USER: 'user_data',
+  USER: 'user',
   REMEMBER_ME: 'remember_me',
 } as const;
 

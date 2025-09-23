@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse; // Fixed import
 import java.util.List;
 
 @Configuration
@@ -53,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers("/health", "/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/error").permitAll() // Allow error endpoint
 
                 // Admin-only endpoints
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -81,11 +83,27 @@ public class SecurityConfig {
             // Stateless session management for JWT
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // OAuth2 Login Configuration
+            // OAuth2 Login Configuration - Fixed to prevent redirect loops
             .oauth2Login(oauth2 -> oauth2
-                .loginPage("/login") // Custom login page if needed
                 .defaultSuccessUrl("/auth/oauth2/success", true) // Redirect to our handler
-                .failureUrl("/login?error=oauth_failed")
+                .failureUrl("/auth/login?error=oauth_failed")
+            )
+
+            // Disable form login to prevent redirects
+            .formLogin(form -> form.disable())
+
+            // Configure exception handling
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + authException.getMessage() + "\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Access Denied\",\"message\":\"" + accessDeniedException.getMessage() + "\"}");
+                })
             )
 
             // Add JWT filter before UsernamePasswordAuthenticationFilter

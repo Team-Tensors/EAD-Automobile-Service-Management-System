@@ -1,0 +1,74 @@
+### Login with Email
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Refresh JWT Token
+POST http://localhost:4000/api/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token_from_login}}"
+}
+
+### Rotate Refresh Token (Get New Refresh Token)
+POST http://localhost:4000/api/auth/rotate-refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "{{current_refresh_token}}"
+}
+
+### Customer Registration
+POST http://localhost:4000/api/auth/register/customer
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123",
+  "fullName": "John Doe",
+  "phoneNumber": "+1234567890",
+  "address": "123 Main St, City, State",
+  "role": "CUSTOMER"
+}
+
+### Employee Registration (Admin access required)
+POST http://localhost:4000/api/auth/register/employee
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "email": "jane@company.com",
+  "password": "password123",
+  "fullName": "Jane Smith",
+  "phoneNumber": "+1234567891",
+  "address": "456 Work St, City, State",
+  "role": "EMPLOYEE"
+}
+
+### Logout (Revoke Refresh Token)
+POST http://localhost:4000/api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh_token_to_revoke}}"
+}
+
+### Logout from All Devices
+POST http://localhost:4000/api/auth/logout-all
+Authorization: Bearer {{jwt_token}}
+
+### Get Active Sessions
+GET http://localhost:4000/api/auth/active-sessions
+Authorization: Bearer {{jwt_token}}
+
+### Get User Profile
+GET http://localhost:4000/api/auth/profile
+Authorization: Bearer {{user_token}}
+
+### Check Email Availability
+GET http://localhost:4000/api/auth/check-email/test@example.com
