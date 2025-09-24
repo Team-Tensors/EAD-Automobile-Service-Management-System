@@ -85,7 +85,7 @@ export interface TokenPayload {
 }
 
 export interface OAuthProvider {
-  name: 'google' | 'github';
+  name: 'google' ;
   clientId: string;
   redirectUri: string;
 }
@@ -146,7 +146,7 @@ export interface AuthContextType {
   hasPermission: (resource: string, action: string) => boolean;
   
   // OAuth
-  loginWithOAuth: (provider: 'google' | 'github') => void;
+  loginWithOAuth: (provider: 'google') => void;
 }
 
 // Route Protection

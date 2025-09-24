@@ -1,7 +1,6 @@
 package com.ead.backend.config;
 
 import com.ead.backend.filter.JwtAuthenticationFilter;
-import com.ead.backend.filter.RoleBasedAuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,8 +33,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
-                                                  RoleBasedAuthorizationFilter roleAuthFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
             // CORS Configuration for React frontend
             .cors(cors -> cors.configurationSource(request -> {
@@ -50,7 +48,7 @@ public class SecurityConfig {
             // Disable CSRF for REST API
             .csrf(csrf -> csrf.disable())
 
-            // Simplified Authorization rules - JWT filter handles role-based auth
+            // Role-based authorization rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints (no authentication required)
                 .requestMatchers("/auth/login", "/auth/register/customer", "/auth/refresh-token").permitAll()
@@ -59,7 +57,22 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/error", "/oauth2/**", "/login/**").permitAll()
 
-                // All other requests require authentication (role checking done by JWT filter)
+                // Admin-only endpoints
+                .requestMatchers("/admin/**", "/auth/register/employee").hasRole("ADMIN")
+
+                // Employee endpoints (employees and admins can access)
+                .requestMatchers("/employee/**", "/services/manage/**", "/appointments/manage/**", "/projects/manage/**")
+                    .hasAnyRole("EMPLOYEE", "ADMIN")
+
+                // Customer endpoints (customers, employees, and admins can access)
+                .requestMatchers("/customer/**", "/appointments/book/**", "/services/view/**", "/projects/request/**")
+                    .hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+
+                // Protected endpoints requiring any authenticated user
+                .requestMatchers("/profile/**", "/dashboard/**", "/auth/logout/**", "/auth/active-sessions/**")
+                    .authenticated()
+
+                // All other requests require authentication
                 .anyRequest().authenticated()
             )
 
@@ -89,11 +102,9 @@ public class SecurityConfig {
                 })
             )
 
-            // Add filters in correct order: JWT auth first, then role-based authorization
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(roleAuthFilter, JwtAuthenticationFilter.class);
+            // Only add the JWT authentication filter
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // Allow H2 console frame options (for development)
         http.headers(headers -> headers
             .frameOptions(frame -> frame.sameOrigin())
         );
