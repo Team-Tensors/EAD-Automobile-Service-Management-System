@@ -4,6 +4,7 @@ import LoginPage from './pages/loginPage'
 import RegisterPage from './pages/registerPage'
 import DashboardRouter from './pages/DashboardRouter'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
+import { UserRole } from './types/auth'
 
 function App() {
   return (
@@ -32,6 +33,55 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardRouter />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Example: Admin-only route */}
+      <Route 
+        path="/admin/*" 
+        element={
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <div>Admin Panel - Only accessible by admins</div>
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Example: Employee or Admin route (Staff) */}
+      <Route 
+        path="/staff/*" 
+        element={
+          <ProtectedRoute 
+            requiredRole={UserRole.EMPLOYEE}
+            fallback={
+              <ProtectedRoute requiredRole={UserRole.ADMIN}>
+                <div>Staff Panel - Accessible by employees and admins</div>
+              </ProtectedRoute>
+            }
+          >
+            <div>Staff Panel - Accessible by employees and admins</div>
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Example: Customer-only route */}
+      <Route 
+        path="/customer/*" 
+        element={
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <div>Customer Portal - Only accessible by customers</div>
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Example: Permission-based route */}
+      <Route 
+        path="/reports" 
+        element={
+          <ProtectedRoute 
+            requiredPermission={{ resource: 'reports', action: 'read' }}
+          >
+            <div>Reports - Requires specific permission</div>
           </ProtectedRoute>
         } 
       />
