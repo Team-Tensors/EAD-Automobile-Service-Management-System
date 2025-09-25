@@ -1,0 +1,48 @@
+### Customer Registration
+POST http://localhost:4000/api/auth/register/customer
+Content-Type: application/json
+
+{
+  "username": "john_customer",
+  "email": "john@example.com",
+  "password": "password123",
+  "fullName": "John Doe",
+  "phoneNumber": "+1234567890",
+  "address": "123 Main St, City, State",
+  "role": "CUSTOMER"
+}
+
+### Employee Registration (Admin access required)
+POST http://localhost:4000/api/auth/register/employee
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "username": "jane_employee",
+  "email": "jane@company.com",
+  "password": "password123",
+  "fullName": "Jane Smith",
+  "phoneNumber": "+1234567891",
+  "address": "456 Work St, City, State",
+  "role": "EMPLOYEE"
+}
+
+### Login
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "john_customer",
+  "password": "password123"
+}
+
+### Check Email Availability
+GET http://localhost:4000/api/auth/check-email/test@example.com
+
+### Get User Profile
+GET http://localhost:4000/api/auth/profile
+Authorization: Bearer {{user_token}}
+
+### Logout
+POST http://localhost:4000/api/auth/logout
+Authorization: Bearer {{user_token}}
