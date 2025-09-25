@@ -18,10 +18,10 @@ This is an Enterprise Application Development (EAD) project that implements a co
 ## System Diagrams
 
 ### Use Case Diagram
-![Use Case Diagram](diagrams/usecase-diagram.png)
+![Use Case Diagram](diagrams/use_case.png)
 
 ### Entity Relationship Diagram
-![ER Diagram](diagrams/er-diagram.png)
+![ER Diagram](diagrams/er.png)
 
 ## Key Features
 
