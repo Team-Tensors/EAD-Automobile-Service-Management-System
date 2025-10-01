@@ -42,7 +42,10 @@ function App() {
         path="/admin/*" 
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
-            <div>Admin Panel - Only accessible by admins</div>
+            <div className="p-8 bg-red-50 border-l-4 border-red-500">
+              <h1 className="text-xl font-semibold text-red-700">Admin Panel</h1>
+              <p className="text-red-600">Only accessible by admins</p>
+            </div>
           </ProtectedRoute>
         } 
       />
@@ -69,7 +72,10 @@ function App() {
         path="/customer/*" 
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <div>Customer Portal - Only accessible by customers</div>
+            <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
+              <h1 className="text-xl font-semibold text-blue-700">Customer Portal</h1>
+              <p className="text-blue-600">Only accessible by customers</p>
+            </div>
           </ProtectedRoute>
         } 
       />
@@ -93,14 +99,12 @@ function App() {
       <Route 
         path="*" 
         element={
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '50px',
-            color: '#666'
-          }}>
-            <h2>Page Not Found</h2>
-            <p>The page you're looking for doesn't exist.</p>
-            <a href="/dashboard" style={{ color: '#007bff' }}>Go to Dashboard</a>
+          <div className="text-center p-12 text-gray-600">
+            <h2 className="text-2xl font-bold mb-4">Page Not Found</h2>
+            <p className="mb-4">The page you're looking for doesn't exist.</p>
+            <a href="/dashboard" className="text-blue-500 hover:text-blue-700 underline">
+              Go to Dashboard
+            </a>
           </div>
         } 
       />
