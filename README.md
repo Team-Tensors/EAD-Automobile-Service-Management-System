@@ -2,11 +2,11 @@
 
 **Automobile Service Time Logging & Appointment System**
 
-## 📋 Project Overview
+## Project Overview
 
 This is an Enterprise Application Development (EAD) project that implements a comprehensive automobile service management system. The system streamlines the process of managing vehicle service appointments, tracking service progress, and logging service times for automotive service centers and their customers.
 
-## 🎯 Project Objectives
+## Project Objectives
 
 - Develop a web-based automobile service management system
 - Implement appointment booking and scheduling functionality
@@ -15,7 +15,15 @@ This is an Enterprise Application Development (EAD) project that implements a co
 - Enable efficient management of service center operations
 - Demonstrate enterprise application development best practices
 
-## ✨ Key Features
+## System Diagrams
+
+### Use Case Diagram
+![Use Case Diagram](diagrams/use_case.png)
+
+### Entity Relationship Diagram
+![ER Diagram](diagrams/er.png)
+
+## Key Features
 
 ### Customer Portal
 - **User Registration & Authentication**: Secure login system for customers
@@ -38,7 +46,7 @@ This is an Enterprise Application Development (EAD) project that implements a co
 - **Reports & Analytics**: Generate business intelligence reports
 - **System Configuration**: Configure system settings and parameters
 
-## 🏗️ System Architecture
+## System Architecture
 
 ### Frontend
 - **Technology**: React.js / Angular / Vue.js
@@ -60,13 +68,17 @@ This is an Enterprise Application Development (EAD) project that implements a co
 - **File Storage**: Document and image management
 - **Caching**: Redis for performance optimization
 
-## 👥 User Roles
+## User Roles
 
 1. **Customer**: Book appointments, track services, manage vehicles
 2. **Service Technician**: Log service times, update service status
 3. **Service Advisor**: Manage customer communications and appointments
 4. **Manager**: Oversee operations, generate reports
 5. **Administrator**: System administration and user management
+
+## Getting Started
+
+### Prerequisites
 
 
 **Last Updated**: September 2025
