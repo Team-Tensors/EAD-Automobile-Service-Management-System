@@ -14,233 +14,133 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <header style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '30px',
-        paddingBottom: '20px',
-        borderBottom: '1px solid #eee'
-      }}>
-        <div>
-          <h1>Admin Dashboard</h1>
-          <p style={{ color: '#666', margin: '5px 0' }}>
-            Welcome, {user?.firstName} {user?.lastName} - System Administrator
-          </p>
-        </div>
-        <button 
-          onClick={handleLogout}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
-      </header>
+    <div className="min-h-screen bg-gray-50 p-5">
+      <div className="max-w-7xl mx-auto">
+        <header className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-l-4 border-orange-500">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white text-2xl font-bold">🔧</span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent">
+                  🏭 AutoService Pro - Admin
+                </h1>
+                <p className="text-gray-600 mt-1 font-medium">
+                  Welcome back, {user?.firstName} {user?.lastName} - System Administrator
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white border-0 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 cursor-pointer font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              🚪 Logout
+            </button>
+          </div>
+        </header>
 
-      {/* Key Metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ 
-          background: 'linear-gradient(135deg, #007bff, #0056b3)', 
-          color: 'white',
-          padding: '20px', 
-          borderRadius: '8px', 
-          textAlign: 'center'
-        }}>
-          <h3 style={{ margin: '0 0 10px 0' }}>Total Users</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>0</p>
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <div className="text-4xl mb-3">👥</div>
+            <h3 className="m-0 mb-2 text-lg font-semibold">Total Users</h3>
+            <p className="text-3xl font-bold m-0">0</p>
+            <p className="text-blue-100 text-sm mt-2">Registered Customers</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <div className="text-4xl mb-3">🔧</div>
+            <h3 className="m-0 mb-2 text-lg font-semibold">Active Services</h3>
+            <p className="text-3xl font-bold m-0">0</p>
+            <p className="text-green-100 text-sm mt-2">In Progress</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 text-white p-6 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <div className="text-4xl mb-3">⏳</div>
+            <h3 className="m-0 mb-2 text-lg font-semibold">Pending Requests</h3>
+            <p className="text-3xl font-bold m-0">0</p>
+            <p className="text-orange-100 text-sm mt-2">Awaiting Review</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl text-center shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <div className="text-4xl mb-3">💰</div>
+            <h3 className="m-0 mb-2 text-lg font-semibold">Revenue</h3>
+            <p className="text-3xl font-bold m-0">$0</p>
+            <p className="text-emerald-100 text-sm mt-2">Monthly Total</p>
+          </div>
         </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #28a745, #1e7e34)', 
-          color: 'white',
-          padding: '20px', 
-          borderRadius: '8px', 
-          textAlign: 'center'
-        }}>
-          <h3 style={{ margin: '0 0 10px 0' }}>Active Services</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>0</p>
-        </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #ffc107, #e0a800)', 
-          color: 'black',
-          padding: '20px', 
-          borderRadius: '8px', 
-          textAlign: 'center'
-        }}>
-          <h3 style={{ margin: '0 0 10px 0' }}>Pending Requests</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>0</p>
-        </div>
-        
-        <div style={{ 
-          background: 'linear-gradient(135deg, #dc3545, #c82333)', 
-          color: 'white',
-          padding: '20px', 
-          borderRadius: '8px', 
-          textAlign: 'center'
-        }}>
-          <h3 style={{ margin: '0 0 10px 0' }}>Revenue</h3>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', margin: '0' }}>$0</p>
-        </div>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {/* User Management */}
-        <div style={{ 
-          background: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          border: '1px solid #eee'
-        }}>
-          <h3 style={{ marginBottom: '15px', color: '#007bff' }}>User Management</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>Manage customers and employees</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+        <div className="bg-white p-5 rounded-lg shadow-md border border-gray-200">
+          <h3 className="mb-4 text-xl font-semibold text-blue-600">User Management</h3>
+          <p className="text-gray-600 mb-4">Manage customers and employees</p>
+          <div className="flex flex-col gap-3">
+            <button className="p-3 bg-blue-600 text-white border-0 rounded hover:bg-blue-700 transition-colors cursor-pointer">
               View All Users
             </button>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            <button className="p-3 bg-green-600 text-white border-0 rounded hover:bg-green-700 transition-colors cursor-pointer">
               Add Employee
             </button>
           </div>
         </div>
 
         {/* Service Management */}
-        <div style={{ 
-          background: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          border: '1px solid #eee'
-        }}>
-          <h3 style={{ marginBottom: '15px', color: '#28a745' }}>Service Management</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>Oversee all service operations</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+        <div className="bg-white p-5 rounded-lg shadow-md border border-gray-200">
+          <h3 className="mb-4 text-xl font-semibold text-green-600">Service Management</h3>
+          <p className="text-gray-600 mb-4">Oversee all service operations</p>
+          <div className="flex flex-col gap-3">
+            <button className="p-3 bg-green-600 text-white border-0 rounded hover:bg-green-700 transition-colors cursor-pointer">
               View All Services
             </button>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#ffc107',
-              color: 'black',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            <button className="p-3 bg-yellow-400 text-black border-0 rounded hover:bg-yellow-500 transition-colors cursor-pointer">
               Assign Projects
             </button>
           </div>
         </div>
 
         {/* Reports & Analytics */}
-        <div style={{ 
-          background: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          border: '1px solid #eee'
-        }}>
-          <h3 style={{ marginBottom: '15px', color: '#6c757d' }}>Reports & Analytics</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>View system analytics</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+        <div className="bg-white p-5 rounded-lg shadow-md border border-gray-200">
+          <h3 className="mb-4 text-xl font-semibold text-gray-600">Reports & Analytics</h3>
+          <p className="text-gray-600 mb-4">View system analytics</p>
+          <div className="flex flex-col gap-3">
+            <button className="p-3 bg-gray-600 text-white border-0 rounded hover:bg-gray-700 transition-colors cursor-pointer">
               Generate Reports
             </button>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#17a2b8',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            <button className="p-3 bg-cyan-600 text-white border-0 rounded hover:bg-cyan-700 transition-colors cursor-pointer">
               View Analytics
             </button>
           </div>
         </div>
 
         {/* System Settings */}
-        <div style={{ 
-          background: 'white', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          border: '1px solid #eee'
-        }}>
-          <h3 style={{ marginBottom: '15px', color: '#dc3545' }}>System Settings</h3>
-          <p style={{ color: '#666', marginBottom: '15px' }}>Configure system parameters</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+        <div className="bg-white p-5 rounded-lg shadow-md border border-gray-200">
+          <h3 className="mb-4 text-xl font-semibold text-red-600">System Settings</h3>
+          <p className="text-gray-600 mb-4">Configure system parameters</p>
+          <div className="flex flex-col gap-3">
+            <button className="p-3 bg-red-600 text-white border-0 rounded hover:bg-red-700 transition-colors cursor-pointer">
               System Settings
             </button>
-            <button style={{
-              padding: '10px',
-              backgroundColor: '#fd7e14',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            <button className="p-3 bg-orange-500 text-white border-0 rounded hover:bg-orange-600 transition-colors cursor-pointer">
               Backup & Restore
             </button>
           </div>
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div style={{ 
-        marginTop: '30px',
-        background: 'white', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        border: '1px solid #eee'
-      }}>
-        <h3 style={{ marginBottom: '15px' }}>Recent System Activity</h3>
-        <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-          <p>No recent activity to display</p>
+        {/* Recent Activity */}
+        <div className="mt-8 bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+          <h3 className="mb-4 text-xl font-semibold text-slate-800 flex items-center">
+            📊 Recent System Activity
+          </h3>
+          <div className="p-5 text-center text-gray-600">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">📈</span>
+            </div>
+            <p className="font-medium">No recent activity to display</p>
+            <p className="text-sm text-gray-500 mt-2">System activities will appear here</p>
+          </div>
         </div>
       </div>
     </div>

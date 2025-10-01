@@ -109,203 +109,233 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1>Create Account</h1>
-        <p>Join our automobile service platform</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 py-8 px-4 relative overflow-hidden">
+      {/* Automotive Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-16 left-8 w-28 h-28 border-2 border-orange-400 rounded-full"></div>
+        <div className="absolute top-32 right-16 w-20 h-20 border-2 border-blue-400 rounded-full"></div>
+        <div className="absolute bottom-24 left-24 w-24 h-24 border-2 border-orange-400 rounded-full"></div>
+        <div className="absolute bottom-16 right-8 w-32 h-32 border-2 border-blue-400 rounded-full"></div>
       </div>
+      
+      <div className="max-w-lg mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-gray-200/50">
+        {/* Logo/Branding Section */}
+        <div className="text-center mb-10">
+          <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+            <div className="text-white text-2xl font-bold">🔧</div>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent mb-2">
+            Join AutoService Pro
+          </h1>
+          <p className="text-gray-600 font-medium">Start Your Professional Vehicle Care Journey</p>
+          <div className="w-20 h-1 bg-gradient-to-r from-orange-400 to-orange-600 mx-auto mt-3 rounded-full"></div>
+        </div>
       
       <form onSubmit={handleSubmit}>
         {error && (
-          <div style={{ 
-            color: 'red', 
-            backgroundColor: '#ffe6e6', 
-            padding: '10px', 
-            borderRadius: '4px', 
-            marginBottom: '20px' 
-          }}>
+          <div className="text-red-600 bg-red-50 p-3 rounded border border-red-200 mb-5">
             {error}
           </div>
         )}
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="fullName" style={{ display: 'block', marginBottom: '5px' }}>
-            Full Name
+        <div className="mb-6">
+          <label htmlFor="fullName" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            👤 Full Name
           </label>
-          <input
-            type="text"
-            id="fullName"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.fullName ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your full name"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.fullName 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="John Doe"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">👨</span>
+            </div>
+          </div>
           {formErrors.fullName && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.fullName}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.fullName}
             </span>
           )}
         </div>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>
-            Email Address
+        <div className="mb-6">
+          <label htmlFor="email" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            📧 Email Address
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.email ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your email"
-            autoComplete="email"
-          />
+          <div className="relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.email 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="john@example.com"
+              autoComplete="email"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">✉️</span>
+            </div>
+          </div>
           {formErrors.email && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.email}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.email}
             </span>
           )}
         </div>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="phoneNumber" style={{ display: 'block', marginBottom: '5px' }}>
-            Phone Number
+        <div className="mb-6">
+          <label htmlFor="phoneNumber" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            📞 Phone Number
           </label>
-          <input
-            type="tel"
-            id="phoneNumber"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.phoneNumber ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your phone number"
-            autoComplete="tel"
-          />
+          <div className="relative">
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.phoneNumber 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="+1 (555) 123-4567"
+              autoComplete="tel"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">📱</span>
+            </div>
+          </div>
           {formErrors.phoneNumber && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.phoneNumber}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.phoneNumber}
             </span>
           )}
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="address" style={{ display: 'block', marginBottom: '5px' }}>
-            Address
+        <div className="mb-6">
+          <label htmlFor="address" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            🏠 Address <span className="text-gray-500 normal-case">(Optional)</span>
           </label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.address ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your address (optional)"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.address 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="123 Main St, City, State 12345"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">🗺</span>
+            </div>
+          </div>
           {formErrors.address && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.address}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.address}
             </span>
           )}
         </div>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="role" style={{ display: 'block', marginBottom: '5px' }}>
-            Account Type
+        <div className="mb-6">
+          <label htmlFor="role" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            🎯 Account Type
           </label>
-          <select
-            id="role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-          >
-            <option value={UserRole.CUSTOMER}>Customer</option>
-            <option value={UserRole.EMPLOYEE}>Employee</option>
-          </select>
+          <div className="relative">
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full p-4 pl-12 pr-12 border-2 border-gray-200 rounded-xl text-base font-medium focus:border-orange-400 focus:ring-4 focus:ring-orange-100 bg-gray-50 hover:bg-white focus:bg-white shadow-sm transition-all duration-200 appearance-none cursor-pointer"
+            >
+              <option value={UserRole.CUSTOMER}>👨‍💼 Vehicle Owner (Customer)</option>
+              <option value={UserRole.EMPLOYEE}>🔧 Service Technician (Employee)</option>
+            </select>
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">👥</span>
+            </div>
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">▼</span>
+            </div>
+          </div>
         </div>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
-            Password
+        <div className="mb-6">
+          <label htmlFor="password" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            🔒 Create Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.password ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Create a password"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.password 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="Create a secure password (8+ chars)"
+              autoComplete="new-password"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">🔐</span>
+            </div>
+          </div>
           {formErrors.password && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.password}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.password}
             </span>
           )}
         </div>
         
-        <div style={{ marginBottom: '20px' }}>
-          <label htmlFor="confirmPassword" style={{ display: 'block', marginBottom: '5px' }}>
-            Confirm Password
+        <div className="mb-8">
+          <label htmlFor="confirmPassword" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            🔍 Confirm Password
           </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.confirmPassword ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Confirm your password"
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.confirmPassword 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="Confirm your password"
+              autoComplete="new-password"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">🔑</span>
+            </div>
+          </div>
           {formErrors.confirmPassword && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.confirmPassword}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.confirmPassword}
             </span>
           )}
         </div>
@@ -316,30 +346,26 @@ const RegisterPage: React.FC = () => {
             console.log('Button clicked!'); // Debug log
             // Don't prevent default here, let form submission handle it
           }}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: isLoading ? '#ccc' : '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            cursor: isLoading ? 'not-allowed' : 'pointer'
-          }}
+          className={`w-full p-4 text-white border-0 rounded-xl text-base font-bold uppercase tracking-wider transition-all duration-200 shadow-lg transform hover:scale-[1.02] ${
+            isLoading 
+              ? 'bg-gray-400 cursor-not-allowed shadow-none transform-none' 
+              : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl cursor-pointer'
+          }`}
           disabled={isLoading}
         >
-          {isLoading ? 'Creating Account...' : 'Create Account'}
+          {isLoading ? '⏳ Creating Account...' : '🚀 Start Your Journey'}
         </button>
         
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <p>
+        <div className="text-center border-t-2 border-gray-100 pt-6 mt-8">
+          <p className="text-gray-600 font-medium">
             Already have an account?{' '}
-            <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>
-              Sign in here
+            <Link to="/login" className="text-orange-600 hover:text-orange-700 no-underline font-bold hover:underline transition-all">
+              🔑 Sign In Here
             </Link>
           </p>
         </div>
       </form>
+      </div>
     </div>
   );
 };

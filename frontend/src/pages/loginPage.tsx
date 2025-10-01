@@ -64,149 +64,158 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <h1>Welcome Back</h1>
-        <p>Sign in to your automobile service account</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex flex-col relative overflow-hidden">
+      {/* Automotive Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-20 left-10 w-32 h-32 border-2 border-orange-400 rounded-full"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 border-2 border-blue-400 rounded-full"></div>
+        <div className="absolute bottom-32 left-32 w-28 h-28 border-2 border-orange-400 rounded-full"></div>
+        <div className="absolute bottom-20 right-10 w-36 h-36 border-2 border-blue-400 rounded-full"></div>
       </div>
       
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div style={{ 
-            color: 'red', 
-            backgroundColor: '#ffe6e6', 
-            padding: '10px', 
-            borderRadius: '4px', 
-            marginBottom: '20px' 
-          }}>
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-gray-200/50">
+          {/* Logo/Branding Section */}
+          <div className="text-center mb-10">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+              <div className="text-white text-2xl font-bold">🔧</div>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent mb-2">
+              AutoService Pro
+            </h1>
+            <p className="text-gray-600 font-medium">Professional Vehicle Care</p>
+            <div className="w-16 h-1 bg-gradient-to-r from-orange-400 to-orange-600 mx-auto mt-3 rounded-full"></div>
+          </div>
+      
+         {error && (
+          <div className="text-red-600 bg-red-50 p-3 rounded border border-red-200 mb-5">
             {error}
           </div>
         )}
-        
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>
-            Email Address
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="mb-6">
+          <label htmlFor="email" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            📧 Email Address
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.email ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your email address"
-            autoComplete="email"
-          />
+          <div className="relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.email 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="your.email@example.com"
+              autoComplete="email"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">✉️</span>
+            </div>
+          </div>
           {formErrors.email && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.email}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.email}
             </span>
           )}
         </div>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
-            Password
+        <div className="mb-6">
+          <label htmlFor="password" className="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            🔒 Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: formErrors.password ? '1px solid red' : '1px solid #ccc',
-              borderRadius: '4px',
-              fontSize: '16px'
-            }}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-          />
+          <div className="relative">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full p-4 pl-12 border-2 rounded-xl text-base font-medium transition-all duration-200 ${
+                formErrors.password 
+                  ? 'border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100' 
+                  : 'border-gray-200 focus:border-orange-400 focus:ring-4 focus:ring-orange-100'
+              } bg-gray-50 hover:bg-white focus:bg-white shadow-sm`}
+              placeholder="Enter your secure password"
+              autoComplete="current-password"
+            />
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <span className="text-gray-400 text-lg">🔐</span>
+            </div>
+          </div>
           {formErrors.password && (
-            <span style={{ color: 'red', fontSize: '14px' }}>
-              {formErrors.password}
+            <span className="text-red-600 text-sm mt-2 block font-medium">
+              ⚠️ {formErrors.password}
             </span>
           )}
         </div>
         
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '20px' 
-        }}>
-          <label style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="flex justify-between items-center mb-8">
+          <label className="flex items-center text-sm text-slate-700 font-medium hover:text-slate-800 transition-colors cursor-pointer">
             <input
               type="checkbox"
               name="rememberMe"
               checked={formData.rememberMe}
               onChange={handleChange}
-              style={{ marginRight: '5px' }}
+              className="mr-3 h-5 w-5 text-orange-500 focus:ring-orange-400 focus:ring-2 border-gray-300 rounded-md transition-all"
             />
-            Remember me
+            🔄 Remember me
           </label>
-          <Link to="/forgot-password" style={{ color: '#007bff', textDecoration: 'none' }}>
-            Forgot password?
+          <Link to="/forgot-password" className="text-orange-600 hover:text-orange-700 no-underline text-sm font-semibold hover:underline transition-all">
+            🔑 Forgot password?
           </Link>
         </div>
         
         <button 
           type="submit" 
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: isLoading ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '16px',
-            cursor: isLoading ? 'not-allowed' : 'pointer'
-          }}
+          className={`w-full p-4 text-white border-0 rounded-xl text-base font-bold uppercase tracking-wider transition-all duration-200 shadow-lg transform hover:scale-[1.02] ${
+            isLoading 
+              ? 'bg-gray-400 cursor-not-allowed shadow-none transform-none' 
+              : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl cursor-pointer'
+          }`}
           disabled={isLoading}
         >
-          {isLoading ? 'Signing in...' : 'Sign In'}
+          {isLoading ? '⏳ Signing in...' : '🚗 Start Your Service'}
         </button>
         
-        <div style={{ textAlign: 'center', margin: '20px 0' }}>
-          <span style={{ color: '#666' }}>or</span>
+        <div className="text-center my-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t-2 border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500 font-medium">or continue with</span>
+            </div>
+          </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <div className="mb-8">
           <button 
             type="button" 
-            style={{
-              flex: 1,
-              padding: '10px',
-              backgroundColor: '#db4437',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="w-full p-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-semibold shadow-sm hover:shadow-md flex items-center justify-center space-x-3"
             onClick={() => console.log('Google OAuth coming soon!')}
           >
-            Google
+            <span className="text-xl">🔍</span>
+            <span>Continue with Google</span>
           </button>
         </div>
         
-        <div style={{ textAlign: 'center' }}>
-          <p>
-            Don't have an account?{' '}
-            <Link to="/register" style={{ color: '#007bff', textDecoration: 'none' }}>
-              Sign up here
+        <div className="text-center border-t-2 border-gray-100 pt-6">
+          <p className="text-gray-600 font-medium">
+            New to AutoService Pro?{' '}
+            <Link to="/register" className="text-orange-600 hover:text-orange-700 no-underline font-bold hover:underline transition-all">
+              🚀 Create Account
             </Link>
           </p>
         </div>
       </form>
+      </div>
     </div>
+  </div>
   );
 };
 
