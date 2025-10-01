@@ -1,7 +1,7 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom'
-import LoginPage from './pages/loginPage'
-import RegisterPage from './pages/registerPage'
+import LoginPage from './pages/loginpageN'
+import RegisterPage from './pages/registerpageN'
 import DashboardRouter from './pages/DashboardRouter'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
