@@ -80,10 +80,10 @@ const LoginPage: React.FC = () => {
             <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
               <div className="text-white text-2xl font-bold">🔧</div>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent mb-2">
+            <h1 className="text-3xl font-bold font-heading bg-gradient-to-r from-slate-800 to-blue-800 bg-clip-text text-transparent mb-2">
               AutoService Pro
             </h1>
-            <p className="text-gray-600 font-medium">Professional Vehicle Care</p>
+            <p className="text-gray-600 font-medium font-sans">Professional Vehicle Care</p>
             <div className="w-16 h-1 bg-gradient-to-r from-orange-400 to-orange-600 mx-auto mt-3 rounded-full"></div>
           </div>
       
