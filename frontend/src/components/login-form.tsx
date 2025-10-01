@@ -166,11 +166,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </div>
             </div>
           </form>
-          <div className="relative hidden bg-muted md:block">
+          <div className="relative hidden  bg-muted md:block">
             <img
-              src="/placeholder.svg"
+              src="/IAE-Blog-3.18.24.png"
               alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.6]"
             />
           </div>
         </CardContent>
