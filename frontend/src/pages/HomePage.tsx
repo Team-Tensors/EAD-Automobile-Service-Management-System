@@ -2,8 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 
-import NavBar from '@/components/ui/navbar'
-import Footer from '@/components/ui/footer'
+import NavBar from '@/components/navbar'
+import Footer from '@/components/footer'
 
 const HomePage: React.FC = () => {
   return (
