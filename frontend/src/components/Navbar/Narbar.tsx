@@ -7,9 +7,9 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "HOME", path: "/" },
-    { name: "ABOUT US", path: "#about" },
-    { name: "SERVICES", path: "#services" },
-    { name: "PRICING", path: "#pricing" },
+    { name: "ABOUT US", path: "/about" },
+    { name: "SERVICES", path: "/services" },
+    { name: "PRICING", path: "/pricing" },
   ];
 
   return (
@@ -26,13 +26,13 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.path}
+                to={link.path}
                 className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -59,14 +59,14 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 space-y-4">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.path}
+                to={link.path}
                 className="block text-sm font-medium text-gray-400 hover:text-white transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <div className="flex flex-col space-y-2 pt-4 border-t border-zinc-800">
               <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors text-center">
