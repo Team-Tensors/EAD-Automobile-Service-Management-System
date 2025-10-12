@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <div className="text-sm">© {new Date().getFullYear()} DriveCare: Automobile Service Management System</div>
         <div className="flex items-center gap-4 text-sm">
           <Link to="/contact" className="hover:underline">Contact</Link>
-          <a href="/privacy" className="hover:underline">Privacy</a>
+          <Link to="/privacy" className="hover:underline">Privacy</Link>
         </div>
       </div>
     </footer>
