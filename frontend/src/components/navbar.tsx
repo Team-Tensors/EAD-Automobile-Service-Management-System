@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Button } from './button'
+import { Button } from './ui/button'
 
 const NavBar: React.FC = () => {
   return (
