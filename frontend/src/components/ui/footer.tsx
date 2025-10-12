@@ -1,0 +1,18 @@
+import React from 'react'
+import { Link } from 'react-router-dom'
+
+const Footer: React.FC = () => {
+  return (
+    <footer className="bg-muted text-muted-foreground">
+      <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="text-sm">© {new Date().getFullYear()} EAD Automobile Service Management</div>
+        <div className="flex items-center gap-4 text-sm">
+          <Link to="/contact" className="hover:underline">Contact</Link>
+          <a href="#" className="hover:underline">Privacy</a>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+export default Footer
