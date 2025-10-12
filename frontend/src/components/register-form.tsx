@@ -104,22 +104,23 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden bg-zinc-950 border-zinc-800">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold font-heading">Create an account</h1>
-                <p className="text-balance text-muted-foreground">Sign up for your DriveCare account</p>
+                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-500">CARE</span></span>
+                <h1 className="text-2xl font-bold font-heading text-white">Create an account</h1>
+                <p className="text-balance text-gray-400">Sign up for your DriveCare account</p>
               </div>
               
               {error && (
-                <div className="text-red-600 bg-red-50 p-3 rounded border border-red-200 mb-2">
+                <div className="text-red-400 bg-red-950/50 p-3 rounded border border-red-800 mb-2">
                   {error}
                 </div>
               )}
               <div className="grid gap-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName" className="text-white">Full Name</Label>
                 <Input 
                   id="fullName" 
                   name="fullName"
@@ -127,17 +128,17 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="John Doe" 
                   value={formData.fullName}
                   onChange={handleChange}
-                  className={formErrors.fullName ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.fullName ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.fullName && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.fullName}
                   </span>
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-white">Email</Label>
                 <Input 
                   id="email" 
                   name="email"
@@ -145,17 +146,17 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="m@example.com" 
                   value={formData.email}
                   onChange={handleChange}
-                  className={formErrors.email ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.email && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.email}
                   </span>
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
+                <Label htmlFor="phoneNumber" className="text-white">Phone Number</Label>
                 <Input 
                   id="phoneNumber" 
                   name="phoneNumber"
@@ -163,17 +164,17 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="+1 (555) 000-0000" 
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className={formErrors.phoneNumber ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.phoneNumber ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.phoneNumber && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.phoneNumber}
                   </span>
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="address">Address (Optional)</Label>
+                <Label htmlFor="address" className="text-white">Address (Optional)</Label>
                 <Input 
                   id="address" 
                   name="address"
@@ -181,30 +182,30 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="123 Main St, City, State" 
                   value={formData.address}
                   onChange={handleChange}
-                  className={formErrors.address ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.address ? 'border-red-400 focus:border-red-500' : ''}`}
                 />
                 {formErrors.address && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.address}
                   </span>
                 )}
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="role">Account Type</Label>
+                <Label htmlFor="role" className="text-white">Account Type</Label>
                 <select
                   id="role"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base font-sans shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  className="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white px-3 py-1 text-base font-sans shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 >
                   <option value={UserRole.CUSTOMER}>Vehicle Owner (Customer)</option>
                   <option value={UserRole.EMPLOYEE}>Service Technician (Employee)</option>
                 </select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-white">Password</Label>
                 <Input 
                   id="password" 
                   name="password"
@@ -212,17 +213,17 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="Must be at least 8 characters"
                   value={formData.password}
                   onChange={handleChange}
-                  className={formErrors.password ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.password && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.password}
                   </span>
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
                 <Input 
                   id="confirmPassword" 
                   name="confirmPassword"
@@ -230,22 +231,22 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.confirmPassword && (
-                  <span className="text-red-600 text-sm mt-1 block">
+                  <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.confirmPassword}
                   </span>
                 )}
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={isLoading}>
                 {isLoading ? 'Creating Account...' : 'Sign Up'}
               </Button>
               <div className="relative text-center text-sm">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">Or Sign up with </span>
+                <span className="relative z-10 bg-zinc-950 px-2 text-gray-400">Or Sign up with </span>
               </div>
-              <Button variant="outline" className="w-full bg-transparent">
+              <Button variant="outline" className="w-full border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
                   <path
                     d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
@@ -254,15 +255,15 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                 </svg>
               Google
               </Button>
-              <div className="text-center text-sm">
+              <div className="text-center text-sm text-gray-400">
                 Already have an account?{" "}
-                <Link to="/login" className="underline underline-offset-4 text-primary hover:text-primary/80">
+                <Link to="/login" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
                   Login
                 </Link>
               </div>
             </div>
           </form>
-          <div className="relative hidden bg-muted md:block">
+          <div className="relative hidden bg-zinc-900 md:block">
             <img
                src="/IAE-Blog-3.18.24.png"
               alt="Image"
@@ -271,7 +272,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
           </div>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+      <div className="text-balance text-center text-xs text-gray-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-orange-500">
         By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
       </div>
     </div>
