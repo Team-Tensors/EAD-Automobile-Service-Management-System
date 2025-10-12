@@ -19,7 +19,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-white tracking-wider">
-              AUTO<span className="text-orange-500">FIX</span>
+              DRIVE<span className="text-orange-500">CARE</span>
             </span>
           </Link>
 
