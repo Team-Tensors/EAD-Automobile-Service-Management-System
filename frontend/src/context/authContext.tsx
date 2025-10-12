@@ -277,6 +277,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       clearAuthStorage();
       dispatch({ type: 'AUTH_LOGOUT' });
+      // After logout, ensure the user is redirected to the homepage.
+      // Use replace to avoid leaving the protected page in history.
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/')) {
+        window.location.replace('/');
+      } else if (typeof window !== 'undefined') {
+        // Fallback: always replace to root
+        window.location.replace('/');
+      }
     }
   };
 
