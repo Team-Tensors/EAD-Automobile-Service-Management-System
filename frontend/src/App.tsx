@@ -1,61 +1,63 @@
-
-import { Routes, Route } from 'react-router-dom'
-import LoginPage from './pages/loginpageN'
-import RegisterPage from './pages/registerpageN'
-import HomePage from './pages/HomePage'
-import DashboardRouter from './pages/DashboardRouter'
-import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
-import { UserRole } from './types/auth'
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/loginpageN";
+import RegisterPage from "./pages/registerpageN";
+import HomePage from "./pages/HomePage";
+import DashboardRouter from "./pages/DashboardRouter";
+import { ProtectedRoute, PublicRoute } from "./guards/ProtectedRoute";
+import { UserRole } from "./types/auth";
+import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
 
 function App() {
   return (
     <Routes>
       {/* Public routes (only accessible when NOT authenticated) */}
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
           <PublicRoute>
             <LoginPage />
           </PublicRoute>
-        } 
+        }
       />
-      <Route 
-        path="/register" 
+      <Route
+        path="/register"
         element={
           <PublicRoute>
             <RegisterPage />
           </PublicRoute>
-        } 
+        }
       />
-      
+
       {/* Protected routes (require authentication) */}
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <DashboardRouter />
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Example: Admin-only route */}
-      <Route 
-        path="/admin/*" 
+      <Route
+        path="/admin/*"
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <div className="p-8 bg-red-50 border-l-4 border-red-500">
-              <h1 className="text-xl font-semibold text-red-700">Admin Panel</h1>
+              <h1 className="text-xl font-semibold text-red-700">
+                Admin Panel
+              </h1>
               <p className="text-red-600">Only accessible by admins</p>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Example: Employee or Admin route (Staff) */}
-      <Route 
-        path="/staff/*" 
+      <Route
+        path="/staff/*"
         element={
-          <ProtectedRoute 
+          <ProtectedRoute
             requiredRole={UserRole.EMPLOYEE}
             fallback={
               <ProtectedRoute requiredRole={UserRole.ADMIN}>
@@ -65,52 +67,66 @@ function App() {
           >
             <div>Staff Panel - Accessible by employees and admins</div>
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Example: Customer-only route */}
-      <Route 
-        path="/customer/*" 
+      <Route
+        path="/customer/*"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
-              <h1 className="text-xl font-semibold text-blue-700">Customer Portal</h1>
+              <h1 className="text-xl font-semibold text-blue-700">
+                Customer Portal
+              </h1>
               <p className="text-blue-600">Only accessible by customers</p>
             </div>
           </ProtectedRoute>
-        } 
+        }
       />
-      
-      {/* Example: Permission-based route */}
-      <Route 
-        path="/reports" 
+      {/* Customer Appointment Route */}
+      <Route
+        path="/customer/appointments"
         element={
-          <ProtectedRoute 
-            requiredPermission={{ resource: 'reports', action: 'read' }}
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <AppointmentBookingPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Example: Permission-based route */}
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute
+            requiredPermission={{ resource: "reports", action: "read" }}
           >
             <div>Reports - Requires specific permission</div>
           </ProtectedRoute>
-        } 
+        }
       />
-      
-  {/* Home page */}
-  <Route path="/" element={<HomePage />} />
-      
+
+      {/* Home page */}
+      <Route path="/" element={<HomePage />} />
+
       {/* Fallback for unknown routes */}
-      <Route 
-        path="*" 
+      <Route
+        path="*"
         element={
           <div className="text-center p-12 text-gray-600">
             <h2 className="text-2xl font-bold mb-4">Page Not Found</h2>
             <p className="mb-4">The page you're looking for doesn't exist.</p>
-            <a href="/dashboard" className="text-blue-500 hover:text-blue-700 underline">
+            <a
+              href="/dashboard"
+              className="text-blue-500 hover:text-blue-700 underline"
+            >
               Go to Dashboard
             </a>
           </div>
-        } 
+        }
       />
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;
