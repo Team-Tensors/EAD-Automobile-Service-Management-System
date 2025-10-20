@@ -1,41 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, Car, Calendar, DollarSign, User, Filter, Download, ChevronRight, CheckCircle, AlertCircle, Loader } from 'lucide-react';
-import Navbar from '@/components/Navbar/Narbar';
-import Footer from '@/components/Footer/Footer';
+import { useState, useEffect } from 'react';
+import { MapPin, Clock, Car, Calendar, User, Filter, Download, ChevronRight, CheckCircle, CircleDashed } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 // TypeScript Interfaces
-interface TimeLog {
-  task: string;
-  hours: number;
-  status: 'completed' | 'in_progress';
-}
-
 interface Service {
   id: number;
   vehicleName: string;
   vehicleNumber: string;
   serviceType: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  progress: number;
+  status: 'completed' | 'not_completed';
   startDate: string;
   estimatedCompletion: string;
   assignedEmployee: string;
-  currentStage: string;
-  costEstimate: number;
-  timeLogs: TimeLog[];
-}
-
-interface RealtimeUpdate {
-  message: string;
-  timestamp: string;
+  serviceCenter: string;
+  centerSlot: string;
 }
 
 const CustomerDashboard = () => {
+  const { user, logout } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showMap, setShowMap] = useState<boolean>(false);
-  const [realTimeUpdates, setRealTimeUpdates] = useState<RealtimeUpdate[]>([]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   // Mock data - Replace with actual API calls
   useEffect(() => {
@@ -45,32 +39,24 @@ const CustomerDashboard = () => {
         vehicleName: 'Toyota Camry 2020',
         vehicleNumber: 'ABC-1234',
         serviceType: 'Regular Maintenance',
-        status: 'in_progress',
-        progress: 65,
+        status: 'not_completed',
         startDate: '2025-10-15',
         estimatedCompletion: '2025-10-20',
         assignedEmployee: 'John Mechanic',
-        currentStage: 'Engine Inspection',
-        costEstimate: 15000,
-        timeLogs: [
-          { task: 'Oil Change', hours: 2, status: 'completed' },
-          { task: 'Brake Inspection', hours: 1.5, status: 'completed' },
-          { task: 'Engine Inspection', hours: 0, status: 'in_progress' }
-        ]
+        serviceCenter: 'DriveCare Negombo Center',
+        centerSlot: 'Bay 3'
       },
       {
         id: 2,
         vehicleName: 'Honda Civic 2019',
         vehicleNumber: 'XYZ-5678',
         serviceType: 'Custom Modification',
-        status: 'pending',
-        progress: 0,
+        status: 'not_completed',
         startDate: '2025-10-22',
         estimatedCompletion: '2025-11-05',
         assignedEmployee: 'Not Assigned',
-        currentStage: 'Awaiting Parts',
-        costEstimate: 45000,
-        timeLogs: []
+        serviceCenter: 'DriveCare Colombo Center',
+        centerSlot: 'Bay 1'
       },
       {
         id: 3,
@@ -78,49 +64,21 @@ const CustomerDashboard = () => {
         vehicleNumber: 'LMN-9012',
         serviceType: 'Accident Repair',
         status: 'completed',
-        progress: 100,
         startDate: '2025-10-01',
         estimatedCompletion: '2025-10-12',
         assignedEmployee: 'Sarah Engineer',
-        currentStage: 'Quality Check Passed',
-        costEstimate: 85000,
-        timeLogs: [
-          { task: 'Body Work', hours: 12, status: 'completed' },
-          { task: 'Painting', hours: 8, status: 'completed' },
-          { task: 'Final Assembly', hours: 6, status: 'completed' }
-        ]
+        serviceCenter: 'DriveCare Negombo Center',
+        centerSlot: 'Bay 5'
       }
     ];
     setServices(mockServices);
     setSelectedService(mockServices[0]);
-
-    // Simulate real-time updates via WebSocket
-    const ws = simulateWebSocket();
-    return () => ws.close();
   }, []);
-
-  const simulateWebSocket = () => {
-    const interval = setInterval(() => {
-      const updates = [
-        'Engine inspection completed - 70% progress',
-        'Parts ordered for Honda Civic modification',
-        'Quality check started on BMW X5'
-      ];
-      const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
-      setRealTimeUpdates(prev => [{
-        message: randomUpdate,
-        timestamp: new Date().toLocaleTimeString()
-      }, ...prev.slice(0, 4)]);
-    }, 15000);
-
-    return { close: () => clearInterval(interval) };
-  };
 
   const getStatusColor = (status: string): string => {
     switch(status) {
       case 'completed': return 'bg-chart-2/20 text-chart-2 border-chart-2/30';
-      case 'in_progress': return 'bg-chart-1/20 text-chart-1 border-chart-1/30';
-      case 'pending': return 'bg-chart-4/20 text-chart-4 border-chart-4/30';
+      case 'not_completed': return 'bg-chart-4/20 text-chart-4 border-chart-4/30';
       default: return 'bg-muted text-muted-foreground border-border';
     }
   };
@@ -128,8 +86,7 @@ const CustomerDashboard = () => {
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'completed': return <CheckCircle className="w-5 h-5 text-chart-2" />;
-      case 'in_progress': return <Loader className="w-5 h-5 text-chart-1 animate-spin" />;
-      case 'pending': return <AlertCircle className="w-5 h-5 text-chart-4" />;
+      case 'not_completed': return <CircleDashed className="w-5 h-5 text-chart-4" />;
       default: return null;
     }
   };
@@ -140,18 +97,22 @@ const CustomerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <Navbar />
-      <header className="mt-16 bg-primary text-primary-foreground shadow-lg border-b border-border">
+      {/* Welcome Header */}
+      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              {/* <h1 className="text-3xl font-bold font-heading">DriveCare Dashboard</h1> */}
-              <p className="text-muted-foreground mt-1">Track your vehicle services in real-time</p>
+              <h1 className="text-3xl font-bold">Customer Dashboard</h1>
+              <p className="text-primary-foreground/80 mt-1">
+                Welcome back, {user?.firstName} {user?.lastName}!
+              </p>
             </div>
             <div className="flex items-center gap-4">
-              <button className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-secondary/80 transition border border-border">
-                Book Service
+              <button 
+                onClick={handleLogout}
+                className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold hover:bg-destructive/90 transition border border-border"
+              >
+                Logout
               </button>
               <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center border border-border">
                 <User className="w-6 h-6 text-accent-foreground" />
@@ -162,19 +123,12 @@ const CustomerDashboard = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Real-Time Updates Banner */}
-        {realTimeUpdates.length > 0 && (
-          <div className="bg-chart-1/10 border-l-4 border-chart-1 p-4 mb-6 rounded-r-lg">
-            <div className="flex items-center gap-2">
-              <Loader className="w-5 h-5 text-chart-1 animate-spin" />
-              <div>
-                <p className="font-semibold text-foreground">Live Update</p>
-                <p className="text-sm text-muted-foreground">{realTimeUpdates[0]?.message}</p>
-                <p className="text-xs text-muted-foreground mt-1">{realTimeUpdates[0]?.timestamp}</p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Book Appointment Button */}
+        <div className="mb-6">
+          <button className="bg-chart-2 text-white px-6 py-3 rounded-lg font-semibold hover:bg-chart-2/90 transition border border-border shadow-md">
+            Book Appointment
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Services List */}
@@ -187,7 +141,7 @@ const CustomerDashboard = () => {
 
               {/* Filter Buttons */}
               <div className="flex gap-2 mb-4 flex-wrap">
-                {['all', 'pending', 'in_progress', 'completed'].map(status => (
+                {['all', 'not_completed', 'completed'].map(status => (
                   <button
                     key={status}
                     onClick={() => setFilterStatus(status)}
@@ -197,13 +151,13 @@ const CustomerDashboard = () => {
                         : 'bg-secondary text-secondary-foreground border-border hover:bg-accent'
                     }`}
                   >
-                    {status.replace('_', ' ').toUpperCase()}
+                    {status === 'all' ? 'ALL' : status === 'not_completed' ? 'NOT COMPLETED' : 'COMPLETED'}
                   </button>
                 ))}
               </div>
 
               {/* Service Cards */}
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {filteredServices.map(service => (
                   <div
                     key={service.id}
@@ -221,6 +175,7 @@ const CustomerDashboard = () => {
                           <p className="font-semibold text-card-foreground">{service.vehicleName}</p>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{service.vehicleNumber}</p>
+                        <p className="text-xs text-muted-foreground mb-2">{service.serviceType}</p>
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(service.status)}`}>
                           {getStatusIcon(service.status)}
                           {service.status.replace('_', ' ').toUpperCase()}
@@ -245,27 +200,26 @@ const CustomerDashboard = () => {
                     <p className="text-muted-foreground">{selectedService.serviceType}</p>
                   </div>
                   <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(selectedService.status)}`}>
-                    {selectedService.status.replace('_', ' ').toUpperCase()}
+                    {selectedService.status === 'completed' ? 'COMPLETED' : 'NOT COMPLETED'}
                   </span>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">Overall Progress</span>
-                    <span className="text-sm font-bold text-chart-1">{selectedService.progress}%</span>
+                {/* Service Information Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
+                    <MapPin className="w-5 h-5 text-chart-1" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Service Center</p>
+                      <p className="font-semibold text-card-foreground">{selectedService.serviceCenter}</p>
+                    </div>
                   </div>
-                  <div className="w-full bg-secondary rounded-full h-3 border border-border">
-                    <div
-                      className="bg-chart-1 h-3 rounded-full transition-all duration-500"
-                      style={{ width: `${selectedService.progress}%` }}
-                    />
+                  <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
+                    <Car className="w-5 h-5 text-chart-1" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Center Slot</p>
+                      <p className="font-semibold text-card-foreground">{selectedService.centerSlot}</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">Current Stage: <span className="font-semibold text-foreground">{selectedService.currentStage}</span></p>
-                </div>
-
-                {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
                     <Calendar className="w-5 h-5 text-chart-1" />
                     <div>
@@ -280,24 +234,17 @@ const CustomerDashboard = () => {
                       <p className="font-semibold text-card-foreground">{selectedService.estimatedCompletion}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
+                  <div className="col-span-2 flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
                     <User className="w-5 h-5 text-chart-1" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Assigned To</p>
+                      <p className="text-xs text-muted-foreground">Assigned Employee</p>
                       <p className="font-semibold text-card-foreground">{selectedService.assignedEmployee}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg border border-border">
-                    <DollarSign className="w-5 h-5 text-chart-1" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Estimated Cost</p>
-                      <p className="font-semibold text-card-foreground">Rs. {selectedService.costEstimate.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 mt-6">
                   <button 
                     onClick={() => setShowMap(!showMap)}
                     className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border"
@@ -320,51 +267,15 @@ const CustomerDashboard = () => {
                     <div className="text-center">
                       <MapPin className="w-12 h-12 text-chart-1 mx-auto mb-2" />
                       <p className="text-muted-foreground">Map integration with Google Maps / Leaflet</p>
-                      <p className="text-sm text-muted-foreground mt-2">DriveCare Service Center - Negombo</p>
+                      <p className="text-sm text-muted-foreground mt-2">{selectedService.serviceCenter}</p>
                     </div>
                   </div>
                 </div>
               )}
-
-              {/* Time Logs */}
-              <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-                <h3 className="text-lg font-bold text-card-foreground mb-4">Service Timeline & Time Logs</h3>
-                <div className="space-y-3">
-                  {selectedService.timeLogs.length > 0 ? (
-                    selectedService.timeLogs.map((log, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-3 bg-secondary rounded-lg border border-border">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          log.status === 'completed' ? 'bg-chart-2/20 border border-chart-2/30' : 'bg-chart-1/20 border border-chart-1/30'
-                        }`}>
-                          {log.status === 'completed' ? (
-                            <CheckCircle className="w-5 h-5 text-chart-2" />
-                          ) : (
-                            <Loader className="w-5 h-5 text-chart-1 animate-spin" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-card-foreground">{log.task}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {log.hours > 0 ? `${log.hours} hours logged` : 'In progress...'}
-                          </p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                          log.status === 'completed' ? 'bg-chart-2/20 text-chart-2 border-chart-2/30' : 'bg-chart-1/20 text-chart-1 border-chart-1/30'
-                        }`}>
-                          {log.status.toUpperCase()}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-center py-4">No time logs available yet</p>
-                  )}
-                </div>
-              </div>
             </div>
           )}
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
