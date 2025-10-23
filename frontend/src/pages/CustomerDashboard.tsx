@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Clock, Car, Calendar, User, Filter, Download, ChevronRight, CheckCircle, CircleDashed } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import Footer from '@/components/Footer/Footer';
 
 // TypeScript Interfaces
 interface Service {
@@ -276,6 +277,7 @@ const CustomerDashboard = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
