@@ -150,8 +150,13 @@ export const PublicRoute: React.FC<{ children: React.ReactNode; redirectTo?: str
   redirectTo = '/dashboard' 
 }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
 
-  if (isLoading) {
+  // Only show loading spinner on initial app load, not during login attempts
+  // The login form itself handles loading state with the submit button
+  const isLoginOrRegisterPage = location.pathname === '/login' || location.pathname === '/register';
+  
+  if (isLoading && !isLoginOrRegisterPage) {
     return <LoadingSpinner />;
   }
 
