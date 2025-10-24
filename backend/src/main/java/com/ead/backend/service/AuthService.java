@@ -1,9 +1,9 @@
 package com.ead.backend.service;
 
-import com.ead.backend.dto.AuthResponse;
-import com.ead.backend.dto.LoginRequest;
-import com.ead.backend.dto.SignupRequest;
-import com.ead.backend.dto.MessageResponse;
+import com.ead.backend.dto.AuthResponseDTO;
+import com.ead.backend.dto.LoginRequestDTO;
+import com.ead.backend.dto.SignupRequestDTO;
+import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.entity.RefreshToken;
 import com.ead.backend.repository.RoleRepository;
 import com.ead.backend.repository.UserRepository;
@@ -51,11 +51,29 @@ public class AuthService {
         this.refreshTokenService = refreshTokenService;
     }
 
-    public AuthResponse login(LoginRequest request, String deviceInfo) {
+    public AuthResponseDTO login(LoginRequestDTO request, String deviceInfo) {
         logger.info("=== LOGIN PROCESS STARTED ===");
         logger.info("Login request for email: {}", request.getEmail());
 
-        // Authenticate user using email
+        // Step 1: Check if user exists with the provided email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    logger.error("User not found with email: {}", request.getEmail());
+                    return new RuntimeException("EMAIL_NOT_FOUND");
+                });
+
+        logger.info("Found user - ID: {}, Email: {}, Active: {}",
+                   user.getId(), user.getEmail(), user.getActive());
+
+        // Step 2: Check if the password matches
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.error("Invalid password for user: {}", request.getEmail());
+            throw new RuntimeException("INVALID_PASSWORD");
+        }
+
+        logger.info("Password validation successful for: {}", request.getEmail());
+
+        // Step 3: Authenticate user (this should pass now since we pre-validated)
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
@@ -64,10 +82,6 @@ public class AuthService {
         // Load user details and generate token
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = jwtUtil.generateToken(userDetails);
-
-        // Get user from database for additional info using email
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found after successful authentication"));
 
         logger.info("Found user after authentication - ID: {}, Email: {}",
                    user.getId(), user.getEmail());
@@ -82,17 +96,17 @@ public class AuthService {
 
         logger.info("Login completed successfully for user: {}", user.getEmail());
 
-        return new AuthResponse(token, refreshToken.getToken(), user.getId(),
+        return new AuthResponseDTO(token, refreshToken.getToken(), user.getId(),
                                user.getEmail(), user.getFullName(), roles);
     }
 
     // Overloaded method for backward compatibility
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponseDTO login(LoginRequestDTO request) {
         return login(request, null);
     }
 
     @Transactional
-    public MessageResponse signup(SignupRequest request) {
+    public MessageResponseDTO signup(SignupRequestDTO request) {
         logger.info("=== SIGNUP PROCESS STARTED ===");
         logger.info("Signup request - Email: {}, Role: {}",
                    request.getEmail(), request.getRole());
@@ -101,7 +115,7 @@ public class AuthService {
         Optional<User> existingUserByEmail = userRepository.findByEmail(request.getEmail());
         if (existingUserByEmail.isPresent()) {
             logger.warn("Email already exists: {}", request.getEmail());
-            return new MessageResponse("Email is already taken", false);
+            return new MessageResponseDTO("Email is already taken", false);
         }
 
         try {
@@ -138,7 +152,7 @@ public class AuthService {
             logger.info("Post-save verification:");
             logger.info("Can find by email '{}': {}", savedUser.getEmail(), verifyByEmail.isPresent());
 
-            return new MessageResponse("User registered successfully as " + roleName);
+            return new MessageResponseDTO("User registered successfully as " + roleName);
 
         } catch (Exception e) {
             logger.error("Error during user registration: {}", e.getMessage(), e);
@@ -178,7 +192,7 @@ public class AuthService {
         }
     }
 
-    public AuthResponse generateTokenForOAuthUser(User user, String deviceInfo) {
+    public AuthResponseDTO generateTokenForOAuthUser(User user, String deviceInfo) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtUtil.generateToken(userDetails);
 
@@ -189,19 +203,19 @@ public class AuthService {
                 .map(Role::getName)
                 .collect(Collectors.toSet());
 
-        return new AuthResponse(token, refreshToken.getToken(), user.getId(),
+        return new AuthResponseDTO(token, refreshToken.getToken(), user.getId(),
                                user.getEmail(), user.getFullName(), roles);
     }
 
     // Overloaded method for backward compatibility
-    public AuthResponse generateTokenForOAuthUser(User user) {
+    public AuthResponseDTO generateTokenForOAuthUser(User user) {
         return generateTokenForOAuthUser(user, null);
     }
 
     /**
      * Refresh JWT token using refresh token
      */
-    public AuthResponse refreshToken(String refreshTokenValue) {
+    public AuthResponseDTO refreshToken(String refreshTokenValue) {
         Optional<String> newJwtToken = refreshTokenService.refreshJwtToken(refreshTokenValue);
 
         if (newJwtToken.isPresent()) {
@@ -215,7 +229,7 @@ public class AuthService {
                     .collect(Collectors.toSet());
 
             // Return response with new JWT token and existing refresh token
-            return new AuthResponse(newJwtToken.get(), refreshTokenValue, user.getId(),
+            return new AuthResponseDTO(newJwtToken.get(), refreshTokenValue, user.getId(),
                                    user.getEmail(), user.getFullName(), roles);
         }
 

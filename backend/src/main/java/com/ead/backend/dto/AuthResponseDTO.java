@@ -6,7 +6,7 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
-public class AuthResponse {
+public class AuthResponseDTO {
     private String token;
     private String refreshToken; // Added refresh token
     private String type = "Bearer";
@@ -15,7 +15,7 @@ public class AuthResponse {
     private String fullName;
     private Set<String> roles;
 
-    public AuthResponse(String token, String refreshToken, Long id, String email, String fullName, Set<String> roles) {
+    public AuthResponseDTO(String token, String refreshToken, Long id, String email, String fullName, Set<String> roles) {
         this.token = token;
         this.refreshToken = refreshToken;
         this.id = id;
@@ -25,7 +25,7 @@ public class AuthResponse {
     }
 
     // Constructor without refresh token (for backward compatibility)
-    public AuthResponse(String token, Long id, String email, String fullName, Set<String> roles) {
+    public AuthResponseDTO(String token, Long id, String email, String fullName, Set<String> roles) {
         this.token = token;
         this.id = id;
         this.email = email;

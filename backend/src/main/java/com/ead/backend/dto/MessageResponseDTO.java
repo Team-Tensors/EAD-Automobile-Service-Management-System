@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class MessageResponse {
+public class MessageResponseDTO {
     private String message;
     private boolean success;
 
-    public MessageResponse(String message) {
+    public MessageResponseDTO(String message) {
         this.message = message;
         this.success = true;
     }
