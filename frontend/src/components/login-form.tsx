@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginCredentials } from '../types/auth';
@@ -72,16 +73,33 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       } catch (err) {
         // Parse error message to determine if it's email or password specific
         const errorMessage = (err as Error).message || '';
+        const lowerErrorMessage = errorMessage.toLowerCase();
         
-        if (errorMessage.toLowerCase().includes('email not found') || 
-            errorMessage.toLowerCase().includes('email')) {
-          setFormErrors(prev => ({ ...prev, email: errorMessage }));
-        } else if (errorMessage.toLowerCase().includes('password is incorrect') || 
-                   errorMessage.toLowerCase().includes('password')) {
-          setFormErrors(prev => ({ ...prev, password: errorMessage }));
+        // Clear any previous field errors
+        setFormErrors({});
+        
+        // Check for email-specific errors
+        if (lowerErrorMessage.includes('email not found') || 
+            lowerErrorMessage.includes('user not found') ||
+            lowerErrorMessage.includes('account not found')) {
+          setFormErrors({ email: 'This email is not registered. Please check or sign up.' });
+        } 
+        // Check for password-specific errors
+        else if (lowerErrorMessage.includes('password is incorrect') || 
+                 lowerErrorMessage.includes('incorrect password') ||
+                 lowerErrorMessage.includes('wrong password') ||
+                 lowerErrorMessage.includes('invalid password')) {
+          setFormErrors({ password: 'Incorrect password. Please try again.' });
         }
-        // Generic errors will still be shown in the error state from useAuth
-        console.error('Login failed:', err);
+        // Check if error message mentions both or is generic credential error
+        else if (lowerErrorMessage.includes('invalid credentials') || 
+                 lowerErrorMessage.includes('authentication failed')) {
+          setFormErrors({ 
+            email: 'Invalid credentials',
+            password: 'Invalid credentials'
+          });
+        }
+        // For other errors, let the general error banner handle it
       }
     };
 
@@ -98,9 +116,34 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 <p className="text-balance text-gray-400">Login to your DriveCare account</p>
               </div>
               {error && !formErrors.email && !formErrors.password && (
-                <div className="text-red-400 bg-red-950/50 p-3 rounded border border-red-800 mb-2">
-                  {error}
-                </div>
+                <Alert variant="destructive">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <AlertDescription>
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {/* Helpful hint when there are field-specific errors */}
+              {(formErrors.email || formErrors.password) && (
+                <Alert variant="warning">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <AlertDescription>
+                    {formErrors.email && !formErrors.password && (
+                      <p><strong>Email Issue:</strong> Please verify your email address or <Link to="/register" className="underline text-orange-400 hover:text-orange-500">create a new account</Link>.</p>
+                    )}
+                    {formErrors.password && !formErrors.email && (
+                      <p><strong>Password Issue:</strong> Double-check your password or use <a href="#" className="underline text-orange-400 hover:text-orange-500">forgot password</a> to reset it.</p>
+                    )}
+                    {formErrors.email && formErrors.password && (
+                      <p><strong>Login Failed:</strong> Please check both your email and password.</p>
+                    )}
+                  </AlertDescription>
+                </Alert>
               )}
               
               <div className="grid gap-2">
@@ -112,13 +155,20 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   placeholder="example@gmail.com" 
                   value={formData.email}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all ${formErrors.email ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
                   required 
+                  aria-invalid={formErrors.email ? "true" : "false"}
+                  aria-describedby={formErrors.email ? "email-error" : undefined}
                 />
                 {formErrors.email && (
-                  <span className="text-red-400 text-sm mt-1 block">
-                    {formErrors.email}
-                  </span>
+                  <Alert variant="destructive" className="mt-2" id="email-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <AlertDescription className="font-medium">
+                      {formErrors.email}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </div>
               <div className="grid gap-2">
@@ -134,13 +184,20 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   type="password" 
                   value={formData.password}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all ${formErrors.password ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
                   required 
+                  aria-invalid={formErrors.password ? "true" : "false"}
+                  aria-describedby={formErrors.password ? "password-error" : undefined}
                 />
                 {formErrors.password && (
-                  <span className="text-red-400 text-sm mt-1 block">
-                    {formErrors.password}
-                  </span>
+                  <Alert variant="destructive" className="mt-2" id="password-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <AlertDescription className="font-medium">
+                      {formErrors.password}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </div>
               <div className="flex items-center justify-between mb-4">
