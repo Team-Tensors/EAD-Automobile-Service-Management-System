@@ -73,6 +73,12 @@ api.interceptors.response.use(
       if (status === 401 && !originalRequest._retry) {
         const errorMessage = data?.message || '';
         
+        // Check if this is a login failure (email/password error)
+        if (originalRequest.url?.includes('/auth/login')) {
+          // Don't redirect, just pass the specific error message
+          return Promise.reject(new Error(errorMessage || 'Invalid credentials'));
+        }
+        
         // Check if this is a token expiration (attempt refresh)
         if (errorMessage.includes('expired') || errorMessage.includes('invalid') || 
             errorMessage.includes('jwt') || errorMessage.includes('token')) {
