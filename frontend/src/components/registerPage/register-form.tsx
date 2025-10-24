@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { UserRole } from '../types/auth'
-import type { RegisterData } from '../types/auth'
+import { useAuth } from '../../hooks/useAuth'
+import { UserRole } from '../../types/auth'
+import type { RegisterData } from '../../types/auth'
 import { useState } from "react"
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
