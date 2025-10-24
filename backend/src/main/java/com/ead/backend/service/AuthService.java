@@ -55,7 +55,25 @@ public class AuthService {
         logger.info("=== LOGIN PROCESS STARTED ===");
         logger.info("Login request for email: {}", request.getEmail());
 
-        // Authenticate user using email
+        // Step 1: Check if user exists with the provided email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    logger.error("User not found with email: {}", request.getEmail());
+                    return new RuntimeException("EMAIL_NOT_FOUND");
+                });
+
+        logger.info("Found user - ID: {}, Email: {}, Active: {}",
+                   user.getId(), user.getEmail(), user.getActive());
+
+        // Step 2: Check if the password matches
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            logger.error("Invalid password for user: {}", request.getEmail());
+            throw new RuntimeException("INVALID_PASSWORD");
+        }
+
+        logger.info("Password validation successful for: {}", request.getEmail());
+
+        // Step 3: Authenticate user (this should pass now since we pre-validated)
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
@@ -64,10 +82,6 @@ public class AuthService {
         // Load user details and generate token
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String token = jwtUtil.generateToken(userDetails);
-
-        // Get user from database for additional info using email
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found after successful authentication"));
 
         logger.info("Found user after authentication - ID: {}, Email: {}",
                    user.getId(), user.getEmail());
