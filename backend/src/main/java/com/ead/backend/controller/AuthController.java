@@ -1,10 +1,10 @@
 package com.ead.backend.controller;
 
-import com.ead.backend.dto.AuthResponse;
-import com.ead.backend.dto.LoginRequest;
-import com.ead.backend.dto.SignupRequest;
-import com.ead.backend.dto.MessageResponse;
-import com.ead.backend.dto.RefreshTokenRequest;
+import com.ead.backend.dto.AuthResponseDTO;
+import com.ead.backend.dto.LoginRequestDTO;
+import com.ead.backend.dto.SignupRequestDTO;
+import com.ead.backend.dto.MessageResponseDTO;
+import com.ead.backend.dto.RefreshTokenRequestDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import com.ead.backend.service.RefreshTokenService;
@@ -17,8 +17,6 @@ import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,7 @@ public class AuthController {
      * Customer & Employee Login - Returns JWT token with user details and refresh token
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
         logger.info("=== LOGIN REQUEST RECEIVED ===");
         logger.info("Request URL: {}", httpRequest.getRequestURL());
         logger.info("Request Method: {}", httpRequest.getMethod());
@@ -55,7 +53,7 @@ public class AuthController {
             String deviceInfo = extractDeviceInfo(httpRequest);
             logger.info("Device Info: {}", deviceInfo);
 
-            AuthResponse response = authService.login(request, deviceInfo);
+            AuthResponseDTO response = authService.login(request, deviceInfo);
             logger.info("Login successful for user: {}", request.getEmail());
             logger.info("Generated JWT token length: {}", response.getToken().length());
             logger.info("Generated refresh token: {}", response.getRefreshToken());
@@ -68,20 +66,20 @@ public class AuthController {
             if ("EMAIL_NOT_FOUND".equals(errorMessage)) {
                 logger.error("Login failed - Email not found: {}", request.getEmail());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse("Email not found", false));
+                        .body(new MessageResponseDTO("Email not found", false));
             } else if ("INVALID_PASSWORD".equals(errorMessage)) {
                 logger.error("Login failed - Invalid password for user: {}", request.getEmail());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse("Password is incorrect", false));
+                        .body(new MessageResponseDTO("Password is incorrect", false));
             } else {
                 logger.error("Login failed for user: {} - Error: {}", request.getEmail(), errorMessage);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse("Invalid email or password", false));
+                        .body(new MessageResponseDTO("Invalid email or password", false));
             }
         } catch (Exception e) {
             logger.error("Login failed for user: {} - Unexpected error: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Invalid email or password", false));
+                    .body(new MessageResponseDTO("Invalid email or password", false));
         }
     }
 
@@ -89,12 +87,12 @@ public class AuthController {
      * Refresh JWT token using refresh token
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO request) {
         logger.info("=== REFRESH TOKEN REQUEST RECEIVED ===");
         logger.info("Refresh token: {}", request.getRefreshToken());
 
         try {
-            AuthResponse response = authService.refreshToken(request.getRefreshToken());
+            AuthResponseDTO response = authService.refreshToken(request.getRefreshToken());
             logger.info("Token refresh successful");
             logger.info("New JWT token length: {}", response.getToken().length());
 
@@ -102,7 +100,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Token refresh failed - Error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new MessageResponse("Invalid or expired refresh token", false));
+                    .body(new MessageResponseDTO("Invalid or expired refresh token", false));
         }
     }
 
@@ -110,7 +108,7 @@ public class AuthController {
      * Rotate refresh token (get new refresh token)
      */
     @PostMapping("/rotate-refresh-token")
-    public ResponseEntity<?> rotateRefreshToken(@Valid @RequestBody RefreshTokenRequest request,
+    public ResponseEntity<?> rotateRefreshToken(@Valid @RequestBody RefreshTokenRequestDTO request,
                                                 HttpServletRequest httpRequest) {
         logger.info("=== ROTATE REFRESH TOKEN REQUEST RECEIVED ===");
         logger.info("Old refresh token: {}", request.getRefreshToken());
@@ -123,12 +121,12 @@ public class AuthController {
             logger.info("Refresh token rotation successful");
             logger.info("New refresh token: {}", newRefreshToken.getToken());
 
-            return ResponseEntity.ok(new MessageResponse(
+            return ResponseEntity.ok(new MessageResponseDTO(
                 "Refresh token rotated successfully. New token: " + newRefreshToken.getToken()));
         } catch (Exception e) {
             logger.error("Refresh token rotation failed - Error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Unable to rotate refresh token: " + e.getMessage(), false));
+                    .body(new MessageResponseDTO("Unable to rotate refresh token: " + e.getMessage(), false));
         }
     }
 
@@ -136,7 +134,7 @@ public class AuthController {
      * Customer & Employee Registration - For automobile service management
      */
     @PostMapping("/register")
-    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequestDTO request, HttpServletRequest httpRequest) {
         logger.info("=== REGISTRATION REQUEST RECEIVED ===");
         logger.info("Email: {}", request.getEmail());
         logger.info("Full Name: {}", request.getFullName());
@@ -144,22 +142,22 @@ public class AuthController {
         logger.info("Phone: {}", request.getPhoneNumber());
 
         try {
-            MessageResponse signupResponse = authService.signup(request);
+            MessageResponseDTO signupResponse = authService.signup(request);
             if (signupResponse.isSuccess()) {
                 logger.info("Registration successful for user: {}", request.getEmail());
 
                 // Auto-login after successful registration
                 String deviceInfo = extractDeviceInfo(httpRequest);
-                LoginRequest loginRequest = new LoginRequest();
-                loginRequest.setEmail(request.getEmail());
-                loginRequest.setPassword(request.getPassword());
+                LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
+                loginRequestDTO.setEmail(request.getEmail());
+                loginRequestDTO.setPassword(request.getPassword());
 
-                AuthResponse authResponse = authService.login(loginRequest, deviceInfo);
+                AuthResponseDTO authResponseDTO = authService.login(loginRequestDTO, deviceInfo);
                 logger.info("Auto-login successful after registration for user: {}", request.getEmail());
-                logger.info("Generated JWT token length: {}", authResponse.getToken().length());
-                logger.info("Generated refresh token: {}", authResponse.getRefreshToken());
+                logger.info("Generated JWT token length: {}", authResponseDTO.getToken().length());
+                logger.info("Generated refresh token: {}", authResponseDTO.getRefreshToken());
 
-                return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+                return ResponseEntity.status(HttpStatus.CREATED).body(authResponseDTO);
             } else {
                 logger.warn("Registration failed for user: {} - Reason: {}", request.getEmail(), signupResponse.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(signupResponse);
@@ -167,7 +165,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Registration failed for user: {} - Error: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Registration failed: " + e.getMessage(), false));
+                    .body(new MessageResponseDTO("Registration failed: " + e.getMessage(), false));
         }
     }
 
@@ -175,7 +173,7 @@ public class AuthController {
      * Customer Registration - Specific endpoint for customers
      */
     @PostMapping("/register/customer")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> registerCustomer(@Valid @RequestBody SignupRequestDTO request, HttpServletRequest httpRequest) {
         logger.info("=== CUSTOMER REGISTRATION REQUEST RECEIVED ===");
         logger.info("Customer Email: {}", request.getEmail());
 
@@ -188,7 +186,7 @@ public class AuthController {
      */
     @PostMapping("/register/employee")
     @AdminOnly // Only admins can create employees - checked via JWT token
-    public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequestDTO request, HttpServletRequest httpRequest) {
         logger.info("=== EMPLOYEE REGISTRATION REQUEST RECEIVED ===");
         logger.info("Employee Email: {}", request.getEmail());
 
@@ -200,7 +198,7 @@ public class AuthController {
      * Logout with refresh token revocation
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody(required = false) RefreshTokenRequest request) {
+    public ResponseEntity<?> logout(@RequestBody(required = false) RefreshTokenRequestDTO request) {
         logger.info("=== LOGOUT REQUEST RECEIVED ===");
 
         try {
@@ -208,15 +206,15 @@ public class AuthController {
                 logger.info("Logout with refresh token: {}", request.getRefreshToken());
                 authService.logout(request.getRefreshToken());
                 logger.info("Logout successful with token revocation");
-                return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
+                return ResponseEntity.ok(new MessageResponseDTO("Logged out successfully"));
             } else {
                 logger.info("Client-side logout (no refresh token provided)");
-                return ResponseEntity.ok(new MessageResponse("Logged out successfully (client-side only)"));
+                return ResponseEntity.ok(new MessageResponseDTO("Logged out successfully (client-side only)"));
             }
         } catch (Exception e) {
             logger.error("Logout failed - Error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Logout failed: " + e.getMessage(), false));
+                    .body(new MessageResponseDTO("Logout failed: " + e.getMessage(), false));
         }
     }
 
@@ -233,11 +231,11 @@ public class AuthController {
             String email = authentication.getName(); // This will be the email since we use email as username
             authService.logoutFromAllDevices(email);
             logger.info("Logout from all devices successful for user: {}", email);
-            return ResponseEntity.ok(new MessageResponse("Logged out from all devices successfully"));
+            return ResponseEntity.ok(new MessageResponseDTO("Logged out from all devices successfully"));
         } catch (Exception e) {
             logger.error("Logout from all devices failed for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("Logout from all devices failed: " + e.getMessage(), false));
+                    .body(new MessageResponseDTO("Logout from all devices failed: " + e.getMessage(), false));
         }
     }
 
@@ -272,7 +270,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Failed to fetch active sessions for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse("Unable to fetch active sessions", false));
+                    .body(new MessageResponseDTO("Unable to fetch active sessions", false));
         }
     }
 
@@ -308,7 +306,7 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("Failed to fetch profile for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new MessageResponse("Unable to fetch user profile", false));
+                    .body(new MessageResponseDTO("Unable to fetch user profile", false));
         }
     }
 

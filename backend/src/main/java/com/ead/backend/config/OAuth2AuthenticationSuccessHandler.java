@@ -1,6 +1,6 @@
 package com.ead.backend.config;
 
-import com.ead.backend.dto.AuthResponse;
+import com.ead.backend.dto.AuthResponseDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,11 +49,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             logger.info("User created/updated - ID: {}, Email: {}", user.getId(), user.getEmail());
 
             // Generate JWT tokens
-            AuthResponse authResponse = authService.generateTokenForOAuthUser(user, deviceInfo);
+            AuthResponseDTO authResponseDTO = authService.generateTokenForOAuthUser(user, deviceInfo);
             logger.info("JWT tokens generated for user: {}", user.getEmail());
 
             // Build redirect URL with tokens
-            String frontendUrl = buildFrontendRedirectUrl(authResponse, user);
+            String frontendUrl = buildFrontendRedirectUrl(authResponseDTO, user);
             logger.info("Redirecting to frontend: {}", frontendUrl);
 
             // Redirect to frontend
@@ -69,11 +69,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
     }
 
-    private String buildFrontendRedirectUrl(AuthResponse authResponse, User user) throws Exception {
+    private String buildFrontendRedirectUrl(AuthResponseDTO authResponseDTO, User user) throws Exception {
         return String.format(
             "http://localhost:5173/oauth/callback?token=%s&refreshToken=%s&id=%s&email=%s&fullName=%s",
-            authResponse.getToken(),
-            authResponse.getRefreshToken(),
+            authResponseDTO.getToken(),
+            authResponseDTO.getRefreshToken(),
             user.getId(),
             URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
             URLEncoder.encode(user.getFullName(), StandardCharsets.UTF_8)
