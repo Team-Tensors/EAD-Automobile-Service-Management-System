@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import type { LoginCredentials } from '../types/auth';
+import { useAuth } from '../../hooks/useAuth';
+import type { LoginCredentials } from '../../types/auth';
 import { useState } from "react"
 
  
