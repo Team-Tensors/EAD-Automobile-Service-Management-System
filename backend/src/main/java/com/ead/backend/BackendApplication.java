@@ -32,6 +32,7 @@ public class BackendApplication {
                 User adminUser = new User();
 //                adminUser.setUsername("admin");
                 adminUser.setEmail("admin@example.com");
+                adminUser.setFullName("Admin");
                 adminUser.setPassword(encoder.encode("adminpass"));
                 adminUser.getRoles().add(adminRole);
                 userRepo.save(adminUser);
