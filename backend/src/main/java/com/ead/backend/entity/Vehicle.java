@@ -32,6 +32,7 @@ public class Vehicle {
     @Column(nullable = false)
     private String color;
 
+    @Column
     private LocalDateTime lastServiceDate;
 
     @Column(nullable = false, unique = true)
