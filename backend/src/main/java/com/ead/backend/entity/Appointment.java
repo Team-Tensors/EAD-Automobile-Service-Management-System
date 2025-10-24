@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Appoinment {
+public class Appointment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class Appoinment {
     private ServiceType serviceType;
 
     @Column(nullable = false)
-    private LocalDateTime appoinmentDate;
+    private LocalDateTime appointmentDate;
 
     @Column(nullable = false)
     private String status; //e.g., "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
