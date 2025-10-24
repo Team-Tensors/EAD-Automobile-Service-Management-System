@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -198,45 +197,6 @@ public class AuthController {
     }
 
     /**
-     * OAuth2 Success Handler - For Google OAuth integration with refresh token
-     */
-    @GetMapping("/oauth2/success")
-    public void oauth2Success(Authentication authentication, HttpServletRequest httpRequest,
-                             HttpServletResponse response) throws IOException {
-        logger.info("=== OAUTH2 SUCCESS REQUEST RECEIVED ===");
-        logger.info("Authentication: {}", authentication.getName());
-
-        try {
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-            String email = oauth2User.getAttribute("email");
-            String name = oauth2User.getAttribute("name");
-            String deviceInfo = extractDeviceInfo(httpRequest);
-
-            logger.info("OAuth2 user email: {}", email);
-            logger.info("OAuth2 user name: {}", name);
-
-            // Create or update OAuth user
-            User user = authService.createOrUpdateOAuthUser(email, name, "google",
-                    oauth2User.getAttribute("sub"));
-
-            // Generate token with refresh token for OAuth user
-            AuthResponse authResponse = authService.generateTokenForOAuthUser(user, deviceInfo);
-
-            logger.info("OAuth2 authentication successful for user: {}", email);
-
-            // Redirect to frontend with both tokens
-            String frontendUrl = "http://localhost:3000/oauth/callback?token=" +
-                    authResponse.getToken() + "&refreshToken=" + authResponse.getRefreshToken() +
-                    "&user=" + user.getId();
-            response.sendRedirect(frontendUrl);
-
-        } catch (Exception e) {
-            logger.error("OAuth2 authentication failed - Error: {}", e.getMessage());
-            response.sendRedirect("http://localhost:3000/login?error=oauth_failed");
-        }
-    }
-
-    /**
      * Logout with refresh token revocation
      */
     @PostMapping("/logout")
@@ -313,6 +273,42 @@ public class AuthController {
             logger.error("Failed to fetch active sessions for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponse("Unable to fetch active sessions", false));
+        }
+    }
+
+    /**
+     * Get current user profile
+     */
+    @GetMapping("/profile")
+    @Authenticated // Requires valid JWT token with any role
+    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        logger.info("=== GET USER PROFILE REQUEST RECEIVED ===");
+        logger.info("User email: {}", authentication.getName());
+
+        try {
+            String email = authentication.getName();
+            User user = authService.findUserByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Create profile response
+            var profile = new java.util.HashMap<String, Object>();
+            profile.put("id", user.getId());
+            profile.put("email", user.getEmail());
+            profile.put("fullName", user.getFullName());
+            profile.put("phoneNumber", user.getPhoneNumber());
+            profile.put("address", user.getAddress());
+            profile.put("active", user.getActive());
+            profile.put("oauthProvider", user.getOauthProvider());
+            profile.put("roles", user.getRoles().stream()
+                    .map(role -> role.getName())
+                    .collect(java.util.stream.Collectors.toSet()));
+
+            logger.info("Profile fetched successfully for user: {}", email);
+            return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            logger.error("Failed to fetch profile for user: {} - Error: {}", authentication.getName(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Unable to fetch user profile", false));
         }
     }
 
