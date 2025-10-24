@@ -73,6 +73,12 @@ api.interceptors.response.use(
       if (status === 401 && !originalRequest._retry) {
         const errorMessage = data?.message || '';
         
+        // Check if this is a login failure (email/password error)
+        if (originalRequest.url?.includes('/auth/login')) {
+          // Don't redirect, just pass the specific error message
+          return Promise.reject(new Error(errorMessage || 'Invalid credentials'));
+        }
+        
         // Check if this is a token expiration (attempt refresh)
         if (errorMessage.includes('expired') || errorMessage.includes('invalid') || 
             errorMessage.includes('jwt') || errorMessage.includes('token')) {
@@ -146,14 +152,21 @@ api.interceptors.response.use(
             }
           }
         } else {
-          // Other 401 errors (missing token, etc.) - clear everything
-          localStorage.removeItem('token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('user');
-          
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
+          // Other 401 errors (missing token, etc.)
+          // Don't redirect if this is a login attempt
+          if (!originalRequest.url?.includes('/auth/login') && 
+              !originalRequest.url?.includes('/auth/register')) {
+            // Clear everything and redirect to login
+            localStorage.removeItem('token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            
+            if (!window.location.pathname.includes('/login')) {
+              window.location.href = '/login';
+            }
           }
+          // For login/register, just pass the error through
+          return Promise.reject(new Error(errorMessage || 'Authentication failed'));
         }
       }
       
