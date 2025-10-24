@@ -29,12 +29,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         [name]: type === 'checkbox' ? checked : value,
       }));
       
-      // Clear field error when user starts typing
+      // Clear field-specific error when user starts typing
       if (formErrors[name]) {
         setFormErrors(prev => ({ ...prev, [name]: '' }));
       }
       
-      // Clear auth error
+      // Also clear all field errors if user modifies any field
+      // This ensures clean slate when correcting either email or password
+      if (formErrors.email || formErrors.password) {
+        setFormErrors({});
+      }
+      
+      // Clear auth context error
       if (error) {
         clearError();
       }
@@ -64,7 +70,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         await login(formData);
         navigate('/dashboard'); // Redirect to dashboard after successful login
       } catch (err) {
-        // Error is handled by the auth context
+        // Parse error message to determine if it's email or password specific
+        const errorMessage = (err as Error).message || '';
+        
+        if (errorMessage.toLowerCase().includes('email not found') || 
+            errorMessage.toLowerCase().includes('email')) {
+          setFormErrors(prev => ({ ...prev, email: errorMessage }));
+        } else if (errorMessage.toLowerCase().includes('password is incorrect') || 
+                   errorMessage.toLowerCase().includes('password')) {
+          setFormErrors(prev => ({ ...prev, password: errorMessage }));
+        }
+        // Generic errors will still be shown in the error state from useAuth
         console.error('Login failed:', err);
       }
     };
@@ -81,7 +97,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                 <h1 className="text-2xl font-bold font-heading text-white">Welcome back</h1>
                 <p className="text-balance text-gray-400">Login to your DriveCare account</p>
               </div>
-              {error && (
+              {error && !formErrors.email && !formErrors.password && (
                 <div className="text-red-400 bg-red-950/50 p-3 rounded border border-red-800 mb-2">
                   {error}
                 </div>
