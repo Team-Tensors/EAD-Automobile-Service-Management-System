@@ -62,8 +62,25 @@ public class AuthController {
             logger.info("Generated refresh token: {}", response.getRefreshToken());
 
             return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+
+            // Check for specific error types
+            if ("EMAIL_NOT_FOUND".equals(errorMessage)) {
+                logger.error("Login failed - Email not found: {}", request.getEmail());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Email not found", false));
+            } else if ("INVALID_PASSWORD".equals(errorMessage)) {
+                logger.error("Login failed - Invalid password for user: {}", request.getEmail());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Password is incorrect", false));
+            } else {
+                logger.error("Login failed for user: {} - Error: {}", request.getEmail(), errorMessage);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new MessageResponse("Invalid email or password", false));
+            }
         } catch (Exception e) {
-            logger.error("Login failed for user: {} - Error: {}", request.getEmail(), e.getMessage());
+            logger.error("Login failed for user: {} - Unexpected error: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new MessageResponse("Invalid email or password", false));
         }
