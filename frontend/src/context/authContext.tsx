@@ -170,6 +170,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error: unknown) {
       const errorMessage = (error as Error).message || ERROR_MESSAGES.NETWORK_ERROR;
+      
+      // Clear any existing auth data on login failure
+      clearAuthStorage();
+      
       dispatch({ type: 'AUTH_FAILURE', payload: errorMessage });
       throw new Error(errorMessage);
     }
