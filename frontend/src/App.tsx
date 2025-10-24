@@ -1,7 +1,8 @@
 
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/loginpageN'
 import RegisterPage from './pages/registerpageN'
+import HomePage from './pages/HomePage'
 import DashboardRouter from './pages/DashboardRouter'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
@@ -92,8 +93,8 @@ function App() {
         } 
       />
       
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+  {/* Home page */}
+  <Route path="/" element={<HomePage />} />
       
       {/* Fallback for unknown routes */}
       <Route 
