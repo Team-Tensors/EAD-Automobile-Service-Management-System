@@ -1,9 +1,10 @@
 
 import { Routes, Route } from 'react-router-dom'
-import LoginPage from './pages/loginpageN'
-import RegisterPage from './pages/registerpageN'
+import LoginPage from './pages/loginPage'
+import RegisterPage from './pages/registerPage'
 import HomePage from './pages/HomePage'
 import DashboardRouter from './pages/DashboardRouter'
+import OAuthCallback from './pages/OAuthCallback'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 
@@ -27,6 +28,9 @@ function App() {
           </PublicRoute>
         } 
       />
+      
+      {/* OAuth callback route - accessible to everyone */}
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
       
       {/* Protected routes (require authentication) */}
       <Route 
