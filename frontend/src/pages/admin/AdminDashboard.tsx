@@ -397,7 +397,7 @@ const AdminDashboard = () => {
                 {upcomingServices.map(service => (
                   <div
                     key={service.id}
-                    className="p-4 rounded-lg border-2 border-border bg-secondary hover:border-orange-500/50 transition cursor-pointer"
+                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-orange-500/50 transition cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -450,7 +450,7 @@ const AdminDashboard = () => {
                 {ongoingServices.map(service => (
                   <div
                     key={service.id}
-                    className="p-4 rounded-lg border-2 border-border bg-secondary hover:border-yellow-500/50 transition cursor-pointer"
+                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-yellow-500/50 transition cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -511,7 +511,7 @@ const AdminDashboard = () => {
                 {unassignedServices.map(service => (
                   <div
                     key={service.id}
-                    className="p-4 rounded-lg border-2 border-red-500/30 bg-card hover:border-red-500 transition"
+                    className="p-4 mr-1 rounded-lg border-2 border-red-500/30 bg-card hover:border-red-500 transition"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
