@@ -5,7 +5,7 @@ import path from "path"
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/EAD-Automobile-Service-Management-System/', // Replace with your repo name
+  base: '/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
