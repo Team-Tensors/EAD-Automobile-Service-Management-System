@@ -14,6 +14,9 @@ import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
 function App() {
   return (
     <Routes>
+      {/* Home page - MUST BE FIRST */}
+      <Route path="/" element={<HomePage />} />
+
       {/* Public routes (only accessible when NOT authenticated) */}
       <Route
         path="/login"
@@ -63,22 +66,22 @@ function App() {
         }
       />
 
-      {/* Admin routes with nested routing */}
-      <Route
-        path="/admin/*"
-        element={
-          <ProtectedRoute requiredRole={UserRole.ADMIN}>
-            <AdminRouter />
-          </ProtectedRoute>
-        }
-      />
-
       {/* Customer Appointment Route */}
       <Route
         path="/dashboard/appointments"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin routes with nested routing */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <AdminRouter />
           </ProtectedRoute>
         }
       />
@@ -95,10 +98,7 @@ function App() {
         }
       />
 
-      {/* Home page */}
-      <Route path="/" element={<HomePage />} />
-
-      {/* Fallback for unknown routes */}
+      {/* Fallback for unknown routes - MUST BE LAST */}
       <Route
         path="*"
         element={
@@ -106,10 +106,10 @@ function App() {
             <h2 className="text-2xl font-bold mb-4">Page Not Found</h2>
             <p className="mb-4">The page you're looking for doesn't exist.</p>
             <a
-              href="/dashboard"
+              href="/"
               className="text-blue-500 hover:text-blue-700 underline"
             >
-              Go to Dashboard
+              Go to Home
             </a>
           </div>
         }
