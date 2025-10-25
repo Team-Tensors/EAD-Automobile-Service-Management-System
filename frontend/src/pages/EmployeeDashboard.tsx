@@ -1,20 +1,18 @@
 // Employee Dashboard Component
 import React from 'react';
 import { useAuth } from '../hooks/useAuth';
+import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
 const EmployeeDashboard: React.FC = () => {
   const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
   return (
-    <div className="p-5 max-w-6xl mx-auto">
+    <div className='min-h-screen bg-background'>
+
+       {/* Authenticated Navbar */}
+      <AuthenticatedNavbar />
+
+      <div className="p-5 max-w-6xl mx-auto">
       <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Employee Dashboard</h1>
@@ -22,12 +20,6 @@ const EmployeeDashboard: React.FC = () => {
             Welcome, {user?.firstName} {user?.lastName} - {user?.department || 'Employee'}
           </p>
         </div>
-        <button 
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 text-white border-0 rounded hover:bg-red-700 transition-colors cursor-pointer"
-        >
-          Logout
-        </button>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -102,6 +94,8 @@ const EmployeeDashboard: React.FC = () => {
         </div>
       </div>
     </div>
+    </div>
+    
   );
 };
 
