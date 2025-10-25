@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
 const EmployeeDashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className='min-h-screen bg-background'>
