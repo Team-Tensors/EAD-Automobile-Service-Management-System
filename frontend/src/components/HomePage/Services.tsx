@@ -53,9 +53,9 @@ const Services: React.FC = () => {
   };
 
   return (
-    <section className="py-12 px-4 md:px-8 lg:px-20 bg-black text-white min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6">Services</h2>
+    <section className="pt-28 pb-20 px-6 md:px-10 lg:px-24 bg-black text-white min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl font-bold mb-6 font-heading">Services</h2>
 
         {/* Timeline Navigation */}
         <nav className="mb-12" aria-label="Services navigation">
@@ -77,12 +77,12 @@ const Services: React.FC = () => {
                     i === active
                       ? "bg-orange-600 border-orange-600"
                       : i < active
-                      ? "bg-gray-700 border-gray-700"
+                      ? " border-gray-700"
                       : "bg-transparent border-gray-700"
                   }`}
                 >
                   {i < active && (
-                    <span className="text-white text-sm">✓</span>
+                    <span className="text-white text-sm"></span>
                   )}
                 </button>
                 <span
@@ -108,7 +108,7 @@ const Services: React.FC = () => {
             {services[tabs[active].id].map((s) => (
               <Card key={s.title} className="bg-[#111] border-gray-800">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">{s.title}</CardTitle>
+                  <CardTitle className="text-lg text-white font-heading">{s.title}</CardTitle>
                   <CardDescription className="text-gray-300">{s.desc}</CardDescription>
                 </CardHeader>
                 <CardContent>
