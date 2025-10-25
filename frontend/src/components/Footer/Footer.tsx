@@ -1,12 +1,12 @@
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter, Linkedin, DollarSign, Settings, KeyRound, Rss } from "lucide-react"
+import { Megaphone, Users, Car, Mail, Phone, MapPin, Instagram, Facebook, Twitter, Linkedin, DollarSign, Settings} from "lucide-react"
 
 const Footer = () => {
   const offerings = [
-    { icon: Phone, label: "DISCOVER DRIVECARE" },
+    { icon: Car, label: "DISCOVER DRIVECARE" },
     { icon: Settings, label: "OUR SERVICES" },
     { icon: DollarSign, label: "PRICING PLANS" },
-    { icon: KeyRound, label: "JOIN OUR TEAM" },
-    { icon: Rss, label: "LATEST NEWS" },
+    { icon: Users, label: "JOIN OUR TEAM" },
+    { icon: Megaphone, label: "LATEST NEWS" },
   ]
 
   const contactInfo = [
@@ -53,9 +53,12 @@ const Footer = () => {
                   {offerings.map((item, index) => {
                     const IconComponent = item.icon
                     return (
-                      <div key={index} className="flex items-center gap-4 pb-4 border-b border-orange-500/30">
-                        <IconComponent className="w-6 h-6 text-orange-500 flex-shrink-0" />
-                        <span className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{item.label}</span>
+                      <div
+                        key={index}
+                        className="flex items-center gap-4 p-4 bg-[#0f0e0e] border-l-4 border-orange-500 hover:bg-[#0f0e0e]/50 transition-all cursor-pointer group"
+                      >
+                        <IconComponent className="w-6 h-6 text-orange-500 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium tracking-wide uppercase">{item.label}</span>
                       </div>
                     )
                   })}
@@ -68,9 +71,12 @@ const Footer = () => {
                   {contactInfo.map((item, index) => {
                     const IconComponent = item.icon
                     return (
-                      <div key={index} className="flex items-center gap-4 pb-4 border-b border-orange-500/30">
-                        <IconComponent className="w-6 h-6 text-orange-500 flex-shrink-0" />
-                        <span className="text-sm font-semibold text-gray-300 uppercase tracking-wide">{item.text}</span>
+                      <div
+                        key={index}
+                        className="flex items-center gap-4 p-4 bg-[#0f0e0e] border-l-4 border-orange-500 hover:bg-[#0f0e0e]/50 transition-all cursor-pointer group"
+                      >
+                        <IconComponent className="w-6 h-6 text-orange-500 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium tracking-wide uppercase">{item.text}</span>
                       </div>
                     )
                   })}
@@ -161,7 +167,7 @@ const Footer = () => {
             {/* Copyright */}
             <p className="text-gray-500 text-sm">
             © Autofix. All rights reserved. Designed by{" "}
-            <span className="text-orange-500 font-semibold">fourtwelve</span>
+            <span className="text-orange-500 font-semibold font-heading">DriveCare</span>
           </p>
           </div>
         </div>

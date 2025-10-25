@@ -40,7 +40,7 @@ const ContactUs: React.FC = () => {
       <section className="py-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 lg:px-0">
           <div className="mb-10">
-            <p className="text-4xl font-bold mb-6 font-heading text-orange-500">Contact Us</p>
+            <p className="text-4xl font-bold mb-6 font-heading text-orange-500">Get in Touch</p>
             <h2 className="text-3xl font-bold uppercase tracking-wide">Have questions about our services? <span className="text-gray-400 block text-lg font-normal">FAQ for answers</span></h2>
           </div>
 
@@ -76,7 +76,7 @@ const ContactUs: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12">
               <div className="lg:col-span-6 lg:col-start-7">
                 <div className="bg-white/5 border border-zinc-700 rounded-md p-8 backdrop-blur-sm">
-                  <h3 className="text-2xl font-semibold mb-3 text-white font-heading">Contact Us</h3>
+                  <h3 className="text-2xl font-semibold mb-3 text-white font-heading">Drop a Message</h3>
                   <p className="text-sm text-gray-300 mb-6">Tell us about your request and we'll get back to you shortly.</p>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
