@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Hide scrollbar for WebKit-based browsers */
+::-webkit-scrollbar {
+  display: none;
+}
