@@ -20,26 +20,21 @@ public class AppointmentService {
     @Autowired private ModificationTypeRepository modificationTypeRepository;
 
     // ===================================================================
-    // 1. CUSTOMER: Book appointment with preferred date/time
+    // 1. CUSTOMER: Book appointment
     // ===================================================================
     public Appointment createAppointment(Appointment appointment) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User customer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        User customer = getCurrentUser();  // Uses helper
 
-        // Validate vehicle ownership
         Vehicle vehicle = vehicleRepository.findById(appointment.getVehicle().getId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         if (!vehicle.getUser().getId().equals(customer.getId())) {
             throw new RuntimeException("You can only book for your own vehicle");
         }
 
-        // Validate appointment type
         if (appointment.getAppointmentType() == null) {
             throw new RuntimeException("Appointment type is required");
         }
 
-        // Resolve service or modification
         if (appointment.getAppointmentType() == AppointmentType.SERVICE) {
             ServiceType st = serviceTypeRepository.findById(appointment.getServiceType().getId())
                     .orElseThrow(() -> new RuntimeException("Service type not found"));
@@ -52,7 +47,6 @@ public class AppointmentService {
             appointment.setServiceType(null);
         }
 
-        // CUSTOMER MUST SELECT appointmentDate
         if (appointment.getAppointmentDate() == null) {
             throw new RuntimeException("Please select your preferred appointment date and time");
         }
@@ -63,19 +57,15 @@ public class AppointmentService {
         appointment.setUser(customer);
         appointment.setVehicle(vehicle);
         appointment.setStatus("PENDING");
-        // startTime and endTime remain NULL — set by employee later
 
         return appointmentRepository.save(appointment);
     }
 
     // ===================================================================
-    // 2. CUSTOMER: Get their own appointments
+    // 2. CUSTOMER: Get own appointments
     // ===================================================================
     public List<Appointment> getUserAppointments() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User customer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
+        User customer = getCurrentUser();  // Uses helper
         return appointmentRepository.findByUserId(customer.getId());
     }
 
@@ -83,9 +73,7 @@ public class AppointmentService {
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
     public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User currentUser = getCurrentUser();  // Uses helper
 
         boolean isManagerOrAdmin = currentUser.getRoles().stream()
                 .anyMatch(r -> "MANAGER".equals(r.getName()) || "ADMIN".equals(r.getName()));
@@ -123,12 +111,10 @@ public class AppointmentService {
     }
 
     // ===================================================================
-    // 5. EMPLOYEE: Start work (set startTime)
+    // 5. EMPLOYEE: Start work
     // ===================================================================
     public Appointment startAppointment(Long appointmentId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User employee = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+        User employee = getCurrentUser();  // Uses helper
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
             throw new RuntimeException("Only EMPLOYEE can start work");
@@ -151,12 +137,10 @@ public class AppointmentService {
     }
 
     // ===================================================================
-    // 6. EMPLOYEE: Complete work (set endTime)
+    // 6. EMPLOYEE: Complete work
     // ===================================================================
-    public Appointment completeAppointment guarding(Long appointmentId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User employee = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    public Appointment completeAppointment(Long appointmentId) {
+        User employee = getCurrentUser();  // Uses helper
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
             throw new RuntimeException("Only EMPLOYEE can complete work");
@@ -182,7 +166,7 @@ public class AppointmentService {
     }
 
     // ===================================================================
-    // 7. Helper: Get current user
+    // HELPER: Get current authenticated user 
     // ===================================================================
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
