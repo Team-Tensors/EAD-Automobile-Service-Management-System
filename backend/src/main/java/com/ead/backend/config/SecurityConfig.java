@@ -59,6 +59,7 @@ public class SecurityConfig {
                 // Public endpoints (no authentication required)
                 .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/register/employee", "/auth/refresh-token").permitAll()
                 .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
+                .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
                 .requestMatchers("/health", "/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/error").permitAll()
