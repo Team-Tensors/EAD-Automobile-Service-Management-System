@@ -1,8 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Roboto:ital,wght@0,100;300;400;500;700;900;1,100;300;400;500;700;900&display=swap");
 @import "tailwindcss";
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  /* Helper utilities to apply project font variables */
+  .font-heading {
+    font-family: var(--font-heading) !important;
+  }
+  .font-body {
+    font-family: var(--font-sans) !important;
   }
 }
 
