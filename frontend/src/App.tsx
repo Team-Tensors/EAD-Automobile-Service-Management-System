@@ -3,6 +3,7 @@ import LoginPage from './pages/loginPage'
 import RegisterPage from './pages/registerPage'
 import HomePage from './pages/HomePage'
 import DashboardRouter from './pages/DashboardRouter'
+import AdminRouter from './pages/admin/AdminRouter'
 import OAuthCallback from './pages/OAuthCallback'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
@@ -42,17 +43,12 @@ function App() {
         }
       />
 
-      {/* Example: Admin-only route */}
+      {/* Admin routes with nested routing */}
       <Route
         path="/admin/*"
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
-            <div className="p-8 bg-red-50 border-l-4 border-red-500">
-              <h1 className="text-xl font-semibold text-red-700">
-                Admin Panel
-              </h1>
-              <p className="text-red-600">Only accessible by admins</p>
-            </div>
+            <AdminRouter />
           </ProtectedRoute>
         }
       />
