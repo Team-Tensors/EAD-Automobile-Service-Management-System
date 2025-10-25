@@ -22,7 +22,7 @@ const Features = () => {
 
   return (
     <section className="relative z-10 -mt-32 pb-20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-30">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div
@@ -38,7 +38,7 @@ const Features = () => {
               </div>
 
               {/* Value */}
-              <h3 className="text-6xl font-bold text-white/10 mb-2 group-hover:text-orange-500/20 transition-colors">
+              <h3 className="text-6xl font-bold text-white/10 mb-2 group-hover:text-orange-500/20 transition-colors font-heading">
                 {feature.value}
               </h3>
 
