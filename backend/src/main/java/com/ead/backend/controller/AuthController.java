@@ -9,7 +9,6 @@ import com.ead.backend.dto.UpdateProfileRequestDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import com.ead.backend.service.RefreshTokenService;
-import com.ead.backend.annotation.JwtSecurityAnnotations.AdminOnly;
 import com.ead.backend.annotation.JwtSecurityAnnotations.Authenticated;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
