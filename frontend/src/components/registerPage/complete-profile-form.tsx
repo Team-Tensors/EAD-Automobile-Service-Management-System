@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { useNavigate } from 'react-router-dom'
 import { useState } from "react"
 import { UserRole } from '../../types/auth'
-import api from '../../utill/apiUtils'
+import { authService } from "@/services/authService"
 
 interface CompleteProfileData {
   phoneNumber: string;
@@ -69,7 +69,7 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
     
     try {
       // Call backend API to update profile with missing information
-      await api.put('/auth/complete-profile', {
+      await authService.updateProfile({
         phoneNumber: formData.phoneNumber,
         address: formData.address || '',
         role: formData.role,
@@ -100,10 +100,10 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
     }
   }
 
-  const handleSkip = () => {
-    // Allow user to skip for now, but they may need to complete later
-    navigate('/dashboard')
-  }
+//   const handleSkip = () => {
+//     // Allow user to skip for now, but they may need to complete later
+//     navigate('/dashboard')
+//   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -161,7 +161,7 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
                 />
               </div>
               
-              <div className="grid gap-2">
+              {/* <div className="grid gap-2">
                 <Label htmlFor="role" className="text-white">
                   Account Type <span className="text-red-400">*</span>
                 </Label>
@@ -179,7 +179,7 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
                 <p className="text-xs text-gray-400">
                   Choose how you'll be using DriveCare
                 </p>
-              </div>
+              </div> */}
 
               <Button 
                 type="submit" 
@@ -189,7 +189,7 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
                 {isLoading ? 'Completing Profile...' : 'Complete Profile'}
               </Button>
 
-              <Button 
+              {/* <Button 
                 type="button"
                 variant="outline"
                 className="w-full border-zinc-800 bg-zinc-900 text-gray-400 hover:bg-zinc-800 hover:text-white"
@@ -197,7 +197,7 @@ export function CompleteProfileForm({ className, ...props }: React.ComponentProp
                 disabled={isLoading}
               >
                 Skip for Now
-              </Button>
+              </Button> */}
 
               <div className="text-center text-xs text-gray-400">
                 <p>You can always update your profile later in settings.</p>

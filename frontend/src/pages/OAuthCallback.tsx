@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { User } from '../types/auth';
 import type { UserRole } from '../types/auth';
+import { authService } from '@/services/authService';
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -43,18 +44,7 @@ const OAuthCallback = () => {
 
         // Fetch user profile
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/auth/profile`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch user profile');
-          }
-
-          const backendUserData = await response.json();
+          const backendUserData = await authService.getProfile();
           
           console.log('Backend user data received:', backendUserData);
           

@@ -105,8 +105,8 @@ export const authService = {
     },
 
     // Complete profile after OAuth signup (add missing phone number, address, role)
-    completeProfile: async (data: { phoneNumber: string; address?: string; role: string }): Promise<User> => {
-        const response = await api.put("/auth/complete-profile", data);
+    updateProfile: async (data: { phoneNumber: string; address?: string; role: string }): Promise<User> => {
+        const response = await api.put("/auth/update-profile", data);
         return response.data;
     },
 
