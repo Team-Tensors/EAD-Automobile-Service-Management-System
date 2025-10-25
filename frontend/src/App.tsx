@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import LoginPage from './pages/loginPage'
 import RegisterPage from './pages/registerPage'
+import EmployeeRegisterPage from './pages/EmployeeRegisterPage'
 import HomePage from './pages/HomePage'
 import DashboardRouter from './pages/DashboardRouter'
 import OAuthCallback from './pages/OAuthCallback'
@@ -26,6 +27,14 @@ function App() {
         element={
           <PublicRoute>
             <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register/employee"
+        element={
+          <PublicRoute>
+            <EmployeeRegisterPage />
           </PublicRoute>
         }
       />

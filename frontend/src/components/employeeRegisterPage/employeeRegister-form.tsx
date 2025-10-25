@@ -9,11 +9,14 @@ import { useAuth } from '../../hooks/useAuth'
 import { UserRole } from '../../types/auth'
 import type { RegisterData } from '../../types/auth'
 import { useState } from "react"
+import api from "@/utill/apiUtils"
 import { Eye, EyeOff } from "lucide-react"
 
-export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
+export function EmployeeRegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
-  const { register, isLoading, error, clearError } = useAuth()
+  const { clearError } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
   const [formData, setFormData] = useState<RegisterData>({
     email: '',
@@ -21,7 +24,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
     fullName: '',
     phoneNumber: '',
     address: '',
-    role: UserRole.CUSTOMER,
+    role: UserRole.EMPLOYEE,
     confirmPassword: '',
   })
   
@@ -43,6 +46,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
     
     // Clear auth error
     if (error) {
+      setError(null)
       clearError()
     }
   }
@@ -87,28 +91,41 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
       return
     }
     
+    setIsLoading(true)
+    setError(null)
+    
     try {
+      // For employee registration, we'll use a direct API call
+      // Since registerEmployee requires admin token, we'll create a public endpoint version
       const registrationData = {
         email: formData.email,
         password: formData.password,
         fullName: formData.fullName,
         phoneNumber: formData.phoneNumber,
         address: formData.address || '',
-        role: formData.role,
-        confirmPassword: formData.confirmPassword,
+        role: UserRole.EMPLOYEE,
       }
+
+      // Using the customer registration endpoint but with EMPLOYEE role
+      // You'll need to update your backend to support this or create a new endpoint
+      const response = await api.post("/auth/register/employee", registrationData)
       
-      await register(registrationData)
+      // Store tokens and user data
+      const { token, refreshToken, ...userData } = response.data
+      localStorage.setItem('token', token)
+      localStorage.setItem('refresh_token', refreshToken)
+      localStorage.setItem('user', JSON.stringify(userData))
+      
+      // Navigate to dashboard
       navigate('/dashboard')
     } catch (err) {
       console.error('Registration failed:', err)
+      const apiError = err as { response?: { data?: { message?: string } } }
+      setError(apiError.response?.data?.message || 'Employee registration failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
-
-  const handleGoogleSignup = () => {
-    // Redirect to backend OAuth endpoint
-    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/oauth2/authorization/google`;
-  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -118,8 +135,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-500">CARE</span></span>
-                <h1 className="text-2xl font-bold font-heading text-white">Create an account</h1>
-                <p className="text-balance text-gray-400">Sign up for your DriveCare account</p>
+                <h1 className="text-2xl font-bold font-heading text-white">Employee Registration</h1>
+                <p className="text-balance text-gray-400">Join our team as a service technician</p>
               </div>
               
               {error && (
@@ -200,19 +217,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               </div>
               
               <div className="grid gap-2">
-                <Label htmlFor="role" className="text-white">Account Type</Label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white px-3 py-1 text-base font-sans shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                >
-                  <option value={UserRole.CUSTOMER}>Vehicle Owner (Customer)</option>
-                  <option value={UserRole.EMPLOYEE}>Service Technician (Employee)</option>
-                </select>
-              </div>
-              <div className="grid gap-2">
                 <Label htmlFor="password" className="text-white">Password</Label>
                 <div className="relative">
                   <Input 
@@ -269,23 +273,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={isLoading}>
                 {isLoading ? 'Creating Account...' : 'Sign Up'}
               </Button>
-              <div className="relative text-center text-sm">
-                <span className="relative z-10 bg-zinc-950 px-2 text-gray-400">Or Sign up with </span>
-              </div>
-              <Button 
-                type="button"
-                variant="outline" 
-                className="w-full border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white"
-                onClick={handleGoogleSignup}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
-                  <path
-                    d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                    fill="currentColor"
-                  />
-                </svg>
-              Google
-              </Button>
               <div className="text-center text-sm text-gray-400">
                 Already have an account?{" "}
                 <Link to="/login" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
@@ -293,9 +280,9 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                 </Link>
               </div>
               <div className="text-center text-sm text-gray-400">
-                Joining as a service technician?{" "}
-                <Link to="/register/employee" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
-                  Employee Registration
+                Registering as a customer?{" "}
+                <Link to="/register" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                  Customer Registration
                 </Link>
               </div>
             </div>
