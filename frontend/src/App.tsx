@@ -73,37 +73,6 @@ function App() {
         }
       />
 
-      {/* Example: Employee or Admin route (Staff) */}
-      <Route
-        path="/staff/*"
-        element={
-          <ProtectedRoute
-            requiredRole={UserRole.EMPLOYEE}
-            fallback={
-              <ProtectedRoute requiredRole={UserRole.ADMIN}>
-                <div>Staff Panel - Accessible by employees and admins</div>
-              </ProtectedRoute>
-            }
-          >
-            <div>Staff Panel - Accessible by employees and admins</div>
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Example: Customer-only route */}
-      <Route
-        path="/customer/*"
-        element={
-          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
-              <h1 className="text-xl font-semibold text-blue-700">
-                Customer Portal
-              </h1>
-              <p className="text-blue-600">Only accessible by customers</p>
-            </div>
-          </ProtectedRoute>
-        }
-      />
       {/* Customer Appointment Route */}
       <Route
         path="/dashboard/appointments"
