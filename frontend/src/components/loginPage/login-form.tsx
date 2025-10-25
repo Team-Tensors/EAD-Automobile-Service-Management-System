@@ -180,9 +180,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-white">Password</Label>
-                  <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline text-orange-500 hover:text-orange-600">
+                  <Link 
+                    to="/forgot-password" 
+                    className="ml-auto text-sm underline-offset-2 hover:underline text-orange-500 hover:text-orange-600"
+                  >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Input 
