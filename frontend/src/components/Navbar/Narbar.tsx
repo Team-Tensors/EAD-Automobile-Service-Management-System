@@ -18,7 +18,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-white tracking-wider">
+            <span className="text-2xl font-bold text-white tracking-wider font-heading">
               DRIVE<span className="text-orange-500">CARE</span>
             </span>
           </Link>
