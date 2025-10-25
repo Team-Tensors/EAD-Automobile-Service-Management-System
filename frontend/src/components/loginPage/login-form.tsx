@@ -9,13 +9,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import type { LoginCredentials } from '../../types/auth';
 import { useState } from "react"
-
+import { Eye, EyeOff } from "lucide-react"
  
   
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
 
    const navigate = useNavigate();
   const { login, isLoading, error, clearError } = useAuth();
+  const [showPassword, setShowPassword] = useState(false)
   
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -183,17 +184,27 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     Forgot your password?
                   </a>
                 </div>
-                <Input 
-                  id="password" 
-                  name="password"
-                  type="password" 
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all ${formErrors.password ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
-                  required 
-                  aria-invalid={formErrors.password ? "true" : "false"}
-                  aria-describedby={formErrors.password ? "password-error" : undefined}
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all pr-10 ${formErrors.password ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
+                    required 
+                    aria-invalid={formErrors.password ? "true" : "false"}
+                    aria-describedby={formErrors.password ? "password-error" : undefined}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
                 {formErrors.password && (
                   <Alert variant="destructive" className="mt-2" id="password-error">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">

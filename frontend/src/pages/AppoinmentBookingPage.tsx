@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Calendar, Clock, Wrench, Car, CheckCircle } from "lucide-react";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
 
 const AppointmentBookingPage: React.FC = () => {
   const [vehicleId, setVehicleId] = useState("");
@@ -48,8 +50,10 @@ const AppointmentBookingPage: React.FC = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
-        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg shadow-lg p-8 max-w-md w-full border border-zinc-800 hover:border-orange-500/50 transition-all duration-300">
+      <div className="min-h-screen bg-zinc-950">
+        <AuthenticatedNavbar />
+        <div className="flex items-center justify-center p-4 py-12">
+          <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg shadow-lg p-8 max-w-md w-full border border-zinc-800 hover:border-orange-500/50 transition-all duration-300">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center">
               <CheckCircle className="w-16 h-16 text-orange-500" />
@@ -95,13 +99,17 @@ const AppointmentBookingPage: React.FC = () => {
             Book Another Appointment
           </button>
         </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-zinc-950">
+      <AuthenticatedNavbar />
+      <div className="py-8 px-4">
+        <div className="max-w-2xl mx-auto">
         <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg shadow-lg p-8 border border-zinc-800 hover:border-orange-500/50 transition-all duration-300">
           <div className="flex items-center justify-center mb-8">
             <div className="w-12 h-0.5 bg-orange-500 mr-4"></div>
@@ -197,7 +205,9 @@ const AppointmentBookingPage: React.FC = () => {
             You'll receive a confirmation email shortly after booking
           </p>
         </div>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 };

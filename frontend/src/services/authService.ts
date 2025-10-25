@@ -42,7 +42,7 @@ export const authService = {
     },
 
     // Register employee (requires admin token)
-    registerEmployee: async (userData: RegisterData, adminToken: string): Promise<AuthResponse> => {
+    registerEmployee: async (userData: RegisterData): Promise<AuthResponse> => {
         const registrationData = {
             email: userData.email,
             password: userData.password,
@@ -53,9 +53,7 @@ export const authService = {
             employeeId: userData.employeeId,
             department: userData.department
         };
-        const response = await api.post("/auth/register/employee", registrationData, {
-            headers: { 'Authorization': `Bearer ${adminToken}` }
-        });
+        const response = await api.post("/auth/register/employee", registrationData);
         return response.data;
     },
 
@@ -101,6 +99,12 @@ export const authService = {
     // Get user profile
     getProfile: async (): Promise<User> => {
         const response = await api.get("/auth/profile");
+        return response.data;
+    },
+
+    // Complete profile after OAuth signup (add missing phone number, address, role)
+    updateProfile: async (data: { phoneNumber: string; address?: string; role: string }): Promise<User> => {
+        const response = await api.put("/auth/update-profile", data);
         return response.data;
     },
 

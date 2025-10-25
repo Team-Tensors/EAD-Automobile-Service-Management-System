@@ -276,4 +276,84 @@ public class AuthService {
     public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    /**
+     * Complete user profile after OAuth registration
+     */
+    @Transactional
+    public User completeProfile(String email, String phoneNumber, String address, String role) {
+        logger.info("=== COMPLETE PROFILE PROCESS STARTED ===");
+        logger.info("Complete profile request - Email: {}, Role: {}", email, role);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update profile information
+        user.setPhoneNumber(phoneNumber);
+        user.setAddress(address);
+
+        // Update role if provided
+        if (role != null && !role.trim().isEmpty()) {
+            String roleName = validateAndGetRole(role);
+            Role newRole = roleRepository.findByName(roleName)
+                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+
+            // Clear existing roles and add new role
+            user.getRoles().clear();
+            user.getRoles().add(newRole);
+
+            logger.info("Updated user role to: {}", roleName);
+        }
+
+        User updatedUser = userRepository.save(user);
+        logger.info("Profile completed successfully for user: {}", email);
+
+        return updatedUser;
+    }
+
+    /**
+     * Update user profile - only updates fields that are provided
+     */
+    @Transactional
+    public User updateProfile(String email, String phoneNumber, String address, String role, String fullName) {
+        logger.info("=== UPDATE PROFILE PROCESS STARTED ===");
+        logger.info("Update profile request - Email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update profile information only if provided
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            user.setPhoneNumber(phoneNumber);
+            logger.info("Updated phone number");
+        }
+
+        if (address != null && !address.trim().isEmpty()) {
+            user.setAddress(address);
+            logger.info("Updated address");
+        }
+
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            user.setFullName(fullName);
+            logger.info("Updated full name");
+        }
+
+        // Update role if provided
+        if (role != null && !role.trim().isEmpty()) {
+            String roleName = validateAndGetRole(role);
+            Role newRole = roleRepository.findByName(roleName)
+                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+
+            // Clear existing roles and add new role
+            user.getRoles().clear();
+            user.getRoles().add(newRole);
+
+            logger.info("Updated user role to: {}", roleName);
+        }
+
+        User updatedUser = userRepository.save(user);
+        logger.info("Profile updated successfully for user: {}", email);
+
+        return updatedUser;
+    }
 }
