@@ -5,10 +5,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { UserRole } from '../types/auth'
-import type { RegisterData } from '../types/auth'
+import { useAuth } from '../../hooks/useAuth'
+import { UserRole } from '../../types/auth'
+import type { RegisterData } from '../../types/auth'
 import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
@@ -25,6 +26,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
   })
   
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -101,6 +104,11 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
       console.error('Registration failed:', err)
     }
   }
+
+  const handleGoogleSignup = () => {
+    // Redirect to backend OAuth endpoint
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/oauth2/authorization/google`;
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -206,16 +214,25 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password" className="text-white">Password</Label>
-                <Input 
-                  id="password" 
-                  name="password"
-                  type="password" 
-                  placeholder="Must be at least 8 characters"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
-                  required 
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Must be at least 8 characters"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
+                    required 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {formErrors.password && (
                   <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.password}
@@ -224,16 +241,25 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="confirmPassword" className="text-white">Confirm Password</Label>
-                <Input 
-                  id="confirmPassword" 
-                  name="confirmPassword"
-                  type="password" 
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
-                  required 
-                />
+                <div className="relative">
+                  <Input 
+                    id="confirmPassword" 
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
+                    required 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {formErrors.confirmPassword && (
                   <span className="text-red-400 text-sm mt-1 block">
                     {formErrors.confirmPassword}
@@ -246,7 +272,12 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               <div className="relative text-center text-sm">
                 <span className="relative z-10 bg-zinc-950 px-2 text-gray-400">Or Sign up with </span>
               </div>
-              <Button variant="outline" className="w-full border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white">
+              <Button 
+                type="button"
+                variant="outline" 
+                className="w-full border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800 hover:text-white"
+                onClick={handleGoogleSignup}
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
                   <path
                     d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
@@ -259,6 +290,12 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                 Already have an account?{" "}
                 <Link to="/login" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
                   Login
+                </Link>
+              </div>
+              <div className="text-center text-sm text-gray-400">
+                Joining as a service technician?{" "}
+                <Link to="/register/employee" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                  Employee Registration
                 </Link>
               </div>
             </div>

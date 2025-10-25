@@ -1,10 +1,14 @@
-import { Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/loginpageN";
-import RegisterPage from "./pages/registerpageN";
-import HomePage from "./pages/HomePage";
-import DashboardRouter from "./pages/DashboardRouter";
-import { ProtectedRoute, PublicRoute } from "./guards/ProtectedRoute";
-import { UserRole } from "./types/auth";
+import { Routes, Route } from 'react-router-dom'
+import LoginPage from './pages/loginPage'
+import RegisterPage from './pages/registerPage'
+import EmployeeRegisterPage from './pages/EmployeeRegisterPage'
+import HomePage from './pages/HomePage'
+import DashboardRouter from './pages/DashboardRouter'
+import AdminRouter from './pages/admin/AdminRouter'
+import OAuthCallback from './pages/OAuthCallback'
+import CompleteProfilePage from './pages/CompleteProfilePage'
+import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
+import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
 
 function App() {
@@ -27,7 +31,28 @@ function App() {
           </PublicRoute>
         }
       />
-
+      <Route
+        path="/register/employee"
+        element={
+          <PublicRoute>
+            <EmployeeRegisterPage />
+          </PublicRoute>
+        }
+      />
+      
+      {/* OAuth callback route - accessible to everyone */}
+      <Route path="/oauth/callback" element={<OAuthCallback />} />
+      
+      {/* Complete profile route - for OAuth users who need to add missing info */}
+      <Route
+        path="/complete-profile"
+        element={
+          <ProtectedRoute>
+            <CompleteProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      
       {/* Protected routes (require authentication) */}
       <Route
         path="/dashboard"
@@ -38,55 +63,19 @@ function App() {
         }
       />
 
-      {/* Example: Admin-only route */}
+      {/* Admin routes with nested routing */}
       <Route
         path="/admin/*"
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
-            <div className="p-8 bg-red-50 border-l-4 border-red-500">
-              <h1 className="text-xl font-semibold text-red-700">
-                Admin Panel
-              </h1>
-              <p className="text-red-600">Only accessible by admins</p>
-            </div>
+            <AdminRouter />
           </ProtectedRoute>
         }
       />
 
-      {/* Example: Employee or Admin route (Staff) */}
-      <Route
-        path="/staff/*"
-        element={
-          <ProtectedRoute
-            requiredRole={UserRole.EMPLOYEE}
-            fallback={
-              <ProtectedRoute requiredRole={UserRole.ADMIN}>
-                <div>Staff Panel - Accessible by employees and admins</div>
-              </ProtectedRoute>
-            }
-          >
-            <div>Staff Panel - Accessible by employees and admins</div>
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Example: Customer-only route */}
-      <Route
-        path="/customer/*"
-        element={
-          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
-              <h1 className="text-xl font-semibold text-blue-700">
-                Customer Portal
-              </h1>
-              <p className="text-blue-600">Only accessible by customers</p>
-            </div>
-          </ProtectedRoute>
-        }
-      />
       {/* Customer Appointment Route */}
       <Route
-        path="/customer/appointments"
+        path="/dashboard/appointments"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
@@ -130,3 +119,52 @@ function App() {
 }
 
 export default App;
+
+
+
+      {/* Example: Admin-only route */}
+      {/* <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute requiredRole={UserRole.ADMIN}>
+            <div className="p-8 bg-red-50 border-l-4 border-red-500">
+              <h1 className="text-xl font-semibold text-red-700">
+                Admin Panel
+              </h1>
+              <p className="text-red-600">Only accessible by admins</p>
+            </div>
+          </ProtectedRoute>
+        }
+      /> */}
+
+      {/* Example: Employee or Admin route (Staff) */}
+      {/* <Route
+        path="/staff/*"
+        element={
+          <ProtectedRoute
+            requiredRole={UserRole.EMPLOYEE}
+            fallback={
+              <ProtectedRoute requiredRole={UserRole.ADMIN}>
+                <div>Staff Panel - Accessible by employees and admins</div>
+              </ProtectedRoute>
+            }
+          >
+            <div>Staff Panel - Accessible by employees and admins</div>
+          </ProtectedRoute>
+        }
+      /> */}
+
+      {/* Example: Customer-only route */}
+      {/* <Route
+        path="/customer/*"
+        element={
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
+              <h1 className="text-xl font-semibold text-blue-700">
+                Customer Portal
+              </h1>
+              <p className="text-blue-600">Only accessible by customers</p>
+            </div>
+          </ProtectedRoute>
+        }
+      /> */}
