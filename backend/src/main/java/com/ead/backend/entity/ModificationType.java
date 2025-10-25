@@ -4,18 +4,18 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "service_type")
+@Table(name = "modification_type")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServiceType {
+public class ModificationType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name;                 // e.g. "Oil Change"
+    private String name;                 // e.g. "Brake Pad Replacement"
 
     @Column
     private String description;

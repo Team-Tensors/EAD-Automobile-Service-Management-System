@@ -1,19 +1,16 @@
 package com.ead.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "appointment")
 @Data
 @NoArgsConstructor
-@Getter
-@Setter
 public class Appointment {
 
     @Id
@@ -28,17 +25,35 @@ public class Appointment {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
+    /** tells if this is a SERVICE or a MODIFICATION */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "appointment_type", nullable = false)
+    private AppointmentType appointmentType;
+
+    /** One of the two will be filled – the other stays null */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_type_id", nullable = false)
+    @JoinColumn(name = "service_type_id")
     private ServiceType serviceType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modification_type_id")
+    private ModificationType modificationType;
 
     @Column(nullable = false)
     private LocalDateTime appointmentDate;
 
     @Column(nullable = false)
-    private String status; //e.g., "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
+    private String status = "PENDING"; // PENDING, CONFIRMED, COMPLETED, CANCELLED
 
     @Column
     private String description;
 
+    // Employees assigned to this appointment
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "appointment_employees",
+            joinColumns = @JoinColumn(name = "appointment_id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id")
+    )
+    private Set<User> assignedEmployees = new HashSet<>();
 }
