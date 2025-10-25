@@ -58,7 +58,7 @@ const AdminNavbar = () => {
                 <button
                   key={item.id}
                   onClick={() => handleNavigation(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
                     activeSection === item.id
                       ? 'bg-orange-500 text-white'
                       : 'text-gray-400 hover:text-white hover:bg-zinc-800'
@@ -75,11 +75,11 @@ const AdminNavbar = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition text-sm"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition text-sm  cursor-pointer"
             >
               Logout
             </button>
-            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center cursor-pointer">
               <User className="w-6 h-6 text-white" />
             </div>
           </div>
