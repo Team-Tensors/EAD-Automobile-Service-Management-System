@@ -10,6 +10,7 @@ import CompleteProfilePage from './pages/CompleteProfilePage'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
+import AddVehiclePage from './pages/MyVehiclesPage'
 
 function App() {
   return (
@@ -79,6 +80,15 @@ function App() {
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
+          </ProtectedRoute>
+        }
+      />
+
+        <Route
+        path="/dashboard/my-vehicle"
+        element={
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <AddVehiclePage />
           </ProtectedRoute>
         }
       />
