@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { 
-  MapPin, 
   Clock, 
   Car, 
   Calendar, 
   User, 
-  Filter, 
   ChevronRight, 
   CheckCircle, 
   CircleDashed,
@@ -646,7 +644,7 @@ interface LogTimeProps {
   onDeleteLog: (logId: number) => void;
 }
 
-const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, onDeleteLog }) => {
+const LogTimeSection: React.FC<LogTimeProps> = ({ logs, onSaveLog, onDeleteLog }) => {
   const [date, setDate] = useState(formatDate(new Date()));
   const [startTime, setStartTime] = useState(formatTime(new Date()));
   const [endTime, setEndTime] = useState(formatTime(new Date()));
