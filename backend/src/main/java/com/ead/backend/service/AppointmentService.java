@@ -19,54 +19,158 @@ public class AppointmentService {
     @Autowired private ServiceTypeRepository serviceTypeRepository;
     @Autowired private ModificationTypeRepository modificationTypeRepository;
 
-    // ... existing createAppointment() and getUserAppointments() ...
+    // ===================================================================
+    // 1. CUSTOMER: Book appointment
+    // ===================================================================
+    public Appointment createAppointment(Appointment appointment) {
+        User customer = getCurrentUser();  // Uses helper
 
-    /**
-     * Assign one or more employees to an appointment
-     * @param appointmentId the appointment
-     * @param employeeIds list of employee user IDs
-     * @return updated appointment
-     */
-
-        public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
-            // 1. Get current user (must be MANAGER or ADMIN)
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            User currentUser = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            boolean isManagerOrAdmin = currentUser.getRoles().stream()
-                    .anyMatch(r -> "MANAGER".equals(r.getName()) || "ADMIN".equals(r.getName()));
-            if (!isManagerOrAdmin) {
-                throw new RuntimeException("Only MANAGER or ADMIN can assign employees");
-            }
-
-            // 2. Load appointment
-            Appointment appointment = appointmentRepository.findById(appointmentId)
-                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
-
-            // 3. Validate and add each employee
-            for (Long empId : employeeIds) {
-                User employee = userRepository.findById(empId)
-                        .orElseThrow(() -> new RuntimeException("Employee not found: " + empId));
-
-                // Must have EMPLOYEE role
-                boolean hasEmployeeRole = employee.getRoles().stream()
-                        .anyMatch(r -> "EMPLOYEE".equals(r.getName()));
-                if (!hasEmployeeRole) {
-                    throw new RuntimeException("User ID " + empId + " is not an EMPLOYEE");
-                }
-
-                appointment.getAssignedEmployees().add(employee);
-            }
-
-            return appointmentRepository.save(appointment);
+        Vehicle vehicle = vehicleRepository.findById(appointment.getVehicle().getId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        if (!vehicle.getUser().getId().equals(customer.getId())) {
+            throw new RuntimeException("You can only book for your own vehicle");
         }
 
-        // Get all employees (for dropdown)
-        public List<User> getAllEmployees() {
-            return userRepository.findAll().stream()
-                    .filter(u -> u.getRoles().stream()
-                            .anyMatch(r -> "EMPLOYEE".equals(r.getName())))
-                    .toList();
+        if (appointment.getAppointmentType() == null) {
+            throw new RuntimeException("Appointment type is required");
         }
+
+        if (appointment.getAppointmentType() == AppointmentType.SERVICE) {
+            ServiceType st = serviceTypeRepository.findById(appointment.getServiceType().getId())
+                    .orElseThrow(() -> new RuntimeException("Service type not found"));
+            appointment.setServiceType(st);
+            appointment.setModificationType(null);
+        } else {
+            ModificationType mt = modificationTypeRepository.findById(appointment.getModificationType().getId())
+                    .orElseThrow(() -> new RuntimeException("Modification type not found"));
+            appointment.setModificationType(mt);
+            appointment.setServiceType(null);
+        }
+
+        if (appointment.getAppointmentDate() == null) {
+            throw new RuntimeException("Please select your preferred appointment date and time");
+        }
+        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now().plusHours(1))) {
+            throw new RuntimeException("Appointment date must be at least 1 hour from now");
+        }
+
+        appointment.setUser(customer);
+        appointment.setVehicle(vehicle);
+        appointment.setStatus("PENDING");
+
+        return appointmentRepository.save(appointment);
     }
+
+    // ===================================================================
+    // 2. CUSTOMER: Get own appointments
+    // ===================================================================
+    public List<Appointment> getUserAppointments() {
+        User customer = getCurrentUser();  // Uses helper
+        return appointmentRepository.findByUserId(customer.getId());
+    }
+
+    // ===================================================================
+    // 3. ADMIN/MANAGER: Assign employees
+    // ===================================================================
+    public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
+        User currentUser = getCurrentUser();  // Uses helper
+
+        boolean isManagerOrAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> "MANAGER".equals(r.getName()) || "ADMIN".equals(r.getName()));
+        if (!isManagerOrAdmin) {
+            throw new RuntimeException("Only MANAGER or ADMIN can assign employees");
+        }
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        for (Long empId : employeeIds) {
+            User employee = userRepository.findById(empId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found: " + empId));
+
+            boolean hasEmployeeRole = employee.getRoles().stream()
+                    .anyMatch(r -> "EMPLOYEE".equals(r.getName()));
+            if (!hasEmployeeRole) {
+                throw new RuntimeException("User ID " + empId + " is not an EMPLOYEE");
+            }
+
+            appointment.getAssignedEmployees().add(employee);
+        }
+
+        return appointmentRepository.save(appointment);
+    }
+
+    // ===================================================================
+    // 4. Get all employees (for dropdown)
+    // ===================================================================
+    public List<User> getAllEmployees() {
+        return userRepository.findAll().stream()
+                .filter(u -> u.getRoles().stream()
+                        .anyMatch(r -> "EMPLOYEE".equals(r.getName())))
+                .toList();
+    }
+
+    // ===================================================================
+    // 5. EMPLOYEE: Start work
+    // ===================================================================
+    public Appointment startAppointment(Long appointmentId) {
+        User employee = getCurrentUser();  // Uses helper
+
+        if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
+            throw new RuntimeException("Only EMPLOYEE can start work");
+        }
+
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appt.getAssignedEmployees().contains(employee)) {
+            throw new RuntimeException("You are not assigned to this appointment");
+        }
+
+        if (appt.getStartTime() != null) {
+            throw new RuntimeException("Work already started");
+        }
+
+        appt.setStartTime(LocalDateTime.now());
+        appt.setStatus("IN_PROGRESS");
+        return appointmentRepository.save(appt);
+    }
+
+    // ===================================================================
+    // 6. EMPLOYEE: Complete work
+    // ===================================================================
+    public Appointment completeAppointment(Long appointmentId) {
+        User employee = getCurrentUser();  // Uses helper
+
+        if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
+            throw new RuntimeException("Only EMPLOYEE can complete work");
+        }
+
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appt.getAssignedEmployees().contains(employee)) {
+            throw new RuntimeException("You are not assigned to this appointment");
+        }
+
+        if (appt.getStartTime() == null) {
+            throw new RuntimeException("Work has not started yet");
+        }
+        if (appt.getEndTime() != null) {
+            throw new RuntimeException("Work already completed");
+        }
+
+        appt.setEndTime(LocalDateTime.now());
+        appt.setStatus("COMPLETED");
+        return appointmentRepository.save(appt);
+    }
+
+    // ===================================================================
+    // HELPER: Get current authenticated user 
+    // ===================================================================
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+}
