@@ -5,16 +5,15 @@ import { AuthProvider } from './context/authContext.tsx'
 import './globals.css'
 import App from './App.tsx'
 
+// Use BASE_URL from Vite config for proper routing
+const basename = import.meta.env.BASE_URL
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={basename}>
         <App />
       </BrowserRouter>
     </AuthProvider>
   </StrictMode>,
 )
-
-
-
-
