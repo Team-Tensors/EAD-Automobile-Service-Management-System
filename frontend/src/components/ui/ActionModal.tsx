@@ -1,4 +1,3 @@
-// src/components/ui/ActionModal.tsx
 import React from 'react';
 import { X } from 'lucide-react';
 
