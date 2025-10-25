@@ -27,49 +27,46 @@ public class AppointmentService {
      * @param employeeIds list of employee user IDs
      * @return updated appointment
      */
-    public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        for (Long empId : employeeIds) {
-            User employee = userRepository.findById(empId)
-                    .orElseThrow(() -> new RuntimeException("Employee not found: " + empId));
+        public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
+            // 1. Get current user (must be MANAGER or ADMIN)
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // Validate: must have EMPLOYEE role
-            boolean isEmployee = employee.getRoles().stream()
-                    .anyMatch(role -> "EMPLOYEE".equals(role.getName()));
-            if (!isEmployee) {
-                throw new RuntimeException("User ID " + empId + " is not an employee");
+            boolean isManagerOrAdmin = currentUser.getRoles().stream()
+                    .anyMatch(r -> "MANAGER".equals(r.getName()) || "ADMIN".equals(r.getName()));
+            if (!isManagerOrAdmin) {
+                throw new RuntimeException("Only MANAGER or ADMIN can assign employees");
             }
 
-            appointment.getAssignedEmployees().add(employee);
+            // 2. Load appointment
+            Appointment appointment = appointmentRepository.findById(appointmentId)
+                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+            // 3. Validate and add each employee
+            for (Long empId : employeeIds) {
+                User employee = userRepository.findById(empId)
+                        .orElseThrow(() -> new RuntimeException("Employee not found: " + empId));
+
+                // Must have EMPLOYEE role
+                boolean hasEmployeeRole = employee.getRoles().stream()
+                        .anyMatch(r -> "EMPLOYEE".equals(r.getName()));
+                if (!hasEmployeeRole) {
+                    throw new RuntimeException("User ID " + empId + " is not an EMPLOYEE");
+                }
+
+                appointment.getAssignedEmployees().add(employee);
+            }
+
+            return appointmentRepository.save(appointment);
         }
 
-        return appointmentRepository.save(appointment);
+        // Get all employees (for dropdown)
+        public List<User> getAllEmployees() {
+            return userRepository.findAll().stream()
+                    .filter(u -> u.getRoles().stream()
+                            .anyMatch(r -> "EMPLOYEE".equals(r.getName())))
+                    .toList();
+        }
     }
-
-    /**
-     * Get all appointments assigned to the current logged-in employee
-     */
-    public List<Appointment> getEmployeeAppointments() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User employee = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        return appointmentRepository.findByAssignedEmployeesId(employee.getId());
-    }
-
-    /**
-     * Remove employee from appointment (optional)
-     */
-    public Appointment removeEmployee(Long appointmentId, Long employeeId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
-
-        User employee = userRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        appointment.getAssignedEmployees().remove(employee);
-        return appointmentRepository.save(appointment);
-    }
-}

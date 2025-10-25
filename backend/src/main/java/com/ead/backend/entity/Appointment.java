@@ -17,20 +17,22 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Customer who booked
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // Vehicle being serviced
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
-    /** tells if this is a SERVICE or a MODIFICATION */
+    // Type: SERVICE or MODIFICATION
     @Enumerated(EnumType.STRING)
     @Column(name = "appointment_type", nullable = false)
     private AppointmentType appointmentType;
 
-    /** One of the two will be filled – the other stays null */
+    // One of these will be used
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_type_id")
     private ServiceType serviceType;
@@ -39,16 +41,19 @@ public class Appointment {
     @JoinColumn(name = "modification_type_id")
     private ModificationType modificationType;
 
-    @Column(nullable = false)
+    // Appointment date & time
+    @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;
 
+    // Status
     @Column(nullable = false)
-    private String status = "PENDING"; // PENDING, CONFIRMED, COMPLETED, CANCELLED
+    private String status = "PENDING"; // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
 
+    // Optional notes
     @Column
     private String description;
 
-    // Employees assigned to this appointment
+    // EMPLOYEES assigned to this job (Admin or self-assign)
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "appointment_employees",
