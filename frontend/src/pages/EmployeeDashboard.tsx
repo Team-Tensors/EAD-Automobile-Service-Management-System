@@ -7,20 +7,21 @@ const EmployeeDashboard: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className='min-h-screen bg-background'>
+    <div className='min-h-screen bg-background pt-12'>
 
        {/* Authenticated Navbar */}
       <AuthenticatedNavbar />
-
-      <div className="p-5 max-w-6xl mx-auto">
-      <header className="flex justify-between items-center mb-8 pb-5 border-b border-gray-200">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Employee Dashboard</h1>
-          <p className="text-gray-600 mt-1">
-            Welcome, {user?.firstName} {user?.lastName} - {user?.department || 'Employee'}
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
+          <p className="text-gray-400 mt-2">
+            Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
           </p>
         </div>
-      </header>
+      </div>
+      <div className="p-5 max-w-6xl mx-auto">
+     
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {/* Active Projects */}
