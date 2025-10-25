@@ -1,10 +1,10 @@
 // Dashboard Router - Routes users to appropriate dashboard based on role
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../types/auth';
 import CustomerDashboard from './CustomerDashboard';
 import EmployeeDashboard from './EmployeeDashboard';
-import AdminDashboard from './AdminDashboard';
 
 const DashboardRouter: React.FC = () => {
   const { user } = useAuth();
@@ -37,7 +37,8 @@ const DashboardRouter: React.FC = () => {
     case UserRole.EMPLOYEE:
       return <EmployeeDashboard />;
     case UserRole.ADMIN:
-      return <AdminDashboard />;
+      // Redirect to admin router for proper navigation
+      return <Navigate to="/admin/dashboard" replace />;
     default:
       return (
         <div style={{ 
