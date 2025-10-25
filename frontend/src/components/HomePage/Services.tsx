@@ -55,7 +55,7 @@ const Services: React.FC = () => {
   return (
     <section className="pt-28 pb-20 px-6 md:px-10 lg:px-24 bg-black text-white min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold mb-6 font-heading">Services</h2>
+        <h2 className="text-4xl font-bold mb-6 font-heading text-orange-700">Services</h2>
 
         {/* Timeline Navigation */}
         <nav className="mb-12" aria-label="Services navigation">
@@ -64,7 +64,7 @@ const Services: React.FC = () => {
             <div className="absolute top-8 left-0 right-0 h-[2px] bg-gray-700" />
             {/* Active progress line */}
             <div 
-              className="absolute top-8 left-0 h-[2px] bg-orange-600 transition-all duration-300"
+              className="absolute top-8 left-0 h-[2px] bg-orange-500 transition-all duration-300"
               style={{ width: `${(active / (tabs.length - 1)) * 100}%` }}
             />
             
@@ -75,7 +75,7 @@ const Services: React.FC = () => {
                   onClick={() => handleClick(i)}
                   className={`w-10 h-10 rounded border-2 mb-3 transition-all ${
                     i === active
-                      ? "bg-orange-600 border-orange-600"
+                      ? "bg-orange-500 border-orange-500"
                       : i < active
                       ? " border-gray-700"
                       : "bg-transparent border-gray-700"
@@ -87,7 +87,7 @@ const Services: React.FC = () => {
                 </button>
                 <span
                   className={`text-sm font-medium uppercase tracking-wider ${
-                    i === active ? "text-orange-600" : "text-gray-400"
+                    i === active ? "text-orange-500" : "text-gray-400"
                   }`}
                 >
                   {t.label}
@@ -101,7 +101,7 @@ const Services: React.FC = () => {
         <div className="min-h-[400px]">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-1 h-6 bg-orange-500" />
-            <h3 className="text-2xl font-semibold">{tabs[active].label}</h3>
+            <h3 className="text-2xl font-semibold font-heading">{tabs[active].label}</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
