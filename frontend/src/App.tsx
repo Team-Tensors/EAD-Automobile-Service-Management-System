@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import LoginPage from './pages/loginPage'
 import RegisterPage from './pages/registerPage'
 import EmployeeRegisterPage from './pages/EmployeeRegisterPage'
@@ -105,12 +105,12 @@ function App() {
           <div className="text-center p-12 text-gray-600">
             <h2 className="text-2xl font-bold mb-4">Page Not Found</h2>
             <p className="mb-4">The page you're looking for doesn't exist.</p>
-            <a
-              href="/"
+            <Link
+              to="/"
               className="text-blue-500 hover:text-blue-700 underline"
             >
               Go to Home
-            </a>
+            </Link>
           </div>
         }
       />
@@ -119,52 +119,3 @@ function App() {
 }
 
 export default App;
-
-
-
-      {/* Example: Admin-only route */}
-      {/* <Route
-        path="/admin/*"
-        element={
-          <ProtectedRoute requiredRole={UserRole.ADMIN}>
-            <div className="p-8 bg-red-50 border-l-4 border-red-500">
-              <h1 className="text-xl font-semibold text-red-700">
-                Admin Panel
-              </h1>
-              <p className="text-red-600">Only accessible by admins</p>
-            </div>
-          </ProtectedRoute>
-        }
-      /> */}
-
-      {/* Example: Employee or Admin route (Staff) */}
-      {/* <Route
-        path="/staff/*"
-        element={
-          <ProtectedRoute
-            requiredRole={UserRole.EMPLOYEE}
-            fallback={
-              <ProtectedRoute requiredRole={UserRole.ADMIN}>
-                <div>Staff Panel - Accessible by employees and admins</div>
-              </ProtectedRoute>
-            }
-          >
-            <div>Staff Panel - Accessible by employees and admins</div>
-          </ProtectedRoute>
-        }
-      /> */}
-
-      {/* Example: Customer-only route */}
-      {/* <Route
-        path="/customer/*"
-        element={
-          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <div className="p-8 bg-blue-50 border-l-4 border-blue-500">
-              <h1 className="text-xl font-semibold text-blue-700">
-                Customer Portal
-              </h1>
-              <p className="text-blue-600">Only accessible by customers</p>
-            </div>
-          </ProtectedRoute>
-        }
-      /> */}
