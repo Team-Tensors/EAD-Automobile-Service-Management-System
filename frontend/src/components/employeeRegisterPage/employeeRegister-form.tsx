@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { UserRole } from '../../types/auth'
 import type { RegisterData } from '../../types/auth'
@@ -13,7 +13,6 @@ import api from "@/utill/apiUtils"
 import { Eye, EyeOff } from "lucide-react"
 
 export function EmployeeRegisterForm({ className, ...props }: React.ComponentProps<"div">) {
-  const navigate = useNavigate()
   const { clearError } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -106,9 +105,8 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
         role: UserRole.EMPLOYEE,
       }
 
-      // Using the customer registration endpoint but with EMPLOYEE role
-      // You'll need to update your backend to support this or create a new endpoint
-      const response = await api.post("/auth/register/employee", registrationData)
+
+      const response = await api.post("/auth/register/employee", registrationData);
       
       // Store tokens and user data
       const { token, refreshToken, ...userData } = response.data
@@ -116,8 +114,12 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
       localStorage.setItem('refresh_token', refreshToken)
       localStorage.setItem('user', JSON.stringify(userData))
       
-      // Navigate to dashboard
-      navigate('/dashboard')
+      if(token && refreshToken && userData) {
+        // Force a full page reload to reinitialize auth context
+        // This ensures the auth context reads from localStorage and updates isAuthenticated
+        window.location.href = '/dashboard'
+      }
+
     } catch (err) {
       console.error('Registration failed:', err)
       const apiError = err as { response?: { data?: { message?: string } } }
