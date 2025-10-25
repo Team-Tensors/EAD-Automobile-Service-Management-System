@@ -7,7 +7,7 @@ import ContactUs from "@/components/HomePage/ContactUs";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-[#1d1c1c]">
+    <div className="min-h-screen bg-[#131212]">
       <Navbar />
       <main>
         <Hero />
