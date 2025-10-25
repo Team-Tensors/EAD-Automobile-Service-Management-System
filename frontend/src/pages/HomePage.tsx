@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar/Narbar";
 import Hero from "@/components/HomePage/Hero";
 import Features from "@/components/HomePage/Features";
+import Services from "@/components/HomePage/Services";
 import Footer from "@/components/Footer/Footer";
 
 const HomePage = () => {
@@ -10,6 +11,8 @@ const HomePage = () => {
       <main>
         <Hero />
         <Features />
+        <Services />
+        
       </main>
       <Footer />
     </div>
