@@ -1,0 +1,26 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build with Docker Compose
+      run: docker compose build
+    
+    - name: Start services (optional - for testing)
+      run: docker compose up -d
+    
+    - name: Check running containers (optional)
+      run: docker compose ps
+    
+    - name: Stop services (optional)
+      run: docker compose down
