@@ -539,7 +539,7 @@ const AdminDashboard = () => {
 
                     <button
                       onClick={() => handleAssignEmployee(service)}
-                      className="w-full bg-orange-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-600 transition text-sm flex items-center justify-center gap-2"
+                      className="w-full bg-orange-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-600 transition text-sm flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <UserPlus className="w-4 h-4" />
                       Assign Employee
@@ -570,7 +570,7 @@ const AdminDashboard = () => {
                     setSelectedService(null);
                     setSearchEmployee('');
                   }}
-                  className="text-primary-foreground hover:bg-primary-foreground/20 p-2 rounded-lg transition"
+                  className="text-primary-foreground hover:bg-primary-foreground/20 p-2 rounded-lg transition cursor-pointer"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -598,7 +598,7 @@ const AdminDashboard = () => {
                   key={employee.id}
                   className={`p-4 rounded-lg border-2 transition ${
                     employee.availability === 'available'
-                      ? 'border-border bg-secondary hover:border-orange-500 cursor-pointer'
+                      ? 'border-border bg-secondary hover:border-orange-500'
                       : 'border-border bg-secondary/50 opacity-60'
                   }`}
                 >
@@ -638,7 +638,7 @@ const AdminDashboard = () => {
                       disabled={employee.availability === 'busy'}
                       className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
                         employee.availability === 'available'
-                          ? 'bg-orange-500 text-white hover:bg-orange-600'
+                          ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
                     >
