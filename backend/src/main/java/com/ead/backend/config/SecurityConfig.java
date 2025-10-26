@@ -44,7 +44,7 @@ public class SecurityConfig {
             // CORS Configuration for React frontend
             .cors(cors -> cors.configurationSource(request -> {
                 var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);
@@ -57,7 +57,7 @@ public class SecurityConfig {
             // Role-based authorization rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints (no authentication required)
-                .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/refresh-token").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/register/employee", "/auth/refresh-token").permitAll()
                 .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
                 .requestMatchers("/health", "/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -70,7 +70,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/profile", "/auth/logout", "/auth/logout-all", "/auth/active-sessions").authenticated()
 
                 // Admin-only endpoints
-                .requestMatchers("/admin/**", "/auth/register/employee").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 // Employee endpoints (employees and admins can access)
                 .requestMatchers("/employee/**", "/services/manage/**", "/appointments/manage/**", "/projects/manage/**")

@@ -13,15 +13,18 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav className="fixed top-6 left-0 right-0 z-50 pointer-events-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pointer-events-auto">
+        <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-4 sm:px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-white tracking-wider">
-              DRIVE<span className="text-orange-500">CARE</span>
+            <span className="text-2xl font-bold text-white tracking-wider font-heading">
+              DRIVE<span className="text-orange-600">CARE</span>
             </span>
           </Link>
+
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -41,23 +44,26 @@ const Navbar = () => {
             <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors">
               Login
             </Link>
-            <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 rounded-md transition-colors">
+            <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 rounded-md transition-colors">
               Register
             </Link>
           </div>
 
           {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-white"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-white"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation (keeps below the floating bar) */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-4">
+          <div className="md:hidden py-4 space-y-4 mt-2 px-2">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -72,7 +78,7 @@ const Navbar = () => {
               <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors text-center">
                 Login
               </Link>
-              <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 rounded-md transition-colors text-center">
+              <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 rounded-md transition-colors text-center">
                 Register
               </Link>
             </div>

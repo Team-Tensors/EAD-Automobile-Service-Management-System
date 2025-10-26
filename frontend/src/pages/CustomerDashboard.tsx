@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  MapPin,
-  Clock,
-  Car,
-  Calendar,
-  User,
-  Filter,
-  Download,
-  ChevronRight,
-  CheckCircle,
-  CircleDashed,
-} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
+import { MapPin, Clock, Car, Calendar, User, Filter, Download, ChevronRight, CheckCircle, CircleDashed } from 'lucide-react';
+import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
 // TypeScript Interfaces
 interface Service {
@@ -29,20 +19,11 @@ interface Service {
 }
 
 const CustomerDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showMap, setShowMap] = useState<boolean>(false);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
   // Mock data - Replace with actual API calls
   useEffect(() => {
     const mockServices: Service[] = [
@@ -115,31 +96,19 @@ const CustomerDashboard = () => {
       : services.filter((s) => s.status === filterStatus);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Welcome Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Customer Dashboard</h1>
-              <p className="text-primary-foreground/80 mt-1">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleLogout}
-                className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold hover:bg-destructive/90 transition border border-border"
-              >
-                Logout
-              </button>
-              <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center border border-border">
-                <User className="w-6 h-6 text-accent-foreground" />
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background pt-12">
+      {/* Authenticated Navbar */}
+      <AuthenticatedNavbar />
+
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold text-white">Customer Dashboard</h1>
+          <p className="text-gray-400 mt-2">
+            Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
+          </p>
         </div>
-      </header>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Book Appointment Button */}
