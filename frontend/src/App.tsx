@@ -91,7 +91,7 @@ function App() {
 
       {/* Customer Appointment Route */}
       <Route
-        path="/appointment-booking"
+        path="/my-appointments/appointment-booking"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
