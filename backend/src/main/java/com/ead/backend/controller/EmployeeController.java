@@ -1,5 +1,6 @@
 package com.ead.backend.controller;
 
+import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.entity.Appointment;
@@ -59,7 +60,7 @@ public class EmployeeController {
     public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId) {
         logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
         try {
-            List<Appointment> appointments = employeeService.getAppointmentsByEmployee(employeeId);
+            List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employeeId);
             return ResponseEntity.ok(appointments);
         } catch (Exception e) {
             logger.error("Error retrieving appointments for employee {}: {}", employeeId, e.getMessage());
@@ -78,8 +79,8 @@ public class EmployeeController {
         logger.info("Appointment Id: {}, New Status: {}", appointmentId, status);
 
         try {
-            Appointment updatedAppointment = employeeService.updateAppointmentStatus(appointmentId, status);
-            return ResponseEntity.ok(updatedAppointment);
+            employeeService.updateAppointmentStatus(appointmentId, status);
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
             logger.error("Error updating appointment status: {}", errorMessage);
@@ -108,8 +109,8 @@ public class EmployeeController {
         logger.info("Appointment Id: {}", appointmentId);
 
         try {
-            TimeLog savedLog = employeeService.addTimeLog(appointmentId, timeLog);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedLog);
+            employeeService.addTimeLog(appointmentId, timeLog);
+            return ResponseEntity.status(HttpStatus.CREATED). build();
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
             logger.error("Error inserting new time log: {}", errorMessage);
