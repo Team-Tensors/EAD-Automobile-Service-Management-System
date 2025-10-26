@@ -45,6 +45,16 @@ export interface LoginCredentials {
   rememberMe?: boolean;
 }
 
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface RegisterData {
   email: string;
   password: string;

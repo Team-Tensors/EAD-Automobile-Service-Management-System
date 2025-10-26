@@ -45,6 +45,14 @@ public class Appointment {
     @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;
 
+    // EMPLOYEE SETS: When work actually starts
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    // EMPLOYEE SETS: When work ends
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
     // Status
     @Column(nullable = false)
     private String status = "PENDING"; // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED
