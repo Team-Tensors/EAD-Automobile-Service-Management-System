@@ -19,7 +19,7 @@ const Hero = () => {
         <div className="max-w-4xl">
           {/* Tagline */}
           <div className="flex items-center space-x-3 mb-6 animate-fade-in">
-            <div className="w-12 h-0.5 bg-orange-500"></div>
+            <div className="w-12 h-0.5 bg-orange-600"></div>
             <p className="text-sm text-gray-400 uppercase tracking-wider">
               Discover the passion and expertise behind AutoFix
             </p>
@@ -34,10 +34,10 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 animate-fade-in-up-delay">
-            <button className="px-8 py-4 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]">
+            <button className="px-8 py-4 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]">
               GET STARTED
             </button>
-            <button className="px-8 py-4 bg-transparent border-2 border-white/20 text-white font-semibold rounded-md hover:border-orange-500 hover:text-orange-500 transition-all duration-300">
+            <button className="px-8 py-4 bg-transparent border-2 border-white/20 text-white font-semibold rounded-md hover:border-orange-700 hover:text-orange-700 transition-all duration-300">
               LEARN MORE
             </button>
           </div>

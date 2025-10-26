@@ -40,7 +40,7 @@ const ContactUs: React.FC = () => {
       <section className="py-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 lg:px-0">
           <div className="mb-10">
-            <p className="text-4xl font-bold mb-6 font-heading text-orange-500">Get in Touch</p>
+            <p className="text-4xl font-bold mb-6 font-heading text-orange-700">Get in Touch</p>
             <h2 className="text-3xl font-bold uppercase tracking-wide">Have questions about our services? <span className="text-gray-400 block text-lg font-normal">FAQ for answers</span></h2>
           </div>
 
@@ -57,7 +57,7 @@ const ContactUs: React.FC = () => {
                 </button>
                 <button
                   onClick={() => toggle(i)}
-                  className="ml-4 inline-flex items-center justify-center w-9 h-9 bg-orange-500 text-white rounded-md"
+                  className="ml-4 inline-flex items-center justify-center w-9 h-9 bg-orange-600 text-white rounded-md"
                   aria-hidden
                 >
                   +

@@ -136,7 +136,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-500">CARE</span></span>
+                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-600">CARE</span></span>
                 <h1 className="text-2xl font-bold font-heading text-white">Employee Registration</h1>
                 <p className="text-balance text-gray-400">Join our team as a service technician</p>
               </div>
@@ -155,7 +155,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                   placeholder="John Doe" 
                   value={formData.fullName}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.fullName ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 ${formErrors.fullName ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.fullName && (
@@ -173,7 +173,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                   placeholder="m@example.com" 
                   value={formData.email}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 ${formErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.email && (
@@ -191,7 +191,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                   placeholder="+1 (555) 000-0000" 
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.phoneNumber ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 ${formErrors.phoneNumber ? 'border-red-400 focus:border-red-500' : ''}`}
                   required 
                 />
                 {formErrors.phoneNumber && (
@@ -209,7 +209,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                   placeholder="123 Main St, City, State" 
                   value={formData.address}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.address ? 'border-red-400 focus:border-red-500' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 ${formErrors.address ? 'border-red-400 focus:border-red-500' : ''}`}
                 />
                 {formErrors.address && (
                   <span className="text-red-400 text-sm mt-1 block">
@@ -228,7 +228,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                     placeholder="Must be at least 8 characters"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.password ? 'border-red-400 focus:border-red-500' : ''}`}
                     required 
                   />
                   <button
@@ -255,7 +255,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 pr-10 ${formErrors.confirmPassword ? 'border-red-400 focus:border-red-500' : ''}`}
                     required 
                   />
                   <button
@@ -272,18 +272,18 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
                   </span>
                 )}
               </div>
-              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={isLoading}>
                 {isLoading ? 'Creating Account...' : 'Sign Up'}
               </Button>
               <div className="text-center text-sm text-gray-400">
                 Already have an account?{" "}
-                <Link to="/login" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                <Link to="/login" className="underline underline-offset-4 text-orange-600 hover:text-orange-700">
                   Login
                 </Link>
               </div>
               <div className="text-center text-sm text-gray-400">
                 Registering as a customer?{" "}
-                <Link to="/register" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                <Link to="/register" className="underline underline-offset-4 text-orange-600 hover:text-orange-700">
                   Customer Registration
                 </Link>
               </div>
@@ -298,7 +298,7 @@ export function EmployeeRegisterForm({ className, ...props }: React.ComponentPro
           </div>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-gray-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-orange-500">
+      <div className="text-balance text-center text-xs text-gray-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-orange-600">
         By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
       </div>
     </div>
