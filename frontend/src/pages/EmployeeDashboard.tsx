@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
-  MapPin, 
   Clock, 
   Car, 
   Calendar, 
   User, 
-  Filter, 
   ChevronRight, 
   CheckCircle, 
   CircleDashed,
   Briefcase,
   Loader,
   Check,
-  ClipboardList, // For Inventory
-  ClipboardX, // For Unassigned
+  ClipboardList,
+  ClipboardX,
   ChevronLeft,
   Save,
   Trash2,
   Edit,
-  Dot // For calendar
+  Dot,
+  X,
+  AlertTriangle 
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
@@ -31,8 +31,8 @@ interface AssignedService {
   vehicleNumber: string;
   serviceType: string;
   status: 'completed' | 'in_progress' | 'not_started';
-  startDate: string | null; // Can be null if not started
-  estimatedCompletion: string | null; // Can be null
+  startDate: string | null; 
+  estimatedCompletion: string | null;
   customerName: string; 
   serviceCenter: string;
   centerSlot: string;
@@ -50,6 +50,7 @@ interface TimeLog {
 
 type ServiceStatus = 'completed' | 'in_progress' | 'not_started';
 type ActiveSection = 'logTime' | 'updateStatus' | 'none';
+type NotificationType = 'success' | 'error';
 
 // --- MOCK DATA ---
 
@@ -60,7 +61,7 @@ const MOCK_SERVICES: AssignedService[] = [
     vehicleNumber: 'ABC-1234',
     serviceType: 'Regular Maintenance',
     status: 'in_progress',
-    startDate: '2025-10-24T10:00:00Z', // Already started
+    startDate: '2025-10-24T10:00:00Z', 
     estimatedCompletion: '2025-10-28T17:00:00Z',
     customerName: 'Alice Smith',
     serviceCenter: 'DriveCare Negombo Center',
@@ -72,7 +73,7 @@ const MOCK_SERVICES: AssignedService[] = [
     vehicleNumber: 'XYZ-5678',
     serviceType: 'Custom Modification',
     status: 'not_started', 
-    startDate: null, // Not started yet
+    startDate: null, 
     estimatedCompletion: '2025-11-05T17:00:00Z',
     customerName: 'Bob Johnson',
     serviceCenter: 'DriveCare Colombo Center',
@@ -92,10 +93,13 @@ const MOCK_SERVICES: AssignedService[] = [
   }
 ];
 
+// Mock logs are set for October 2025 to match the calendar logic
 const MOCK_TIME_LOGS: { [key: number]: TimeLog[] } = {
   1: [
     { id: 101, serviceId: 1, date: '2025-10-24', startTime: '10:00', endTime: '12:30', duration: '2h 30m', description: 'Initial diagnostics and oil change.' },
-    { id: 102, serviceId: 1, date: '2025-10-24', startTime: '13:30', endTime: '15:00', duration: '1h 30m', description: 'Replaced air filter and spark plugs.' }
+    { id: 102, serviceId: 1, date: '2025-10-24', startTime: '13:30', endTime: '15:00', duration: '1h 30m', description: 'Replaced air filter and spark plugs.' },
+    // Add a log for the selected date (Oct 27, 2025 based on context)
+    { id: 103, serviceId: 1, date: '2025-10-27', startTime: '09:00', endTime: '11:00', duration: '2h 0m', description: 'Checked tire pressure.' },
   ],
   2: [],
   3: [
@@ -107,10 +111,18 @@ const MOCK_TIME_LOGS: { [key: number]: TimeLog[] } = {
 // --- HELPER FUNCTIONS ---
 
 const formatDate = (date: Date): string => {
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    console.error("Invalid date passed to formatDate:", date);
+    return new Date().toISOString().split('T')[0]; 
+  }
   return date.toISOString().split('T')[0];
 };
 
 const formatTime = (date: Date): string => {
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error("Invalid date passed to formatTime:", date);
+      return new Date().toTimeString().split(' ')[0].substring(0, 5); 
+  }
   return date.toTimeString().split(' ')[0].substring(0, 5);
 };
 
@@ -127,21 +139,18 @@ const generateMonthGrid = (date: Date): CalendarDay[] => {
 
   const firstDayOfMonth = new Date(year, month, 1);
   const lastDayOfMonth = new Date(year, month + 1, 0);
-  const firstDayWeekday = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, ...
+  const firstDayWeekday = firstDayOfMonth.getDay(); 
 
-  // 1. Pad with previous month's days
   for (let i = 0; i < firstDayWeekday; i++) {
     const prevDate = new Date(firstDayOfMonth);
     prevDate.setDate(prevDate.getDate() - (firstDayWeekday - i));
     grid.push({ date: prevDate, isCurrentMonth: false });
   }
 
-  // 2. Add current month's days
   for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
     grid.push({ date: new Date(year, month, i), isCurrentMonth: true });
   }
 
-  // 3. Pad with next month's days to fill 42 cells (6 weeks)
   const remainingCells = 42 - grid.length;
   for (let i = 1; i <= remainingCells; i++) {
     const nextDate = new Date(lastDayOfMonth);
@@ -159,7 +168,7 @@ const calculateDuration = (startTime: string, endTime: string): string => {
     const start = new Date(`1970-01-01T${startTime}:00`);
     const end = new Date(`1970-01-01T${endTime}:00`);
     let diff = end.getTime() - start.getTime();
-    if (diff < 0) diff += 24 * 60 * 60 * 1000; // Handle overnight
+    if (diff < 0) diff += 24 * 60 * 60 * 1000;
     
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -170,7 +179,6 @@ const calculateDuration = (startTime: string, endTime: string): string => {
   }
 };
 
-// Helper to get all logs from all services for a specific date
 const getLogsForDate = (date: Date, allLogs: { [key: number]: TimeLog[] }, services: AssignedService[]): (TimeLog & { vehicleNumber: string })[] => {
   const dateString = formatDate(date);
   const logsForDay: (TimeLog & { vehicleNumber: string })[] = [];
@@ -187,7 +195,6 @@ const getLogsForDate = (date: Date, allLogs: { [key: number]: TimeLog[] }, servi
   return logsForDay;
 };
 
-// Helper to check if a date has any logs
 const dateHasLogs = (date: Date, allLogs: { [key: number]: TimeLog[] }): boolean => {
   const dateString = formatDate(date);
   return Object.values(allLogs).flat().some(log => log.date === dateString);
@@ -202,13 +209,28 @@ const EmployeeDashboard = () => {
   const [selectedService, setSelectedService] = useState<AssignedService | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   
-  // State for new sections
   const [activeSection, setActiveSection] = useState<ActiveSection>('none');
   const [timeLogs, setTimeLogs] = useState<{ [key: number]: TimeLog[] }>(MOCK_TIME_LOGS);
   
-  // State for Calendar Summary
-  const [summaryMonth, setSummaryMonth] = useState(new Date('2025-10-01')); // Set to first of month
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(new Date('2025-10-25'));
+  const currentDate = new Date(); // Use actual current date
+  const firstOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const [summaryMonth, setSummaryMonth] = useState(firstOfCurrentMonth); 
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(currentDate); 
+  
+  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
+  const notificationTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const [logToDelete, setLogToDelete] = useState<TimeLog | null>(null);
+  
+  const showNotification = (message: string, type: NotificationType = 'success') => {
+    if (notificationTimer.current) {
+      clearTimeout(notificationTimer.current);
+    }
+    setNotification({ message, type });
+    notificationTimer.current = setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   const handleLogout = async () => {
     try {
@@ -219,10 +241,9 @@ const EmployeeDashboard = () => {
   };
 
   useEffect(() => {
-    // Select the first non-completed service by default
     const defaultService = assignedServices.find(s => s.status !== 'completed') || assignedServices[0];
     setSelectedService(defaultService);
-  }, []); // Run only once
+  }, []); 
 
   // --- Status & Color Helpers ---
   const getStatusColor = (status: string): string => {
@@ -255,22 +276,19 @@ const EmployeeDashboard = () => {
   // --- Event Handlers ---
   const handleSelectService = (service: AssignedService) => {
     setSelectedService(service);
-    setActiveSection('none'); // Close sections when changing service
+    setActiveSection('none');
   };
   
   const handleToggleSection = (section: ActiveSection) => {
     setActiveSection(prev => (prev === section ? 'none' : section));
   };
 
-  const handleStatusUpdate = (newStatus: ServiceStatus) => {
+  const handleStatusUpdate = (newStatus: ServiceStatus, description?: string) => {
     if (!selectedService) return;
 
     let newStartDate = selectedService.startDate;
     let newEstimatedCompletion = selectedService.estimatedCompletion;
 
-    // *** NEW LOGIC as requested ***
-    // If moving from 'not_started' to 'in_progress', set start date to NOW
-    // and estimated completion to 1 hour from NOW.
     if (selectedService.status === 'not_started' && newStatus === 'in_progress') {
       const now = new Date();
       const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
@@ -278,9 +296,13 @@ const EmployeeDashboard = () => {
       newStartDate = now.toISOString();
       newEstimatedCompletion = oneHourLater.toISOString();
       
-      alert(`Service Started.\nNew Estimated Completion: ${oneHourLater.toLocaleString()}`);
+      showNotification(`Service Started. Est. completion: ${oneHourLater.toLocaleTimeString()}`, 'success');
     } else {
-       alert(`Status updated to: ${newStatus.replace('_', ' ').toUpperCase()}`);
+       showNotification(`Status updated to: ${newStatus.replace('_', ' ').toUpperCase()}`, 'success');
+    }
+    
+    if (newStatus === 'completed') {
+      console.log("Saving Completion Description:", description);
     }
 
     const updatedService = { 
@@ -290,7 +312,6 @@ const EmployeeDashboard = () => {
       estimatedCompletion: newEstimatedCompletion
     };
     
-    // Update state
     setSelectedService(updatedService);
     setAssignedServices(prevServices => 
       prevServices.map(s => s.id === updatedService.id ? updatedService : s)
@@ -305,7 +326,7 @@ const EmployeeDashboard = () => {
     const duration = calculateDuration(newLog.startTime, newLog.endTime);
     const logToSave: TimeLog = {
       ...newLog,
-      id: Date.now(), // mock ID
+      id: Date.now(),
       serviceId: selectedService.id,
       duration: duration
     };
@@ -317,19 +338,46 @@ const EmployeeDashboard = () => {
         [selectedService.id]: [...currentLogs, logToSave]
       };
     });
+    
+    showNotification('Time log saved successfully!', 'success');
+  };
+  
+  const handleUpdateLog = (updatedLog: TimeLog) => {
+    if (!selectedService) return;
+
+    const duration = calculateDuration(updatedLog.startTime, updatedLog.endTime);
+    const logToUpdate = { ...updatedLog, duration };
+    
+    setTimeLogs(prevLogs => {
+      const currentLogs = prevLogs[selectedService.id] || [];
+      return {
+        ...prevLogs,
+        [selectedService.id]: currentLogs.map(log => 
+          log.id === logToUpdate.id ? logToUpdate : log
+        )
+      };
+    });
+    
+    showNotification('Time log updated successfully!', 'success');
   };
 
-  const handleDeleteLog = (logId: number) => {
-    if (!selectedService) return;
-    if (!window.confirm("Are you sure you want to delete this log entry?")) return;
+  const handleDeleteLogRequest = (log: TimeLog) => {
+    setLogToDelete(log); 
+  };
+
+  const handleConfirmDelete = () => {
+    if (!logToDelete || !selectedService) return;
 
     setTimeLogs(prevLogs => {
       const currentLogs = prevLogs[selectedService.id] || [];
       return {
         ...prevLogs,
-        [selectedService.id]: currentLogs.filter(log => log.id !== logId)
+        [selectedService.id]: currentLogs.filter(log => log.id !== logToDelete.id)
       };
     });
+    
+    showNotification('Log entry deleted.', 'success');
+    setLogToDelete(null); 
   };
   
   const changeMonth = (direction: 'prev' | 'next') => {
@@ -337,12 +385,30 @@ const EmployeeDashboard = () => {
     const amount = direction === 'prev' ? -1 : 1;
     newDate.setMonth(newDate.getMonth() + amount);
     setSummaryMonth(newDate);
-    setSelectedCalendarDate(null); // Clear selected day when changing month
+    setSelectedCalendarDate(null);
   };
 
   // --- RENDER ---
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative"> 
+      
+      {/* --- ToastNotification --- */}
+      {notification && (
+        <ToastNotification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+      
+      {/* --- Delete Confirmation Modal --- */}
+      {logToDelete && (
+        <DeleteConfirmationModal
+          onCancel={() => setLogToDelete(null)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
+
       {/* Header */}
       <header className="bg-primary text-primary-foreground shadow-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -424,14 +490,17 @@ const EmployeeDashboard = () => {
                 View All <ChevronRight className="w-4 h-4 ml-1" />
               </div>
             </a>
-            <a href="#" className="bg-card rounded-lg shadow-md p-6 border border-border flex flex-col items-start gap-3 hover:bg-accent transition-colors group">
+            <a 
+              href="#" 
+              className="bg-card rounded-lg shadow-md p-6 border border-border flex flex-col items-start gap-3 hover:bg-accent transition-colors group"
+            >
               <div className="p-3 bg-secondary rounded-lg border border-border">
                 <Calendar className="w-6 h-6 text-chart-1" />
               </div>
               <h3 className="text-xl font-bold text-card-foreground">Service Scheduling</h3>
-              <p className="text-sm text-muted-foreground flex-1">See a full calendar of your assigned services.</p>
+              <p className="text-sm text-muted-foreground flex-1">See the list of your assigned services.</p>
               <div className="mt-2 text-sm font-semibold text-primary group-hover:underline flex items-center">
-                Open Calendar <ChevronRight className="w-4 h-4 ml-1" />
+                View all services <ChevronRight className="w-4 h-4 ml-1" />
               </div>
             </a>
           </div>
@@ -519,11 +588,15 @@ const EmployeeDashboard = () => {
                       <Check className="w-4 h-4" />
                       Update Status
                     </button>
+                    {/* --- LOG TIME BUTTON --- */}
                     <button 
                       onClick={() => handleToggleSection('logTime')}
-                      className={`flex-1 px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border border-border ${
-                        activeSection === 'logTime' ? 'bg-accent text-accent-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'
-                      }`}
+                      disabled={selectedService.status === 'not_started'}
+                      className={`flex-1 px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border ${
+                        activeSection === 'logTime' 
+                          ? 'bg-chart-2 text-white border-chart-2/50' 
+                          : 'bg-chart-2/80 text-white hover:bg-chart-2 border-chart-2/50'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       <Clock className="w-4 h-4" />
                       Log Time
@@ -531,21 +604,24 @@ const EmployeeDashboard = () => {
                   </div>
                 </div>
                 
-                {/* --- NEW Update Status Section --- */}
                 {activeSection === 'updateStatus' && (
                   <UpdateStatusSection 
                     service={selectedService}
                     onStatusUpdate={handleStatusUpdate}
+                    showNotification={showNotification}
                   />
                 )}
                 
-                {/* --- NEW Log Time Section --- */}
                 {activeSection === 'logTime' && (
                   <LogTimeSection 
                     serviceId={selectedService.id}
                     logs={timeLogs[selectedService.id] || []}
                     onSaveLog={handleSaveLog}
-                    onDeleteLog={handleDeleteLog}
+                    onUpdateLog={handleUpdateLog}
+                    onDeleteRequest={handleDeleteLogRequest}
+                    showNotification={showNotification}
+                    // --- Pass selected calendar date ---
+                    selectedCalendarDate={selectedCalendarDate} 
                   />
                 )}
               </>
@@ -553,11 +629,10 @@ const EmployeeDashboard = () => {
           </div>
         </div>
 
-        {/* --- NEW Monthly Calendar Section (at bottom) --- */}
+        {/* --- Monthly Calendar Section --- */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold text-card-foreground mb-4">Monthly Work Summary</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Calendar Card */}
             <MonthlyCalendar 
               currentMonth={summaryMonth}
               allLogs={timeLogs}
@@ -565,7 +640,6 @@ const EmployeeDashboard = () => {
               onDateClick={setSelectedCalendarDate}
               onChangeMonth={changeMonth}
             />
-            {/* Daily Log Summary Card */}
             <DailyLogSummary 
               selectedDate={selectedCalendarDate}
               allLogs={timeLogs}
@@ -582,15 +656,58 @@ const EmployeeDashboard = () => {
 
 // --- SUB-COMPONENTS ---
 
-interface UpdateStatusProps {
-  service: AssignedService;
-  onStatusUpdate: (newStatus: ServiceStatus) => void;
+// --- ToastNotification Component ---
+interface ToastNotificationProps {
+  message: string;
+  type: NotificationType;
+  onClose: () => void;
 }
 
-const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpdate }) => {
-  const [pendingStatus, setPendingStatus] = useState<ServiceStatus>(service.status);
+const ToastNotification: React.FC<ToastNotificationProps> = ({ message, type, onClose }) => {
+  const isSuccess = type === 'success';
 
-  // Helper function to get color without opacity
+  return (
+    <div className="fixed top-20 right-6 z-50 bg-card rounded-lg shadow-xl p-4 border border-border w-full max-w-sm m-4 animate-fade-in-down">
+      <div className="flex items-start gap-4">
+        <div className={`flex-shrink-0 p-2 rounded-full border ${
+          isSuccess 
+          ? 'bg-chart-2/10 border-chart-2/20' 
+          : 'bg-destructive/10 border-destructive/20'
+        }`}>
+          {isSuccess ? (
+            <CheckCircle className="w-5 h-5 text-chart-2" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 text-destructive" />
+          )}
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-card-foreground">
+            {isSuccess ? 'Success' : 'Error'}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {message}
+          </p>
+        </div>
+        <button onClick={onClose} className="text-muted-foreground hover:text-card-foreground">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+// --- Update Status Component ---
+interface UpdateStatusProps {
+  service: AssignedService;
+  onStatusUpdate: (newStatus: ServiceStatus, description?: string) => void;
+  showNotification: (message: string, type: NotificationType) => void;
+}
+
+const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpdate, showNotification }) => {
+  const [pendingStatus, setPendingStatus] = useState<ServiceStatus>(service.status);
+  const [description, setDescription] = useState('');
+
   const getSolidStatusColor = (status: string): string => {
     switch(status) {
       case 'completed': return 'bg-chart-2 text-white border-chart-2';
@@ -606,6 +723,14 @@ const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpd
       ? getSolidStatusColor(status)
       : `bg-secondary text-secondary-foreground border-border hover:bg-accent`
     }`;
+  };
+  
+  const handleSaveClick = () => {
+    if (pendingStatus === 'completed' && !description.trim()) {
+      showNotification('Please add a completion description.', 'error');
+      return;
+    }
+    onStatusUpdate(pendingStatus, description);
   };
 
   return (
@@ -626,9 +751,23 @@ const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpd
           COMPLETED
         </button>
       </div>
+
+      {pendingStatus === 'completed' && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">Completion Description</label>
+          <textarea 
+            value={description} 
+            onChange={e => setDescription(e.target.value)} 
+            rows={4}
+            placeholder="Describe the work completed, parts used, and final checks."
+            className="w-full p-2 bg-background border border-border rounded-lg"
+          ></textarea>
+        </div>
+      )}
+
       <button 
-        onClick={() => onStatusUpdate(pendingStatus)}
-        disabled={pendingStatus === service.status}
+        onClick={handleSaveClick}
+        disabled={pendingStatus === service.status && (pendingStatus !== 'completed' || description === '')}
         className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border disabled:opacity-50"
       >
         <Save className="w-4 h-4" />
@@ -639,19 +778,66 @@ const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpd
 };
 
 
+// --- MODIFIED Log Time Component ---
 interface LogTimeProps {
   serviceId: number;
   logs: TimeLog[];
   onSaveLog: (newLog: Omit<TimeLog, 'id' | 'serviceId' | 'duration'>) => void;
-  onDeleteLog: (logId: number) => void;
+  onUpdateLog: (updatedLog: TimeLog) => void;
+  onDeleteRequest: (log: TimeLog) => void;
+  showNotification: (message: string, type: NotificationType) => void;
+  selectedCalendarDate: Date | null; // Added prop
 }
 
-const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, onDeleteLog }) => {
-  const [date, setDate] = useState(formatDate(new Date()));
-  const [startTime, setStartTime] = useState(formatTime(new Date()));
-  const [endTime, setEndTime] = useState(formatTime(new Date()));
+const LogTimeSection: React.FC<LogTimeProps> = ({ 
+  serviceId, 
+  logs, 
+  onSaveLog, 
+  onUpdateLog, 
+  onDeleteRequest, 
+  showNotification, 
+  selectedCalendarDate // Use prop
+}) => {
+  const [editingLog, setEditingLog] = useState<TimeLog | null>(null);
+  
+  // --- Initialize state with current date/time OR selected calendar date ---
+  const getDefaultDate = () => selectedCalendarDate ? formatDate(selectedCalendarDate) : formatDate(new Date());
+  const [date, setDate] = useState(getDefaultDate());
+  const [startTime, setStartTime] = useState(() => formatTime(new Date()));
+  const [endTime, setEndTime] = useState(() => formatTime(new Date()));
   const [duration, setDuration] = useState('0h 0m');
   const [description, setDescription] = useState('');
+  
+  const resetForm = () => {
+    // --- Reset state to current time, but date to selectedCalendarDate or today ---
+    const now = new Date();
+    setDate(getDefaultDate()); // Use selected calendar date or today
+    setStartTime(formatTime(now));
+    setEndTime(formatTime(now));
+    setDuration('0h 0m');
+    setDescription('');
+    setEditingLog(null);
+  };
+  
+  // --- Effect to update default date if calendar selection changes ---
+  useEffect(() => {
+    // Only update the date field if not currently editing a log
+    if (!editingLog) {
+      setDate(getDefaultDate());
+    }
+  }, [selectedCalendarDate, editingLog]); // Rerun when calendar date changes or edit mode changes
+
+  useEffect(() => {
+    if (editingLog) {
+      setDate(editingLog.date);
+      setStartTime(editingLog.startTime);
+      setEndTime(editingLog.endTime);
+      setDuration(editingLog.duration);
+      setDescription(editingLog.description);
+    } 
+    // No 'else' needed here, resetForm handles non-edit state, 
+    // and the other useEffect handles date changes from calendar
+  }, [editingLog]);
 
   const handleDurationCalc = () => {
     setDuration(calculateDuration(startTime, endTime));
@@ -659,25 +845,36 @@ const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, on
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || duration === '0h 0m' || startTime >= endTime) {
-      alert("Please enter a valid description and time range.");
+    if (!description.trim() || duration === '0h 0m' || startTime >= endTime) {
+      showNotification("Please enter a valid description and time range.", "error");
       return;
     }
-    onSaveLog({ date, startTime, endTime, description });
-    // Reset form
-    setDescription('');
-    setStartTime(formatTime(new Date()));
-    setEndTime(formatTime(new Date()));
-    setDuration('0h 0m');
+    
+    if (editingLog) {
+      onUpdateLog({
+        ...editingLog,
+        date,
+        startTime,
+        endTime,
+        description,
+        duration 
+      });
+    } else {
+      onSaveLog({ date, startTime, endTime, description });
+    }
+    
+    resetForm();
   };
   
   return (
     <div className="bg-card rounded-lg shadow-md p-6 border border-border">
       <h3 className="text-xl font-bold text-card-foreground mb-4">Log Time</h3>
       
-      {/* New Log Form */}
+      {/* Log Form */}
       <form onSubmit={handleSave} className="bg-secondary p-4 rounded-lg border border-border mb-6 space-y-4">
-        <h4 className="text-lg font-semibold text-card-foreground">New Log Entry</h4>
+        <h4 className="text-lg font-semibold text-card-foreground">
+          {editingLog ? 'Edit Log Entry' : 'New Log Entry'}
+        </h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
@@ -706,10 +903,22 @@ const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, on
             className="w-full p-2 bg-background border border-border rounded-lg"
           ></textarea>
         </div>
-        <div className="text-right">
-          <button type="submit" className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border ml-auto">
+        <div className="flex justify-end gap-3">
+          {editingLog && (
+            <button 
+              type="button" 
+              onClick={resetForm} 
+              className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-accent transition flex items-center justify-center gap-2 border border-border"
+            >
+              Cancel Edit
+            </button>
+          )}
+          <button 
+            type="submit" 
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border"
+          >
             <Save className="w-4 h-4" />
-            Save Log
+            {editingLog ? 'Update Log' : 'Save Log'}
           </button>
         </div>
       </form>
@@ -721,7 +930,7 @@ const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, on
           {logs.length === 0 && (
             <p className="text-muted-foreground text-center p-4">No time logged for this service yet.</p>
           )}
-          {logs.slice().reverse().map(log => ( // Show newest first
+          {logs.slice().reverse().map(log => (
             <div key={log.id} className="p-3 bg-secondary rounded-lg border border-border flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
@@ -732,8 +941,8 @@ const LogTimeSection: React.FC<LogTimeProps> = ({ serviceId, logs, onSaveLog, on
                 <p className="text-sm text-muted-foreground">{log.description}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => alert('Edit functionality not implemented.')} className="p-2 text-muted-foreground hover:text-primary"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => onDeleteLog(log.id)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => setEditingLog(log)} className="p-2 text-muted-foreground hover:text-primary"><Edit className="w-4 h-4" /></button>
+                <button onClick={() => onDeleteRequest(log)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           ))}
@@ -754,6 +963,8 @@ interface MonthlyCalendarProps {
 }
 
 const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ currentMonth, allLogs, selectedDate, onDateClick, onChangeMonth }) => {
+  // --- Get today's date string once ---
+  const todayString = formatDate(new Date()); 
   const monthGrid = generateMonthGrid(currentMonth);
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -777,21 +988,34 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ currentMonth, allLogs
 
       <div className="grid grid-cols-7 gap-1">
         {monthGrid.map((day, index) => {
+          if (!day.isCurrentMonth) {
+            return <div key={index} className="h-16 rounded-lg bg-secondary/30 border border-transparent"></div>;
+          }
+
           const isSelected = selectedDate && formatDate(day.date) === formatDate(selectedDate);
-          const hasLogs = day.isCurrentMonth && dateHasLogs(day.date, allLogs);
-          
+          const hasLogs = dateHasLogs(day.date, allLogs);
+          const isToday = formatDate(day.date) === todayString;
+
+          // --- Determine cell background and text color ---
+          let cellClasses = 'border-border bg-secondary hover:bg-accent';
+          let textClasses = 'text-card-foreground';
+
+          if (isToday) {
+            cellClasses = 'border-border bg-accent hover:bg-accent/80'; 
+            textClasses = 'text-accent-foreground font-bold'; 
+          }
+          if (isSelected) {
+            cellClasses = 'border-primary bg-primary/10'; 
+            textClasses = 'text-primary font-bold'; 
+          }
+
           return (
             <button
               key={index}
-              disabled={!day.isCurrentMonth}
               onClick={() => onDateClick(day.date)}
-              className={`h-16 p-2 rounded-lg border transition-colors relative flex flex-col items-center justify-start ${
-                !day.isCurrentMonth ? 'bg-secondary/50 text-muted-foreground/30' : 'bg-secondary hover:bg-accent'
-              } ${
-                isSelected ? 'border-primary bg-primary/10' : 'border-border'
-              }`}
+              className={`h-16 p-2 rounded-lg border transition-colors relative flex flex-col items-center justify-start ${cellClasses}`}
             >
-              <span className={`font-semibold ${isSelected ? 'text-primary' : 'text-card-foreground'}`}>
+              <span className={`font-semibold ${textClasses}`}>
                 {day.date.getDate()}
               </span>
               {hasLogs && <Dot className="text-primary w-6 h-6 absolute bottom-0 left-1/2 -translate-x-1/2" />}
@@ -845,5 +1069,45 @@ const DailyLogSummary: React.FC<DailyLogSummaryProps> = ({ selectedDate, allLogs
   );
 };
 
+
+// --- Delete Confirmation Modal (Backdrop removed) ---
+interface DeleteConfirmationModalProps {
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ onCancel, onConfirm }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="bg-card rounded-lg shadow-xl p-6 border border-border w-full max-w-md m-4">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 p-3 bg-destructive/10 rounded-full border border-destructive/20">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-card-foreground mb-2">Delete Log Entry</h3>
+            <p className="text-muted-foreground">
+              Are you sure you want to delete this? This cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 mt-6">
+          <button 
+            onClick={onCancel}
+            className="px-4 py-2 rounded-lg font-semibold bg-secondary text-secondary-foreground hover:bg-accent transition border border-border"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-lg font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition border border-border"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default EmployeeDashboard;
