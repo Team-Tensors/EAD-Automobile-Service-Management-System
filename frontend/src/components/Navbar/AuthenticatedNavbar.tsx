@@ -52,7 +52,7 @@ const AuthenticatedNavbar = () => {
   });
 
   const isActiveTab = (path: string) => {
-    return location.pathname === path;
+    return location.pathname.startsWith(path);
   };
 
   return (
