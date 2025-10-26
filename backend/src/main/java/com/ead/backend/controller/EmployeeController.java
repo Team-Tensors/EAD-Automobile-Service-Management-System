@@ -1,6 +1,8 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.dto.MessageResponseDTO;
+import com.ead.backend.dto.TimeLogRequestDto;
+import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.service.EmployeeService;
 import org.springframework.http.HttpStatus;
@@ -26,8 +28,8 @@ public class EmployeeController {
         logger.info("EmployeeController initialized successfully with JWT-based role authorization");
     }
 
-    @PostMapping("/timelogs")
-    public ResponseEntity<?> timeLogs(@RequestParam Long appointmentId, @RequestParam Long employeeId) {
+    @GetMapping("/appointments/{appointmentId}/employees/{employeeId}/timelogs")
+    public ResponseEntity<?> getTimeLogs(@PathVariable Long appointmentId, @PathVariable Long employeeId)  {
         logger.info("=== RETRIEVE TIME LOGS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
         logger.info("Employee Id: {}", employeeId);
@@ -40,13 +42,91 @@ public class EmployeeController {
 
             // Check for specific error types
             if ("NOT_FOUND".equals(errorMessage)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("No records found.", false));
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("No records found.", false));
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO(errorMessage, false));
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
             }
         } catch (Exception e) {
             logger.error("Retrieve time logs by appointment id and employee id - Unexpected error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDTO("Unexcepted error occurred retrieving time logs.", false));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponseDTO("Unexcepted error occurred retrieving time logs.", false));
+        }
+    }
+
+    /**
+     * Retrieve all appointments assigned to an employee.
+     */
+    @GetMapping("/appointments/{employeeId}")
+    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId) {
+        logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
+        try {
+            List<Appointment> appointments = employeeService.getAppointmentsByEmployee(employeeId);
+            return ResponseEntity.ok(appointments);
+        } catch (Exception e) {
+            logger.error("Error retrieving appointments for employee {}: {}", employeeId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponseDTO("Unexpected error occurred retrieving appointments.", false));
+        }
+    }
+
+    /**
+     * Update the status of an appointment.
+     */
+    @PutMapping("/appointments/{appointmentId}/status")
+    public ResponseEntity<?> updateAppointmentStatus(@PathVariable Long appointmentId,
+                                                     @RequestParam String status) {
+        logger.info("=== UPDATE APPOINTMENT STATUS REQUEST RECEIVED ===");
+        logger.info("Appointment Id: {}, New Status: {}", appointmentId, status);
+
+        try {
+            Appointment updatedAppointment = employeeService.updateAppointmentStatus(appointmentId, status);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+            logger.error("Error updating appointment status: {}", errorMessage);
+            // Check for specific error types
+            if ("NOT_FOUND".equals(errorMessage)) {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Unable to retrieve appointment in order to update status.", false));
+            } else if ("INVALID_STATUS".equals(errorMessage))  {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid appointment status.", false));
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
+            }
+        } catch (Exception e) {
+            logger.error("Unexpected error updating appointment status: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponseDTO("Unexpected error occurred updating appointment status.", false));
+        }
+    }
+
+    /**
+     * Add a new time log entry.
+     */
+    @PostMapping("/appointments/{appointmentId}/timelog")
+    public ResponseEntity<?> addTimeLog(@PathVariable Long appointmentId, @RequestBody TimeLogRequestDto timeLog) {
+        logger.info("=== ADD TIME LOG REQUEST RECEIVED ===");
+        logger.info("Appointment Id: {}", appointmentId);
+
+        try {
+            TimeLog savedLog = employeeService.addTimeLog(appointmentId, timeLog);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedLog);
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+            logger.error("Error inserting new time log: {}", errorMessage);
+            // Check for specific error types
+            if ("APPOINTMENT_NOT_FOUND".equals(errorMessage)) {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid appointment id.", false));
+            } else if ("EMPLOYEE_NOT_FOUND".equals(errorMessage)) {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid employee id.", false));
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
+            }
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error adding time log: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponseDTO("Unexpected error occurred adding time log.", false));
         }
     }
 }
