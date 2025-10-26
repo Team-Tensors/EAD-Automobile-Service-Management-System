@@ -7,6 +7,7 @@ import ContactUs from "@/components/HomePage/ContactUs";
 import { SponsorLogoSlider } from "@/components/HomePage/SponsorLogoSlider"
 import ServicesSlider from "@/components/HomePage/ServicesSlider"
 import AboutSection from "@/components/HomePage/AboutSection";
+import ChooseUs from "@/components/HomePage/ChooseUs";
 
 
 const sponsorLogos = [
@@ -29,6 +30,7 @@ const HomePage = () => {
         <Hero />
         <Features />
         <AboutSection />
+        <ChooseUs />
         <Services />
         <ServicesSlider />
         <ContactUs />
