@@ -91,10 +91,14 @@ const AuthenticatedNavbar = () => {
               Logout
             </button>
 
-            {/* User Avatar */}
-            <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer">
+            {/* User Avatar - Clickable to go to profile */}
+            <Link
+              to="/profile"
+              className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-700 transition-colors"
+              title="View Profile"
+            >
               <User className="w-6 h-6 text-white" />
-            </div>
+            </Link>
           </div>
         </div>
       </div>
