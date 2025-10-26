@@ -6,9 +6,14 @@ import com.ead.backend.dto.SignupRequestDTO;
 import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.dto.RefreshTokenRequestDTO;
 import com.ead.backend.dto.UpdateProfileRequestDTO;
+import com.ead.backend.dto.ForgotPasswordRequestDTO;
+import com.ead.backend.dto.ResetPasswordRequestDTO;
+import com.ead.backend.dto.VerifyResetTokenResponseDTO;
 import com.ead.backend.entity.User;
+import com.ead.backend.entity.PasswordResetToken;
 import com.ead.backend.service.AuthService;
 import com.ead.backend.service.RefreshTokenService;
+import com.ead.backend.service.PasswordResetService;
 import com.ead.backend.annotation.JwtSecurityAnnotations.Authenticated;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +35,12 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService, RefreshTokenService refreshTokenService) {
+    public AuthController(AuthService authService, RefreshTokenService refreshTokenService, PasswordResetService passwordResetService) {
         this.authService = authService;
         this.refreshTokenService = refreshTokenService;
+        this.passwordResetService = passwordResetService;
         logger.info("AuthController initialized successfully with JWT-based role authorization");
     }
 
@@ -351,6 +358,75 @@ public class AuthController {
             logger.error("Failed to update profile for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new MessageResponseDTO("Unable to update profile: " + e.getMessage(), false));
+        }
+    }
+
+    /**
+     * Forgot Password - Request password reset email
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+        logger.info("=== FORGOT PASSWORD REQUEST RECEIVED ===");
+        logger.info("Email: {}", request.getEmail());
+
+        try {
+            passwordResetService.initiatePasswordReset(request.getEmail());
+            logger.info("Password reset initiated for email: {}", request.getEmail());
+
+            // Always return success to prevent email enumeration
+            return ResponseEntity.ok(new MessageResponseDTO(
+                "If this email is registered, you will receive a password reset link shortly"));
+        } catch (Exception e) {
+            logger.error("Forgot password request failed for email: {} - Error: {}",
+                        request.getEmail(), e.getMessage());
+            // Return generic message for security
+            return ResponseEntity.ok(new MessageResponseDTO(
+                "If this email is registered, you will receive a password reset link shortly"));
+        }
+    }
+
+    /**
+     * Reset Password - Set new password with token
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
+        logger.info("=== RESET PASSWORD REQUEST RECEIVED ===");
+
+        try {
+            passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+            logger.info("Password reset successful");
+
+            return ResponseEntity.ok(new MessageResponseDTO(
+                "Password has been reset successfully. You can now login with your new password"));
+        } catch (Exception e) {
+            logger.error("Password reset failed - Error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponseDTO(e.getMessage(), false));
+        }
+    }
+
+    /**
+     * Verify Reset Token - Check if token is valid
+     */
+    @GetMapping("/verify-reset-token/{token}")
+    public ResponseEntity<?> verifyResetToken(@PathVariable String token) {
+        logger.info("=== VERIFY RESET TOKEN REQUEST RECEIVED ===");
+
+        try {
+            PasswordResetToken resetToken = passwordResetService.verifyResetToken(token);
+            logger.info("Token verification successful");
+
+            return ResponseEntity.ok(new VerifyResetTokenResponseDTO(
+                true,
+                resetToken.getUser().getEmail(),
+                "Token is valid"
+            ));
+        } catch (Exception e) {
+            logger.error("Token verification failed - Error: {}", e.getMessage());
+            return ResponseEntity.ok(new VerifyResetTokenResponseDTO(
+                false,
+                e.getMessage()
+            ));
         }
     }
 
