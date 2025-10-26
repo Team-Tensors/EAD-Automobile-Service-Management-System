@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { User } from '../types/auth';
 import type { UserRole } from '../types/auth';
+import { authService } from '@/services/authService';
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -43,18 +44,7 @@ const OAuthCallback = () => {
 
         // Fetch user profile
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/auth/profile`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch user profile');
-          }
-
-          const backendUserData = await response.json();
+          const backendUserData = await authService.getProfile();
           
           console.log('Backend user data received:', backendUserData);
           
@@ -85,13 +75,22 @@ const OAuthCallback = () => {
           localStorage.setItem('user', JSON.stringify(userData));
           
           console.log('User data stored in localStorage');
-          console.log('Redirecting to dashboard...');
-
-          // Success! Redirect to dashboard
-          setIsProcessing(false);
           
-          // Force a page reload to trigger auth context initialization
-          window.location.href = '/dashboard';
+          // Check if user needs to complete profile (missing phone number)
+          const needsProfileCompletion = !userData.phoneNumber || userData.phoneNumber.trim() === '';
+          
+          if (needsProfileCompletion) {
+            console.log('User needs to complete profile, redirecting...');
+            setIsProcessing(false);
+            // Redirect to profile completion page
+            window.location.href = '/complete-profile';
+          } else {
+            console.log('Profile complete, redirecting to dashboard...');
+            // Success! Redirect to dashboard
+            setIsProcessing(false);
+            // Force a page reload to trigger auth context initialization
+            window.location.href = '/dashboard';
+          }
         } catch (profileError) {
           console.error('Error fetching profile:', profileError);
           setError('Authentication successful, but failed to load profile. Redirecting...');

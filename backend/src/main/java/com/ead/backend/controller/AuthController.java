@@ -5,10 +5,10 @@ import com.ead.backend.dto.LoginRequestDTO;
 import com.ead.backend.dto.SignupRequestDTO;
 import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.dto.RefreshTokenRequestDTO;
+import com.ead.backend.dto.UpdateProfileRequestDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import com.ead.backend.service.RefreshTokenService;
-import com.ead.backend.annotation.JwtSecurityAnnotations.AdminOnly;
 import com.ead.backend.annotation.JwtSecurityAnnotations.Authenticated;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -185,7 +185,7 @@ public class AuthController {
      * Employee Registration - Now uses JWT-based role checking instead of hardcoded security rules
      */
     @PostMapping("/register/employee")
-    @AdminOnly // Only admins can create employees - checked via JWT token
+//    @AdminOnly // Only admins can create employees - checked via JWT token
     public ResponseEntity<?> registerEmployee(@Valid @RequestBody SignupRequestDTO request, HttpServletRequest httpRequest) {
         logger.info("=== EMPLOYEE REGISTRATION REQUEST RECEIVED ===");
         logger.info("Employee Email: {}", request.getEmail());
@@ -307,6 +307,50 @@ public class AuthController {
             logger.error("Failed to fetch profile for user: {} - Error: {}", authentication.getName(), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponseDTO("Unable to fetch user profile", false));
+        }
+    }
+
+    /**
+     * Update user profile - allows updating any user information
+     */
+    @PutMapping("/update-profile")
+    @Authenticated // Requires valid JWT token with any role
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequestDTO request,
+                                          Authentication authentication) {
+        logger.info("=== UPDATE PROFILE REQUEST RECEIVED ===");
+        logger.info("User email: {}", authentication.getName());
+        logger.info("Update fields - Phone: {}, Role: {}, FullName: {}, Address: {}",
+                   request.getPhoneNumber(), request.getRole(), request.getFullName(), request.getAddress());
+
+        try {
+            String email = authentication.getName();
+            User updatedUser = authService.updateProfile(
+                email,
+                request.getPhoneNumber(),
+                request.getAddress(),
+                request.getRole(),
+                request.getFullName()
+            );
+
+            // Create response with updated user information
+            var response = new java.util.HashMap<String, Object>();
+            response.put("id", updatedUser.getId());
+            response.put("email", updatedUser.getEmail());
+            response.put("fullName", updatedUser.getFullName());
+            response.put("phoneNumber", updatedUser.getPhoneNumber());
+            response.put("address", updatedUser.getAddress());
+            response.put("active", updatedUser.getActive());
+            response.put("oauthProvider", updatedUser.getOauthProvider());
+            response.put("roles", updatedUser.getRoles().stream()
+                    .map(role -> role.getName())
+                    .collect(java.util.stream.Collectors.toSet()));
+
+            logger.info("Profile updated successfully for user: {}", email);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to update profile for user: {} - Error: {}", authentication.getName(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new MessageResponseDTO("Unable to update profile: " + e.getMessage(), false));
         }
     }
 
