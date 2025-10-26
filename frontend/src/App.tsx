@@ -7,6 +7,8 @@ import DashboardRouter from './pages/DashboardRouter'
 import AdminRouter from './pages/admin/AdminRouter'
 import OAuthCallback from './pages/OAuthCallback'
 import CompleteProfilePage from './pages/CompleteProfilePage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
@@ -41,6 +43,25 @@ function App() {
         element={
           <PublicRoute>
             <EmployeeRegisterPage />
+          </PublicRoute>
+        }
+      />
+      
+      {/* Forgot Password Routes */}
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
+          </PublicRoute>
+        }
+      />
+      
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPasswordPage />
           </PublicRoute>
         }
       />
