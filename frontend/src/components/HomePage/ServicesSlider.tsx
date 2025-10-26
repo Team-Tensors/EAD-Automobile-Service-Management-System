@@ -17,7 +17,7 @@ const services: Service[] = [
     title: "SYSTEM REPAIR",
     badge: "DIAGNOSTICS",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service1.jpg",
     icon: <Wrench size={32} className="text-white" />,
   },
@@ -26,7 +26,7 @@ const services: Service[] = [
     title: "RADIATOR SERVICE",
     badge: "MAINTENANCE",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service2.jpg",
     icon: <Gauge size={32} className="text-white" />,
   },
@@ -35,7 +35,7 @@ const services: Service[] = [
     title: "BRAKE REPAIR",
     badge: "REPAIR",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service3.jpg",
     icon: <Disc3 size={32} className="text-white" />,
   },
@@ -44,7 +44,7 @@ const services: Service[] = [
     title: "BATTERY REPAIR",
     badge: "MAINTENANCE",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service4.jpg",
     icon: <Zap size={32} className="text-white" />,
   },
@@ -53,7 +53,7 @@ const services: Service[] = [
     title: "OIL CHANGE",
     badge: "REPAIR",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service5.jpg",
     icon: <Droplet size={32} className="text-white" />,
   },
@@ -62,7 +62,7 @@ const services: Service[] = [
     title: "SYSTEM REPAIR",
     badge: "REPAIR",
     description:
-      "At Autofix, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust Autofix for all your car care needs.",
+      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
   image: "/services/service6.jpg",
     icon: <Flame size={32} className="text-white" />,
   },

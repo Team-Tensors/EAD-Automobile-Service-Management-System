@@ -8,14 +8,14 @@ import {
 } from "@/components/ui/card";
 
 const tabs = [
-  { id: "autofix", label: "Autofix Services" },
+  { id: "drivecare", label: "DriveCare Services" },
   { id: "maintenance", label: "Maintenance" },
   { id: "repair", label: "Repair" },
   { id: "diagnostics", label: "Diagnostics" },
 ];
 
 const services: Record<string, Array<{ title: string; desc: string; details: string }>> = {
-  autofix: [
+  drivecare: [
     {
       title: "Brake Repair",
       desc: "Comprehensive brake inspections and repairs.",

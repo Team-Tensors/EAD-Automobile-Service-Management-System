@@ -21,7 +21,7 @@ const Hero = () => {
           <div className="flex items-center space-x-3 mb-6 animate-fade-in">
             <div className="w-12 h-0.5 bg-orange-600"></div>
             <p className="text-sm text-gray-400 uppercase tracking-wider">
-              Discover the passion and expertise behind AutoFix
+              Discover the passion and expertise behind DriveCare
             </p>
           </div>
 

@@ -5,7 +5,8 @@ import Services from "@/components/HomePage/Services";
 import Footer from "@/components/Footer/Footer";
 import ContactUs from "@/components/HomePage/ContactUs";
 import { SponsorLogoSlider } from "@/components/HomePage/SponsorLogoSlider"
-import ServicesSlider from "@/components/HomePage/services-slider"
+import ServicesSlider from "@/components/HomePage/ServicesSlider"
+import AboutSection from "@/components/HomePage/AboutSection";
 
 
 const sponsorLogos = [
@@ -22,11 +23,12 @@ const sponsorLogos = [
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-[#131212]">
+    <div className="min-h-screen bg-[#000000]">
       <Navbar />
       <main>
         <Hero />
         <Features />
+        <AboutSection />
         <Services />
         <ServicesSlider />
         <ContactUs />
