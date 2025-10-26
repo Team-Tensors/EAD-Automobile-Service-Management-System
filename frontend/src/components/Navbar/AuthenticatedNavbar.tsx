@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { User, LayoutDashboard, Calendar } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import type { LucideIcon } from "lucide-react";
+import { type LucideIcon, Car } from "lucide-react";
 
 interface NavTab {
   name: string;
@@ -28,11 +28,17 @@ const AuthenticatedNavbar = () => {
   const navTabs: NavTab[] = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     {
-      name: "Appointments",
+      name: "My Appointments",
       path: "/my-appointments",
       icon: Calendar,
       roles: ["CUSTOMER"],
     },
+    {
+      name: "My Vehicles",
+      path: "/my-vehicles",
+      icon: Car, 
+      roles: ["CUSTOMER"],
+    }
     // Add more tabs here as needed
   ];
 
@@ -46,7 +52,7 @@ const AuthenticatedNavbar = () => {
   });
 
   const isActiveTab = (path: string) => {
-    return location.pathname === path;
+    return location.pathname.startsWith(path);
   };
 
   return (
