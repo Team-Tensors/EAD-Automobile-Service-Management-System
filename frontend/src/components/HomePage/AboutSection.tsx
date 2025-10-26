@@ -1,7 +1,7 @@
 
 export default function AboutSection() {
   return (
-    <section className="relative bg-black px-6 py-16 md:px-12 md:py-24 overflow-hidden">
+    <section className="relative bg-black px-6 py-16 md:px-12 md:py-24 mb-5 overflow-hidden">
       {/* Right side radial glow in middle */}
       <div
         className="pointer-events-none absolute right-0 top-1/2 transform -translate-y-1/2 w-1/3 h-full opacity-60"
@@ -11,7 +11,7 @@ export default function AboutSection() {
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto">
+      <div className="relative max-w-7xl mx-auto">
         {/* Accent label */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-1 h-6 bg-orange-600"></div>
@@ -21,7 +21,7 @@ export default function AboutSection() {
         </div>
 
         {/* Main heading */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-16 leading-tight text-balance">
+        <h1 className="text-4xl md:text-4xl lg:text-5xl font-bold text-white mb-16 leading-tight text-balance font-heading">
           FROM OUR GARAGE TO YOUR DRIVEWAY: DRIVECARE'S JOURNEY TO SUPERIOR CAR CARE AND CUSTOMER SATISFACTION
         </h1>
 

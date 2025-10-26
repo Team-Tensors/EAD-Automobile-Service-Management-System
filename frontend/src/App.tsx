@@ -102,7 +102,7 @@ function App() {
 
       {/* Customer Appointment Route */}
       <Route
-        path="/dashboard/appointments"
+        path="/my-appointments/appointment-booking"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
@@ -119,15 +119,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/appointment-booking"
-        element={
-          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <AppointmentBookingPage />
-          </ProtectedRoute>
-        }
-      />
-
+     
       {/* Admin routes with nested routing */}
       <Route
         path="/admin/*"
@@ -138,18 +130,9 @@ function App() {
         }
       />
 
-      {/* Legacy route for backward compatibility */}
-      <Route
-        path="/dashboard/appointments"
-        element={
-          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
-            <MyAppointmentsPage />
-          </ProtectedRoute>
-        }
-      />
-
+      {/* Customer My Vehicles Route */}
         <Route
-        path="/my-vehicle"
+        path="/my-vehicles"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AddVehiclePage />
