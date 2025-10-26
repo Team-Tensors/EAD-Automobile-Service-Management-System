@@ -45,7 +45,7 @@ const AdminNavbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-white tracking-wider">
-              DRIVE<span className="text-orange-500">CARE</span>
+              DRIVE<span className="text-orange-600">CARE</span>
             </span>
             <span className="text-xs text-gray-400 ml-2">Admin</span>
           </div>
@@ -60,7 +60,7 @@ const AdminNavbar = () => {
                   onClick={() => handleNavigation(item.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
                     activeSection === item.id
-                      ? 'bg-orange-500 text-white'
+                      ? 'bg-orange-600 text-white'
                       : 'text-gray-400 hover:text-white hover:bg-zinc-800'
                   }`}
                 >
@@ -79,7 +79,7 @@ const AdminNavbar = () => {
             >
               Logout
             </button>
-            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center cursor-pointer">
+            <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer">
               <User className="w-6 h-6 text-white" />
             </div>
           </div>

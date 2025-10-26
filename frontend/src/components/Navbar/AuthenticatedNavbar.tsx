@@ -50,13 +50,13 @@ const AuthenticatedNavbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur-sm border-b border-zinc-800">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <nav className="fixed top-6 left-0 right-0 z-50 pointer-events-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
+        <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-white tracking-wider">
-              DRIVE<span className="text-orange-500">CARE</span>
+              DRIVE<span className="text-orange-600">CARE</span>
             </span>
           </Link>
 
@@ -92,7 +92,7 @@ const AuthenticatedNavbar = () => {
             </button>
 
             {/* User Avatar */}
-            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center cursor-pointer">
+            <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer">
               <User className="w-6 h-6 text-white" />
             </div>
           </div>
