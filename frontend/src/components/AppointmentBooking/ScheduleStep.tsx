@@ -2,8 +2,14 @@
 import React from 'react';
 import { Calendar, Clock, FileText } from 'lucide-react';
 
+interface ScheduleFormData {
+  appointmentDate: string;
+  appointmentTime: string;
+  description: string;
+}
+
 interface ScheduleStepProps {
-  formData: any;
+  formData: ScheduleFormData;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onBack: () => void;
   onSubmit: () => void;
