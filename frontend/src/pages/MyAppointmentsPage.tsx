@@ -99,7 +99,7 @@ const MyAppointmentsPage = () => {
           {/* Add Appointment Button */}
           <div className="mb-8">
             <button
-              onClick={() => navigate("/appointment-booking")}
+              onClick={() => navigate("/my-appointments/appointment-booking")}
               className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
             >
               <Plus className="w-5 h-5" />

@@ -110,6 +110,7 @@ interface AppointmentFormData {
   appointmentType: "SERVICE" | "MODIFICATION" | "";
   serviceTypeId: string;
   modificationTypeId: string;
+  serviceCenterId: string;
   appointmentDate: string;
   appointmentTime: string;
   description: string;
@@ -144,6 +145,7 @@ const AppointmentBookingPage = () => {
     appointmentType: "",
     serviceTypeId: "",
     modificationTypeId: "",
+    serviceCenterId: "",
     appointmentDate: "",
     appointmentTime: "",
     description: "",
