@@ -27,18 +27,18 @@ const Features = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 p-8 rounded-lg hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10"
+              className="group bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 p-8 rounded-lg hover:border-orange-600/70 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10"
             >
               {/* Label */}
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-0.5 bg-orange-500"></div>
+                <div className="w-8 h-0.5 bg-orange-600"></div>
                 <p className="text-xs text-gray-400 uppercase tracking-wider">
                   {feature.label}
                 </p>
               </div>
 
               {/* Value */}
-              <h3 className="text-6xl font-bold text-white/10 mb-2 group-hover:text-orange-500/20 transition-colors font-heading">
+              <h3 className="text-6xl font-bold text-white/10 mb-2 group-hover:text-orange-600/20 transition-colors font-heading">
                 {feature.value}
               </h3>
 

@@ -20,7 +20,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-white tracking-wider font-heading">
-              DRIVE<span className="text-orange-500">CARE</span>
+              DRIVE<span className="text-orange-600">CARE</span>
             </span>
           </Link>
 
@@ -44,7 +44,7 @@ const Navbar = () => {
             <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors">
               Login
             </Link>
-            <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 rounded-md transition-colors">
+            <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 rounded-md transition-colors">
               Register
             </Link>
           </div>
@@ -78,7 +78,7 @@ const Navbar = () => {
               <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors text-center">
                 Login
               </Link>
-              <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 rounded-md transition-colors text-center">
+              <Link to="/register" className="px-4 py-2 text-sm font-medium bg-orange-600 text-white hover:bg-orange-700 rounded-md transition-colors text-center">
                 Register
               </Link>
             </div>
