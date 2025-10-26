@@ -114,6 +114,27 @@ export const authService = {
         return response.data;
     },
 
+    // Forgot password - Request password reset email
+    forgotPassword: async (email: string): Promise<{ message: string }> => {
+        const response = await api.post("/auth/forgot-password", { email });
+        return response.data;
+    },
+
+    // Reset password - Set new password with token
+    resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
+        const response = await api.post("/auth/reset-password", { 
+            token, 
+            newPassword 
+        });
+        return response.data;
+    },
+
+    // Verify reset token validity
+    verifyResetToken: async (token: string): Promise<{ valid: boolean; email?: string }> => {
+        const response = await api.get(`/auth/verify-reset-token/${token}`);
+        return response.data;
+    },
+
     // Get active sessions
     getActiveSessions: async (): Promise<unknown[]> => {
         const response = await api.get("/auth/active-sessions");

@@ -1,15 +1,12 @@
-// src/pages/AppointmentBookingPage.tsx
+// src/components/AppointmentBooking/AppointmentBookingModal.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import VehicleSelector from "../components/AppointmentBooking/VehicleSelector";
-import AppointmentTypeSelector from "../components/AppointmentBooking/AppointmentTypeSelector";
-import ServiceTypeSelector from "../components/AppointmentBooking/ServiceTypeSelector";
-import ScheduleStep from "../components/AppointmentBooking/ScheduleStep";
-import StepIndicator from "../components/ui/StepIndicator";
-import ActionModal from "../components/ui/ActionModal";
-import VehicleFormComponent from "../components/Vehicle/VehicleForm";
-import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
-import Footer from "@/components/Footer/Footer";
+import VehicleSelector from "../AppointmentBooking/VehicleSelector";
+import AppointmentTypeSelector from "../AppointmentBooking/AppointmentTypeSelector";
+import ServiceTypeSelector from "../AppointmentBooking/ServiceTypeSelector";
+import ScheduleStep from "../AppointmentBooking/ScheduleStep";
+import StepIndicator from "../ui/StepIndicator";
+import ActionModal from "../ui/ActionModal";
+import VehicleFormComponent from "../Vehicle/VehicleForm";
 
 // Sample Data (Move to API later)
 const sampleVehicles = [
@@ -132,8 +129,17 @@ interface VehicleFormData {
   lastServiceDate: string;
 }
 
-const AppointmentBookingPage = () => {
-  const navigate = useNavigate();
+interface AppointmentBookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmitSuccess?: () => void;
+}
+
+const AppointmentBookingModal = ({
+  isOpen,
+  onClose,
+  onSubmitSuccess,
+}: AppointmentBookingModalProps) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>(sampleVehicles);
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -177,7 +183,10 @@ const AppointmentBookingPage = () => {
         licensePlate: vehicleData.licensePlate,
       };
       setVehicles((prev) => [...prev, newVehicle]);
-      setFormData((prev) => ({ ...prev, vehicleId: newVehicle.id.toString() }));
+      setFormData((prev) => ({
+        ...prev,
+        vehicleId: newVehicle.id.toString(),
+      }));
       setIsSubmittingVehicle(false);
       setVehicleFormData({
         brand: "",
@@ -194,11 +203,39 @@ const AppointmentBookingPage = () => {
   const handleSubmit = () => {
     console.log("Appointment Data:", formData);
     // Here you would normally make an API call to save the appointment
-    // For now, we'll just simulate it and redirect
     setTimeout(() => {
       alert("Appointment booked successfully!");
-      navigate("/my-appointments");
+      // Reset form
+      setFormData({
+        vehicleId: "",
+        appointmentType: "",
+        serviceTypeId: "",
+        modificationTypeId: "",
+        appointmentDate: "",
+        appointmentTime: "",
+        description: "",
+      });
+      setCurrentStep(1);
+      onClose();
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
     }, 500);
+  };
+
+  const handleClose = () => {
+    // Reset form when closing
+    setFormData({
+      vehicleId: "",
+      appointmentType: "",
+      serviceTypeId: "",
+      modificationTypeId: "",
+      appointmentDate: "",
+      appointmentTime: "",
+      description: "",
+    });
+    setCurrentStep(1);
+    onClose();
   };
 
   const canProceedToStep2 = formData.vehicleId !== "";
@@ -209,23 +246,15 @@ const AppointmentBookingPage = () => {
       : formData.modificationTypeId !== "");
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
-      <AuthenticatedNavbar />
-
-      <div className="flex-1 bg-black py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <div className="w-12 h-0.5 bg-orange-500"></div>
-              <p className="text-xs text-gray-400 uppercase tracking-wider">
-                Book Appointment
-              </p>
-              <div className="w-12 h-0.5 bg-orange-500"></div>
-            </div>
-            <h1 className="text-5xl font-bold text-white mb-4">
-              Schedule Your Service
-            </h1>
-            <p className="text-gray-400">
+    <>
+      <ActionModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Book Appointment"
+      >
+        <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+          <div className="text-center mb-6">
+            <p className="text-gray-400 text-sm">
               Book your vehicle service or modification appointment in 3 easy
               steps
             </p>
@@ -233,12 +262,12 @@ const AppointmentBookingPage = () => {
 
           <StepIndicator currentStep={currentStep} />
 
-          <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg p-8">
+          <div className="min-h-[400px]">
             {currentStep === 1 && (
               <VehicleSelector
                 vehicles={vehicles}
                 selectedVehicleId={formData.vehicleId}
-                onSelectVehicle={(id) =>
+                onSelectVehicle={(id: string) =>
                   setFormData((prev) => ({ ...prev, vehicleId: id }))
                 }
                 onAddVehicle={() => setIsVehicleModalOpen(true)}
@@ -251,7 +280,7 @@ const AppointmentBookingPage = () => {
               <div className="space-y-6">
                 <AppointmentTypeSelector
                   selectedType={formData.appointmentType}
-                  onSelectType={(type) =>
+                  onSelectType={(type: "SERVICE" | "MODIFICATION" | "") =>
                     setFormData((prev) => ({
                       ...prev,
                       appointmentType: type,
@@ -265,7 +294,7 @@ const AppointmentBookingPage = () => {
                   <ServiceTypeSelector
                     types={serviceTypes}
                     selectedId={formData.serviceTypeId}
-                    onSelectType={(id) =>
+                    onSelectType={(id: string) =>
                       setFormData((prev) => ({ ...prev, serviceTypeId: id }))
                     }
                     label="Select Service Type"
@@ -276,7 +305,7 @@ const AppointmentBookingPage = () => {
                   <ServiceTypeSelector
                     types={modificationTypes}
                     selectedId={formData.modificationTypeId}
-                    onSelectType={(id) =>
+                    onSelectType={(id: string) =>
                       setFormData((prev) => ({
                         ...prev,
                         modificationTypeId: id,
@@ -307,7 +336,9 @@ const AppointmentBookingPage = () => {
             {currentStep === 3 && (
               <ScheduleStep
                 formData={formData}
-                onChange={(e) => {
+                onChange={(
+                  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+                ) => {
                   const { name, value } = e.target;
                   setFormData((prev) => ({ ...prev, [name]: value }));
                 }}
@@ -317,26 +348,25 @@ const AppointmentBookingPage = () => {
             )}
           </div>
         </div>
+      </ActionModal>
 
-        <ActionModal
-          isOpen={isVehicleModalOpen}
-          onClose={() => setIsVehicleModalOpen(false)}
-          title="Add New Vehicle"
-        >
-          <VehicleFormComponent
-            formData={vehicleFormData}
-            onChange={handleVehicleFormChange}
-            onSubmit={handleVehicleFormSubmit}
-            onCancel={() => setIsVehicleModalOpen(false)}
-            isSubmitting={isSubmittingVehicle}
-            isEditing={false}
-          />
-        </ActionModal>
-      </div>
-
-      <Footer />
-    </div>
+      {/* Vehicle Form Modal */}
+      <ActionModal
+        isOpen={isVehicleModalOpen}
+        onClose={() => setIsVehicleModalOpen(false)}
+        title="Add New Vehicle"
+      >
+        <VehicleFormComponent
+          formData={vehicleFormData}
+          onChange={handleVehicleFormChange}
+          onSubmit={handleVehicleFormSubmit}
+          onCancel={() => setIsVehicleModalOpen(false)}
+          isSubmitting={isSubmittingVehicle}
+          isEditing={false}
+        />
+      </ActionModal>
+    </>
   );
 };
 
-export default AppointmentBookingPage;
+export default AppointmentBookingModal;

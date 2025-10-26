@@ -6,7 +6,7 @@ import path from "path"
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   base: mode === 'production' 
-    ? '/EAD-Automobile-Service-Management-System/' 
+    ? '/' 
     : '/',
   resolve: {
     alias: {
