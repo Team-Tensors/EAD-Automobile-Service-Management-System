@@ -9,6 +9,7 @@ import OAuthCallback from './pages/OAuthCallback'
 import CompleteProfilePage from './pages/CompleteProfilePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import ProfilePage from './pages/ProfilePage'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
@@ -85,6 +86,16 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardRouter />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Profile Page */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

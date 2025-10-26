@@ -103,7 +103,15 @@ export const authService = {
     },
 
     // Complete profile after OAuth signup (add missing phone number, address, role)
-    updateProfile: async (data: { phoneNumber: string; address?: string; role: string }): Promise<User> => {
+    // Updated to handle all user fields for profile editing
+    updateProfile: async (data: { 
+        fullName?: string;
+        phoneNumber?: string; 
+        address?: string; 
+        role?: string;
+        employeeId?: string;
+        department?: string;
+    }): Promise<User> => {
         const response = await api.put("/auth/update-profile", data);
         return response.data;
     },
