@@ -5,6 +5,7 @@ import Services from "@/components/HomePage/Services";
 import Footer from "@/components/Footer/Footer";
 import ContactUs from "@/components/HomePage/ContactUs";
 import { SponsorLogoSlider } from "@/components/HomePage/SponsorLogoSlider"
+import ServicesSlider from "@/components/HomePage/services-slider"
 
 
 const sponsorLogos = [
@@ -27,6 +28,7 @@ const HomePage = () => {
         <Hero />
         <Features />
         <Services />
+        <ServicesSlider />
         <ContactUs />
       </main>
       <SponsorLogoSlider logos={sponsorLogos} backgroundColor="bg-orange-600" speed={10} />
