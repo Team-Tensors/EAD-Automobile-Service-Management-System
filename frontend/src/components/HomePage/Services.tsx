@@ -133,7 +133,7 @@ const Services: React.FC = () => {
   };
 
   return (
-    <section className="pt-28 pb-20 px-6 md:px-10 lg:px-24 bg-black text-white min-h-screen">
+    <section className="pt-28 pb-2 px-6 md:px-10 lg:px-24 bg-black text-white min-h-screen">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl font-bold mb-6 font-heading text-orange-700">Services</h2>
 
