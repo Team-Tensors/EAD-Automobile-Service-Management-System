@@ -1,34 +1,28 @@
 package com.ead.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "service_type")
 @Data
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
 public class ServiceType {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(nullable = false, unique = true)
+    private String name;                 // e.g. "Oil Change"
 
-    @Column(nullable = false)
+    @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private Double estimatedCost;
 
-    @Column(nullable = false)
-    private Integer estimatedDuration;
-
-
-
+    @Column
+    private Integer estimatedTimeMinutes;
 }

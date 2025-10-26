@@ -11,8 +11,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class BackendApplication {
 
     public static void main(String[] args) {
@@ -32,6 +34,7 @@ public class BackendApplication {
                 User adminUser = new User();
 //                adminUser.setUsername("admin");
                 adminUser.setEmail("admin@example.com");
+                adminUser.setFullName("Admin");
                 adminUser.setPassword(encoder.encode("adminpass"));
                 adminUser.getRoles().add(adminRole);
                 userRepo.save(adminUser);

@@ -14,13 +14,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletResponse; // Fixed import
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+    public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
+        this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,7 +44,7 @@ public class SecurityConfig {
             // CORS Configuration for React frontend
             .cors(cors -> cors.configurationSource(request -> {
                 var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);
@@ -51,14 +57,21 @@ public class SecurityConfig {
             // Role-based authorization rules
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints (no authentication required)
-                .requestMatchers("/auth/login", "/auth/register/customer", "/auth/refresh-token").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/register/employee", "/auth/refresh-token").permitAll()
                 .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
+                .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
                 .requestMatchers("/health", "/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/error", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/error").permitAll()
+
+                // OAuth2 endpoints - allow all OAuth2 related paths
+                .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
+
+                // Protected auth endpoints (require authentication)
+                .requestMatchers("/auth/profile", "/auth/logout", "/auth/logout-all", "/auth/active-sessions").authenticated()
 
                 // Admin-only endpoints
-                .requestMatchers("/admin/**", "/auth/register/employee").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
 
                 // Employee endpoints (employees and admins can access)
                 .requestMatchers("/employee/**", "/services/manage/**", "/appointments/manage/**", "/projects/manage/**")
@@ -69,8 +82,7 @@ public class SecurityConfig {
                     .hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
 
                 // Protected endpoints requiring any authenticated user
-                .requestMatchers("/profile/**", "/dashboard/**", "/auth/logout/**", "/auth/active-sessions/**")
-                    .authenticated()
+                .requestMatchers("/profile/**", "/dashboard/**").authenticated()
 
                 // All other requests require authentication
                 .anyRequest().authenticated()
@@ -79,10 +91,11 @@ public class SecurityConfig {
             // Stateless session management for JWT
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // OAuth2 Login Configuration
+            // OAuth2 Login Configuration with custom success handler
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("/auth/oauth2/success", true)
+                .successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureUrl("/auth/login?error=oauth_failed")
+                .permitAll()
             )
 
             // Disable form login to prevent redirects

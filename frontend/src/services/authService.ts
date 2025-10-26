@@ -42,7 +42,7 @@ export const authService = {
     },
 
     // Register employee (requires admin token)
-    registerEmployee: async (userData: RegisterData, adminToken: string): Promise<AuthResponse> => {
+    registerEmployee: async (userData: RegisterData): Promise<AuthResponse> => {
         const registrationData = {
             email: userData.email,
             password: userData.password,
@@ -53,9 +53,7 @@ export const authService = {
             employeeId: userData.employeeId,
             department: userData.department
         };
-        const response = await api.post("/auth/register/employee", registrationData, {
-            headers: { 'Authorization': `Bearer ${adminToken}` }
-        });
+        const response = await api.post("/auth/register/employee", registrationData);
         return response.data;
     },
 
@@ -104,9 +102,36 @@ export const authService = {
         return response.data;
     },
 
+    // Complete profile after OAuth signup (add missing phone number, address, role)
+    updateProfile: async (data: { phoneNumber: string; address?: string; role: string }): Promise<User> => {
+        const response = await api.put("/auth/update-profile", data);
+        return response.data;
+    },
+
     // Check email availability
     checkEmailAvailability: async (email: string): Promise<{ available: boolean }> => {
         const response = await api.get(`/auth/check-email/${encodeURIComponent(email)}`);
+        return response.data;
+    },
+
+    // Forgot password - Request password reset email
+    forgotPassword: async (email: string): Promise<{ message: string }> => {
+        const response = await api.post("/auth/forgot-password", { email });
+        return response.data;
+    },
+
+    // Reset password - Set new password with token
+    resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
+        const response = await api.post("/auth/reset-password", { 
+            token, 
+            newPassword 
+        });
+        return response.data;
+    },
+
+    // Verify reset token validity
+    verifyResetToken: async (token: string): Promise<{ valid: boolean; email?: string }> => {
+        const response = await api.get(`/auth/verify-reset-token/${token}`);
         return response.data;
     },
 

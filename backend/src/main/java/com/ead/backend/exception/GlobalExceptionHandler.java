@@ -1,6 +1,6 @@
 package com.ead.backend.exception;
 
-import com.ead.backend.dto.MessageResponse;
+import com.ead.backend.dto.MessageResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         logger.error("Combined validation error: {}", errorMsg.toString());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new MessageResponse(errorMsg.toString().trim(), false));
+                .body(new MessageResponseDTO(errorMsg.toString().trim(), false));
     }
 
     /**
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
         logger.error("Runtime exception: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponse("An error occurred: " + ex.getMessage(), false));
+                .body(new MessageResponseDTO("An error occurred: " + ex.getMessage(), false));
     }
 
     /**
@@ -63,6 +63,6 @@ public class GlobalExceptionHandler {
         logger.error("General exception: {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new MessageResponse("An unexpected error occurred", false));
+                .body(new MessageResponseDTO("An unexpected error occurred", false));
     }
 }
