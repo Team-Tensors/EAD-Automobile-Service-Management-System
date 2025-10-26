@@ -1,19 +1,24 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
-COPY mvnw* pom.xml ./
-COPY .mvn .mvn
-RUN ./mvnw dependency:go-offline -B
+# Install Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
+# Copy pom.xml and download dependencies
+COPY pom.xml ./
+RUN mvn dependency:go-offline -B
+
+# Copy source code and build
 COPY src src
-
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
 
+# Copy the built jar from build stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Use port 4000
 EXPOSE 4000
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
