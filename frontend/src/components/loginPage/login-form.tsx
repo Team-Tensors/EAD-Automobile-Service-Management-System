@@ -117,7 +117,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-500">CARE</span></span>
+                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-600">CARE</span></span>
                 <h1 className="text-2xl font-bold font-heading text-white">Welcome back</h1>
                 <p className="text-balance text-gray-400">Login to your DriveCare account</p>
               </div>
@@ -140,10 +140,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   </svg>
                   <AlertDescription>
                     {formErrors.email && !formErrors.password && (
-                      <p><strong>Email Issue:</strong> Please verify your email address or <Link to="/register" className="underline text-orange-400 hover:text-orange-500">create a new account</Link>.</p>
+                      <p><strong>Email Issue:</strong> Please verify your email address or <Link to="/register" className="underline text-orange-600 hover:text-orange-700">create a new account</Link>.</p>
                     )}
                     {formErrors.password && !formErrors.email && (
-                      <p><strong>Password Issue:</strong> Double-check your password or use <a href="#" className="underline text-orange-400 hover:text-orange-500">forgot password</a> to reset it.</p>
+                      <p><strong>Password Issue:</strong> Double-check your password or use <a href="#" className="underline text-orange-600 hover:text-orange-700">forgot password</a> to reset it.</p>
                     )}
                     {formErrors.email && formErrors.password && (
                       <p><strong>Login Failed:</strong> Please check both your email and password.</p>
@@ -161,7 +161,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   placeholder="example@gmail.com" 
                   value={formData.email}
                   onChange={handleChange}
-                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all ${formErrors.email ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
+                  className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 transition-all ${formErrors.email ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
                   required 
                   aria-invalid={formErrors.email ? "true" : "false"}
                   aria-describedby={formErrors.email ? "email-error" : undefined}
@@ -180,9 +180,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-white">Password</Label>
-                  <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline text-orange-500 hover:text-orange-600">
+                  <Link 
+                    to="/forgot-password" 
+                    className="ml-auto text-sm underline-offset-2 hover:underline text-orange-600 hover:text-orange-700"
+                  >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Input 
@@ -191,7 +194,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 transition-all pr-10 ${formErrors.password ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
+                    className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-600 focus-visible:ring-offset-zinc-950 transition-all pr-10 ${formErrors.password ? 'border-red-500 focus:border-red-500 focus-visible:ring-red-500 bg-red-950/20' : ''}`}
                     required 
                     aria-invalid={formErrors.password ? "true" : "false"}
                     aria-describedby={formErrors.password ? "password-error" : undefined}
@@ -223,13 +226,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     name="rememberMe"
                     checked={formData.rememberMe}
                     onChange={handleChange}
-                    className="mr-2 h-4 w-4 text-orange-500 focus:ring-orange-500 focus:ring-2 border-zinc-800 bg-zinc-900 rounded"
+                    className="mr-2 h-4 w-4 text-orange-600 focus:ring-orange-600 focus:ring-2 border-zinc-800 bg-zinc-900 rounded"
                   />
                   Remember me
                 </label>
               </div>
               
-              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={isLoading}>
                 {isLoading ? 'Signing in...' : 'Login'}
               </Button>
               <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1 after:z-0 after:flex after:items-center ">
@@ -252,7 +255,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
               </div>
               <div className="text-center text-sm text-gray-400">
                 Don&apos;t have an account?{" "}
-                <Link to="/register" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                <Link to="/register" className="underline underline-offset-4 text-orange-600 hover:text-orange-700">
                   Sign up
                 </Link>
               </div>
@@ -267,7 +270,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
           </div>
         </CardContent>
       </Card>
-      <div className="text-balance text-center text-xs text-gray-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-orange-500">
+      <div className="text-balance text-center text-xs text-gray-400 [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-orange-600">
         By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
       </div>
     </div>

@@ -35,7 +35,7 @@ jobs:
       run: npm run build
       env:
         # Add your backend API URL here
-        VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://your-backend-api.com' }}
+        VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://eadbackend-64wpq.ondigitalocean.app/' }}
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
