@@ -3,6 +3,7 @@ package com.ead.backend.controller;
 import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
+import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.service.EmployeeService;
@@ -36,7 +37,7 @@ public class EmployeeController {
         logger.info("Employee Id: {}", employeeId);
 
         try {
-            List<TimeLog> timeLogs = employeeService.getTimeLogsByAppointmentAndEmployee(appointmentId, employeeId);
+            List<TimeLogResponseDTO> timeLogs = employeeService.getTimeLogsByAppointmentAndEmployee(appointmentId, employeeId);
             return ResponseEntity.ok(timeLogs);
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
