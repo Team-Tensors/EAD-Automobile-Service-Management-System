@@ -4,8 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import path from "path"
 
 // https://vite.dev/config/
-export default defineConfig({
-  base: '/EAD-Automobile-Service-Management-System/', // Replace with your repo name
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' 
+    ? '/' 
+    : '/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -16,4 +18,4 @@ export default defineConfig({
     host: true,
     port: 5173
   }
-})
+}))
