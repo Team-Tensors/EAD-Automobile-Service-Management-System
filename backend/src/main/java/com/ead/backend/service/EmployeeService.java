@@ -2,6 +2,7 @@ package com.ead.backend.service;
 
 import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
+import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.entity.User;
@@ -39,9 +40,21 @@ public class EmployeeService {
      * @throws RuntimeException if no logs are found
      */
     @Transactional(readOnly = true)
-    public List<TimeLog> getTimeLogsByAppointmentAndEmployee(Long appointmentId, Long employeeId) {
+    public List<TimeLogResponseDTO> getTimeLogsByAppointmentAndEmployee(Long appointmentId, Long employeeId) {
         logger.info("=== EMPLOYEE SERVICE - GET TIME LOGS BY APPOINTMENT AND EMPLOYEE METHOD STARTED ===");
-        return timeLogRepository.findByAppointmentIdAndUserId(appointmentId, employeeId);
+        List<TimeLog> timeLogs = timeLogRepository.findByAppointmentIdAndUserId(appointmentId, employeeId);
+        if (timeLogs.isEmpty()) {
+            throw new RuntimeException("NOT_FOUND");
+        }
+        return timeLogs.stream()
+                .map(t -> new TimeLogResponseDTO(
+                        t.getId(),
+                        t.getStartTime(),
+                        t.getEndTime(),
+                        t.getHoursLogged(),
+                        t.getNotes()
+                ))
+                .toList();
     }
 
     /**
