@@ -1,13 +1,10 @@
 package com.ead.backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-// import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "service_center")
@@ -41,6 +38,4 @@ public class ServiceCenter {
 
     @Column(nullable = false)
     private Boolean isActive = true;
-
-    // ... rest of your fields and methods
 }

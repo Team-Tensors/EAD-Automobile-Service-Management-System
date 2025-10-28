@@ -11,16 +11,16 @@ import java.util.List;
 
 @Repository
 public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, Long> {
-    
+
     List<ServiceCenter> findByIsActiveTrue();
-    
-    @Query("SELECT sc FROM ServiceCenter sc WHERE sc.isActive = true " +
-           "AND (6371 * acos(cos(radians(:lat)) * cos(radians(sc.latitude)) * " +
-           "cos(radians(sc.longitude) - radians(:lng)) + sin(radians(:lat)) * " +
-           "sin(radians(sc.latitude)))) < :radius")
-    List<ServiceCenter> findNearbyServiceCenters(@Param("lat") BigDecimal latitude,
-                                                @Param("lng") BigDecimal longitude,
-                                                @Param("radius") double radiusInKm);
-    
+
+@Query("SELECT sc FROM ServiceCenter sc WHERE sc.isActive = true " +
+       "AND (6371 * acos(cos(radians(:lat)) * cos(radians(sc.latitude)) * " +
+       "cos(radians(sc.longitude) - radians(:lng)) + sin(radians(:lat)) * " +
+       "sin(radians(sc.latitude)))) < :radius")
+List<ServiceCenter> findNearbyServiceCenters(@Param("lat") BigDecimal latitude,
+                                            @Param("lng") BigDecimal longitude,
+                                            @Param("radius") double radiusInKm);
+
     List<ServiceCenter> findByCityAndIsActiveTrue(String city);
 }
