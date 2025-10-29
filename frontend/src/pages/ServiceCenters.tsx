@@ -1,3 +1,4 @@
+// src/components/ServiceCenters.tsx
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
@@ -24,6 +25,7 @@ interface ServiceCenter {
   email: string;
   operatingHours: string;
   services: Service[];
+  isActive: boolean;
 }
 
 interface UserLocation {
@@ -36,7 +38,7 @@ interface UserLocation {
 function MapViewUpdater({ center }: { center: LatLngExpression }) {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, map.getZoom());
+    map.setView(center, map.getZoom() || 10);
   }, [center, map]);
   return null;
 }
@@ -47,12 +49,15 @@ const ServiceCenters = () => {
   const [selectedCenter, setSelectedCenter] = useState<ServiceCenter | null>(null);
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState<string>('');
-  const [mapCenter, setMapCenter] = useState<LatLngExpression>([6.9271, 79.8612]); // Default to Colombo
+
+  // Default to Colombo if no user location
+  const [mapCenter, setMapCenter] = useState<LatLngExpression>([6.9271, 79.8612]);
 
   // Get user's current location
   const getUserLocation = () => {
     if (!navigator.geolocation) {
       setLocationError('Geolocation is not supported by this browser.');
+      fetchServiceCenters();
       return;
     }
 
@@ -62,50 +67,64 @@ const ServiceCenters = () => {
         const location = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy
+          accuracy: position.coords.accuracy,
         };
         setUserLocation(location);
         setMapCenter([location.latitude, location.longitude]);
         setLocationError('');
-        setLoading(false);
+        fetchServiceCenters(location);
       },
       (error) => {
         console.error('Error getting location:', error);
         setLocationError('Unable to retrieve your location. Using default location.');
-        setLoading(false);
+        fetchServiceCenters();
       }
     );
   };
 
-  // Fetch service centers
-  const fetchServiceCenters = async () => {
+  // Fetch service centers with authentication
+  const fetchServiceCenters = async (location?: UserLocation) => {
     try {
-      const response = await fetch('http://localhost:8080/api/service-centers/with-services');
+      let url = 'http://localhost:4000/api/service-centers/with-services';
+      if (location) {
+        url = `http://localhost:4000/api/service-centers/nearby-with-services?lat=${location.latitude}&lng=${location.longitude}&radius=50`;
+      }
+
+      // Assume token is stored in localStorage after login
+      const token = localStorage.getItem('jwtToken'); // Adjust key based on your app
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const response = await fetch(url, { headers });
       if (response.ok) {
         const data = await response.json();
         setServiceCenters(data);
       } else {
-        console.error('Failed to fetch service centers');
+        const errorText = await response.text();
+        console.error('Failed to fetch service centers:', errorText);
       }
     } catch (error) {
       console.error('Error fetching service centers:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     getUserLocation();
-    fetchServiceCenters();
   }, []);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
     return distance.toFixed(1);
   };
@@ -167,6 +186,7 @@ const ServiceCenters = () => {
             </h2>
 
             {serviceCenters
+              .filter((center) => center.isActive)
               .sort((a, b) => {
                 if (!userLocation) return 0;
                 const distA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
@@ -278,36 +298,38 @@ const ServiceCenters = () => {
               )}
 
               {/* Service Center Markers */}
-              {serviceCenters.map((center) => (
-                <Marker
-                  key={center.id}
-                  position={[center.latitude, center.longitude]}
-                  eventHandlers={{
-                    click: () => setSelectedCenter(center),
-                  }}
-                >
-                  <Popup>
-                    <div className="min-w-[200px]">
-                      <h3 className="font-bold text-lg mb-2">{center.name}</h3>
-                      <p className="text-sm mb-2">{center.address}</p>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Phone className="w-3 h-3" />
-                        <span className="text-sm">{center.phone}</span>
+              {serviceCenters
+                .filter((center) => center.isActive)
+                .map((center) => (
+                  <Marker
+                    key={center.id}
+                    position={[center.latitude, center.longitude]}
+                    eventHandlers={{
+                      click: () => setSelectedCenter(center),
+                    }}
+                  >
+                    <Popup>
+                      <div className="min-w-[200px]">
+                        <h3 className="font-bold text-lg mb-2">{center.name}</h3>
+                        <p className="text-sm mb-2">{center.address}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Phone className="w-3 h-3" />
+                          <span className="text-sm">{center.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3 h-3" />
+                          <span className="text-sm">Open Today</span>
+                        </div>
+                        <button
+                          onClick={() => setSelectedCenter(center)}
+                          className="mt-2 w-full bg-chart-2 text-white py-1 px-2 rounded text-sm hover:bg-chart-2/90 transition"
+                        >
+                          View Details
+                        </button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3" />
-                        <span className="text-sm">Open Today</span>
-                      </div>
-                      <button
-                        onClick={() => setSelectedCenter(center)}
-                        className="mt-2 w-full bg-chart-2 text-white py-1 px-2 rounded text-sm hover:bg-chart-2/90 transition"
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+                    </Popup>
+                  </Marker>
+                ))}
             </MapContainer>
           </div>
         </div>
@@ -353,7 +375,7 @@ const ServiceCenters = () => {
                 <h3 className="font-semibold text-lg text-card-foreground mb-4">Operating Hours</h3>
                 <div className="bg-secondary rounded-lg p-4 border border-border">
                   <pre className="text-sm text-card-foreground whitespace-pre-wrap">
-                    {JSON.parse(selectedCenter.operatingHours) ? 
+                    {selectedCenter.operatingHours ? 
                       Object.entries(JSON.parse(selectedCenter.operatingHours)).map(([day, hours]) => (
                         <div key={day} className="flex justify-between">
                           <span className="capitalize">{day}:</span>
@@ -378,7 +400,7 @@ const ServiceCenters = () => {
                           ${service.basePrice}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
+                      <p className="text-sm text-muted-foreground mb-2">{service.description || 'No description available'}</p>
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Duration: {Math.floor(service.durationMinutes / 60)}h {service.durationMinutes % 60}m</span>
                         <button className="text-chart-2 hover:text-chart-2/80 font-semibold">
