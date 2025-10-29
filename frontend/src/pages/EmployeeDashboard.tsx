@@ -669,7 +669,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({ message, type, on
   return (
     <div className="fixed top-20 right-6 z-50 bg-card rounded-lg shadow-xl p-4 border border-border w-full max-w-sm m-4 animate-fade-in-down">
       <div className="flex items-start gap-4">
-        <div className={`flex-shrink-0 p-2 rounded-full border ${
+        <div className={`shrink-0 p-2 rounded-full border ${
           isSuccess 
           ? 'bg-chart-2/10 border-chart-2/20' 
           : 'bg-destructive/10 border-destructive/20'
@@ -789,8 +789,7 @@ interface LogTimeProps {
   selectedCalendarDate: Date | null; // Added prop
 }
 
-const LogTimeSection: React.FC<LogTimeProps> = ({ 
-  serviceId, 
+const LogTimeSection: React.FC<LogTimeProps> = ({  
   logs, 
   onSaveLog, 
   onUpdateLog, 
@@ -1081,7 +1080,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ onCan
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="bg-card rounded-lg shadow-xl p-6 border border-border w-full max-w-md m-4">
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 p-3 bg-destructive/10 rounded-full border border-destructive/20">
+          <div className="shrink-0 p-3 bg-destructive/10 rounded-full border border-destructive/20">
             <AlertTriangle className="w-6 h-6 text-destructive" />
           </div>
           <div>
