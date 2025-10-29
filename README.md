@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 EAD Automobile Service Management System
+# EAD Automobile Service Management System
 
 **Automobile Service Time Logging & Appointment System**
 
@@ -13,26 +13,26 @@
 
 *A comprehensive enterprise application for managing automotive service appointments, time logging, and customer interactions*
 
-[Features](#-key-features) • [Tech Stack](#-technology-stack) • [Getting Started](#-getting-started) • [Documentation](#-system-diagrams) • [License](#-license)
+[Features](#key-features) • [Tech Stack](#technology-stack) • [Getting Started](#getting-started) • [Documentation](#system-diagrams) • [License](#license)
 
 </div>
 
 ---
 
-## 📋 Project Overview
+## Project Overview
 
 This is an **Enterprise Application Development (EAD)** project that implements a comprehensive automobile service management system. The system streamlines the process of managing vehicle service appointments, tracking service progress, and logging service times for automotive service centers and their customers.
 
-### 🎯 Project Objectives
+### Project Objectives
 
-- ✅ Develop a web-based automobile service management system
-- ✅ Implement appointment booking and scheduling functionality
-- ✅ Create service time logging and tracking capabilities
-- ✅ Provide real-time status updates for customers
-- ✅ Enable efficient management of service center operations
-- ✅ Demonstrate enterprise application development best practices
+- Develop a web-based automobile service management system
+- Implement appointment booking and scheduling functionality
+- Create service time logging and tracking capabilities
+- Provide real-time status updates for customers
+- Enable efficient management of service center operations
+- Demonstrate enterprise application development best practices
 
-## 📊 System Diagrams
+## System Diagrams
 
 <details>
 <summary><b>Use Case Diagram</b></summary>
@@ -48,34 +48,34 @@ This is an **Enterprise Application Development (EAD)** project that implements 
 
 </details>
 
-## ✨ Key Features
+## Key Features
 
-### 👥 Customer Portal
-- 🔐 **User Registration & Authentication**: Secure login system with OAuth2 (Google) support
-- 🚙 **Vehicle Management**: Add and manage multiple vehicles with details
-- 📅 **Appointment Booking**: Schedule service appointments online with real-time availability
-- 📜 **Service History**: View comprehensive past and current service records
-- 🔔 **Real-time Status Tracking**: Monitor service progress with live updates
-- 📧 **Notifications**: Receive updates on service status
+### Customer Portal
+- **User Registration & Authentication**: Secure login system with OAuth2 (Google) support
+- **Vehicle Management**: Add and manage multiple vehicles with details
+- **Appointment Booking**: Schedule service appointments online with real-time availability
+- **Service History**: View comprehensive past and current service records
+- **Real-time Status Tracking**: Monitor service progress with live updates
+- **Notifications**: Receive updates on service status
 
-### 👨‍🔧 Employee Dashboard
-- 📊 **Staff Dashboard**: Manage daily operations and appointments efficiently
-- ⏱️ **Service Time Logging**: Track actual time spent on services with precision
-- 📋 **Appointment Management**: View, update, and manage customer appointments
-- 🔄 **Service Status Updates**: Real-time updates to customers on service progress
-- 👤 **Profile Management**: Manage employee profiles and preferences
+### Employee Dashboard
+- **Staff Dashboard**: Manage daily operations and appointments efficiently
+- **Service Time Logging**: Track actual time spent on services with precision
+- **Appointment Management**: View, update, and manage customer appointments
+- **Service Status Updates**: Real-time updates to customers on service progress
+- **Profile Management**: Manage employee profiles and preferences
 
-### 🔧 Administrative Functions
-- 👤 **User Management**: Manage customer and staff accounts
-- 📈 **Analytics & Reports**: View system analytics and performance metrics
-- 🛠️ **Service Catalog**: Maintain service types and configurations
-- 📦 **Inventory Management**: Track parts and supplies
-- 🔔 **Notification Center**: Centralized notification management
-- ⚙️ **System Configuration**: Configure system settings and parameters
+### Administrative Functions
+- **User Management**: Manage customer and staff accounts
+- **Analytics & Reports**: View system analytics and performance metrics
+- **Service Catalog**: Maintain service types and configurations
+- **Inventory Management**: Track parts and supplies
+- **Notification Center**: Centralized notification management
+- **System Configuration**: Configure system settings and parameters
 
-## 🏗️ System Architecture
+## System Architecture
 
-### 💻 Technology Stack
+### Technology Stack
 
 #### Frontend
 - **Framework**: React 19.1.1 with TypeScript
@@ -104,37 +104,37 @@ This is an **Enterprise Application Development (EAD)** project that implements 
 - **Features**: Data integrity, ACID compliance, indexing for performance
 
 #### Security & Authentication
-- 🔒 JWT-based authentication with refresh tokens
-- 🔐 Role-based access control (RBAC)
-- 🌐 OAuth2 integration (Google Sign-In)
-- 🛡️ Password encryption and secure token management
-- 🚫 XSS and CSRF protection
+- JWT-based authentication with refresh tokens
+- Role-based access control (RBAC)
+- OAuth2 integration (Google Sign-In)
+- Password encryption and secure token management
+- XSS and CSRF protection
 
 #### DevOps & Deployment
-- 🐳 Docker & Docker Compose support
-- 📦 Containerized microservices architecture
-- 🔄 Environment-based configuration (.env files)
+- Docker & Docker Compose support
+- Containerized microservices architecture
+- Environment-based configuration (.env files)
 
-## 👥 User Roles
+## User Roles
 
 | Role | Capabilities |
 |------|-------------|
-| 👤 **Customer** | Book appointments, track services, manage vehicles, view service history |
-| 👨‍🔧 **Employee** | Log service times, update service status, manage appointments |
-| 👔 **Admin** | System administration, user management, analytics, inventory management |
+| **Customer** | Book appointments, track services, manage vehicles, view service history |
+| **Employee** | Log service times, update service status, manage appointments |
+| **Admin** | System administration, user management, analytics, inventory management |
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 **Required Software:**
-- ☕ Java 21 or higher
-- 🐘 PostgreSQL 14 or higher
-- 📦 Node.js 18+ and npm/yarn
-- 🐳 Docker and Docker Compose (for containerized deployment)
-- 🔧 Maven 3.8+ (for backend build)
+- Java 21 or higher
+- PostgreSQL 14 or higher
+- Node.js 18+ and npm/yarn
+- Docker and Docker Compose (for containerized deployment)
+- Maven 3.8+ (for backend build)
 
-### 🔧 Installation & Setup
+### Installation & Setup
 
 #### Option 1: Docker Compose (Recommended)
 
@@ -187,7 +187,7 @@ npm run dev
 # Frontend will be available at http://localhost:5173
 ```
 
-### 🗄️ Database Setup
+### Database Setup
 
 ```sql
 -- Create PostgreSQL database
@@ -197,7 +197,7 @@ CREATE DATABASE automobile_service_db;
 -- using JPA/Hibernate auto-ddl configuration
 ```
 
-### ⚙️ Environment Configuration
+### Environment Configuration
 
 **Backend (.env file):**
 ```env
@@ -216,7 +216,7 @@ JWT_REFRESH_EXPIRATION=604800000
 JWT_REFRESH_MAX_TOKENS=5
 ```
 
-### 🧪 Running Tests
+### Running Tests
 
 ```bash
 # Backend tests
@@ -228,7 +228,7 @@ cd frontend
 npm test
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 EAD-Automobile-Service-Management-System/
@@ -265,7 +265,7 @@ EAD-Automobile-Service-Management-System/
 └── README.md                   # This file
 ```
 
-## 📚 API Documentation
+## API Documentation
 
 The backend provides a RESTful API with the following main endpoints:
 
@@ -289,25 +289,25 @@ The backend provides a RESTful API with the following main endpoints:
 ### Health Check
 - `GET /api/health` - Service health status
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to improve the EAD Automobile Service Management System! Here's how you can contribute:
 
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. 💾 Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. 📤 Push to the branch (`git push origin feature/AmazingFeature`)
-5. 🔄 Open a Pull Request
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 Please ensure your code follows the project's coding standards and includes appropriate tests.
 
-## 👨‍💻 Team
+## Team
 
 **Team Tensors** - Enterprise Application Development Project
 
 For questions or support, please open an issue in the GitHub repository.
 
-## 📄 License
+## License
 
 <div align="center">
 
@@ -341,7 +341,7 @@ SOFTWARE.**
 
 </div>
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Spring Boot team for the excellent framework
 - React team for the powerful UI library
@@ -353,8 +353,8 @@ SOFTWARE.**
 
 **Last Updated**: October 2025
 
-Made with ❤️ by Team Tensors
+Made with love by Team Tensors
 
-[⬆ Back to Top](#-ead-automobile-service-management-system)
+[Back to Top](#ead-automobile-service-management-system)
 
 </div>
