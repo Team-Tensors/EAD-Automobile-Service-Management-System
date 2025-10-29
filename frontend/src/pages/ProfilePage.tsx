@@ -133,7 +133,7 @@ const ProfilePage = () => {
     return (
       <>
         <AuthenticatedNavbar />
-        <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 pt-32">
+        <div className="min-h-screen bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900 pt-32">
           <div className="max-w-4xl mx-auto px-4">
             <p className="text-white text-center">Loading profile...</p>
           </div>
@@ -147,7 +147,7 @@ const ProfilePage = () => {
   return (
     <>
       <AuthenticatedNavbar />
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 pt-24 sm:pt-32 pb-12">
+      <div className="min-h-screen bg-linear-to-br from-zinc-900 via-zinc-800 to-zinc-900 pt-24 sm:pt-32 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
@@ -159,7 +159,7 @@ const ProfilePage = () => {
           <div className="bg-zinc-950/50 backdrop-blur-sm border border-zinc-800 rounded-xl p-4 sm:p-6 lg:p-8">
             {/* Profile Header */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-zinc-800">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-linear-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shrink-0">
                 <User className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
               </div>
               <div className="flex-1 text-center sm:text-left">
@@ -301,7 +301,7 @@ const ProfilePage = () => {
                 {user.createdAt && (
                   <div className="pt-4 sm:pt-6 border-t border-zinc-800">
                     <div className="flex items-center gap-2 text-gray-400">
-                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <Calendar className="w-4 h-4 shrink-0" />
                       <span className="text-xs sm:text-sm">
                         Account created on{" "}
                         {new Date(user.createdAt).toLocaleDateString("en-US", {
