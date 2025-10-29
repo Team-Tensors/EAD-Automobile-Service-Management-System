@@ -135,10 +135,9 @@ const AdminNavbar = () => {
   ];
 
   const adminDashboardLinks = [
-    { id: 'dashboard' as NavSection, name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { id: 'dashboard' as NavSection, name: 'A-Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { id: 'analytics' as NavSection, name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
     { id: 'inventory' as NavSection, name: 'Inventory', path: '/admin/inventory', icon: Package },
-    { id: 'notifications' as NavSection, name: 'Notifications', path: '/admin/notifications', icon: Bell },
   ];
 
   useEffect(() => {
