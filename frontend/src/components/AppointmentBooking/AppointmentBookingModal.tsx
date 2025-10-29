@@ -107,6 +107,7 @@ interface AppointmentFormData {
   appointmentType: "SERVICE" | "MODIFICATION" | "";
   serviceTypeId: string;
   modificationTypeId: string;
+  serviceCenterId: string;
   appointmentDate: string;
   appointmentTime: string;
   description: string;
@@ -150,6 +151,7 @@ const AppointmentBookingModal = ({
     appointmentType: "",
     serviceTypeId: "",
     modificationTypeId: "",
+    serviceCenterId: "",
     appointmentDate: "",
     appointmentTime: "",
     description: "",
@@ -211,6 +213,7 @@ const AppointmentBookingModal = ({
         appointmentType: "",
         serviceTypeId: "",
         modificationTypeId: "",
+        serviceCenterId: "",
         appointmentDate: "",
         appointmentTime: "",
         description: "",
@@ -230,6 +233,7 @@ const AppointmentBookingModal = ({
       appointmentType: "",
       serviceTypeId: "",
       modificationTypeId: "",
+      serviceCenterId: "",
       appointmentDate: "",
       appointmentTime: "",
       description: "",
@@ -337,7 +341,9 @@ const AppointmentBookingModal = ({
               <ScheduleStep
                 formData={formData}
                 onChange={(
-                  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+                  e: React.ChangeEvent<
+                    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+                  >
                 ) => {
                   const { name, value } = e.target;
                   setFormData((prev) => ({ ...prev, [name]: value }));
