@@ -166,7 +166,7 @@ public class AppointmentService {
     }
 
     // ===================================================================
-    // HELPER: Get current authenticated user 
+    // HELPER: Get current authenticated user
     // ===================================================================
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

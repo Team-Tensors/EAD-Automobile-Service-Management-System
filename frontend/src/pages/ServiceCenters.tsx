@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import { MapPin, Navigation, Phone, Mail, Clock, Car } from 'lucide-react';
+import api from '../utill/apiUtils'; // Import your API utility
 import 'leaflet/dist/leaflet.css';
 
 // Types
@@ -82,31 +83,26 @@ const ServiceCenters = () => {
     );
   };
 
-  // Fetch service centers with authentication
+  // Fetch service centers using the API utility (handles auth automatically)
   const fetchServiceCenters = async (location?: UserLocation) => {
     try {
-      let url = 'http://localhost:4000/api/service-centers/with-services';
+      let url = '/service-centers/with-services';
       if (location) {
-        url = `http://localhost:4000/api/service-centers/nearby-with-services?lat=${location.latitude}&lng=${location.longitude}&radius=50`;
+        url = `/service-centers/nearby-with-services?lat=${location.latitude}&lng=${location.longitude}&radius=50`;
       }
 
-      // Assume token is stored in localStorage after login
-      const token = localStorage.getItem('jwtToken'); // Adjust key based on your app
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-
-      const response = await fetch(url, { headers });
-      if (response.ok) {
-        const data = await response.json();
-        setServiceCenters(data);
-      } else {
-        const errorText = await response.text();
-        console.error('Failed to fetch service centers:', errorText);
-      }
+      // Use the api utility - it automatically adds the Authorization header
+      const response = await api.get(url);
+      setServiceCenters(response.data);
     } catch (error) {
       console.error('Error fetching service centers:', error);
+      
+      // Show user-friendly error message
+      if ((error as Error).message.includes('Authentication')) {
+        setLocationError('Please log in to view service centers.');
+      } else {
+        setLocationError('Failed to load service centers. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

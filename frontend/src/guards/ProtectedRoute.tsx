@@ -75,9 +75,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return fallback || <LoadingSpinner />;
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to home if not authenticated (avoids flash of login page after logout)
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // Check role-based access
@@ -134,7 +134,7 @@ export const StaffRoute: React.FC<{ children: React.ReactNode; fallback?: React.
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   if (user.role !== UserRole.EMPLOYEE && user.role !== UserRole.ADMIN) {
