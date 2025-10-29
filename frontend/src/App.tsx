@@ -7,10 +7,15 @@ import DashboardRouter from './pages/DashboardRouter'
 import AdminRouter from './pages/admin/AdminRouter'
 import OAuthCallback from './pages/OAuthCallback'
 import CompleteProfilePage from './pages/CompleteProfilePage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+import ProfilePage from './pages/ProfilePage'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
 import ServiceCenters from './pages/ServiceCenters'
+import AddVehiclePage from './pages/MyVehiclesPage'
+import MyAppointmentsPage from "./pages/MyAppointmentsPage";
 
 function App() {
   return (
@@ -40,6 +45,25 @@ function App() {
         element={
           <PublicRoute>
             <EmployeeRegisterPage />
+          </PublicRoute>
+        }
+      />
+      
+      {/* Forgot Password Routes */}
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
+          </PublicRoute>
+        }
+      />
+      
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPasswordPage />
           </PublicRoute>
         }
       />
@@ -75,9 +99,19 @@ function App() {
         }
       />
 
+      {/* Profile Page */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Customer Appointment Route */}
       <Route
-        path="/dashboard/appointments"
+        path="/my-appointments/appointment-booking"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
             <AppointmentBookingPage />
@@ -85,12 +119,32 @@ function App() {
         }
       />
 
+      {/* Customer Appointment Routes */}
+      <Route
+        path="/my-appointments"
+        element={
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <MyAppointmentsPage />
+          </ProtectedRoute>
+        }
+      />
+     
       {/* Admin routes with nested routing */}
       <Route
         path="/admin/*"
         element={
           <ProtectedRoute requiredRole={UserRole.ADMIN}>
             <AdminRouter />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Customer My Vehicles Route */}
+        <Route
+        path="/my-vehicles"
+        element={
+          <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
+            <AddVehiclePage />
           </ProtectedRoute>
         }
       />
