@@ -58,11 +58,21 @@ public class EmployeeController {
      * Retrieve all appointments assigned to an employee.
      */
     @GetMapping("/appointments/{employeeId}")
-    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId) {
+    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId, @RequestParam(required = false) String status) {
         logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
         try {
-            List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employeeId);
+            List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employeeId, status);
             return ResponseEntity.ok(appointments);
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+            logger.error("Error retrieving appointment by employee id: {}", errorMessage);
+            // Check for specific error types
+            if ("INVALID_STATUS".equals(errorMessage))  {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid appointment status.", false));
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
+            }
         } catch (Exception e) {
             logger.error("Error retrieving appointments for employee {}: {}", employeeId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
