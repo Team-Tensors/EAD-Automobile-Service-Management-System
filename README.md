@@ -1,6 +1,6 @@
 <div align="center">
 
-# EAD Automobile Service Management System
+# Drive Care Automobile Service Management System
 
 **Automobile Service Time Logging & Appointment System**
 
