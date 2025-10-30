@@ -1,13 +1,6 @@
 import React from 'react';
 import { Car, Plus, ChevronRight } from 'lucide-react';
-
-interface Vehicle {
-  id: number;
-  brand: string;
-  model: string;
-  year: string;
-  licensePlate: string;
-}
+import type { Vehicle } from '../../types/vehicle';
 
 interface VehicleSelectorProps {
   vehicles: Vehicle[];
