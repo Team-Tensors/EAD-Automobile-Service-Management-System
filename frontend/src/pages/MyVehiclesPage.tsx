@@ -1,6 +1,6 @@
 // src/pages/MyVehiclesDashboardPage.tsx
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Car } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import VehicleCardComponent from "../components/Vehicle/VehicleCard";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
@@ -26,6 +26,7 @@ const MyVehiclesPage = () => {
   useAuth();
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +49,7 @@ const MyVehiclesPage = () => {
   React.useEffect(() => {
     let mounted = true;
     const load = async () => {
+      setIsLoading(true);
       try {
         const data = await (
           await import("../services/vehicleService")
@@ -58,6 +60,8 @@ const MyVehiclesPage = () => {
         if (mounted) {
           toast.error("Failed to load vehicles. Please refresh the page.");
         }
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     };
     load();
@@ -238,31 +242,50 @@ const MyVehiclesPage = () => {
       {/* Main Content */}
       <div className="flex-1 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {vehicles.length > 0 && (
-            <div className="mb-8">
-              <button
-                onClick={openAddModal}
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Add Vehicle</span>
-              </button>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Car className="w-16 h-16 text-orange-500 animate-bounce" />
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                  </div>
+                </div>
+                <p className="text-zinc-400 text-sm">Loading vehicles...</p>
+              </div>
             </div>
-          )}
-
-          {vehicles.length === 0 ? (
-            <VehicleEmptyState onAddClick={openAddModal} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vehicles.map((vehicle) => (
-                <VehicleCardComponent
-                  key={vehicle.id}
-                  vehicle={vehicle}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </div>
+            <>
+              {vehicles.length > 0 && (
+                <div className="mb-8">
+                  <button
+                    onClick={openAddModal}
+                    className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Add Vehicle</span>
+                  </button>
+                </div>
+              )}
+
+              {vehicles.length === 0 ? (
+                <VehicleEmptyState onAddClick={openAddModal} />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {vehicles.map((vehicle) => (
+                    <VehicleCardComponent
+                      key={vehicle.id}
+                      vehicle={vehicle}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           <ActionModal
