@@ -9,7 +9,6 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +26,7 @@ public class AppointmentBookingController {
     @PostMapping("/book")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<?> bookAppointment(
-            @Valid @RequestBody AppointmentBookingRequestDTO request,
-            Principal principal) {  // principal gives logged-in user
+            @Valid @RequestBody AppointmentBookingRequestDTO request) {
 
         try {
             // Map DTO → Entity
