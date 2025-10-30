@@ -1,6 +1,7 @@
 package com.ead.backend.config;
 
 import com.ead.backend.filter.JwtAuthenticationFilter;
+import com.ead.backend.filter.SseTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,9 +25,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final SseTokenAuthenticationFilter sseTokenAuthenticationFilter;
 
-    public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
+    public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, SseTokenAuthenticationFilter sseTokenAuthenticationFilter) {
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.sseTokenAuthenticationFilter = sseTokenAuthenticationFilter;
     }
 
     @Bean
@@ -118,6 +121,7 @@ public class SecurityConfig {
                         })
                 )
 
+                .addFilterBefore(sseTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // Only add the JWT authentication filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

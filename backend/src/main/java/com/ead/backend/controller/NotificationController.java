@@ -22,7 +22,10 @@ public class NotificationController {
 
     // SSE subscription endpoint
     @GetMapping(value = "/subscribe/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@PathVariable Long userId) {
+    public SseEmitter subscribe(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String token
+    ) {
         return notificationService.subscribe(userId);
     }
 
