@@ -4,11 +4,15 @@ import com.ead.backend.filter.JwtAuthenticationFilter;
 import com.ead.backend.filter.SseTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.util.List;
 
 @Configuration
@@ -30,6 +33,20 @@ public class SecurityConfig {
     public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, SseTokenAuthenticationFilter sseTokenAuthenticationFilter) {
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         this.sseTokenAuthenticationFilter = sseTokenAuthenticationFilter;
+    }
+
+    @Bean
+    @Profile({"dev", "local", "default"})
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**",
+            "/webjars/**",
+            "/swagger-ui/index.html"
+        );
     }
 
     @Bean
@@ -55,18 +72,29 @@ public class SecurityConfig {
                     return config;
                 }))
 
-                // Disable CSRF for REST API
-                .csrf(csrf -> csrf.disable())
+            // Disable CSRF for REST API
+            .csrf(AbstractHttpConfigurer::disable)
 
-                // Role-based authorization rules
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints (no authentication required)
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/register/employee", "/auth/refresh-token").permitAll()
-                        .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
-                        .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
-                        .requestMatchers("/health", "/h2-console/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/error").permitAll()
+            // Role-based authorization rules
+            .authorizeHttpRequests(auth -> auth
+                // Swagger endpoints - MUST BE FIRST to avoid conflicts
+                .requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs",
+                    "/swagger-resources/**",
+                    "/webjars/**",
+                    "/swagger-ui/index.html",
+                    "/api-docs/**"
+                ).permitAll()
+
+                // Public endpoints (no authentication required)
+                .requestMatchers("/health", "/health/debug", "/test", "/h2-console/**").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/register/customer", "/auth/register/employee", "/auth/refresh-token").permitAll()
+                .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
+                .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
+                .requestMatchers("/error").permitAll()
 
                         // OAuth2 endpoints - allow all OAuth2 related paths
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
@@ -104,8 +132,8 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
-                // Disable form login to prevent redirects
-                .formLogin(form -> form.disable())
+            // Disable form login to prevent redirects
+            .formLogin(AbstractHttpConfigurer::disable)
 
                 // Configure exception handling
                 .exceptionHandling(exceptions -> exceptions
@@ -126,7 +154,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
+            .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
         );
 
         return http.build();

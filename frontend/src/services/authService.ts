@@ -1,5 +1,10 @@
-import api from "../utill/apiUtils";
-import type { AuthResponse, LoginCredentials, RegisterData, User } from "../types/auth";
+import api from "../util/apiUtils";
+import type {
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+  User,
+} from "../types/auth";
 
 // User registration data interface for backward compatibility
 export interface RegisterCustomerData {
@@ -11,172 +16,189 @@ export interface RegisterCustomerData {
 }
 
 export const authService = {
-    // Login user - Updated to match backend API specification
-    login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-        const response = await api.post("/auth/login", {
-            email: credentials.email,
-            password: credentials.password
-        });
-        console.log('Login response from backend:', response.data);
-        // Backend returns the response in the format specified
-        return response.data;
-    },
+  // Login user - Updated to match backend API specification
+  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    const response = await api.post("/auth/login", {
+      email: credentials.email,
+      password: credentials.password,
+    });
+    console.log("Login response from backend:", response.data);
+    // Backend returns the response in the format specified
+    return response.data;
+  },
 
-    // Register customer - Updated to match backend API specification
-    registerCustomer: async (userData: RegisterData): Promise<AuthResponse> => {
-        const registrationData = {
-            email: userData.email,
-            password: userData.password,
-            fullName: userData.fullName,
-            phoneNumber: userData.phoneNumber,
-            address: userData.address || "",
-            role: "CUSTOMER"
-        };
-        
-        console.log('Sending registration data to backend:', registrationData);
-        
-        const response = await api.post("/auth/register/customer", registrationData);
-        
-        // Backend should return the same format as login response if auto-login is enabled
-        return response.data;
-    },
+  // Register customer - Updated to match backend API specification
+  registerCustomer: async (userData: RegisterData): Promise<AuthResponse> => {
+    const registrationData = {
+      email: userData.email,
+      password: userData.password,
+      fullName: userData.fullName,
+      phoneNumber: userData.phoneNumber,
+      address: userData.address || "",
+      role: "CUSTOMER",
+    };
 
-    // Register employee (requires admin token)
-    registerEmployee: async (userData: RegisterData): Promise<AuthResponse> => {
-        const registrationData = {
-            email: userData.email,
-            password: userData.password,
-            fullName: userData.fullName,
-            phoneNumber: userData.phoneNumber,
-            address: userData.address || "",
-            role: userData.role || "EMPLOYEE",
-            employeeId: userData.employeeId,
-            department: userData.department
-        };
-        const response = await api.post("/auth/register/employee", registrationData);
-        return response.data;
-    },
+    console.log("Sending registration data to backend:", registrationData);
 
-    // Legacy register method - defaults to customer
-    register: async (userData: RegisterData): Promise<AuthResponse> => {
-        return authService.registerCustomer(userData);
-    },
+    const response = await api.post(
+      "/auth/register/customer",
+      registrationData
+    );
 
-    // Logout user
-    logout: async (): Promise<void> => {
-        try {
-            await api.post("/auth/logout");
-        } catch (error) {
-            console.warn('Logout request failed:', error);
-        }
-    },
+    // Backend should return the same format as login response if auto-login is enabled
+    return response.data;
+  },
 
-    // Logout from all devices
-    logoutAll: async (): Promise<void> => {
-        try {
-            await api.post("/auth/logout-all");
-        } catch (error) {
-            console.warn('Logout all devices failed:', error);
-        }
-    },
+  // Register employee (requires admin token)
+  registerEmployee: async (userData: RegisterData): Promise<AuthResponse> => {
+    const registrationData = {
+      email: userData.email,
+      password: userData.password,
+      fullName: userData.fullName,
+      phoneNumber: userData.phoneNumber,
+      address: userData.address || "",
+      role: userData.role || "EMPLOYEE",
+      employeeId: userData.employeeId,
+      department: userData.department,
+    };
+    const response = await api.post(
+      "/auth/register/employee",
+      registrationData
+    );
+    return response.data;
+  },
 
-    // Refresh access token - Updated for JWT backend
-    refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-        const response = await api.post("/auth/refresh-token", { 
-            refreshToken: refreshToken 
-        });
-        
-        // Backend returns new JWT token in same format as login
-        return response.data;
-    },
+  // Legacy register method - defaults to customer
+  register: async (userData: RegisterData): Promise<AuthResponse> => {
+    return authService.registerCustomer(userData);
+  },
 
-    // Rotate refresh token
-    rotateRefreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-        const response = await api.post("/auth/rotate-refresh-token", { refreshToken });
-        return response.data;
-    },
+  // Logout user
+  logout: async (): Promise<void> => {
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.warn("Logout request failed:", error);
+    }
+  },
 
-    // Get user profile
-    getProfile: async (): Promise<User> => {
-        const response = await api.get("/auth/profile");
-        return response.data;
-    },
+  // Logout from all devices
+  logoutAll: async (): Promise<void> => {
+    try {
+      await api.post("/auth/logout-all");
+    } catch (error) {
+      console.warn("Logout all devices failed:", error);
+    }
+  },
 
-    // Complete profile after OAuth signup (add missing phone number, address, role)
-    // Updated to handle all user fields for profile editing
-    updateProfile: async (data: { 
-        fullName?: string;
-        phoneNumber?: string; 
-        address?: string; 
-        role?: string;
-        employeeId?: string;
-        department?: string;
-    }): Promise<User> => {
-        const response = await api.put("/auth/update-profile", data);
-        return response.data;
-    },
+  // Refresh access token - Updated for JWT backend
+  refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
+    const response = await api.post("/auth/refresh-token", {
+      refreshToken: refreshToken,
+    });
 
-    // Check email availability
-    checkEmailAvailability: async (email: string): Promise<{ available: boolean }> => {
-        const response = await api.get(`/auth/check-email/${encodeURIComponent(email)}`);
-        return response.data;
-    },
+    // Backend returns new JWT token in same format as login
+    return response.data;
+  },
 
-    // Forgot password - Request password reset email
-    forgotPassword: async (email: string): Promise<{ message: string }> => {
-        const response = await api.post("/auth/forgot-password", { email });
-        return response.data;
-    },
+  // Rotate refresh token
+  rotateRefreshToken: async (refreshToken: string): Promise<AuthResponse> => {
+    const response = await api.post("/auth/rotate-refresh-token", {
+      refreshToken,
+    });
+    return response.data;
+  },
 
-    // Reset password - Set new password with token
-    resetPassword: async (token: string, newPassword: string): Promise<{ message: string }> => {
-        const response = await api.post("/auth/reset-password", { 
-            token, 
-            newPassword 
-        });
-        return response.data;
-    },
+  // Get user profile
+  getProfile: async (): Promise<User> => {
+    const response = await api.get("/auth/profile");
+    return response.data;
+  },
 
-    // Verify reset token validity
-    verifyResetToken: async (token: string): Promise<{ valid: boolean; email?: string }> => {
-        const response = await api.get(`/auth/verify-reset-token/${token}`);
-        return response.data;
-    },
+  // Complete profile after OAuth signup (add missing phone number, address, role)
+  // Updated to handle all user fields for profile editing
+  updateProfile: async (data: {
+    fullName?: string;
+    phoneNumber?: string;
+    address?: string;
+    role?: string;
+    employeeId?: string;
+    department?: string;
+  }): Promise<User> => {
+    const response = await api.put("/auth/update-profile", data);
+    return response.data;
+  },
 
-    // Get active sessions
-    getActiveSessions: async (): Promise<unknown[]> => {
-        const response = await api.get("/auth/active-sessions");
-        return response.data;
-    },
+  // Check email availability
+  checkEmailAvailability: async (
+    email: string
+  ): Promise<{ available: boolean }> => {
+    const response = await api.get(
+      `/auth/check-email/${encodeURIComponent(email)}`
+    );
+    return response.data;
+  },
 
-    // Verify token (backward compatibility)
-    verifyToken: async (token: string): Promise<boolean> => {
-        try {
-            const response = await api.get("/auth/profile", {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return !!response.data;
-        } catch {
-            return false;
-        }
-    },
+  // Forgot password - Request password reset email
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  },
 
-    // Legacy methods for backward compatibility
-    Login: async (credentials: LoginCredentials) => {
-        return authService.login(credentials);
-    },
+  // Reset password - Set new password with token
+  resetPassword: async (
+    token: string,
+    newPassword: string
+  ): Promise<{ message: string }> => {
+    const response = await api.post("/auth/reset-password", {
+      token,
+      newPassword,
+    });
+    return response.data;
+  },
 
-    Register: async (customerData: RegisterCustomerData) => {
-        const userData: RegisterData = {
-            email: customerData.email,
-            password: customerData.password,
-            fullName: customerData.fullName,
-            phoneNumber: customerData.phoneNumber,
-            address: "",
-            role: "CUSTOMER"
-        };
-        return authService.registerCustomer(userData);
-    },
+  // Verify reset token validity
+  verifyResetToken: async (
+    token: string
+  ): Promise<{ valid: boolean; email?: string }> => {
+    const response = await api.get(`/auth/verify-reset-token/${token}`);
+    return response.data;
+  },
+
+  // Get active sessions
+  getActiveSessions: async (): Promise<unknown[]> => {
+    const response = await api.get("/auth/active-sessions");
+    return response.data;
+  },
+
+  // Verify token (backward compatibility)
+  verifyToken: async (token: string): Promise<boolean> => {
+    try {
+      const response = await api.get("/auth/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return !!response.data;
+    } catch {
+      return false;
+    }
+  },
+
+  // Legacy methods for backward compatibility
+  Login: async (credentials: LoginCredentials) => {
+    return authService.login(credentials);
+  },
+
+  Register: async (customerData: RegisterCustomerData) => {
+    const userData: RegisterData = {
+      email: customerData.email,
+      password: customerData.password,
+      fullName: customerData.fullName,
+      phoneNumber: customerData.phoneNumber,
+      address: "",
+      role: "CUSTOMER",
+    };
+    return authService.registerCustomer(userData);
+  },
 };
 
 // Set or remove authentication token for all API requests
@@ -184,9 +206,9 @@ export const authService = {
 export const setAuthToken = (token: string | null) => {
   if (token) {
     // Set the Authorization header for all subsequent requests
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
     // Remove the Authorization header
-    delete api.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common["Authorization"];
   }
 };

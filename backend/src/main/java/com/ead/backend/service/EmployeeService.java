@@ -61,12 +61,22 @@ public class EmployeeService {
      * Retrieves all appointments assigned to an employee.
      *
      * @param employeeId the employee ID
+     * @param status the appointment status
      * @return list of appointments
      */
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByEmployee(Long employeeId) {
+    public List<AppointmentDTO> getAppointmentsByEmployee(Long employeeId, String status) {
         logger.info("=== EMPLOYEE SERVICE - GET APPOINTMENTS BY EMPLOYEE METHOD STARTED ===");
-        List<Appointment> appointments = appointmentRepository.findByAssignedEmployeesId(employeeId);
+        List<String> allowedStatuses = List.of("CONFIRMED", "IN_PROGRESS", "COMPLETED");
+        List<Appointment> appointments;
+        if (status == null) {
+            appointments = appointmentRepository.findByAssignedEmployeesIdAndStatusIn(employeeId, allowedStatuses);
+        } else {
+            if (!allowedStatuses.contains(status)) {
+                throw new RuntimeException("INVALID_STATUS");
+            }
+            appointments = appointmentRepository.findByAssignedEmployeesIdAndStatus(employeeId, status);
+        }
         return appointments.stream()
                 .map(a -> new AppointmentDTO(
                         a.getId(),

@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
 import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
+import ServiceCenters from './pages/ServiceCenters'
 import AddVehiclePage from './pages/MyVehiclesPage'
 import MyAppointmentsPage from "./pages/MyAppointmentsPage";
 import NotificationsPage from './pages/NotificationsPage';
@@ -87,6 +88,14 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardRouter />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/service-centers"
+        element={
+          <ProtectedRoute>
+            <ServiceCenters />
           </ProtectedRoute>
         }
       />

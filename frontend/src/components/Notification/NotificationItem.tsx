@@ -5,7 +5,7 @@ import {
   getNotificationIcon,
   getNotificationColor,
   formatNotificationTime,
-} from "@/utill/notification.utils";
+} from "@/util/notification.utils";
 
 interface NotificationItemProps {
   notification: Notification;
