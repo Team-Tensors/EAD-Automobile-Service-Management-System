@@ -15,6 +15,7 @@ import { UserRole } from './types/auth'
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
 import AddVehiclePage from './pages/MyVehiclesPage'
 import MyAppointmentsPage from "./pages/MyAppointmentsPage";
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   return (
@@ -99,6 +100,17 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Notifications Page */}
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+
 
       {/* Customer Appointment Route */}
       <Route
