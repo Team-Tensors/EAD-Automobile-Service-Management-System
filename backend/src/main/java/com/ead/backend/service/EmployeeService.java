@@ -4,6 +4,7 @@ import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.AppointmentType;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.entity.User;
 import com.ead.backend.repository.AppointmentRepository;
@@ -83,8 +84,11 @@ public class EmployeeService {
                         a.getUser() != null ? a.getUser().getId() : null,
                         a.getVehicle() != null ? a.getVehicle().getId() : null,
                         a.getAppointmentType() != null ? a.getAppointmentType().name() : null,
-                        a.getServiceType() != null ? a.getServiceType().getId() : null,
-                        a.getModificationType() != null ? a.getModificationType().getId() : null,
+                        // Use serviceOrModification for both service and modification
+                        a.getAppointmentType() == AppointmentType.SERVICE && a.getServiceOrModification() != null 
+                                ? a.getServiceOrModification().getId() : null,
+                        a.getAppointmentType() == AppointmentType.MODIFICATION && a.getServiceOrModification() != null 
+                                ? a.getServiceOrModification().getId() : null,
                         a.getAppointmentDate(),
                         a.getStatus(),
                         a.getDescription(),
