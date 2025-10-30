@@ -6,6 +6,7 @@ import VehicleCardComponent from "../components/Vehicle/VehicleCard";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
 import VehicleEmptyState from "../components/Vehicle/VehicleEmptyState";
 import ActionModal from "../components/ui/ActionModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +31,9 @@ const MyVehiclesPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
 
   const [formData, setFormData] = useState<VehicleFormData>({
     brand: "",
@@ -129,25 +133,29 @@ const MyVehiclesPage = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (!confirm("Are you sure you want to delete this vehicle?")) return;
-    
+    setVehicleToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (vehicleToDelete === null) return;
+
     const deletePromise = (async () => {
       const { vehicleService } = await import("../services/vehicleService");
-      await vehicleService.remove(id);
-      setVehicles((prev) => prev.filter((v) => v.id !== id));
+      await vehicleService.remove(vehicleToDelete);
+      setVehicles((prev) => prev.filter((v) => v.id !== vehicleToDelete));
     })();
 
-    toast.promise(
-      deletePromise,
-      {
-        loading: "Deleting vehicle...",
-        success: "Vehicle deleted successfully! 🗑️",
-        error: (err) => {
-          console.error(err);
-          return "Failed to delete vehicle";
-        },
-      }
-    );
+    toast.promise(deletePromise, {
+      loading: "Deleting vehicle...",
+      success: "Vehicle deleted successfully!",
+      error: (err) => {
+        console.error(err);
+        return "Failed to delete vehicle";
+      },
+    });
+
+    setVehicleToDelete(null);
   };
 
   const openAddModal = () => {
@@ -256,6 +264,17 @@ const MyVehiclesPage = () => {
               isEditing={isEditing}
             />
           </ActionModal>
+
+          <ConfirmDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => setIsDeleteDialogOpen(false)}
+            onConfirm={confirmDelete}
+            title="Delete Vehicle"
+            message="Are you sure you want to delete this vehicle? This action cannot be undone."
+            confirmText="Delete"
+            cancelText="Cancel"
+            isDestructive={true}
+          />
         </div>
       </div>
 
