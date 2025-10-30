@@ -14,6 +14,8 @@ import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { vehicleService } from "../services/vehicleService";
 import type { Vehicle, VehicleCreateDto } from "../types/vehicle";
+import type { AppointmentType } from "../types/appointment";
+import { AppointmentTypeValues } from "../types/appointment";
 
 const serviceTypes = [
   {
@@ -93,7 +95,7 @@ const modificationTypes = [
 
 interface AppointmentFormData {
   vehicleId: string;
-  appointmentType: "SERVICE" | "MODIFICATION" | "";
+  appointmentType: AppointmentType | "";
   serviceTypeId: string;
   modificationTypeId: string;
   serviceCenterId: string;
@@ -232,7 +234,7 @@ const AppointmentBookingPage = () => {
   const canProceedToStep2 = formData.vehicleId !== "";
   const canProceedToStep3 =
     formData.appointmentType !== "" &&
-    (formData.appointmentType === "SERVICE"
+    (formData.appointmentType === AppointmentTypeValues.SERVICE
       ? formData.serviceTypeId !== ""
       : formData.modificationTypeId !== "");
 
@@ -309,7 +311,7 @@ const AppointmentBookingPage = () => {
                   }
                 />
 
-                {formData.appointmentType === "SERVICE" && (
+                {formData.appointmentType === AppointmentTypeValues.SERVICE && (
                   <ServiceTypeSelector
                     types={serviceTypes}
                     selectedId={formData.serviceTypeId}
@@ -320,7 +322,8 @@ const AppointmentBookingPage = () => {
                   />
                 )}
 
-                {formData.appointmentType === "MODIFICATION" && (
+                {formData.appointmentType ===
+                  AppointmentTypeValues.MODIFICATION && (
                   <ServiceTypeSelector
                     types={modificationTypes}
                     selectedId={formData.modificationTypeId}
