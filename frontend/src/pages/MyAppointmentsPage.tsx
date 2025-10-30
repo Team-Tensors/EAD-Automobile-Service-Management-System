@@ -84,7 +84,7 @@ const MyAppointmentsPage = () => {
       <AuthenticatedNavbar />
 
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
+      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-white">My Appointments</h1>
           <p className="text-gray-400 mt-2">
@@ -99,7 +99,7 @@ const MyAppointmentsPage = () => {
           {/* Add Appointment Button */}
           <div className="mb-8">
             <button
-              onClick={() => navigate("/appointment-booking")}
+              onClick={() => navigate("/my-appointments/appointment-booking")}
               className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
             >
               <Plus className="w-5 h-5" />
