@@ -16,82 +16,21 @@ import { vehicleService } from "../services/vehicleService";
 import type { Vehicle, VehicleCreateDto } from "../types/vehicle";
 import type { AppointmentType } from "../types/appointment";
 import { AppointmentTypeValues } from "../types/appointment";
+import { appointmentService } from "../services/appointmentService";
+import { serviceOrModificationService } from "../services/serviceOrModificationService";
+import {
+  serviceCenterService,
+  type ServiceCenterDto,
+} from "../services/serviceCenterService";
 
-const serviceTypes = [
-  {
-    id: 1,
-    name: "Oil Change",
-    description: "Regular engine oil and filter replacement",
-    estimatedDuration: "30 mins",
-    price: 50,
-  },
-  {
-    id: 2,
-    name: "Brake Service",
-    description: "Brake pad replacement and system check",
-    estimatedDuration: "1-2 hours",
-    price: 150,
-  },
-  {
-    id: 3,
-    name: "Tire Rotation",
-    description: "Rotate tires for even wear",
-    estimatedDuration: "45 mins",
-    price: 40,
-  },
-  {
-    id: 4,
-    name: "Full Service",
-    description: "Complete vehicle inspection and service",
-    estimatedDuration: "3-4 hours",
-    price: 250,
-  },
-  {
-    id: 5,
-    name: "AC Service",
-    description: "Air conditioning system check and recharge",
-    estimatedDuration: "1 hour",
-    price: 100,
-  },
-];
-
-const modificationTypes = [
-  {
-    id: 1,
-    name: "Body Kit Installation",
-    description: "Custom body kit fitting",
-    estimatedDuration: "1 day",
-    price: 500,
-  },
-  {
-    id: 2,
-    name: "Exhaust System Upgrade",
-    description: "Performance exhaust installation",
-    estimatedDuration: "2-3 hours",
-    price: 400,
-  },
-  {
-    id: 3,
-    name: "Window Tinting",
-    description: "Professional window tint application",
-    estimatedDuration: "2 hours",
-    price: 200,
-  },
-  {
-    id: 4,
-    name: "Suspension Upgrade",
-    description: "Performance suspension installation",
-    estimatedDuration: "1 day",
-    price: 800,
-  },
-  {
-    id: 5,
-    name: "Audio System Installation",
-    description: "Custom audio system setup",
-    estimatedDuration: "4-6 hours",
-    price: 600,
-  },
-];
+// Local interface for transformed service/modification types
+interface ServiceType {
+  id: number;
+  name: string;
+  description: string;
+  estimatedDuration: string;
+  price: number;
+}
 
 interface AppointmentFormData {
   vehicleId: string;
@@ -116,10 +55,16 @@ interface VehicleFormData {
 const AppointmentBookingPage = () => {
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [serviceTypes, setServiceTypes] = useState<ServiceType[]>([]);
+  const [modificationTypes, setModificationTypes] = useState<ServiceType[]>([]);
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenterDto[]>([]);
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmittingVehicle, setIsSubmittingVehicle] = useState(false);
   const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
+  const [isLoadingServiceTypes, setIsLoadingServiceTypes] = useState(false);
+  const [isLoadingServiceCenters, setIsLoadingServiceCenters] = useState(false);
+  const [isSubmittingAppointment, setIsSubmittingAppointment] = useState(false);
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     vehicleId: "",
@@ -157,6 +102,72 @@ const AppointmentBookingPage = () => {
     };
 
     fetchVehicles();
+  }, []);
+
+  // Fetch service types and modification types on component mount
+  useEffect(() => {
+    const fetchServiceTypes = async () => {
+      try {
+        setIsLoadingServiceTypes(true);
+        const [services, modifications] = await Promise.all([
+          serviceOrModificationService.getServices(),
+          serviceOrModificationService.getModifications(),
+        ]);
+
+        // Transform backend data to match frontend interface
+        const transformedServices = services.map((service) => ({
+          id: service.id,
+          name: service.name,
+          description: service.description,
+          estimatedDuration: service.estimatedTimeMinutes
+            ? `${Math.floor(service.estimatedTimeMinutes / 60)}h ${
+                service.estimatedTimeMinutes % 60
+              }m`
+            : "N/A",
+          price: service.estimatedCost,
+        }));
+
+        const transformedModifications = modifications.map((mod) => ({
+          id: mod.id,
+          name: mod.name,
+          description: mod.description,
+          estimatedDuration: mod.estimatedTimeMinutes
+            ? `${Math.floor(mod.estimatedTimeMinutes / 60)}h ${
+                mod.estimatedTimeMinutes % 60
+              }m`
+            : "N/A",
+          price: mod.estimatedCost,
+        }));
+
+        setServiceTypes(transformedServices);
+        setModificationTypes(transformedModifications);
+      } catch (error) {
+        console.error("Failed to fetch service types:", error);
+        toast.error("Failed to load service types");
+      } finally {
+        setIsLoadingServiceTypes(false);
+      }
+    };
+
+    fetchServiceTypes();
+  }, []);
+
+  // Fetch service centers on component mount
+  useEffect(() => {
+    const fetchServiceCenters = async () => {
+      try {
+        setIsLoadingServiceCenters(true);
+        const centers = await serviceCenterService.getAllServiceCenters();
+        setServiceCenters(centers);
+      } catch (error) {
+        console.error("Failed to fetch service centers:", error);
+        toast.error("Failed to load service centers");
+      } finally {
+        setIsLoadingServiceCenters(false);
+      }
+    };
+
+    fetchServiceCenters();
   }, []);
 
   const handleVehicleFormChange = (
@@ -221,14 +232,92 @@ const AppointmentBookingPage = () => {
     });
   };
 
-  const handleSubmit = () => {
-    console.log("Appointment Data:", formData);
-    // Here you would normally make an API call to save the appointment
-    // For now, we'll just simulate it and redirect
-    setTimeout(() => {
-      alert("Appointment booked successfully!");
-      navigate("/my-appointments");
-    }, 500);
+  const handleSubmit = async () => {
+    if (isSubmittingAppointment) return;
+
+    // Validate required fields
+    if (
+      !formData.vehicleId ||
+      !formData.appointmentType ||
+      !formData.appointmentDate ||
+      !formData.appointmentTime ||
+      !formData.serviceCenterId
+    ) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Get the service/modification ID based on appointment type
+    const serviceOrModificationId =
+      formData.appointmentType === AppointmentTypeValues.SERVICE
+        ? formData.serviceTypeId
+        : formData.modificationTypeId;
+
+    if (!serviceOrModificationId) {
+      toast.error("Please select a service or modification type");
+      return;
+    }
+
+    setIsSubmittingAppointment(true);
+
+    // Combine date and time into ISO format for backend
+    const appointmentDateTime = `${formData.appointmentDate}T${formData.appointmentTime}:00`;
+
+    const appointmentRequest = {
+      vehicleId: parseInt(formData.vehicleId),
+      serviceOrModificationId: parseInt(serviceOrModificationId),
+      serviceCenterId: parseInt(formData.serviceCenterId),
+      appointmentType: formData.appointmentType as AppointmentType,
+      appointmentDate: appointmentDateTime,
+      description: formData.description || undefined,
+    };
+
+    const bookingPromise = appointmentService
+      .bookAppointment(appointmentRequest)
+      .then((response) => {
+        setIsSubmittingAppointment(false);
+        // Reset form
+        setFormData({
+          vehicleId: "",
+          appointmentType: "",
+          serviceTypeId: "",
+          modificationTypeId: "",
+          serviceCenterId: "",
+          appointmentDate: "",
+          appointmentTime: "",
+          description: "",
+        });
+        setCurrentStep(1);
+        // Navigate after a short delay
+        setTimeout(() => {
+          navigate("/my-appointments");
+        }, 1500);
+        return response;
+      })
+      .catch((error) => {
+        setIsSubmittingAppointment(false);
+        throw error;
+      });
+
+    toast.promise(bookingPromise, {
+      loading: "Booking appointment...",
+      success: (response) =>
+        response.message || "Appointment booked successfully!",
+      error: (err) => {
+        console.error("Appointment booking error:", err);
+        console.error("Error response:", err?.response);
+        console.error("Error data:", err?.response?.data);
+
+        // Try multiple ways to get the error message
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Failed to book appointment";
+
+        return errorMessage;
+      },
+    });
   };
 
   const canProceedToStep2 = formData.vehicleId !== "";
@@ -312,29 +401,62 @@ const AppointmentBookingPage = () => {
                 />
 
                 {formData.appointmentType === AppointmentTypeValues.SERVICE && (
-                  <ServiceTypeSelector
-                    types={serviceTypes}
-                    selectedId={formData.serviceTypeId}
-                    onSelectType={(id) =>
-                      setFormData((prev) => ({ ...prev, serviceTypeId: id }))
-                    }
-                    label="Select Service Type"
-                  />
+                  <>
+                    {isLoadingServiceTypes ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="relative">
+                            <Car className="w-12 h-12 text-orange-500 animate-bounce" />
+                          </div>
+                          <p className="text-zinc-400 text-sm">
+                            Loading service types...
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <ServiceTypeSelector
+                        types={serviceTypes}
+                        selectedId={formData.serviceTypeId}
+                        onSelectType={(id) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            serviceTypeId: id,
+                          }))
+                        }
+                        label="Select Service Type"
+                      />
+                    )}
+                  </>
                 )}
 
                 {formData.appointmentType ===
                   AppointmentTypeValues.MODIFICATION && (
-                  <ServiceTypeSelector
-                    types={modificationTypes}
-                    selectedId={formData.modificationTypeId}
-                    onSelectType={(id) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        modificationTypeId: id,
-                      }))
-                    }
-                    label="Select Modification Type"
-                  />
+                  <>
+                    {isLoadingServiceTypes ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="flex flex-col items-center space-y-4">
+                          <div className="relative">
+                            <Car className="w-12 h-12 text-orange-500 animate-bounce" />
+                          </div>
+                          <p className="text-zinc-400 text-sm">
+                            Loading modification types...
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <ServiceTypeSelector
+                        types={modificationTypes}
+                        selectedId={formData.modificationTypeId}
+                        onSelectType={(id) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            modificationTypeId: id,
+                          }))
+                        }
+                        label="Select Modification Type"
+                      />
+                    )}
+                  </>
                 )}
 
                 <div className="flex justify-between">
@@ -358,12 +480,15 @@ const AppointmentBookingPage = () => {
             {currentStep === 3 && (
               <ScheduleStep
                 formData={formData}
+                serviceCenters={serviceCenters}
+                isLoadingServiceCenters={isLoadingServiceCenters}
                 onChange={(e) => {
                   const { name, value } = e.target;
                   setFormData((prev) => ({ ...prev, [name]: value }));
                 }}
                 onBack={() => setCurrentStep(2)}
                 onSubmit={handleSubmit}
+                isSubmitting={isSubmittingAppointment}
               />
             )}
           </div>

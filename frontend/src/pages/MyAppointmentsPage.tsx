@@ -1,33 +1,39 @@
 // src/pages/MyAppointmentsPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Calendar, Clock, Car, Wrench, Package } from "lucide-react";
+import toast from "react-hot-toast";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
-import type { AppointmentType, AppointmentStatus } from "@/types/appointment";
 import { AppointmentTypeValues } from "@/types/appointment";
-
-interface Appointment {
-  id: number;
-  vehicleBrand: string;
-  vehicleModel: string;
-  vehicleLicensePlate: string;
-  appointmentType: AppointmentType;
-  serviceName: string;
-  appointmentDate: string;
-  appointmentTime: string;
-  status: AppointmentStatus;
-  description?: string;
-  estimatedDuration: string;
-  price: number;
-}
+import {
+  appointmentService,
+  type AppointmentSummary,
+} from "@/services/appointmentService";
 
 const MyAppointmentsPage = () => {
   const navigate = useNavigate();
+  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sample data - replace with API call later
-  const [appointments] = useState<Appointment[]>([]);
+  // Fetch appointments on component mount
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setIsLoading(true);
+        const data = await appointmentService.getMyAppointments();
+        setAppointments(data);
+      } catch (error) {
+        console.error("Failed to fetch appointments:", error);
+        toast.error("Failed to load appointments");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -70,8 +76,22 @@ const MyAppointmentsPage = () => {
       {/* Main Content */}
       <div className="flex-1 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Appointments List */}
-          {appointments.length === 0 ? (
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Calendar className="w-16 h-16 text-orange-500 animate-bounce" />
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                  </div>
+                </div>
+                <p className="text-zinc-400 text-sm">Loading appointments...</p>
+              </div>
+            </div>
+          ) : appointments.length === 0 ? (
             <AppointmentEmptyState
               onBookClick={() =>
                 navigate("/my-appointments/appointment-booking")
@@ -103,7 +123,7 @@ const MyAppointmentsPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="p-2 bg-orange-500/10 rounded-lg">
-                            {appointment.appointmentType ===
+                            {appointment.type ===
                             AppointmentTypeValues.SERVICE ? (
                               <Wrench className="w-5 h-5 text-orange-500" />
                             ) : (
@@ -112,10 +132,10 @@ const MyAppointmentsPage = () => {
                           </div>
                           <div>
                             <h3 className="text-xl font-semibold text-white">
-                              {appointment.serviceName}
+                              {appointment.service}
                             </h3>
                             <span className="text-sm text-gray-400">
-                              {appointment.appointmentType}
+                              {appointment.type}
                             </span>
                           </div>
                         </div>
@@ -123,32 +143,25 @@ const MyAppointmentsPage = () => {
                         <div className="space-y-2 text-gray-300">
                           <div className="flex items-center gap-2">
                             <Car className="w-4 h-4 text-gray-500" />
-                            <span>
-                              {appointment.vehicleBrand}{" "}
-                              {appointment.vehicleModel} (
-                              {appointment.vehicleLicensePlate})
-                            </span>
+                            <span>{appointment.vehicle}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-gray-500" />
-                            <span>
-                              {formatDate(appointment.appointmentDate)}
-                            </span>
+                            <span>{formatDate(appointment.date)}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 text-gray-500" />
                             <span>
-                              {appointment.appointmentTime} •{" "}
-                              {appointment.estimatedDuration}
+                              {new Date(appointment.date).toLocaleTimeString(
+                                "en-US",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </span>
                           </div>
                         </div>
-
-                        {appointment.description && (
-                          <p className="text-gray-400 mt-3 text-sm">
-                            {appointment.description}
-                          </p>
-                        )}
                       </div>
 
                       {/* Right Section */}
@@ -160,12 +173,6 @@ const MyAppointmentsPage = () => {
                         >
                           {appointment.status}
                         </span>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-white">
-                            ${appointment.price}
-                          </p>
-                          <p className="text-sm text-gray-400">Total Cost</p>
-                        </div>
                         <div className="flex gap-2 mt-2">
                           <button className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-all text-sm">
                             View Details
