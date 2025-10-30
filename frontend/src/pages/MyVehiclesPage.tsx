@@ -9,15 +9,7 @@ import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { useAuth } from "@/hooks/useAuth";
 
-interface Vehicle {
-  id: number;
-  brand: string;
-  model: string;
-  year: string;
-  color: string;
-  licensePlate: string;
-  lastServiceDate?: string;
-}
+import type { Vehicle } from "../types/vehicle";
 
 interface VehicleFormData {
   brand: string;
@@ -31,25 +23,7 @@ interface VehicleFormData {
 const MyVehiclesPage = () => {
   useAuth();
 
-  const [vehicles, setVehicles] = useState<Vehicle[]>([
-    {
-      id: 1,
-      brand: "Toyota",
-      model: "Camry",
-      year: "2020",
-      color: "Silver",
-      licensePlate: "ABC-1234",
-      lastServiceDate: "2024-09-15",
-    },
-    {
-      id: 2,
-      brand: "Honda",
-      model: "Civic",
-      year: "2021",
-      color: "Black",
-      licensePlate: "XYZ-5678",
-    },
-  ]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -65,6 +39,25 @@ const MyVehiclesPage = () => {
     lastServiceDate: "",
   });
 
+  // load vehicles from backend
+  React.useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await (
+          await import("../services/vehicleService")
+        ).vehicleService.list();
+        if (mounted) setVehicles(data || []);
+      } catch (err) {
+        console.error("Failed to fetch vehicles:", err);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -72,44 +65,57 @@ const MyVehiclesPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFormSubmit = (data: VehicleFormData) => {
+  const handleFormSubmit = async (data: VehicleFormData) => {
     setIsSubmitting(true);
-
-    setTimeout(() => {
+    try {
+      const { vehicleService } = await import("../services/vehicleService");
       if (isEditing && editingId !== null) {
+        const updated = await vehicleService.update(editingId, data);
         setVehicles((prev) =>
-          prev.map((v) =>
-            v.id === editingId
-              ? {
-                  ...data,
-                  id: editingId,
-                  lastServiceDate: data.lastServiceDate || undefined,
-                }
-              : v
-          )
+          prev.map((v) => (v.id === editingId ? updated : v))
         );
       } else {
-        const newVehicle: Vehicle = {
-          ...data,
-          id: Date.now(),
-          lastServiceDate: data.lastServiceDate || undefined,
+        const created = await vehicleService.create(data);
+        setVehicles((prev) => [...prev, created]);
+      }
+      closeModal();
+    } catch (err: unknown) {
+      console.error("Vehicle save error:", err);
+
+      // Extract meaningful error message
+      let msg = "Failed to save vehicle";
+      if (err instanceof Error) {
+        msg = err.message;
+      } else if (typeof err === "object" && err !== null) {
+        // Handle axios error structure
+        const axiosErr = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
         };
-        setVehicles((prev) => [...prev, newVehicle]);
+        if (axiosErr.response?.data?.message) {
+          msg = axiosErr.response.data.message;
+        } else if (axiosErr.message) {
+          msg = axiosErr.message;
+        }
       }
 
+      alert(msg);
+    } finally {
       setIsSubmitting(false);
-      closeModal();
-    }, 1000);
+    }
   };
 
   const handleEdit = (vehicle: Vehicle) => {
+    const dateOnly = vehicle.lastServiceDate
+      ? new Date(vehicle.lastServiceDate).toISOString().slice(0, 10)
+      : "";
     setFormData({
       brand: vehicle.brand,
       model: vehicle.model,
       year: vehicle.year,
       color: vehicle.color,
       licensePlate: vehicle.licensePlate,
-      lastServiceDate: vehicle.lastServiceDate || "",
+      lastServiceDate: dateOnly,
     });
     setEditingId(vehicle.id);
     setIsEditing(true);
@@ -117,9 +123,17 @@ const MyVehiclesPage = () => {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this vehicle?")) {
-      setVehicles((prev) => prev.filter((v) => v.id !== id));
-    }
+    if (!confirm("Are you sure you want to delete this vehicle?")) return;
+    (async () => {
+      try {
+        const { vehicleService } = await import("../services/vehicleService");
+        await vehicleService.remove(id);
+        setVehicles((prev) => prev.filter((v) => v.id !== id));
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete vehicle");
+      }
+    })();
   };
 
   const openAddModal = () => {
