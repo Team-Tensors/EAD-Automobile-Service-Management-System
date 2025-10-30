@@ -167,7 +167,8 @@ const AppointmentBookingPage = () => {
   const handleVehicleFormSubmit = async (vehicleData: VehicleFormData) => {
     // Check for duplicate license plate
     const isDuplicate = vehicles.some(
-      (v) => v.licensePlate.toLowerCase() === vehicleData.licensePlate.toLowerCase()
+      (v) =>
+        v.licensePlate.toLowerCase() === vehicleData.licensePlate.toLowerCase()
     );
 
     if (isDuplicate) {
@@ -186,21 +187,26 @@ const AppointmentBookingPage = () => {
       lastServiceDate: vehicleData.lastServiceDate || undefined,
     };
 
-    const createPromise = vehicleService.create(createDto).then((newVehicle) => {
-      setVehicles((prev) => [...prev, newVehicle]);
-      setFormData((prev) => ({ ...prev, vehicleId: newVehicle.id.toString() }));
-      setVehicleFormData({
-        brand: "",
-        model: "",
-        year: "",
-        color: "",
-        licensePlate: "",
-        lastServiceDate: "",
+    const createPromise = vehicleService
+      .create(createDto)
+      .then((newVehicle) => {
+        setVehicles((prev) => [...prev, newVehicle]);
+        setFormData((prev) => ({
+          ...prev,
+          vehicleId: newVehicle.id.toString(),
+        }));
+        setVehicleFormData({
+          brand: "",
+          model: "",
+          year: "",
+          color: "",
+          licensePlate: "",
+          lastServiceDate: "",
+        });
+        setIsVehicleModalOpen(false);
+        setIsSubmittingVehicle(false);
+        return newVehicle;
       });
-      setIsVehicleModalOpen(false);
-      setIsSubmittingVehicle(false);
-      return newVehicle;
-    });
 
     toast.promise(createPromise, {
       loading: "Adding vehicle...",
@@ -269,7 +275,9 @@ const AppointmentBookingPage = () => {
                           <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
                         </div>
                       </div>
-                      <p className="text-zinc-400 text-sm">Loading vehicles...</p>
+                      <p className="text-zinc-400 text-sm">
+                        Loading vehicles...
+                      </p>
                     </div>
                   </div>
                 ) : (
