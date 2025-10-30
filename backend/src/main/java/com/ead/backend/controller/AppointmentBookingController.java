@@ -42,6 +42,11 @@ public class AppointmentBookingController {
             ServiceOrModification som = new ServiceOrModification();
             som.setId(request.getServiceOrModificationId());
             appointment.setServiceOrModification(som);
+            
+            ServiceCenter serviceCenter = new ServiceCenter();
+            serviceCenter.setId(request.getServiceCenterId());
+            appointment.setServiceCenter(serviceCenter);
+            
             appointment.setAppointmentType(request.getAppointmentType());
             appointment.setAppointmentDate(request.getAppointmentDate());
             appointment.setDescription(request.getDescription());
