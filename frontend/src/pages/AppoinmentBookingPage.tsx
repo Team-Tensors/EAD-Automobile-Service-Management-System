@@ -1,6 +1,8 @@
 // src/pages/AppointmentBookingPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Car } from "lucide-react";
 import VehicleSelector from "../components/AppointmentBooking/VehicleSelector";
 import AppointmentTypeSelector from "../components/AppointmentBooking/AppointmentTypeSelector";
 import ServiceTypeSelector from "../components/AppointmentBooking/ServiceTypeSelector";
@@ -10,24 +12,8 @@ import ActionModal from "../components/ui/ActionModal";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
-
-// Sample Data (Move to API later)
-const sampleVehicles = [
-  {
-    id: 1,
-    brand: "Toyota",
-    model: "Camry",
-    year: "2020",
-    licensePlate: "ABC-1234",
-  },
-  {
-    id: 2,
-    brand: "Honda",
-    model: "Civic",
-    year: "2021",
-    licensePlate: "XYZ-5678",
-  },
-];
+import { vehicleService } from "../services/vehicleService";
+import type { Vehicle, VehicleCreateDto } from "../types/vehicle";
 
 const serviceTypes = [
   {
@@ -116,14 +102,6 @@ interface AppointmentFormData {
   description: string;
 }
 
-interface Vehicle {
-  id: number;
-  brand: string;
-  model: string;
-  year: string;
-  licensePlate: string;
-}
-
 interface VehicleFormData {
   brand: string;
   model: string;
@@ -135,10 +113,11 @@ interface VehicleFormData {
 
 const AppointmentBookingPage = () => {
   const navigate = useNavigate();
-  const [vehicles, setVehicles] = useState<Vehicle[]>(sampleVehicles);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmittingVehicle, setIsSubmittingVehicle] = useState(false);
+  const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     vehicleId: "",
@@ -160,6 +139,24 @@ const AppointmentBookingPage = () => {
     lastServiceDate: "",
   });
 
+  // Fetch vehicles on component mount
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      try {
+        setIsLoadingVehicles(true);
+        const data = await vehicleService.list();
+        setVehicles(data);
+      } catch (error) {
+        console.error("Failed to fetch vehicles:", error);
+        toast.error("Failed to load vehicles");
+      } finally {
+        setIsLoadingVehicles(false);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
   const handleVehicleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -167,20 +164,31 @@ const AppointmentBookingPage = () => {
     setVehicleFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleVehicleFormSubmit = (vehicleData: VehicleFormData) => {
+  const handleVehicleFormSubmit = async (vehicleData: VehicleFormData) => {
+    // Check for duplicate license plate
+    const isDuplicate = vehicles.some(
+      (v) => v.licensePlate.toLowerCase() === vehicleData.licensePlate.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast.error("A vehicle with this license plate already exists");
+      return;
+    }
+
     setIsSubmittingVehicle(true);
 
-    setTimeout(() => {
-      const newVehicle: Vehicle = {
-        id: Date.now(),
-        brand: vehicleData.brand,
-        model: vehicleData.model,
-        year: vehicleData.year,
-        licensePlate: vehicleData.licensePlate,
-      };
+    const createDto: VehicleCreateDto = {
+      brand: vehicleData.brand,
+      model: vehicleData.model,
+      year: vehicleData.year,
+      color: vehicleData.color,
+      licensePlate: vehicleData.licensePlate,
+      lastServiceDate: vehicleData.lastServiceDate || undefined,
+    };
+
+    const createPromise = vehicleService.create(createDto).then((newVehicle) => {
       setVehicles((prev) => [...prev, newVehicle]);
       setFormData((prev) => ({ ...prev, vehicleId: newVehicle.id.toString() }));
-      setIsSubmittingVehicle(false);
       setVehicleFormData({
         brand: "",
         model: "",
@@ -190,7 +198,19 @@ const AppointmentBookingPage = () => {
         lastServiceDate: "",
       });
       setIsVehicleModalOpen(false);
-    }, 1000);
+      setIsSubmittingVehicle(false);
+      return newVehicle;
+    });
+
+    toast.promise(createPromise, {
+      loading: "Adding vehicle...",
+      success: "Vehicle added successfully!",
+      error: (err) => {
+        console.error(err);
+        setIsSubmittingVehicle(false);
+        return "Failed to add vehicle";
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -237,16 +257,34 @@ const AppointmentBookingPage = () => {
 
           <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg p-8">
             {currentStep === 1 && (
-              <VehicleSelector
-                vehicles={vehicles}
-                selectedVehicleId={formData.vehicleId}
-                onSelectVehicle={(id) =>
-                  setFormData((prev) => ({ ...prev, vehicleId: id }))
-                }
-                onAddVehicle={() => setIsVehicleModalOpen(true)}
-                onNext={() => setCurrentStep(2)}
-                canProceed={canProceedToStep2}
-              />
+              <>
+                {isLoadingVehicles ? (
+                  <div className="flex items-center justify-center py-20">
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="relative">
+                        <Car className="w-16 h-16 text-orange-500 animate-bounce" />
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                          <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
+                          <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                        </div>
+                      </div>
+                      <p className="text-zinc-400 text-sm">Loading vehicles...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <VehicleSelector
+                    vehicles={vehicles}
+                    selectedVehicleId={formData.vehicleId}
+                    onSelectVehicle={(id) =>
+                      setFormData((prev) => ({ ...prev, vehicleId: id }))
+                    }
+                    onAddVehicle={() => setIsVehicleModalOpen(true)}
+                    onNext={() => setCurrentStep(2)}
+                    canProceed={canProceedToStep2}
+                  />
+                )}
+              </>
             )}
 
             {currentStep === 2 && (
