@@ -1,7 +1,7 @@
 // src/pages/MyVehiclesDashboardPage.tsx
 import React, { useState } from "react";
 import { Plus, Car } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import VehicleCardComponent from "../components/Vehicle/VehicleCard";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
 import VehicleEmptyState from "../components/Vehicle/VehicleEmptyState";
@@ -207,29 +207,6 @@ const MyVehiclesPage = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col pt-15">
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: "#18181b",
-            color: "#fff",
-            border: "1px solid #27272a",
-          },
-          success: {
-            iconTheme: {
-              primary: "#f97316",
-              secondary: "#fff",
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: "#ef4444",
-              secondary: "#fff",
-            },
-          },
-        }}
-      />
       <AuthenticatedNavbar />
 
       {/* Header Section with proper spacing from navbar */}
