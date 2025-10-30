@@ -104,15 +104,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) => {
   };
 
   const handleTogglePanel = () => {
-    if (!isPanelOpen) {
-      setIsPanelOpen(true);
-    } else {
-      setTimeout(() => setIsPanelOpen(false), 300);
-    }
+    setIsPanelOpen(!isPanelOpen);
   };
 
   const handleClosePanel = () => {
-    setTimeout(() => setIsPanelOpen(false), 300);
+    setIsPanelOpen(false);
   };
 
   return (
@@ -131,19 +127,17 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) => {
       </button>
 
       {isPanelOpen && (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-          <NotificationPanel
-            notifications={notifications}
-            unreadCount={unreadCount}
-            onClose={handleClosePanel}
-            onMarkAsRead={handleMarkAsRead}
-            onMarkAllAsRead={handleMarkAllAsRead}
-            onClearAll={handleClearAll}
-            onRequestPermission={() =>
-              notificationService.requestBrowserPermission()
-            }
-          />
-        </div>
+        <NotificationPanel
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onClose={handleClosePanel}
+          onMarkAsRead={handleMarkAsRead}
+          onMarkAllAsRead={handleMarkAllAsRead}
+          onClearAll={handleClearAll}
+          onRequestPermission={() =>
+            notificationService.requestBrowserPermission()
+          }
+        />
       )}
     </div>
   );
