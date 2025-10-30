@@ -159,22 +159,26 @@ const MyVehiclesPage = () => {
   const confirmDelete = () => {
     if (vehicleToDelete === null) return;
 
+    const vehicleIdToDelete = vehicleToDelete;
+
     const deletePromise = (async () => {
       const { vehicleService } = await import("../services/vehicleService");
-      await vehicleService.remove(vehicleToDelete);
-      setVehicles((prev) => prev.filter((v) => v.id !== vehicleToDelete));
+      await vehicleService.remove(vehicleIdToDelete);
+      setVehicles((prev) => prev.filter((v) => v.id !== vehicleIdToDelete));
     })();
 
     toast.promise(deletePromise, {
       loading: "Deleting vehicle...",
-      success: "Vehicle deleted successfully!",
+      success: () => {
+        setVehicleToDelete(null);
+        return "Vehicle deleted successfully!";
+      },
       error: (err) => {
         console.error(err);
+        setVehicleToDelete(null);
         return "Failed to delete vehicle";
       },
     });
-
-    setVehicleToDelete(null);
   };
 
   const openAddModal = () => {

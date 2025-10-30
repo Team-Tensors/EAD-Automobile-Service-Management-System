@@ -1,4 +1,4 @@
-import api from "../utill/apiUtils";
+import api from "../util/apiUtils";
 import type { Vehicle, VehicleCreateDto } from "../types/vehicle";
 
 const base = "/vehicles";
