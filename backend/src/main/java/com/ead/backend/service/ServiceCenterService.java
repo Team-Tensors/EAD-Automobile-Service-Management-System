@@ -1,7 +1,6 @@
 package com.ead.backend.service;
 
 import com.ead.backend.dto.ServiceCenterDTO;
-import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.repository.ServiceCenterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
