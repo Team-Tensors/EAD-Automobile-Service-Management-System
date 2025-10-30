@@ -18,7 +18,6 @@ import java.util.List;
 @RequestMapping("/vehicles")
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"}, allowCredentials = "true")
 public class VehicleController {
 
     private final VehicleService vehicleService;
