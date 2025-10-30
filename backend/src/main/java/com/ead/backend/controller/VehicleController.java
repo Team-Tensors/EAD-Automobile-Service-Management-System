@@ -15,10 +15,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/vehicles")
+@RequestMapping("/vehicles")
 @RequiredArgsConstructor
 @PreAuthorize("isAuthenticated()")
-@CrossOrigin(origins = "${frontend.url}", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"}, allowCredentials = "true")
 public class VehicleController {
 
     private final VehicleService vehicleService;
