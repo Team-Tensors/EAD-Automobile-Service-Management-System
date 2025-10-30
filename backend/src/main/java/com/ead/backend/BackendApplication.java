@@ -9,13 +9,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableScheduling
+@Slf4j
 public class BackendApplication {
+
+    @Autowired
+    private Environment env;
 
     public static void main(String[] args) {
         SpringApplication.run(BackendApplication.class, args);
@@ -43,5 +53,32 @@ public class BackendApplication {
                 System.out.println("Admin user already exists");
             }
         };
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void printSwaggerUrl() {
+        String activeProfile = env.getProperty("spring.profiles.active", "dev");
+
+        // Only show Swagger URL in development profiles
+        if ("dev".equals(activeProfile) || "local".equals(activeProfile)) {
+            String port = env.getProperty("server.port", "8080");
+            String contextPath = env.getProperty("server.servlet.context-path", "");
+
+            String swaggerUrl = "http://localhost:" + port + contextPath + "/swagger-ui/index.html";
+            String apiDocsUrl = "http://localhost:" + port + contextPath + "/v3/api-docs";
+
+            log.info("\n" +
+                    "═══════════════════════════════════════════════════════════\n" +
+                    "DRIVECARE API STARTED SUCCESSFULLY!\n" +
+                    "═══════════════════════════════════════════════════════════\n" +
+                    "Swagger UI: {}\n" +
+                    "API Docs:   {}\n" +
+                    "Profile:    {}\n" +
+                    "Ready to manage your automobile services!\n" +
+                    "═══════════════════════════════════════════════════════════",
+                    swaggerUrl, apiDocsUrl, activeProfile);
+        } else {
+            log.info("Application started successfully in '{}' profile", activeProfile);
+        }
     }
 }

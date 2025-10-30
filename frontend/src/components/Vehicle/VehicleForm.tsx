@@ -1,4 +1,3 @@
-// src/components/vehicles/VehicleFormComponent.tsx
 import React, { useState } from 'react';
 import { Car, Calendar, Palette, Hash } from 'lucide-react';
 import FormInputField from '../ui/FormInputField';
@@ -56,7 +55,7 @@ const VehicleForm: React.FC<VehicleFormComponentProps> = ({
 
   const handleSubmit = () => {
     if (!validate()) return;
-    onSubmit(formData); // Pass validated data up
+    onSubmit(formData);
   };
 
   return (
