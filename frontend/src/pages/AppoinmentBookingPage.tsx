@@ -66,6 +66,20 @@ const AppointmentBookingPage = () => {
   const [isLoadingServiceCenters, setIsLoadingServiceCenters] = useState(false);
   const [isSubmittingAppointment, setIsSubmittingAppointment] = useState(false);
 
+  // Helper function to format duration
+  const formatDuration = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    if (hours === 0) {
+      return `${mins}m`;
+    } else if (mins === 0) {
+      return `${hours}h`;
+    } else {
+      return `${hours}h ${mins}m`;
+    }
+  };
+
   const [formData, setFormData] = useState<AppointmentFormData>({
     vehicleId: "",
     appointmentType: "",
@@ -120,9 +134,7 @@ const AppointmentBookingPage = () => {
           name: service.name,
           description: service.description,
           estimatedDuration: service.estimatedTimeMinutes
-            ? `${Math.floor(service.estimatedTimeMinutes / 60)}h ${
-                service.estimatedTimeMinutes % 60
-              }m`
+            ? formatDuration(service.estimatedTimeMinutes)
             : "N/A",
           price: service.estimatedCost,
         }));
@@ -132,9 +144,7 @@ const AppointmentBookingPage = () => {
           name: mod.name,
           description: mod.description,
           estimatedDuration: mod.estimatedTimeMinutes
-            ? `${Math.floor(mod.estimatedTimeMinutes / 60)}h ${
-                mod.estimatedTimeMinutes % 60
-              }m`
+            ? formatDuration(mod.estimatedTimeMinutes)
             : "N/A",
           price: mod.estimatedCost,
         }));
