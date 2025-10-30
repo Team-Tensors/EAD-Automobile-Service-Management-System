@@ -5,17 +5,19 @@ import { Plus, Calendar, Clock, Car, Wrench, Package } from "lucide-react";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
+import type { AppointmentType, AppointmentStatus } from "@/types/appointment";
+import { AppointmentTypeValues } from "@/types/appointment";
 
 interface Appointment {
   id: number;
   vehicleBrand: string;
   vehicleModel: string;
   vehicleLicensePlate: string;
-  appointmentType: "SERVICE" | "MODIFICATION";
+  appointmentType: AppointmentType;
   serviceName: string;
   appointmentDate: string;
   appointmentTime: string;
-  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+  status: AppointmentStatus;
   description?: string;
   estimatedDuration: string;
   price: number;
@@ -101,7 +103,8 @@ const MyAppointmentsPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="p-2 bg-orange-500/10 rounded-lg">
-                            {appointment.appointmentType === "SERVICE" ? (
+                            {appointment.appointmentType ===
+                            AppointmentTypeValues.SERVICE ? (
                               <Wrench className="w-5 h-5 text-orange-500" />
                             ) : (
                               <Package className="w-5 h-5 text-orange-500" />
