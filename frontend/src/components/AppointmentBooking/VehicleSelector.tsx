@@ -1,6 +1,6 @@
-import React from 'react';
-import { Car, Plus, ChevronRight } from 'lucide-react';
-import type { Vehicle } from '../../types/vehicle';
+import React from "react";
+import { Car, Plus, ChevronRight } from "lucide-react";
+import type { Vehicle } from "../../types/vehicle";
 
 interface VehicleSelectorProps {
   vehicles: Vehicle[];
@@ -50,14 +50,18 @@ const VehicleSelector: React.FC<VehicleSelectorProps> = ({
                   onClick={() => onSelectVehicle(vehicle.id.toString())}
                   className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-300 ${
                     selectedVehicleId === vehicle.id.toString()
-                      ? 'border-orange-500 bg-orange-500/10'
-                      : 'border-zinc-700 bg-zinc-800/50 hover:border-orange-500/50'
+                      ? "border-orange-500 bg-orange-500/10"
+                      : "border-zinc-700 bg-zinc-800/50 hover:border-orange-500/50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-semibold">{vehicle.brand} {vehicle.model}</p>
-                      <p className="text-gray-400 text-sm">{vehicle.year} • {vehicle.licensePlate}</p>
+                      <p className="text-white font-semibold">
+                        {vehicle.brand} {vehicle.model}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        {vehicle.year} • {vehicle.licensePlate}
+                      </p>
                     </div>
                     {selectedVehicleId === vehicle.id.toString() && (
                       <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
