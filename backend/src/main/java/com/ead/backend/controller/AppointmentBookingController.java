@@ -67,7 +67,7 @@ public class AppointmentBookingController {
 
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDTO(e.getMessage()));
+                    .body(new MessageResponseDTO(e.getMessage(), false));
         }
     }
 
