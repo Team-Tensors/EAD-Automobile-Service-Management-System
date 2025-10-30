@@ -1,6 +1,7 @@
 // src/pages/MyVehiclesDashboardPage.tsx
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import VehicleCardComponent from "../components/Vehicle/VehicleCard";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
 import VehicleEmptyState from "../components/Vehicle/VehicleEmptyState";
@@ -50,6 +51,9 @@ const MyVehiclesPage = () => {
         if (mounted) setVehicles(data || []);
       } catch (err) {
         console.error("Failed to fetch vehicles:", err);
+        if (mounted) {
+          toast.error("Failed to load vehicles. Please refresh the page.");
+        }
       }
     };
     load();
@@ -74,9 +78,11 @@ const MyVehiclesPage = () => {
         setVehicles((prev) =>
           prev.map((v) => (v.id === editingId ? updated : v))
         );
+        toast.success("Vehicle updated successfully!");
       } else {
         const created = await vehicleService.create(data);
         setVehicles((prev) => [...prev, created]);
+        toast.success("Vehicle added successfully!");
       }
       closeModal();
     } catch (err: unknown) {
@@ -99,7 +105,7 @@ const MyVehiclesPage = () => {
         }
       }
 
-      alert(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -124,16 +130,24 @@ const MyVehiclesPage = () => {
 
   const handleDelete = (id: number) => {
     if (!confirm("Are you sure you want to delete this vehicle?")) return;
-    (async () => {
-      try {
-        const { vehicleService } = await import("../services/vehicleService");
-        await vehicleService.remove(id);
-        setVehicles((prev) => prev.filter((v) => v.id !== id));
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete vehicle");
-      }
+    
+    const deletePromise = (async () => {
+      const { vehicleService } = await import("../services/vehicleService");
+      await vehicleService.remove(id);
+      setVehicles((prev) => prev.filter((v) => v.id !== id));
     })();
+
+    toast.promise(
+      deletePromise,
+      {
+        loading: "Deleting vehicle...",
+        success: "Vehicle deleted successfully! 🗑️",
+        error: (err) => {
+          console.error(err);
+          return "Failed to delete vehicle";
+        },
+      }
+    );
   };
 
   const openAddModal = () => {
@@ -166,6 +180,29 @@ const MyVehiclesPage = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col pt-15">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#18181b",
+            color: "#fff",
+            border: "1px solid #27272a",
+          },
+          success: {
+            iconTheme: {
+              primary: "#f97316",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
       <AuthenticatedNavbar />
 
       {/* Header Section with proper spacing from navbar */}
