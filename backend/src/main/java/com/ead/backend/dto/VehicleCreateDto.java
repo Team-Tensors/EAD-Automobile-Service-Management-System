@@ -1,4 +1,3 @@
-// src/main/java/com/ead/backend/dto/VehicleCreateDto.java
 package com.ead.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -15,14 +14,15 @@ public class VehicleCreateDto {
     private String model;
 
     @NotBlank(message = "Year is required")
-    @Pattern(regexp = "\\d{4}", message = "Year must be a 4-digit number")
+    @Pattern(regexp = "^(19|20)\\d{2}$", message = "Year must be a valid 4-digit year (1900–2099)")
     private String year;
 
     @NotBlank(message = "Color is required")
     private String color;
 
-    private String lastServiceDate;
-
     @NotBlank(message = "License plate is required")
     private String licensePlate;
+
+    // Format: "2025-04-05" (from HTML <input type="date">)
+    private String lastServiceDate; // Optional
 }

@@ -1,44 +1,64 @@
+// src/main/java/com/ead/backend/service/VehicleService.java
 package com.ead.backend.service;
 
 import com.ead.backend.entity.User;
 import com.ead.backend.entity.Vehicle;
 import com.ead.backend.repository.UserRepository;
 import com.ead.backend.repository.VehicleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleService {
 
-    @Autowired
-    private VehicleRepository vehicleRepository;
+    private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    /**
-     * Add a new vehicle for the currently logged-in user
-     */
-    public Vehicle addVehicle(Vehicle vehicle) {
+    private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
-        vehicle.setUser(user);
+    // === CREATE ===
+    public Vehicle addVehicle(Vehicle vehicle) {
+        vehicle.setUser(getCurrentUser());
         return vehicleRepository.save(vehicle);
     }
 
-    /**
-     * Get all vehicles belonging to the logged-in user
-     */
+    // === READ: All ===
     public List<Vehicle> getUserVehicles() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = getCurrentUser();
         return vehicleRepository.findByUserId(user.getId());
+    }
+
+    // === READ: One (with ownership) ===
+    public Vehicle getVehicleByIdAndUser(Long id) {
+        User user = getCurrentUser();
+        return vehicleRepository.findById(id)
+                .filter(v -> v.getUser().getId().equals(user.getId()))
+                .orElse(null);
+    }
+
+    // === UPDATE ===
+    @Transactional
+    public Vehicle updateVehicle(Vehicle vehicle) {
+        return vehicleRepository.save(vehicle);
+    }
+
+    // === DELETE ===
+    @Transactional
+    public boolean deleteVehicleByIdAndUser(Long id) {
+        Vehicle vehicle = getVehicleByIdAndUser(id);
+        if (vehicle != null) {
+            vehicleRepository.delete(vehicle);
+            return true;
+        }
+        return false;
     }
 }
