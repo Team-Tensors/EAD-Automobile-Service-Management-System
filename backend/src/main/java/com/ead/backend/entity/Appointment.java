@@ -37,6 +37,11 @@ public class Appointment {
     @JoinColumn(name = "service_or_modification_id", nullable = false)
     private ServiceOrModification serviceOrModification;
 
+    // Service center where the appointment is scheduled
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_center_id", nullable = false)
+    private ServiceCenter serviceCenter;
+
     // Appointment scheduled time
     @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;

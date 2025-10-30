@@ -17,6 +17,7 @@ public class AppointmentService {
     @Autowired private UserRepository userRepository;
     @Autowired private VehicleRepository vehicleRepository;
     @Autowired private ServiceOrModificationRepository serviceOrModificationRepository;
+    @Autowired private ServiceCenterRepository serviceCenterRepository;
 
     // ===================================================================
     // 1. CUSTOMER: Book appointment
@@ -54,6 +55,21 @@ public class AppointmentService {
         }
 
         appointment.setServiceOrModification(som);
+
+        // Validate and set ServiceCenter
+        if (appointment.getServiceCenter() == null || appointment.getServiceCenter().getId() == null) {
+            throw new RuntimeException("Service center must be selected");
+        }
+
+        ServiceCenter serviceCenter = serviceCenterRepository
+                .findById(appointment.getServiceCenter().getId())
+                .orElseThrow(() -> new RuntimeException("Service center not found"));
+
+        if (!serviceCenter.getIsActive()) {
+            throw new RuntimeException("Selected service center is not currently available");
+        }
+
+        appointment.setServiceCenter(serviceCenter);
 
         // Validate appointment date
         if (appointment.getAppointmentDate() == null) {
