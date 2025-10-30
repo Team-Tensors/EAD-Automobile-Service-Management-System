@@ -15,8 +15,7 @@ public class AppointmentDTO {
     private Long userId;
     private Long vehicleId;
     private String appointmentType;
-    private Long serviceTypeId;
-    private Long modificationTypeId;
+    private Long serviceOrModificationId;
     private LocalDateTime appointmentDate;
     private String status;
     private String description;
