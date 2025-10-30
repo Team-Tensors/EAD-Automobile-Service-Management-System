@@ -1,3 +1,4 @@
+// src/main/java/com/ead/backend/repository/VehicleRepository.java
 package com.ead.backend.repository;
 
 import com.ead.backend.entity.Vehicle;
