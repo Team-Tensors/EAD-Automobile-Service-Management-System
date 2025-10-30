@@ -74,6 +74,21 @@ const MyVehiclesPage = () => {
   };
 
   const handleFormSubmit = async (data: VehicleFormData) => {
+    // Check for duplicate license plate
+    const normalizedLicensePlate = data.licensePlate.trim().toUpperCase();
+    const isDuplicate = vehicles.some(
+      (v) =>
+        v.licensePlate.toUpperCase() === normalizedLicensePlate &&
+        v.id !== editingId // Allow same plate for the vehicle being edited
+    );
+
+    if (isDuplicate) {
+      toast.error(
+        `A vehicle with license plate "${data.licensePlate}" already exists!`
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { vehicleService } = await import("../services/vehicleService");
