@@ -1,5 +1,5 @@
 // src/components/AppointmentBooking/AppointmentBookingModal.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import VehicleSelector from "../AppointmentBooking/VehicleSelector";
 import AppointmentTypeSelector from "../AppointmentBooking/AppointmentTypeSelector";
 import ServiceTypeSelector from "../AppointmentBooking/ServiceTypeSelector";
@@ -7,6 +7,8 @@ import ScheduleStep from "../AppointmentBooking/ScheduleStep";
 import StepIndicator from "../ui/StepIndicator";
 import ActionModal from "../ui/ActionModal";
 import VehicleFormComponent from "../Vehicle/VehicleForm";
+import { serviceCenterService, type ServiceCenterDto } from "../../services/serviceCenterService";
+import toast from "react-hot-toast";
 
 // Sample Data (Move to API later)
 const sampleVehicles = [
@@ -15,6 +17,7 @@ const sampleVehicles = [
     brand: "Toyota",
     model: "Camry",
     year: "2020",
+    color: "Silver",
     licensePlate: "ABC-1234",
   },
   {
@@ -22,6 +25,7 @@ const sampleVehicles = [
     brand: "Honda",
     model: "Civic",
     year: "2021",
+    color: "Blue",
     licensePlate: "XYZ-5678",
   },
 ];
@@ -118,6 +122,7 @@ interface Vehicle {
   brand: string;
   model: string;
   year: string;
+  color: string;
   licensePlate: string;
 }
 
@@ -142,9 +147,32 @@ const AppointmentBookingModal = ({
   onSubmitSuccess,
 }: AppointmentBookingModalProps) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>(sampleVehicles);
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenterDto[]>([]);
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmittingVehicle, setIsSubmittingVehicle] = useState(false);
+  const [isLoadingServiceCenters, setIsLoadingServiceCenters] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch service centers on mount
+  useEffect(() => {
+    const fetchServiceCenters = async () => {
+      try {
+        setIsLoadingServiceCenters(true);
+        const centers = await serviceCenterService.getAllServiceCenters();
+        setServiceCenters(centers);
+      } catch (error) {
+        console.error("Failed to fetch service centers:", error);
+        toast.error("Failed to load service centers");
+      } finally {
+        setIsLoadingServiceCenters(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchServiceCenters();
+    }
+  }, [isOpen]);
 
   const [formData, setFormData] = useState<AppointmentFormData>({
     vehicleId: "",
@@ -182,6 +210,7 @@ const AppointmentBookingModal = ({
         brand: vehicleData.brand,
         model: vehicleData.model,
         year: vehicleData.year,
+        color: vehicleData.color,
         licensePlate: vehicleData.licensePlate,
       };
       setVehicles((prev) => [...prev, newVehicle]);
@@ -203,7 +232,10 @@ const AppointmentBookingModal = ({
   };
 
   const handleSubmit = () => {
+    if (isSubmitting) return;
+    
     console.log("Appointment Data:", formData);
+    setIsSubmitting(true);
     // Here you would normally make an API call to save the appointment
     setTimeout(() => {
       alert("Appointment booked successfully!");
@@ -219,6 +251,7 @@ const AppointmentBookingModal = ({
         description: "",
       });
       setCurrentStep(1);
+      setIsSubmitting(false);
       onClose();
       if (onSubmitSuccess) {
         onSubmitSuccess();
@@ -340,6 +373,8 @@ const AppointmentBookingModal = ({
             {currentStep === 3 && (
               <ScheduleStep
                 formData={formData}
+                serviceCenters={serviceCenters}
+                isLoadingServiceCenters={isLoadingServiceCenters}
                 onChange={(
                   e: React.ChangeEvent<
                     HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -350,6 +385,7 @@ const AppointmentBookingModal = ({
                 }}
                 onBack={() => setCurrentStep(2)}
                 onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
               />
             )}
           </div>

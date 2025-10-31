@@ -1,10 +1,8 @@
 package com.ead.backend.dto;
 
-import com.ead.backend.entity.ServiceType;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Data
 public class ServiceCenterDTO {
@@ -18,11 +16,9 @@ public class ServiceCenterDTO {
     private String email;
     private String operatingHours;
     private Boolean isActive;
-    private List<ServiceType> services;
 
     public ServiceCenterDTO() {}
 
-    // Constructor to map from ServiceCenter entity
     public ServiceCenterDTO(com.ead.backend.entity.ServiceCenter center) {
         this.id = center.getId();
         this.name = center.getName();

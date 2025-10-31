@@ -3,9 +3,7 @@ package com.ead.backend.service;
 import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.dto.TimeLogResponseDTO;
-import com.ead.backend.entity.Appointment;
-import com.ead.backend.entity.TimeLog;
-import com.ead.backend.entity.User;
+import com.ead.backend.entity.*;
 import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.TimeLogRepository;
 import com.ead.backend.repository.UserRepository;
@@ -15,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,23 +76,66 @@ public class EmployeeService {
             }
             appointments = appointmentRepository.findByAssignedEmployeesIdAndStatus(employeeId, status);
         }
-        return appointments.stream()
-                .map(a -> new AppointmentDTO(
-                        a.getId(),
-                        a.getUser() != null ? a.getUser().getId() : null,
-                        a.getVehicle() != null ? a.getVehicle().getId() : null,
-                        a.getAppointmentType() != null ? a.getAppointmentType().name() : null,
-                        // Unified serviceOrModification field
-                        a.getServiceOrModification() != null ? a.getServiceOrModification().getId() : null,
-                        a.getAppointmentDate(),
-                        a.getStatus(),
-                        a.getDescription(),
-                        a.getAssignedEmployees()
-                                .stream()
-                                .map(User::getId)
-                                .collect(Collectors.toSet())
-                ))
-                .toList();
+        return appointments.stream().map(a -> {
+            // User details
+            User user = a.getUser();
+            Long userId = user != null ? user.getId() : null;
+            String userFullName = user != null ? user.getFullName() : null;
+            String address = user != null ? user.getAddress() : null;
+            String phoneNumber = user != null ? user.getPhoneNumber() : null;
+            String email = user != null ? user.getEmail() : null;
+
+            // Vehicle details
+            Vehicle vehicle = a.getVehicle();
+            Long vehicleId = vehicle != null ? vehicle.getId() : null;
+            String brand = vehicle != null ? vehicle.getBrand() : null;
+            String model = vehicle != null ? vehicle.getModel() : null;
+            String year = vehicle != null ? vehicle.getYear() : null;
+            String color = vehicle != null ? vehicle.getColor() : null;
+            LocalDateTime lastServiceDate = vehicle != null ? vehicle.getLastServiceDate() : null;
+            String licensePlate = vehicle != null ? vehicle.getLicensePlate() : null;
+
+            // Appointment type info
+            String appointmentType = a.getAppointmentType() != null ? a.getAppointmentType().name() : null;
+            ServiceOrModification serviceOrModificationType = a.getServiceOrModification();
+            Long serviceOrModificationId = serviceOrModificationType != null ? serviceOrModificationType.getId() : null;
+            String serviceOrModificationName = serviceOrModificationType != null ? serviceOrModificationType.getName() : null;
+            String serviceOrModificationDescription = serviceOrModificationType != null ? serviceOrModificationType.getDescription() : null;
+            Double estimatedCost = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedCost() : null;
+            Integer estimatedTimeMinutes = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedTimeMinutes() : null;
+
+            // Assigned employee IDs
+            Set<Long> assignedEmployeeIds = a.getAssignedEmployees()
+                    .stream()
+                    .map(User::getId)
+                    .collect(Collectors.toSet());
+
+            return new AppointmentDTO(
+                    a.getId(),
+                    userId,
+                    userFullName,
+                    address,
+                    phoneNumber,
+                    email,
+                    vehicleId,
+                    brand,
+                    model,
+                    year,
+                    color,
+                    lastServiceDate,
+                    licensePlate,
+                    appointmentType,
+                    serviceOrModificationId,
+                    serviceOrModificationName,
+                    serviceOrModificationDescription,
+                    estimatedCost,
+                    estimatedTimeMinutes,
+                    a.getAppointmentDate(),
+                    a.getStatus(),
+                    a.getDescription(),
+                    assignedEmployeeIds
+            );
+        }).toList();
     }
 
     /**
@@ -110,6 +152,33 @@ public class EmployeeService {
         }
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("NOT_FOUND"));
+        String currentStatus = appointment.getStatus();
+        if (currentStatus.equals(newStatus)) {
+            logger.info("Status is already '{}'. No update performed.", newStatus);
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        switch (newStatus) {
+            case "IN_PROGRESS":
+                if (appointment.getStartTime() == null) {
+                    appointment.setStartTime(now);
+                    logger.info("Start time set to {}", now);
+                }
+                break;
+            case "COMPLETED":
+                if (appointment.getEndTime() == null) {
+                    appointment.setEndTime(now);
+                    logger.info("End time set to {}", now);
+                }
+                break;
+            case "CONFIRMED":
+                appointment.setStartTime(null);
+                appointment.setEndTime(null);
+                logger.info("Reset start time and end time of the appointment");
+                break;
+            default:
+                break;
+        }
         appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
     }
