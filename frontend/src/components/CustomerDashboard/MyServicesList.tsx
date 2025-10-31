@@ -4,7 +4,7 @@ import type { Service } from "../../types/myService";
 
 interface MyServicesListProps {
   services: Service[];
-  selectedId: number | null;
+  selectedId: string | null;
   onSelect: (service: Service) => void;
   filter: string;
   onFilterChange: (filter: string) => void;
