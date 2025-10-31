@@ -23,20 +23,27 @@ const ServiceCenters = () => {
   }, [userLocation]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-black border-b border-zinc-800">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Service Centers</h1>
-              <p className="text-primary-foreground/80 mt-1">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-12 h-0.5 bg-orange-500"></div>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">
+                  Locations
+                </p>
+                <div className="w-12 h-0.5 bg-orange-500"></div>
+              </div>
+              <h1 className="text-5xl font-bold text-white mb-2">Service Centers</h1>
+              <p className="text-gray-400">
                 Find DriveCare service centers near you
               </p>
             </div>
             <button
               onClick={getUserLocation}
-              className="bg-accent text-accent-foreground px-4 py-2 rounded-lg font-semibold hover:bg-accent/90 transition border border-border flex items-center gap-2"
+              className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center gap-2"
             >
               <Navigation className="w-4 h-4" />
               Update My Location
@@ -45,35 +52,37 @@ const ServiceCenters = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {locationError && (
-          <div className="mb-6 p-4 bg-destructive/20 text-destructive-foreground rounded-lg border border-destructive/30">
-            {locationError}
+      <div className="flex-1 bg-black py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          {locationError && (
+            <div className="mb-6 p-4 bg-red-900/20 text-red-400 rounded-lg border border-red-900/30">
+              {locationError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* List */}
+            <ServiceCenterList
+              centers={serviceCenters}
+              userLocation={userLocation}
+              selectedCenter={selectedCenter}
+              onSelect={setSelectedCenter}
+              calculateDistance={calculateDistance}
+              getDirectionsUrl={getDirectionsUrl}
+            />
+
+            {/* Map */}
+            <ServiceCenterMap
+              mapCenter={mapCenter}
+              userLocation={userLocation}
+              centers={serviceCenters}
+              onSelect={setSelectedCenter}
+            />
           </div>
-        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* List */}
-          <ServiceCenterList
-            centers={serviceCenters}
-            userLocation={userLocation}
-            selectedCenter={selectedCenter}
-            onSelect={setSelectedCenter}
-            calculateDistance={calculateDistance}
-            getDirectionsUrl={getDirectionsUrl}
-          />
-
-          {/* Map */}
-          <ServiceCenterMap
-            mapCenter={mapCenter}
-            userLocation={userLocation}
-            centers={serviceCenters}
-            onSelect={setSelectedCenter}
-          />
+          {/* Selected Center Details */}
+          {selectedCenter && <SelectedCenterDetails center={selectedCenter} />}
         </div>
-
-        {/* Selected Center Details */}
-        {selectedCenter && <SelectedCenterDetails center={selectedCenter} />}
       </div>
     </div>
   );
