@@ -808,5 +808,21 @@ const EmployeeDashboard = () => {
   );
 };
 
+
 export default EmployeeDashboard;
+
+// Add white clock icon for time input (works in Chromium browsers)
+// This is injected as a style tag for component-scoped effect
+// You can move this to a global CSS file if you prefer
+const style = document.createElement('style');
+style.innerHTML = `
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+`;
+if (typeof window !== 'undefined' && !document.getElementById('white-time-icon-style')) {
+  style.id = 'white-time-icon-style';
+  document.head.appendChild(style);
+}
 
