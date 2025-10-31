@@ -1,7 +1,7 @@
 // src/main/java/com/ead/backend/controller/VehicleController.java
 package com.ead.backend.controller;
 
-import com.ead.backend.dto.VehicleCreateDto;
+import com.ead.backend.dto.VehicleCreateDTO;
 import com.ead.backend.entity.Vehicle;
 import com.ead.backend.service.VehicleService;
 import jakarta.validation.Valid;
@@ -38,7 +38,7 @@ public class VehicleController {
 
     // === POST: Add new vehicle ===
     @PostMapping
-    public ResponseEntity<Vehicle> addVehicle(@Valid @RequestBody VehicleCreateDto dto) {
+    public ResponseEntity<Vehicle> addVehicle(@Valid @RequestBody VehicleCreateDTO dto) {
         Vehicle vehicle = new Vehicle();
         mapDtoToEntity(dto, vehicle);
         Vehicle saved = vehicleService.addVehicle(vehicle);
@@ -49,7 +49,7 @@ public class VehicleController {
     @PutMapping("/{id}")
     public ResponseEntity<Vehicle> updateVehicle(
             @PathVariable Long id,
-            @Valid @RequestBody VehicleCreateDto dto) {
+            @Valid @RequestBody VehicleCreateDTO dto) {
 
         Vehicle existing = vehicleService.getVehicleByIdAndUser(id);
         if (existing == null) {
@@ -71,7 +71,7 @@ public class VehicleController {
     }
 
     // === Helper: Map DTO → Entity ===
-    private void mapDtoToEntity(VehicleCreateDto dto, Vehicle vehicle) {
+    private void mapDtoToEntity(VehicleCreateDTO dto, Vehicle vehicle) {
         vehicle.setBrand(dto.getBrand());
         vehicle.setModel(dto.getModel());
         vehicle.setYear(dto.getYear());

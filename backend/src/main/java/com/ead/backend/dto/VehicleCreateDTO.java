@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class VehicleCreateDto {
+public class VehicleCreateDTO {
 
     @NotBlank(message = "Brand is required")
     private String brand;
