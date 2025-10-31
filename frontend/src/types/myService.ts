@@ -3,7 +3,7 @@
 import type { AppointmentSummary } from "@/services/appointmentService";
 
 export interface Service {
-  id: number;
+  id: string;
   vehicleName: string;
   vehicleNumber: string;
   serviceType: string;
