@@ -24,10 +24,6 @@ import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
 const API_BASE_URL = 'http://localhost:4000/api/employee';
 
-// ✅ Fixed Bearer Token
-const FIXED_TOKEN =
-  'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9FTVBMT1lFRSJ9XSwic3ViIjoiYXNhbmRpQGdtYWlsLmNvbSIsImlhdCI6MTc2MTkzNTMwMCwiZXhwIjoxNzYyMDIxNzAwfQ.OG3cPfOrCZ7GW0Wf6ERXfDvNATX0tWRf0pcY7X3AUbc';
-
 // ------------------ Types ------------------
 interface Appointment {
   id: string;
@@ -79,7 +75,7 @@ interface TimeLogErrors {
 
 // ------------------ Component ------------------
 const EmployeeDashboard = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth(); // <-- get token from context
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -124,7 +120,7 @@ const EmployeeDashboard = () => {
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${FIXED_TOKEN}`,
+          Authorization: `Bearer ${token}`, // <-- use dynamic token
         },
       });
 
@@ -155,7 +151,7 @@ const EmployeeDashboard = () => {
           {
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${FIXED_TOKEN}`,
+              Authorization: `Bearer ${token}`, // <-- use dynamic token
             },
           }
         );
@@ -194,7 +190,7 @@ const EmployeeDashboard = () => {
         `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
         {
           method: 'PUT',
-          headers: { Authorization: `Bearer ${FIXED_TOKEN}` },
+          headers: { Authorization: `Bearer ${token}` }, // <-- use dynamic token
         }
       );
 
@@ -258,7 +254,7 @@ const EmployeeDashboard = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${FIXED_TOKEN}`,
+            Authorization: `Bearer ${token}`, // <-- use dynamic token
           },
           body: JSON.stringify(payload),
         }
