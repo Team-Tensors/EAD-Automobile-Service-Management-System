@@ -7,6 +7,10 @@ import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.service.EmployeeService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +61,15 @@ public class EmployeeController {
     /**
      * Retrieve all appointments assigned to an employee.
      */
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful retrieval of Appointments",
+                    content = @Content(
+                            schema = @Schema(implementation = AppointmentDTO.class)
+                    )
+            )
+    })
     @GetMapping("/appointments/{employeeId}")
     public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId, @RequestParam(required = false) String status) {
         logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
