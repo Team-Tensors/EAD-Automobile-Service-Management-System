@@ -83,8 +83,8 @@ public class EmployeeService {
                         a.getUser() != null ? a.getUser().getId() : null,
                         a.getVehicle() != null ? a.getVehicle().getId() : null,
                         a.getAppointmentType() != null ? a.getAppointmentType().name() : null,
-                        a.getServiceType() != null ? a.getServiceType().getId() : null,
-                        a.getModificationType() != null ? a.getModificationType().getId() : null,
+                        // Unified serviceOrModification field
+                        a.getServiceOrModification() != null ? a.getServiceOrModification().getId() : null,
                         a.getAppointmentDate(),
                         a.getStatus(),
                         a.getDescription(),
