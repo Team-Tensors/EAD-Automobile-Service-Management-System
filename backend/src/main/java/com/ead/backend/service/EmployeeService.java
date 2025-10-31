@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,7 +40,7 @@ public class EmployeeService {
      * @throws RuntimeException if no logs are found
      */
     @Transactional(readOnly = true)
-    public List<TimeLogResponseDTO> getTimeLogsByAppointmentAndEmployee(Long appointmentId, Long employeeId) {
+    public List<TimeLogResponseDTO> getTimeLogsByAppointmentAndEmployee(UUID appointmentId, Long employeeId) {
         logger.info("=== EMPLOYEE SERVICE - GET TIME LOGS BY APPOINTMENT AND EMPLOYEE METHOD STARTED ===");
         List<TimeLog> timeLogs = timeLogRepository.findByAppointmentIdAndUserId(appointmentId, employeeId);
         if (timeLogs.isEmpty()) {
@@ -87,7 +88,7 @@ public class EmployeeService {
 
             // Vehicle details
             Vehicle vehicle = a.getVehicle();
-            Long vehicleId = vehicle != null ? vehicle.getId() : null;
+            UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
             String year = vehicle != null ? vehicle.getYear() : null;
@@ -145,7 +146,7 @@ public class EmployeeService {
      * @param newStatus     the new status (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
      */
     @Transactional
-    public void updateAppointmentStatus(Long appointmentId, String newStatus) {
+    public void updateAppointmentStatus(UUID appointmentId, String newStatus) {
         logger.info("=== EMPLOYEE SERVICE - UPDATE APPOINTMENT STATUS METHOD STARTED ===");
         if (!VALID_APPOINTMENT_STATUSES.contains(newStatus)) {
             throw new RuntimeException("INVALID_STATUS");
@@ -190,7 +191,7 @@ public class EmployeeService {
      * @param timeLogDto    the time log request DTO
      */
     @Transactional
-    public void addTimeLog(Long appointmentId, TimeLogRequestDto timeLogDto) {
+    public void addTimeLog(UUID appointmentId, TimeLogRequestDto timeLogDto) {
         logger.info("=== EMPLOYEE SERVICE - ADD TIME LOG METHOD STARTED ===");
 
         // Fetch appointment

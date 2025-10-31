@@ -4,10 +4,11 @@ import com.ead.backend.entity.AppointmentType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class AppointmentSummaryDTO {
-    private Long id;
+    private UUID id;
     private String vehicle;
     private String service;
     private AppointmentType type;
