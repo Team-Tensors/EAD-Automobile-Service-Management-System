@@ -64,7 +64,7 @@ public class EmployeeController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Successful retrieval of Appoinments",
+                    description = "Successful retrieval of Appointments",
                     content = @Content(
                             schema = @Schema(implementation = AppointmentDTO.class)
                     )
