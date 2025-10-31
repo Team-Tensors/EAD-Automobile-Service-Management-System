@@ -26,9 +26,9 @@ export const mapSummaryToService = (summary: AppointmentSummary): Service => {
     serviceType: summary.service,
     status: isCompleted ? "completed" : "not_completed",
     startDate: summary.date,
-    estimatedCompletion:  "TBD",
-    assignedEmployee:  "Not Assigned",
-    serviceCenter:  "TBD",
-    centerSlot:  "TBD",
+    estimatedCompletion: (summary as any).estimatedCompletion ?? "TBD",
+    assignedEmployee: (summary as any).assignedEmployee ?? "Not Assigned",
+    serviceCenter: (summary as any).serviceCenter ?? "TBD",
+    centerSlot: (summary as any).centerSlot ?? "TBD",
   };
 };
