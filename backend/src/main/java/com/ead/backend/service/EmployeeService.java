@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,7 +88,7 @@ public class EmployeeService {
 
             // Vehicle details
             Vehicle vehicle = a.getVehicle();
-            Long vehicleId = vehicle != null ? vehicle.getId() : null;
+            UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
             String year = vehicle != null ? vehicle.getYear() : null;

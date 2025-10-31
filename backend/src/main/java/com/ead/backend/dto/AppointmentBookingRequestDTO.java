@@ -6,12 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class AppointmentBookingRequestDTO {
 
     @NotNull(message = "Vehicle ID is required")
-    private Long vehicleId;
+    private UUID vehicleId;
 
     @NotNull(message = "Service/Modification ID is required")
     private Long serviceOrModificationId;
