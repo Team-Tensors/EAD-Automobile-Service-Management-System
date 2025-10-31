@@ -97,28 +97,12 @@ public class EmployeeService {
 
             // Appointment type info
             String appointmentType = a.getAppointmentType() != null ? a.getAppointmentType().name() : null;
-            Long serviceTypeId = null;
-            Long modificationTypeId = null;
-            String serviceName = null;
-            String serviceDescription = null;
-            Double estimatedCost = null;
-            Integer estimatedTimeMinutes = null;
-
-            if (a.getAppointmentType() == AppointmentType.SERVICE && a.getServiceType() != null) {
-                ServiceType serviceType = a.getServiceType();
-                serviceTypeId = serviceType.getId();
-                serviceName = serviceType.getName();
-                serviceDescription = serviceType.getDescription();
-                estimatedCost = serviceType.getEstimatedCost();
-                estimatedTimeMinutes = serviceType.getEstimatedTimeMinutes();
-            } else if (a.getAppointmentType() == AppointmentType.MODIFICATION && a.getModificationType() != null) {
-                ModificationType modType = a.getModificationType();
-                modificationTypeId = modType.getId();
-                serviceName = modType.getName();
-                serviceDescription = modType.getDescription();
-                estimatedCost = modType.getEstimatedCost();
-                estimatedTimeMinutes = modType.getEstimatedTimeMinutes();
-            }
+            ServiceOrModification serviceOrModificationType = a.getServiceOrModification();
+            Long serviceOrModificationId = serviceOrModificationType.getId();
+            String serviceOrModificationName = serviceOrModificationType.getName();
+            String serviceOrModificationDescription = serviceOrModificationType.getDescription();
+            Double estimatedCost = serviceOrModificationType.getEstimatedCost();
+            Integer estimatedTimeMinutes = serviceOrModificationType.getEstimatedTimeMinutes();
 
             // Assigned employee IDs
             Set<Long> assignedEmployeeIds = a.getAssignedEmployees()
@@ -141,10 +125,9 @@ public class EmployeeService {
                     lastServiceDate,
                     licensePlate,
                     appointmentType,
-                    serviceTypeId,
-                    modificationTypeId,
-                    serviceName,
-                    serviceDescription,
+                    serviceOrModificationId,
+                    serviceOrModificationName,
+                    serviceOrModificationDescription,
                     estimatedCost,
                     estimatedTimeMinutes,
                     a.getAppointmentDate(),

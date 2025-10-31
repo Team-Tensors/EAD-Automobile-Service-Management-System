@@ -26,10 +26,8 @@ public class AppointmentDTO {
     private String licensePlate;
     private String appointmentType;
     private Long serviceOrModificationId;
-    private Long serviceTypeId;
-    private Long modificationTypeId;
-    private String serviceName;
-    private String serviceDescription;
+    private String serviceOrModificationName;
+    private String serviceOrModificationDescription;
     private Double estimatedCost;
     private Integer estimatedTimeMinutes;
     private LocalDateTime appointmentDate;
