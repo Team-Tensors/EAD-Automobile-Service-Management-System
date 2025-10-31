@@ -4,7 +4,7 @@ import type { AppointmentType } from "../types/appointment";
 const base = "/appointments";
 
 export interface AppointmentBookingRequest {
-  vehicleId: number;
+  vehicleId: string; // UUID as string
   serviceOrModificationId: number;
   serviceCenterId: number;
   appointmentType: AppointmentType;
@@ -13,8 +13,8 @@ export interface AppointmentBookingRequest {
 }
 
 export interface AppointmentBookingResponse {
-  id: number;
-  vehicleId: number;
+  id: string; // UUID as string
+  vehicleId: string; // UUID as string
   vehicleInfo: string;
   serviceName: string;
   appointmentType: AppointmentType;
@@ -24,7 +24,7 @@ export interface AppointmentBookingResponse {
 }
 
 export interface AppointmentSummary {
-  id: number;
+  id: string; // UUID as string
   vehicle: string;
   service: string;
   type: AppointmentType;
