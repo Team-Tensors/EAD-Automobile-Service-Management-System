@@ -98,11 +98,11 @@ public class EmployeeService {
             // Appointment type info
             String appointmentType = a.getAppointmentType() != null ? a.getAppointmentType().name() : null;
             ServiceOrModification serviceOrModificationType = a.getServiceOrModification();
-            Long serviceOrModificationId = serviceOrModificationType.getId();
-            String serviceOrModificationName = serviceOrModificationType.getName();
-            String serviceOrModificationDescription = serviceOrModificationType.getDescription();
-            Double estimatedCost = serviceOrModificationType.getEstimatedCost();
-            Integer estimatedTimeMinutes = serviceOrModificationType.getEstimatedTimeMinutes();
+            Long serviceOrModificationId = serviceOrModificationType != null ? serviceOrModificationType.getId() : null;
+            String serviceOrModificationName = serviceOrModificationType != null ? serviceOrModificationType.getName() : null;
+            String serviceOrModificationDescription = serviceOrModificationType != null ? serviceOrModificationType.getDescription() : null;
+            Double estimatedCost = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedCost() : null;
+            Integer estimatedTimeMinutes = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedTimeMinutes() : null;
 
             // Assigned employee IDs
             Set<Long> assignedEmployeeIds = a.getAssignedEmployees()
