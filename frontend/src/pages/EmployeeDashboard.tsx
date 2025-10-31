@@ -13,6 +13,10 @@ import {
   Phone,
   Mail,
   MapPin,
+  Wrench,
+  Tag,
+  Timer,
+  Coins,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
@@ -20,7 +24,7 @@ import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
 const API_BASE_URL = 'http://localhost:4000/api/employee';
 
-// ✅ Fixed Bearer Token (used for all API calls)
+// ✅ Fixed Bearer Token
 const FIXED_TOKEN =
   'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9FTVBMT1lFRSJ9XSwic3ViIjoiYXNhbmRpQGdtYWlsLmNvbSIsImlhdCI6MTc2MTkzNTMwMCwiZXhwIjoxNzYyMDIxNzAwfQ.OG3cPfOrCZ7GW0Wf6ERXfDvNATX0tWRf0pcY7X3AUbc';
 
@@ -182,10 +186,7 @@ const EmployeeDashboard = () => {
   // ------------------ Update Appointment Status ------------------
   const updateAppointmentStatus = async () => {
     if (!newStatus || !selectedAppointment) return;
-
-    if (newStatus === 'COMPLETED' && !completionDescription.trim()) {
-      return; // validation (UI also shows message)
-    }
+    if (newStatus === 'COMPLETED' && !completionDescription.trim()) return;
 
     setLoading(true);
     try {
@@ -193,9 +194,7 @@ const EmployeeDashboard = () => {
         `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
         {
           method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${FIXED_TOKEN}`,
-          },
+          headers: { Authorization: `Bearer ${FIXED_TOKEN}` },
         }
       );
 
@@ -234,9 +233,7 @@ const EmployeeDashboard = () => {
     if (date && startTime && endTime) {
       const start = new Date(`${date}T${startTime}`);
       const end = new Date(`${date}T${endTime}`);
-      if (end <= start) {
-        errors.endTime = 'End time must be after start time.';
-      }
+      if (end <= start) errors.endTime = 'End time must be after start time.';
     }
 
     setTimeLogErrors(errors);
@@ -244,9 +241,7 @@ const EmployeeDashboard = () => {
   };
 
   const submitTimeLog = async () => {
-    if (!validateTimeLog() || !selectedAppointment) {
-      return;
-    }
+    if (!validateTimeLog() || !selectedAppointment) return;
 
     setLoading(true);
     try {
@@ -286,55 +281,14 @@ const EmployeeDashboard = () => {
     }
   };
 
-  const handleTimeLogChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setTimeLogForm(prev => ({ ...prev, [name]: value }));
-
-    if (timeLogErrors[name as keyof TimeLogErrors]) {
-      setTimeLogErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name as keyof TimeLogErrors];
-        return newErrors;
-      });
-    }
-
-    if (
-      (name === 'startTime' || name === 'endTime') &&
-      timeLogErrors.endTime === 'End time must be after start time.'
-    ) {
-      setTimeLogErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.endTime;
-        return newErrors;
-      });
-    }
-  };
-
-  const handleAppointmentSelect = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setShowStatusUpdate(false);
-    setShowTimeLog(false);
-    setTimeLogForm({
-      date: new Date().toISOString().split('T')[0],
-      startTime: '',
-      endTime: '',
-      description: '',
-    });
-    setTimeLogErrors({});
-    setNewStatus('');
-    setCompletionDescription('');
-  };
-
   // ------------------ Helpers / UI Formatting ------------------
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'CONFIRMED': // Not Started
+      case 'CONFIRMED':
         return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'IN_PROGRESS': // In Progress
+      case 'IN_PROGRESS':
         return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'COMPLETED': // Completed
+      case 'COMPLETED':
         return 'bg-green-500/10 text-green-500 border-green-500/20';
       default:
         return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
@@ -421,13 +375,15 @@ const EmployeeDashboard = () => {
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {loading && appointments.length === 0 && (
-                  <div className="text-center py-8 text-gray-400">Loading appointments...</div>
+                  <div className="text-center py-8 text-gray-400">
+                    Loading appointments...
+                  </div>
                 )}
 
                 {appointments.map(apt => (
                   <div
                     key={apt.id}
-                    onClick={() => handleAppointmentSelect(apt)}
+                    onClick={() => setSelectedAppointment(apt)}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition ${
                       selectedAppointment?.id === apt.id
                         ? 'border-orange-500 bg-zinc-800'
@@ -439,22 +395,30 @@ const EmployeeDashboard = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <Car className="w-4 h-4 text-gray-500" />
                           <p className="font-semibold text-white">
-                            {apt.brand} {apt.model} ({apt.year}) - {apt.licensePlate}
+                            {apt.brand} {apt.model} ({apt.year})
                           </p>
                         </div>
                         <p className="text-sm text-gray-400 mb-2">{apt.appointmentType}</p>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(apt.status)}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                            apt.status
+                          )}`}
+                        >
                           {getStatusIcon(apt.status)}
                           {getDisplayStatus(apt.status)}
                         </span>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-2">{formatDate(apt.appointmentDate)}</div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      {formatDate(apt.appointmentDate)}
+                    </div>
                   </div>
                 ))}
 
                 {!loading && appointments.length === 0 && (
-                  <div className="text-center py-8 text-gray-400">No appointments found for this filter</div>
+                  <div className="text-center py-8 text-gray-400">
+                    No appointments found for this filter
+                  </div>
                 )}
               </div>
             </div>
@@ -465,42 +429,131 @@ const EmployeeDashboard = () => {
             {selectedAppointment ? (
               <div className="space-y-6">
                 <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
+                  {/* VEHICLE INFO */}
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h2 className="text-2xl font-bold text-white mb-2">Vehicle: {selectedAppointment.brand} {selectedAppointment.model} ({selectedAppointment.year})</h2>
-                      <p className="text-gray-400">{selectedAppointment.licensePlate} • {selectedAppointment.color}</p>
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                        {selectedAppointment.brand} {selectedAppointment.model} (
+                        {selectedAppointment.year})
+                      </h2>
+                      <p className="text-gray-400">
+                        {selectedAppointment.licensePlate} •{' '}
+                        {selectedAppointment.color}
+                      </p>
                     </div>
-                    <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(selectedAppointment.status)}`}>
+                    <span
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+                        selectedAppointment.status
+                      )}`}
+                    >
                       {getStatusIcon(selectedAppointment.status)}
                       {getDisplayStatus(selectedAppointment.status)}
                     </span>
                   </div>
 
+                  {/* CUSTOMER INFO */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-                      <Calendar className="w-5 h-5 text-orange-500" />
-                      <div>
-                        <p className="text-xs text-gray-400">Appointment Date</p>
-                        <p className="font-semibold text-white">{formatDate(selectedAppointment.appointmentDate)}</p>
-                      </div>
-                    </div>
                     <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
                       <User className="w-5 h-5 text-orange-500" />
                       <div>
                         <p className="text-xs text-gray-400">Customer</p>
-                        <p className="font-semibold text-white">{selectedAppointment.userFullName}</p>
-                        <p className="text-xs text-gray-400">{selectedAppointment.email}</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.userFullName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {selectedAppointment.email}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Phone className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Phone</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.phoneNumber}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {selectedAppointment.description && (
-                    <div className="mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-                      <p className="text-xs text-gray-400 mb-1">Description</p>
-                      <p className="text-sm text-white">{selectedAppointment.description}</p>
+                  {/* ADDRESS */}
+                  <div className="flex items-center gap-3 mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                    <MapPin className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-gray-400">Address</p>
+                      <p className="font-semibold text-white">
+                        {selectedAppointment.address}
+                      </p>
+                    </div>
+                  </div>
+
+                                    {/* SERVICE INFO */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Wrench className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Service / Modification</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.serviceOrModificationName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {selectedAppointment.serviceOrModificationDescription}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Coins className="w-5 h-5 text-orange-500" />
+                        <span>Estimated Cost</span>
+                      </div>
+                      <p className="text-white font-semibold">
+                        £{selectedAppointment.estimatedCost?.toFixed(2) ?? 'N/A'}
+                      </p>
+                      <div className="flex items-center gap-2 text-gray-400 mt-1">
+                        <Timer className="w-5 h-5 text-orange-500" />
+                        <span>Estimated Time</span>
+                      </div>
+                      <p className="text-white font-semibold">
+                        {selectedAppointment.estimatedTimeMinutes ?? 'N/A'} mins
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* LAST SERVICE DATE */}
+                  {selectedAppointment.lastServiceDate && (
+                    <div className="flex items-center gap-3 mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Calendar className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Last Service Date</p>
+                        <p className="font-semibold text-white">
+                          {formatDate(selectedAppointment.lastServiceDate)}
+                        </p>
+                      </div>
                     </div>
                   )}
 
+                  {/* DESCRIPTION */}
+                  {selectedAppointment.description && (
+                    <div className="mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <p className="text-xs text-gray-400 mb-1">Appointment Notes</p>
+                      <p className="text-sm text-white">
+                        {selectedAppointment.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* ASSIGNED EMPLOYEES */}
+                  {selectedAppointment.assignedEmployeeIds?.length > 0 && (
+                    <div className="mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <p className="text-xs text-gray-400 mb-1">Assigned Employees</p>
+                      <p className="text-sm text-white">
+                        {selectedAppointment.assignedEmployeeIds.join(', ')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* CONTROL BUTTONS */}
                   <div className="flex gap-3">
                     <button
                       onClick={() => {
@@ -524,15 +577,16 @@ const EmployeeDashboard = () => {
                   </div>
                 </div>
 
-                {/* Update Status Section */}
+                {/* STATUS UPDATE SECTION */}
                 {showStatusUpdate && (
                   <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
-                    <h3 className="text-lg font-semibold text-white mb-4">Update Service Status</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Update Service Status
+                    </h3>
 
                     <div className="grid grid-cols-3 gap-4 mb-4">
                       {['CONFIRMED', 'IN_PROGRESS', 'COMPLETED'].map(status => {
                         const isSelected = newStatus === status;
-
                         const statusColors: Record<string, string> = {
                           CONFIRMED: isSelected
                             ? 'bg-red-500/10 text-red-500 border-red-500/20'
@@ -544,12 +598,13 @@ const EmployeeDashboard = () => {
                             ? 'bg-green-500/10 text-green-500 border-green-500/20'
                             : 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700/50',
                         };
-
                         return (
                           <button
                             key={status}
                             onClick={() => setNewStatus(status)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${statusColors[status] || 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700/50'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${
+                              statusColors[status]
+                            }`}
                           >
                             {getDisplayStatus(status)}
                           </button>
@@ -559,7 +614,9 @@ const EmployeeDashboard = () => {
 
                     {newStatus === 'COMPLETED' && (
                       <div className="mb-4">
-                        <label className="block text-sm font-medium text-white mb-2">Completion Description</label>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Completion Description
+                        </label>
                         <textarea
                           value={completionDescription}
                           onChange={e => setCompletionDescription(e.target.value)}
@@ -568,7 +625,9 @@ const EmployeeDashboard = () => {
                           placeholder="Enter completion remarks..."
                         />
                         {!completionDescription.trim() && (
-                          <p className="text-red-500 text-xs mt-1">Completion description is required.</p>
+                          <p className="text-red-500 text-xs mt-1">
+                            Completion description is required.
+                          </p>
                         )}
                       </div>
                     )}
@@ -578,7 +637,8 @@ const EmployeeDashboard = () => {
                         onClick={updateAppointmentStatus}
                         disabled={
                           !newStatus ||
-                          (newStatus === 'COMPLETED' && !completionDescription.trim()) ||
+                          (newStatus === 'COMPLETED' &&
+                            !completionDescription.trim()) ||
                           loading
                         }
                         className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50"
@@ -589,28 +649,36 @@ const EmployeeDashboard = () => {
                   </div>
                 )}
 
-                {/* Log Time Section */}
+                {/* TIME LOG SECTION */}
                 {showTimeLog && (
                   <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
-                    <h3 className="text-lg font-semibold text-white mb-4">Log Work Time</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Log Work Time
+                    </h3>
 
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Date
+                        </label>
                         <input
                           type="date"
                           name="date"
                           value={timeLogForm.date}
-                          onChange={handleTimeLogChange}
+                          onChange={e => setTimeLogForm(prev => ({ ...prev, date: e.target.value }))}
                           className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
                         />
                         {timeLogErrors.date && (
-                          <p className="text-red-500 text-xs mt-1">{timeLogErrors.date}</p>
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.date}
+                          </p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Duration (hrs)</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Duration (hrs)
+                        </label>
                         <input
                           type="text"
                           value={calculateDuration()}
@@ -620,48 +688,67 @@ const EmployeeDashboard = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Start Time
+                        </label>
                         <input
                           type="time"
                           name="startTime"
                           value={timeLogForm.startTime}
-                          onChange={handleTimeLogChange}
+                          onChange={e =>
+                            setTimeLogForm(prev => ({ ...prev, startTime: e.target.value }))
+                          }
                           className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
                         />
                         {timeLogErrors.startTime && (
-                          <p className="text-red-500 text-xs mt-1">{timeLogErrors.startTime}</p>
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.startTime}
+                          </p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">End Time</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          End Time
+                        </label>
                         <input
                           type="time"
                           name="endTime"
                           value={timeLogForm.endTime}
-                          onChange={handleTimeLogChange}
+                          onChange={e =>
+                            setTimeLogForm(prev => ({ ...prev, endTime: e.target.value }))
+                          }
                           className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
                         />
                         {timeLogErrors.endTime && (
-                          <p className="text-red-500 text-xs mt-1">{timeLogErrors.endTime}</p>
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.endTime}
+                          </p>
                         )}
                       </div>
                     </div>
 
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Work Description</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Work Description
+                      </label>
                       <textarea
                         name="description"
                         value={timeLogForm.description}
-                        onChange={handleTimeLogChange}
+                        onChange={e =>
+                          setTimeLogForm(prev => ({ ...prev, description: e.target.value }))
+                        }
                         rows={3}
                         placeholder="Describe the work done..."
                         className="w-full px-3 py-2 border border-zinc-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-black text-white"
                       />
                       {timeLogErrors.description && (
-                        <p className="text-red-500 text-xs mt-1">{timeLogErrors.description}</p>
+                        <p className="text-red-500 text-xs mt-1">
+                          {timeLogErrors.description}
+                        </p>
                       )}
                     </div>
+
                     <div className="flex justify-center">
                       <button
                         onClick={submitTimeLog}
@@ -674,29 +761,47 @@ const EmployeeDashboard = () => {
                   </div>
                 )}
 
-                {/* Logged Time Section */}
+                {/* LOGGED TIME ENTRIES */}
                 <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
-                  <h3 className="text-lg font-semibold text-white mb-4">Logged Time Entries</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Logged Time Entries
+                  </h3>
 
                   {timeLogs.length > 0 ? (
                     <div className="space-y-3 max-h-[300px] overflow-y-auto">
                       {timeLogs.map(log => (
-                        <div key={log.id} className="flex justify-between items-start p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                        <div
+                          key={log.id}
+                          className="flex justify-between items-start p-3 bg-zinc-800 rounded-lg border border-zinc-700"
+                        >
                           <div>
-                            <p className="text-sm font-medium text-white">{formatDateTime(log.startTime)} → {formatDateTime(log.endTime)}</p>
-                            {log.notes && <p className="text-xs text-gray-400 mt-1">{log.notes}</p>}
+                            <p className="text-sm font-medium text-white">
+                              {formatDateTime(log.startTime)} →{' '}
+                              {formatDateTime(log.endTime)}
+                            </p>
+                            {log.notes && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                {log.notes}
+                              </p>
+                            )}
                           </div>
-                          <p className="text-sm font-semibold text-orange-500">{log.hoursLogged.toFixed(2)}h</p>
+                          <p className="text-sm font-semibold text-orange-500">
+                            {log.hoursLogged.toFixed(2)}h
+                          </p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-sm">No time logs recorded yet.</p>
+                    <p className="text-gray-400 text-sm">
+                      No time logs recorded yet.
+                    </p>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-20 text-gray-400">Select an appointment to view details</div>
+              <div className="text-center py-20 text-gray-400">
+                Select an appointment to view details
+              </div>
             )}
           </div>
         </div>
@@ -708,3 +813,4 @@ const EmployeeDashboard = () => {
 };
 
 export default EmployeeDashboard;
+
