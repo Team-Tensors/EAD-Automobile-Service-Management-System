@@ -1,6 +1,6 @@
 // src/services/myServicesRealtimeService.ts
 export interface ServiceUpdate {
-  id: number;
+  id: string;
   status?: string;
   assignedEmployee?: string;
 }
