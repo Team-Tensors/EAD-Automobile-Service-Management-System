@@ -8,8 +8,8 @@ export const AppointmentTypeValues = {
 };
 
 export interface Appointment {
-  id: number;
-  vehicleId: number;
+  id: string; // UUID as string
+  vehicleId: string; // UUID as string
   appointmentType: AppointmentType;
   serviceTypeId?: number;
   modificationTypeId?: number;
@@ -34,7 +34,7 @@ export const AppointmentStatusValues = {
 };
 
 export interface AppointmentCreateDto {
-  vehicleId: number;
+  vehicleId: string; // UUID as string
   appointmentType: AppointmentType;
   serviceTypeId?: number;
   modificationTypeId?: number;

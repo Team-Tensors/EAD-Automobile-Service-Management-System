@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class VehicleService {
     }
 
     // === READ: One (with ownership) ===
-    public Vehicle getVehicleByIdAndUser(Long id) {
+    public Vehicle getVehicleByIdAndUser(UUID id) {
         User user = getCurrentUser();
         return vehicleRepository.findById(id)
                 .filter(v -> v.getUser().getId().equals(user.getId()))
@@ -53,7 +54,7 @@ public class VehicleService {
 
     // === DELETE ===
     @Transactional
-    public boolean deleteVehicleByIdAndUser(Long id) {
+    public boolean deleteVehicleByIdAndUser(UUID id) {
         Vehicle vehicle = getVehicleByIdAndUser(id);
         if (vehicle != null) {
             vehicleRepository.delete(vehicle);
