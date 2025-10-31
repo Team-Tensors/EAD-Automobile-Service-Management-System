@@ -18,7 +18,7 @@ public class ServiceCenterController {
 
     @GetMapping("/with-services")
     public ResponseEntity<List<ServiceCenterDTO>> getAllWithServices() {
-        List<ServiceCenterDTO> centers = service.getAllActiveWithServices();
+        List<ServiceCenterDTO> centers = service.getAllActive();
         return ResponseEntity.ok(centers);
     }
 
@@ -27,7 +27,7 @@ public class ServiceCenterController {
             @RequestParam BigDecimal lat,
             @RequestParam BigDecimal lng,
             @RequestParam(defaultValue = "50") double radius) {
-        List<ServiceCenterDTO> centers = service.getNearbyWithServices(lat, lng, radius);
+        List<ServiceCenterDTO> centers = service.getNearby(lat, lng, radius);
         return ResponseEntity.ok(centers);
     }
 }
