@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppointmentDTO {
-    private Long id;
+    private UUID id;
     private Long userId;
     private String userFullName;
     private String address;

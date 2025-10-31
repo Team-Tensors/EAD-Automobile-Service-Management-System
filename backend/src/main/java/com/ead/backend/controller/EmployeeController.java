@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee")
@@ -35,7 +36,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/appointments/{appointmentId}/employees/{employeeId}/timelogs")
-    public ResponseEntity<?> getTimeLogs(@PathVariable Long appointmentId, @PathVariable Long employeeId)  {
+    public ResponseEntity<?> getTimeLogs(@PathVariable UUID appointmentId, @PathVariable Long employeeId)  {
         logger.info("=== RETRIEVE TIME LOGS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
         logger.info("Employee Id: {}", employeeId);
@@ -97,7 +98,7 @@ public class EmployeeController {
      * Update the status of an appointment.
      */
     @PutMapping("/appointments/{appointmentId}/status")
-    public ResponseEntity<?> updateAppointmentStatus(@PathVariable Long appointmentId,
+    public ResponseEntity<?> updateAppointmentStatus(@PathVariable UUID appointmentId,
                                                      @RequestParam String status) {
         logger.info("=== UPDATE APPOINTMENT STATUS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}, New Status: {}", appointmentId, status);
@@ -128,7 +129,7 @@ public class EmployeeController {
      * Add a new time log entry.
      */
     @PostMapping("/appointments/{appointmentId}/timelog")
-    public ResponseEntity<?> addTimeLog(@PathVariable Long appointmentId, @RequestBody TimeLogRequestDto timeLog) {
+    public ResponseEntity<?> addTimeLog(@PathVariable UUID appointmentId, @RequestBody TimeLogRequestDto timeLog) {
         logger.info("=== ADD TIME LOG REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
 
