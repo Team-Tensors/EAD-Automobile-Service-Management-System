@@ -9,7 +9,7 @@ export const vehicleService = {
     return res.data;
   },
 
-  get: async (id: number): Promise<Vehicle> => {
+  get: async (id: string): Promise<Vehicle> => {
     const res = await api.get(`${base}/${id}`);
     return res.data;
   },
@@ -24,7 +24,7 @@ export const vehicleService = {
     return res.data;
   },
 
-  update: async (id: number, payload: VehicleCreateDto): Promise<Vehicle> => {
+  update: async (id: string, payload: VehicleCreateDto): Promise<Vehicle> => {
     // Remove empty lastServiceDate to avoid backend validation issues
     const cleanPayload = {
       ...payload,
@@ -34,7 +34,7 @@ export const vehicleService = {
     return res.data;
   },
 
-  remove: async (id: number): Promise<void> => {
+  remove: async (id: string): Promise<void> => {
     await api.delete(`${base}/${id}`);
   },
 };
