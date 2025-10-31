@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +18,7 @@ public class AppointmentDTO {
     private String address;
     private String phoneNumber;
     private String email;
-    private Long vehicleId;
+    private UUID vehicleId;
     private String brand;
     private String model;
     private String year;
