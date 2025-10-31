@@ -1,14 +1,25 @@
 import api from "../util/apiUtils";
 import type { ServiceCenter, UserLocation } from "../types/serviceCenter";
 
+// Re-export types for convenience
+export type { ServiceCenter as ServiceCenterDto };
+
 // API calls
-export const fetchServiceCenters = async (location?: UserLocation): Promise<ServiceCenter[]> => {
+export const fetchServiceCenters = async (
+  location?: UserLocation
+): Promise<ServiceCenter[]> => {
   let url = "/service-centers/with-services";
   if (location) {
     url = `/service-centers/nearby-with-services?lat=${location.latitude}&lng=${location.longitude}&radius=50`;
   }
   const response = await api.get(url);
   return response.data;
+};
+
+// Service object with all methods
+export const serviceCenterService = {
+  getAllServiceCenters: fetchServiceCenters,
+  fetchServiceCenters,
 };
 
 // Utility functions
@@ -57,10 +68,20 @@ export const sortCentersByDistance = (
 ): ServiceCenter[] => {
   return [...centers].sort((a, b) => {
     const distA = parseFloat(
-      calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude)
+      calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        a.latitude,
+        a.longitude
+      )
     );
     const distB = parseFloat(
-      calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude)
+      calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        b.latitude,
+        b.longitude
+      )
     );
     return distA - distB;
   });
