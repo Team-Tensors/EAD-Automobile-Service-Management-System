@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class AppointmentService {
@@ -98,7 +99,7 @@ public class AppointmentService {
     // ===================================================================
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
-    public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
+    public Appointment assignEmployees(UUID appointmentId, Set<Long> employeeIds) {
         User currentUser = getCurrentUser();
 
         boolean isManagerOrAdmin = currentUser.getRoles().stream()
@@ -139,7 +140,7 @@ public class AppointmentService {
     // ===================================================================
     // 5. EMPLOYEE: Start work
     // ===================================================================
-    public Appointment startAppointment(Long appointmentId) {
+    public Appointment startAppointment(UUID appointmentId) {
         User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
@@ -165,7 +166,7 @@ public class AppointmentService {
     // ===================================================================
     // 6. EMPLOYEE: Complete work
     // ===================================================================
-    public Appointment completeAppointment(Long appointmentId) {
+    public Appointment completeAppointment(UUID appointmentId) {
         User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
