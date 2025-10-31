@@ -1,6 +1,7 @@
 package com.ead.backend.config;
 
 import com.ead.backend.filter.JwtAuthenticationFilter;
+import com.ead.backend.filter.SseTokenAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -27,9 +28,11 @@ import java.util.List;
 public class SecurityConfig {
 
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final SseTokenAuthenticationFilter sseTokenAuthenticationFilter;
 
-    public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) {
+    public SecurityConfig(OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, SseTokenAuthenticationFilter sseTokenAuthenticationFilter) {
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
+        this.sseTokenAuthenticationFilter = sseTokenAuthenticationFilter;
     }
 
     @Bean
@@ -59,15 +62,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
-            // CORS Configuration for React frontend
-            .cors(cors -> cors.configurationSource(request -> {
-                var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setAllowCredentials(true);
-                return config;
-            }))
+                // CORS Configuration for React frontend
+                .cors(cors -> cors.configurationSource(request -> {
+                    var config = new org.springframework.web.cors.CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
 
             // Disable CSRF for REST API
             .csrf(AbstractHttpConfigurer::disable)
@@ -93,59 +96,62 @@ public class SecurityConfig {
                 .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
                 .requestMatchers("/error").permitAll()
 
-                // OAuth2 endpoints - allow all OAuth2 related paths
-                .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
+                        // OAuth2 endpoints - allow all OAuth2 related paths
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
 
-                // Protected auth endpoints (require authentication)
-                .requestMatchers("/auth/profile", "/auth/logout", "/auth/logout-all", "/auth/active-sessions").authenticated()
+                        // Protected auth endpoints (require authentication)
+                        .requestMatchers("/auth/profile", "/auth/logout", "/auth/logout-all", "/auth/active-sessions").authenticated()
 
-                // Admin-only endpoints
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Admin-only endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                // Employee endpoints (employees and admins can access)
-                .requestMatchers("/employee/**", "/services/manage/**", "/appointments/manage/**", "/projects/manage/**")
-                    .hasAnyRole("EMPLOYEE", "ADMIN")
+                        // Employee endpoints (employees and admins can access)
+                        .requestMatchers("/employee/**", "/services/manage/**", "/appointments/manage/**", "/projects/manage/**")
+                        .hasAnyRole("EMPLOYEE", "ADMIN")
 
-                // Customer endpoints (customers, employees, and admins can access)
-                .requestMatchers("/customer/**", "/appointments/book/**", "/services/view/**", "/projects/request/**")
-                    .hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
+                        // Customer endpoints (customers, employees, and admins can access)
+                        .requestMatchers("/customer/**", "/appointments/book/**", "/services/view/**", "/projects/request/**")
+                        .hasAnyRole("CUSTOMER", "EMPLOYEE", "ADMIN")
 
-                // Protected endpoints requiring any authenticated user
-                .requestMatchers("/profile/**", "/dashboard/**").authenticated()
+                        // Protected endpoints requiring any authenticated user
+                        .requestMatchers("/profile/**", "/dashboard/**").authenticated()
 
-                // All other requests require authentication
-                .anyRequest().authenticated()
-            )
+                        .requestMatchers("/notifications/**").authenticated()
 
-            // Stateless session management for JWT
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        // All other requests require authentication
+                        .anyRequest().authenticated()
+                )
 
-            // OAuth2 Login Configuration with custom success handler
-            .oauth2Login(oauth2 -> oauth2
-                .successHandler(oAuth2AuthenticationSuccessHandler)
-                .failureUrl("/auth/login?error=oauth_failed")
-                .permitAll()
-            )
+                // Stateless session management for JWT
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // OAuth2 Login Configuration with custom success handler
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureUrl("/auth/login?error=oauth_failed")
+                        .permitAll()
+                )
 
             // Disable form login to prevent redirects
             .formLogin(AbstractHttpConfigurer::disable)
 
-            // Configure exception handling
-            .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\":\"Access Denied\",\"message\":\"Insufficient privileges\"}");
-                })
-            )
+                // Configure exception handling
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\":\"Access Denied\",\"message\":\"Insufficient privileges\"}");
+                        })
+                )
 
-            // Only add the JWT authentication filter
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(sseTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Only add the JWT authentication filter
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.headers(headers -> headers
             .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)

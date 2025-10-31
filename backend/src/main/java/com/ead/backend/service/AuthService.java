@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ead.backend.entity.User;
 import com.ead.backend.entity.Role;
+
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,12 +38,13 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final RefreshTokenService refreshTokenService; // Added refresh token service
+    private final NotificationService notificationService;
 
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
                        AuthenticationManager authenticationManager,
                        UserDetailsService userDetailsService,
-                       RefreshTokenService refreshTokenService) { // Added parameter
+                       RefreshTokenService refreshTokenService, NotificationService notificationService) { // Added parameter
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -49,6 +52,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.refreshTokenService = refreshTokenService;
+        this.notificationService = notificationService;
     }
 
     public AuthResponseDTO login(LoginRequestDTO request, String deviceInfo) {
@@ -95,6 +99,14 @@ public class AuthService {
                 .collect(Collectors.toSet());
 
         logger.info("Login completed successfully for user: {}", user.getEmail());
+
+        notificationService.sendNotification(
+                user.getId(),
+                "LOGIN_SUCCESS",
+                "You have successfully logged in!",
+                Map.of("email", user.getEmail(), "device", deviceInfo)
+        );
+
 
         return new AuthResponseDTO(token, refreshToken.getToken(), user.getId(),
                                user.getEmail(), user.getFullName(), roles);
