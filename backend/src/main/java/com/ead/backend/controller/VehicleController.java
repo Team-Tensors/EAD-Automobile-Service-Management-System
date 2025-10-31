@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -31,7 +32,7 @@ public class VehicleController {
 
     // === GET: Get one vehicle by ID (with ownership check) ===
     @GetMapping("/{id}")
-    public ResponseEntity<Vehicle> getVehicle(@PathVariable Long id) {
+    public ResponseEntity<Vehicle> getVehicle(@PathVariable UUID id) {
         Vehicle vehicle = vehicleService.getVehicleByIdAndUser(id);
         return ResponseEntity.ok(vehicle);
     }
@@ -48,7 +49,7 @@ public class VehicleController {
     // === PUT: Update existing vehicle ===
     @PutMapping("/{id}")
     public ResponseEntity<Vehicle> updateVehicle(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @Valid @RequestBody VehicleCreateDTO dto) {
 
         Vehicle existing = vehicleService.getVehicleByIdAndUser(id);
@@ -63,7 +64,7 @@ public class VehicleController {
 
     // === DELETE: Remove vehicle ===
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteVehicle(@PathVariable UUID id) {
         boolean deleted = vehicleService.deleteVehicleByIdAndUser(id);
         return deleted
                 ? ResponseEntity.noContent().build()
