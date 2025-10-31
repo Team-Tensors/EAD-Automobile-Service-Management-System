@@ -9,6 +9,8 @@ import ServiceCenterMap from "../components/ServiceCenters/ServiceCenterMap";
 import SelectedCenterDetails from "../components/ServiceCenters/ServiceCenterDetails";
 import type { ServiceCenter, MapCenter } from "../types/serviceCenter";
 import { calculateDistance, getDirectionsUrl } from "../services/serviceCenterService";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
 
 const ServiceCenters = () => {
   const { serviceCenters, userLocation, locationError, getUserLocation } = useServiceCenters();
@@ -24,19 +26,13 @@ const ServiceCenters = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col pt-12">
+      <AuthenticatedNavbar />
       {/* Header */}
       <header className="bg-black border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="w-12 h-0.5 bg-orange-500"></div>
-                <p className="text-xs text-gray-400 uppercase tracking-wider">
-                  Locations
-                </p>
-                <div className="w-12 h-0.5 bg-orange-500"></div>
-              </div>
-              <h1 className="text-5xl font-bold text-white mb-2">Service Centers</h1>
+              <h1 className="text-3xl font-bold text-white mb-2">Service Centers</h1>
               <p className="text-gray-400">
                 Find DriveCare service centers near you
               </p>
@@ -84,6 +80,7 @@ const ServiceCenters = () => {
           {selectedCenter && <SelectedCenterDetails center={selectedCenter} />}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
