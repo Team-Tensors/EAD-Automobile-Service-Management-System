@@ -27,29 +27,30 @@ public class Appointment {
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 
-    // Type: SERVICE or MODIFICATION
+    // Type: SERVICE or MODIFICATION (for UI/logic)
     @Enumerated(EnumType.STRING)
     @Column(name = "appointment_type", nullable = false)
     private AppointmentType appointmentType;
 
-    // One of these will be used
+    // Unified reference: one column for both service & modification
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_type_id")
-    private ServiceType serviceType;
+    @JoinColumn(name = "service_or_modification_id", nullable = false)
+    private ServiceOrModification serviceOrModification;
 
+    // Service center where the appointment is scheduled
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "modification_type_id")
-    private ModificationType modificationType;
+    @JoinColumn(name = "service_center_id", nullable = false)
+    private ServiceCenter serviceCenter;
 
-    // Appointment date & time
+    // Appointment scheduled time
     @Column(name = "appointment_date", nullable = false)
     private LocalDateTime appointmentDate;
 
-    // EMPLOYEE SETS: When work actually starts
+    // Actual start time (set by employee)
     @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    // EMPLOYEE SETS: When work ends
+    // Actual end time (set by employee)
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
@@ -61,7 +62,7 @@ public class Appointment {
     @Column
     private String description;
 
-    // EMPLOYEES assigned to this job (Admin or self-assign)
+    // Employees assigned to this job
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "appointment_employees",
@@ -69,4 +70,20 @@ public class Appointment {
             inverseJoinColumns = @JoinColumn(name = "employee_id")
     )
     private Set<User> assignedEmployees = new HashSet<>();
+
+    // -----------------------------------------------------------------
+    // ENSURE appointmentType matches serviceOrModification.type
+    // -----------------------------------------------------------------
+    @PrePersist
+    @PreUpdate
+    private void validateTypeConsistency() {
+        if (this.serviceOrModification != null && this.appointmentType != null) {
+            if (!this.serviceOrModification.getType().equals(this.appointmentType)) {
+                throw new IllegalStateException(
+                        "Appointment type (" + appointmentType +
+                                ") must match ServiceOrModification type (" + serviceOrModification.getType() + ")"
+                );
+            }
+        }
+    }
 }
