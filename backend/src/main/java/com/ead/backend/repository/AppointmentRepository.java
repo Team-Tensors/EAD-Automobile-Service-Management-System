@@ -14,4 +14,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Find all appointments assigned to an employee with multiple statuses
     List<Appointment> findByAssignedEmployeesIdAndStatusIn(Long employeeId, List<String> statuses);
+
+    List<Appointment> findByStatus(String pending);
 }

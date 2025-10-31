@@ -1,21 +1,42 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.annotation.JwtSecurityAnnotations;
+import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.dto.ShiftScheduleRequestDTO;
+import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.Vehicle;
+import com.ead.backend.service.ShiftScheduleService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/shift")
 public class ShiftScheduleController {
 
-    public ShiftScheduleController(){
+    private final ShiftScheduleService shiftScheduleService;
+    public ShiftScheduleController(ShiftScheduleService shiftScheduleService){
 
+        this.shiftScheduleService = shiftScheduleService;
     }
 
+    /**
+     * Get all pending appointments for assignment to employees Admin only
+     */
     @JwtSecurityAnnotations.AdminOnly
     @GetMapping("/pending-appointments")
-    public void getPendingAppointments(){
+    public ResponseEntity<List<ShiftScheduleAppointmentsDTO>> getPendingAppointments(){
+        List<ShiftScheduleAppointmentsDTO> pendingAppointments = shiftScheduleService.getPendingAppointments();
+        return ResponseEntity.ok(pendingAppointments);
+
     }
+
+    /**
+     * Get available appointments for self-assignment
+     * @param employeeId
+     */
 
     @JwtSecurityAnnotations.EmployeeAccess
     @GetMapping("/possible-appointments/{employeeId}")
