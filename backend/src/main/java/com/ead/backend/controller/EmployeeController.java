@@ -7,6 +7,10 @@ import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.TimeLog;
 import com.ead.backend.service.EmployeeService;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee")
@@ -31,7 +36,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/appointments/{appointmentId}/employees/{employeeId}/timelogs")
-    public ResponseEntity<?> getTimeLogs(@PathVariable Long appointmentId, @PathVariable Long employeeId)  {
+    public ResponseEntity<?> getTimeLogs(@PathVariable UUID appointmentId, @PathVariable Long employeeId)  {
         logger.info("=== RETRIEVE TIME LOGS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
         logger.info("Employee Id: {}", employeeId);
@@ -57,6 +62,15 @@ public class EmployeeController {
     /**
      * Retrieve all appointments assigned to an employee.
      */
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful retrieval of Appointments",
+                    content = @Content(
+                            schema = @Schema(implementation = AppointmentDTO.class)
+                    )
+            )
+    })
     @GetMapping("/appointments/{employeeId}")
     public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId, @RequestParam(required = false) String status) {
         logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
@@ -84,7 +98,7 @@ public class EmployeeController {
      * Update the status of an appointment.
      */
     @PutMapping("/appointments/{appointmentId}/status")
-    public ResponseEntity<?> updateAppointmentStatus(@PathVariable Long appointmentId,
+    public ResponseEntity<?> updateAppointmentStatus(@PathVariable UUID appointmentId,
                                                      @RequestParam String status) {
         logger.info("=== UPDATE APPOINTMENT STATUS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}, New Status: {}", appointmentId, status);
@@ -115,7 +129,7 @@ public class EmployeeController {
      * Add a new time log entry.
      */
     @PostMapping("/appointments/{appointmentId}/timelog")
-    public ResponseEntity<?> addTimeLog(@PathVariable Long appointmentId, @RequestBody TimeLogRequestDto timeLog) {
+    public ResponseEntity<?> addTimeLog(@PathVariable UUID appointmentId, @RequestBody TimeLogRequestDto timeLog) {
         logger.info("=== ADD TIME LOG REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
 

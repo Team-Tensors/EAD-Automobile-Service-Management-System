@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class AppointmentService {
@@ -16,37 +17,62 @@ public class AppointmentService {
     @Autowired private AppointmentRepository appointmentRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private VehicleRepository vehicleRepository;
-    @Autowired private ServiceTypeRepository serviceTypeRepository;
-    @Autowired private ModificationTypeRepository modificationTypeRepository;
+    @Autowired private ServiceOrModificationRepository serviceOrModificationRepository;
+    @Autowired private ServiceCenterRepository serviceCenterRepository;
 
     // ===================================================================
     // 1. CUSTOMER: Book appointment
     // ===================================================================
     public Appointment createAppointment(Appointment appointment) {
-        User customer = getCurrentUser();  // Uses helper
+        User customer = getCurrentUser();
 
+        // Validate vehicle ownership
         Vehicle vehicle = vehicleRepository.findById(appointment.getVehicle().getId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         if (!vehicle.getUser().getId().equals(customer.getId())) {
             throw new RuntimeException("You can only book for your own vehicle");
         }
 
+        // Validate appointment type
         if (appointment.getAppointmentType() == null) {
             throw new RuntimeException("Appointment type is required");
         }
 
-        if (appointment.getAppointmentType() == AppointmentType.SERVICE) {
-            ServiceType st = serviceTypeRepository.findById(appointment.getServiceType().getId())
-                    .orElseThrow(() -> new RuntimeException("Service type not found"));
-            appointment.setServiceType(st);
-            appointment.setModificationType(null);
-        } else {
-            ModificationType mt = modificationTypeRepository.findById(appointment.getModificationType().getId())
-                    .orElseThrow(() -> new RuntimeException("Modification type not found"));
-            appointment.setModificationType(mt);
-            appointment.setServiceType(null);
+        // Validate and set ServiceOrModification
+        if (appointment.getServiceOrModification() == null || appointment.getServiceOrModification().getId() == null) {
+            throw new RuntimeException("Service or Modification must be selected");
         }
 
+        ServiceOrModification som = serviceOrModificationRepository
+                .findById(appointment.getServiceOrModification().getId())
+                .orElseThrow(() -> new RuntimeException("Service/Modification not found"));
+
+        // Ensure type consistency
+        if (!som.getType().equals(appointment.getAppointmentType())) {
+            throw new RuntimeException(
+                    String.format("Selected %s does not match appointment type %s",
+                            som.getType(), appointment.getAppointmentType())
+            );
+        }
+
+        appointment.setServiceOrModification(som);
+
+        // Validate and set ServiceCenter
+        if (appointment.getServiceCenter() == null || appointment.getServiceCenter().getId() == null) {
+            throw new RuntimeException("Service center must be selected");
+        }
+
+        ServiceCenter serviceCenter = serviceCenterRepository
+                .findById(appointment.getServiceCenter().getId())
+                .orElseThrow(() -> new RuntimeException("Service center not found"));
+
+        if (!serviceCenter.getIsActive()) {
+            throw new RuntimeException("Selected service center is not currently available");
+        }
+
+        appointment.setServiceCenter(serviceCenter);
+
+        // Validate appointment date
         if (appointment.getAppointmentDate() == null) {
             throw new RuntimeException("Please select your preferred appointment date and time");
         }
@@ -54,6 +80,7 @@ public class AppointmentService {
             throw new RuntimeException("Appointment date must be at least 1 hour from now");
         }
 
+        // Finalize
         appointment.setUser(customer);
         appointment.setVehicle(vehicle);
         appointment.setStatus("PENDING");
@@ -65,15 +92,15 @@ public class AppointmentService {
     // 2. CUSTOMER: Get own appointments
     // ===================================================================
     public List<Appointment> getUserAppointments() {
-        User customer = getCurrentUser();  // Uses helper
+        User customer = getCurrentUser();
         return appointmentRepository.findByUserId(customer.getId());
     }
 
     // ===================================================================
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
-    public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
-        User currentUser = getCurrentUser();  // Uses helper
+    public Appointment assignEmployees(UUID appointmentId, Set<Long> employeeIds) {
+        User currentUser = getCurrentUser();
 
         boolean isManagerOrAdmin = currentUser.getRoles().stream()
                 .anyMatch(r -> "MANAGER".equals(r.getName()) || "ADMIN".equals(r.getName()));
@@ -113,8 +140,8 @@ public class AppointmentService {
     // ===================================================================
     // 5. EMPLOYEE: Start work
     // ===================================================================
-    public Appointment startAppointment(Long appointmentId) {
-        User employee = getCurrentUser();  // Uses helper
+    public Appointment startAppointment(UUID appointmentId) {
+        User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
             throw new RuntimeException("Only EMPLOYEE can start work");
@@ -139,8 +166,8 @@ public class AppointmentService {
     // ===================================================================
     // 6. EMPLOYEE: Complete work
     // ===================================================================
-    public Appointment completeAppointment(Long appointmentId) {
-        User employee = getCurrentUser();  // Uses helper
+    public Appointment completeAppointment(UUID appointmentId) {
+        User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
             throw new RuntimeException("Only EMPLOYEE can complete work");

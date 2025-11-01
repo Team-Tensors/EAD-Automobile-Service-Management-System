@@ -2,7 +2,7 @@ import React from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 
 interface Vehicle {
-  id: number;
+  id: string; // UUID as string
   brand: string;
   model: string;
   year: string;
@@ -14,7 +14,7 @@ interface Vehicle {
 const VehicleCard: React.FC<{
   vehicle: Vehicle;
   onEdit: (vehicle: Vehicle) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }> = ({ vehicle, onEdit, onDelete }) => {
   return (
     <div className="group bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 p-6 rounded-lg hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10">
