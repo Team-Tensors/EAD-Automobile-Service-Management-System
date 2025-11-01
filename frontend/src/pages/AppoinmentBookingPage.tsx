@@ -216,7 +216,7 @@ const AppointmentBookingPage = () => {
         setVehicles((prev) => [...prev, newVehicle]);
         setFormData((prev) => ({
           ...prev,
-          vehicleId: newVehicle.id.toString(),
+          vehicleId: newVehicle.id, // UUID is already a string
         }));
         setVehicleFormData({
           brand: "",
@@ -274,7 +274,7 @@ const AppointmentBookingPage = () => {
     const appointmentDateTime = `${formData.appointmentDate}T${formData.appointmentTime}:00`;
 
     const appointmentRequest = {
-      vehicleId: parseInt(formData.vehicleId),
+      vehicleId: formData.vehicleId, // UUID as string
       serviceOrModificationId: parseInt(serviceOrModificationId),
       serviceCenterId: parseInt(formData.serviceCenterId),
       appointmentType: formData.appointmentType as AppointmentType,

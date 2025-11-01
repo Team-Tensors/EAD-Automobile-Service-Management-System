@@ -1,5 +1,5 @@
 export interface Vehicle {
-  id: number;
+  id: string; // UUID as string
   brand: string;
   model: string;
   year: string;

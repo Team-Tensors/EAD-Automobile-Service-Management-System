@@ -7,8 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class AppointmentService {
@@ -18,6 +20,10 @@ public class AppointmentService {
     @Autowired private VehicleRepository vehicleRepository;
     @Autowired private ServiceOrModificationRepository serviceOrModificationRepository;
     @Autowired private ServiceCenterRepository serviceCenterRepository;
+    @Autowired private EmailService emailService;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a");
 
     // ===================================================================
     // 1. CUSTOMER: Book appointment
@@ -84,7 +90,26 @@ public class AppointmentService {
         appointment.setVehicle(vehicle);
         appointment.setStatus("PENDING");
 
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // Send confirmation email
+        try {
+            emailService.sendAppointmentConfirmationEmail(
+                    customer.getEmail(),
+                    customer.getFullName(),
+                    savedAppointment.getId().toString(),
+                    savedAppointment.getAppointmentDate().format(DATE_FORMATTER),
+                    savedAppointment.getAppointmentDate().format(TIME_FORMATTER),
+                    som.getName(),
+                    vehicle.getBrand() + " " + vehicle.getModel(),
+                    serviceCenter.getName()
+            );
+        } catch (Exception e) {
+            // Log but don't fail the appointment creation
+            System.err.println("Failed to send appointment confirmation email: " + e.getMessage());
+        }
+
+        return savedAppointment;
     }
 
     // ===================================================================
@@ -98,7 +123,7 @@ public class AppointmentService {
     // ===================================================================
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
-    public Appointment assignEmployees(Long appointmentId, Set<Long> employeeIds) {
+    public Appointment assignEmployees(UUID appointmentId, Set<Long> employeeIds) {
         User currentUser = getCurrentUser();
 
         boolean isManagerOrAdmin = currentUser.getRoles().stream()
@@ -123,7 +148,30 @@ public class AppointmentService {
             appointment.getAssignedEmployees().add(employee);
         }
 
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // Send assignment emails to employees
+        try {
+            for (Long empId : employeeIds) {
+                User employee = userRepository.findById(empId).orElse(null);
+                if (employee != null) {
+                    emailService.sendEmployeeAssignmentEmail(
+                            employee.getEmail(),
+                            employee.getFullName(),
+                            savedAppointment.getId().toString(),
+                            savedAppointment.getAppointmentDate().format(DATE_FORMATTER),
+                            savedAppointment.getAppointmentDate().format(TIME_FORMATTER),
+                            savedAppointment.getServiceOrModification().getName(),
+                            savedAppointment.getVehicle().getBrand() + " " + savedAppointment.getVehicle().getModel(),
+                            savedAppointment.getUser().getFullName()
+                    );
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send employee assignment emails: " + e.getMessage());
+        }
+
+        return savedAppointment;
     }
 
     // ===================================================================
@@ -139,7 +187,7 @@ public class AppointmentService {
     // ===================================================================
     // 5. EMPLOYEE: Start work
     // ===================================================================
-    public Appointment startAppointment(Long appointmentId) {
+    public Appointment startAppointment(UUID appointmentId) {
         User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
@@ -159,13 +207,30 @@ public class AppointmentService {
 
         appt.setStartTime(LocalDateTime.now());
         appt.setStatus("IN_PROGRESS");
-        return appointmentRepository.save(appt);
+
+        Appointment savedAppointment = appointmentRepository.save(appt);
+
+        // Send work started notification to customer
+        try {
+            emailService.sendAppointmentStartedEmail(
+                    savedAppointment.getUser().getEmail(),
+                    savedAppointment.getUser().getFullName(),
+                    savedAppointment.getId().toString(),
+                    savedAppointment.getServiceOrModification().getName(),
+                    savedAppointment.getVehicle().getBrand() + " " + savedAppointment.getVehicle().getModel(),
+                    employee.getFullName()
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send work started email: " + e.getMessage());
+        }
+
+        return savedAppointment;
     }
 
     // ===================================================================
     // 6. EMPLOYEE: Complete work
     // ===================================================================
-    public Appointment completeAppointment(Long appointmentId) {
+    public Appointment completeAppointment(UUID appointmentId) {
         User employee = getCurrentUser();
 
         if (!employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()))) {
@@ -188,7 +253,25 @@ public class AppointmentService {
 
         appt.setEndTime(LocalDateTime.now());
         appt.setStatus("COMPLETED");
-        return appointmentRepository.save(appt);
+
+        Appointment savedAppointment = appointmentRepository.save(appt);
+
+        // Send completion notification to customer
+        try {
+            emailService.sendAppointmentCompletedEmail(
+                    savedAppointment.getUser().getEmail(),
+                    savedAppointment.getUser().getFullName(),
+                    savedAppointment.getId().toString(),
+                    savedAppointment.getServiceOrModification().getName(),
+                    savedAppointment.getVehicle().getBrand() + " " + savedAppointment.getVehicle().getModel(),
+                    savedAppointment.getStartTime().format(TIME_FORMATTER),
+                    savedAppointment.getEndTime().format(TIME_FORMATTER)
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to send completion email: " + e.getMessage());
+        }
+
+        return savedAppointment;
     }
 
     // ===================================================================

@@ -1,1112 +1,826 @@
-import { useState, useEffect, useRef } from 'react';
-import { 
-  Clock, 
-  Car, 
-  Calendar, 
-  User, 
-  ChevronRight, 
-  CheckCircle, 
-  CircleDashed,
-  Briefcase,
-  Loader,
-  Check,
-  ClipboardList,
-  ClipboardX,
-  ChevronLeft,
-  Save,
-  Trash2,
-  Edit,
-  Dot,
-  X,
-  AlertTriangle 
+// src/pages/EmployeeDashboard.tsx
+
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  Car,
+  Calendar,
+  User,
+  Filter,
+  Phone,
+  MapPin,
+  Wrench,
+  Timer,
+  Coins,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
+import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 
-// --- INTERFACES ---
+const API_BASE_URL = 'http://localhost:4000/api/employee';
 
-interface AssignedService {
-  id: number;
-  vehicleName: string;
-  vehicleNumber: string;
-  serviceType: string;
-  status: 'completed' | 'in_progress' | 'not_started';
-  startDate: string | null; 
-  estimatedCompletion: string | null;
-  customerName: string; 
-  serviceCenter: string;
-  centerSlot: string;
+// ------------------ Types ------------------
+interface Appointment {
+  id: string;
+  userId: number;
+  userFullName: string;
+  address: string;
+  phoneNumber: string;
+  email: string;
+  vehicleId: string;
+  brand: string;
+  model: string;
+  year: string;
+  color: string;
+  lastServiceDate: string | null;
+  licensePlate: string;
+  appointmentType: string;
+  serviceOrModificationId: number;
+  serviceOrModificationName: string;
+  serviceOrModificationDescription: string;
+  estimatedCost: number;
+  estimatedTimeMinutes: number;
+  appointmentDate: string;
+  status: string;
+  description: string;
+  assignedEmployeeIds: number[];
 }
 
 interface TimeLog {
   id: number;
-  serviceId: number;
-  date: string; // "YYYY-MM-DD"
-  startTime: string; // "HH:mm"
-  endTime: string; // "HH:mm"
-  duration: string; // "2h 30m"
+  startTime: string;
+  endTime: string;
+  hoursLogged: number;
+  notes: string;
+}
+
+interface TimeLogForm {
+  date: string;
+  startTime: string;
+  endTime: string;
   description: string;
 }
 
-type ServiceStatus = 'completed' | 'in_progress' | 'not_started';
-type ActiveSection = 'logTime' | 'updateStatus' | 'none';
-type NotificationType = 'success' | 'error';
-
-// --- MOCK DATA ---
-
-const MOCK_SERVICES: AssignedService[] = [
-  {
-    id: 1,
-    vehicleName: 'Toyota Camry 2020',
-    vehicleNumber: 'ABC-1234',
-    serviceType: 'Regular Maintenance',
-    status: 'in_progress',
-    startDate: '2025-10-24T10:00:00Z', 
-    estimatedCompletion: '2025-10-28T17:00:00Z',
-    customerName: 'Alice Smith',
-    serviceCenter: 'DriveCare Negombo Center',
-    centerSlot: 'Bay 3'
-  },
-  {
-    id: 2,
-    vehicleName: 'Honda Civic 2019',
-    vehicleNumber: 'XYZ-5678',
-    serviceType: 'Custom Modification',
-    status: 'not_started', 
-    startDate: null, 
-    estimatedCompletion: '2025-11-05T17:00:00Z',
-    customerName: 'Bob Johnson',
-    serviceCenter: 'DriveCare Colombo Center',
-    centerSlot: 'Bay 1'
-  },
-  {
-    id: 3,
-    vehicleName: 'BMW X5 2021',
-    vehicleNumber: 'LMN-9012',
-    serviceType: 'Accident Repair',
-    status: 'completed',
-    startDate: '2025-10-01T09:00:00Z',
-    estimatedCompletion: '2025-10-12T17:00:00Z',
-    customerName: 'Charlie Brown',
-    serviceCenter: 'DriveCare Negombo Center',
-    centerSlot: 'Bay 5'
-  }
-];
-
-// Mock logs are set for October 2025 to match the calendar logic
-const MOCK_TIME_LOGS: { [key: number]: TimeLog[] } = {
-  1: [
-    { id: 101, serviceId: 1, date: '2025-10-24', startTime: '10:00', endTime: '12:30', duration: '2h 30m', description: 'Initial diagnostics and oil change.' },
-    { id: 102, serviceId: 1, date: '2025-10-24', startTime: '13:30', endTime: '15:00', duration: '1h 30m', description: 'Replaced air filter and spark plugs.' },
-    // Add a log for the selected date (Oct 27, 2025 based on context)
-    { id: 103, serviceId: 1, date: '2025-10-27', startTime: '09:00', endTime: '11:00', duration: '2h 0m', description: 'Checked tire pressure.' },
-  ],
-  2: [],
-  3: [
-    { id: 301, serviceId: 3, date: '2025-10-01', startTime: '09:00', endTime: '17:00', duration: '8h 0m', description: 'Full day body work.' }
-  ]
-};
-
-
-// --- HELPER FUNCTIONS ---
-
-const formatDate = (date: Date): string => {
-  if (!(date instanceof Date) || isNaN(date.getTime())) {
-    console.error("Invalid date passed to formatDate:", date);
-    return new Date().toISOString().split('T')[0]; 
-  }
-  return date.toISOString().split('T')[0];
-};
-
-const formatTime = (date: Date): string => {
-  if (!(date instanceof Date) || isNaN(date.getTime())) {
-      console.error("Invalid date passed to formatTime:", date);
-      return new Date().toTimeString().split(' ')[0].substring(0, 5); 
-  }
-  return date.toTimeString().split(' ')[0].substring(0, 5);
-};
-
-// --- Calendar Helpers ---
-interface CalendarDay {
-  date: Date;
-  isCurrentMonth: boolean;
+interface TimeLogErrors {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  description?: string;
 }
 
-const generateMonthGrid = (date: Date): CalendarDay[] => {
-  const grid: CalendarDay[] = [];
-  const year = date.getFullYear();
-  const month = date.getMonth();
-
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-  const firstDayWeekday = firstDayOfMonth.getDay(); 
-
-  for (let i = 0; i < firstDayWeekday; i++) {
-    const prevDate = new Date(firstDayOfMonth);
-    prevDate.setDate(prevDate.getDate() - (firstDayWeekday - i));
-    grid.push({ date: prevDate, isCurrentMonth: false });
-  }
-
-  for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
-    grid.push({ date: new Date(year, month, i), isCurrentMonth: true });
-  }
-
-  const remainingCells = 42 - grid.length;
-  for (let i = 1; i <= remainingCells; i++) {
-    const nextDate = new Date(lastDayOfMonth);
-    nextDate.setDate(nextDate.getDate() + i);
-    grid.push({ date: nextDate, isCurrentMonth: false });
-  }
-  
-  return grid;
-};
-
-// --- Time Log Helpers ---
-const calculateDuration = (startTime: string, endTime: string): string => {
-  if (!startTime || !endTime) return '0h 0m';
-  try {
-    const start = new Date(`1970-01-01T${startTime}:00`);
-    const end = new Date(`1970-01-01T${endTime}:00`);
-    let diff = end.getTime() - start.getTime();
-    if (diff < 0) diff += 24 * 60 * 60 * 1000;
-    
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    
-    return `${hours}h ${minutes}m`;
-  } catch (e) {
-    return '0h 0m';
-  }
-};
-
-const getLogsForDate = (date: Date, allLogs: { [key: number]: TimeLog[] }, services: AssignedService[]): (TimeLog & { vehicleNumber: string })[] => {
-  const dateString = formatDate(date);
-  const logsForDay: (TimeLog & { vehicleNumber: string })[] = [];
-  
-  Object.values(allLogs).flat().forEach(log => {
-    if (log.date === dateString) {
-      const service = services.find(s => s.id === log.serviceId);
-      logsForDay.push({
-        ...log,
-        vehicleNumber: service?.vehicleNumber || 'N/A'
-      });
-    }
-  });
-  return logsForDay;
-};
-
-const dateHasLogs = (date: Date, allLogs: { [key: number]: TimeLog[] }): boolean => {
-  const dateString = formatDate(date);
-  return Object.values(allLogs).flat().some(log => log.date === dateString);
-};
-
-
-// --- MAIN COMPONENT ---
-
+// ------------------ Component ------------------
 const EmployeeDashboard = () => {
-  const { user, logout } = useAuth();
-  const [assignedServices, setAssignedServices] = useState<AssignedService[]>(MOCK_SERVICES);
-  const [selectedService, setSelectedService] = useState<AssignedService | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  
-  const [activeSection, setActiveSection] = useState<ActiveSection>('none');
-  const [timeLogs, setTimeLogs] = useState<{ [key: number]: TimeLog[] }>(MOCK_TIME_LOGS);
-  
-  const currentDate = new Date(); // Use actual current date
-  const firstOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-  const [summaryMonth, setSummaryMonth] = useState(firstOfCurrentMonth); 
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(currentDate); 
-  
-  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
-  const notificationTimer = useRef<NodeJS.Timeout | null>(null);
+  const { user, token } = useAuth(); // <-- get token from context
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showStatusUpdate, setShowStatusUpdate] = useState<boolean>(false);
+  const [showTimeLog, setShowTimeLog] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [logToDelete, setLogToDelete] = useState<TimeLog | null>(null);
-  
-  const showNotification = (message: string, type: NotificationType = 'success') => {
-    if (notificationTimer.current) {
-      clearTimeout(notificationTimer.current);
-    }
-    setNotification({ message, type });
-    notificationTimer.current = setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-  };
+  const EMPLOYEE_ID = user?.id || 9;
 
-  const handleLogout = async () => {
+  const [newStatus, setNewStatus] = useState<string>('');
+  const [completionDescription, setCompletionDescription] =
+    useState<string>('');
+
+  const [timeLogForm, setTimeLogForm] = useState<TimeLogForm>({
+    date: new Date().toISOString().split('T')[0],
+    startTime: '',
+    endTime: '',
+    description: '',
+  });
+
+  const [timeLogErrors, setTimeLogErrors] = useState<TimeLogErrors>({});
+
+  // ------------------ Fetch Appointments ------------------
+  const fetchAppointments = useCallback(async () => {
+    if (!EMPLOYEE_ID) return;
+
+    setLoading(true);
+    setError(null);
+
+    let backendStatus: string | null = null;
+    if (statusFilter === 'NOT STARTED') backendStatus = 'CONFIRMED';
+    else if (statusFilter === 'IN PROGRESS') backendStatus = 'IN_PROGRESS';
+    else if (statusFilter === 'COMPLETED') backendStatus = 'COMPLETED';
+
+    let url = `${API_BASE_URL}/appointments/${EMPLOYEE_ID}`;
+    if (backendStatus) url += `?status=${backendStatus}`;
+
     try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // <-- use dynamic token
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch appointments');
+      const data = await response.json();
+      setAppointments(data);
+
+      setSelectedAppointment(prev => {
+        if (prev) {
+          const stillExists = data.find((apt: Appointment) => apt.id === prev.id);
+          if (stillExists) return stillExists;
+        }
+        return data.length > 0 ? data[0] : null;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [EMPLOYEE_ID, statusFilter]);
+
+  // ------------------ Fetch Time Logs ------------------
+  const fetchTimeLogs = useCallback(
+    async (appointmentId: string) => {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/appointments/${appointmentId}/employees/${EMPLOYEE_ID}/timelogs`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`, // <-- use dynamic token
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error('Failed to fetch time logs');
+        const data = await response.json();
+        setTimeLogs(data);
+      } catch (err) {
+        console.error('Error fetching time logs:', err);
+        setTimeLogs([]);
+      }
+    },
+    [EMPLOYEE_ID]
+  );
 
   useEffect(() => {
-    const defaultService = assignedServices.find(s => s.status !== 'completed') || assignedServices[0];
-    setSelectedService(defaultService);
-  }, []); 
+    fetchAppointments();
+  }, [fetchAppointments]);
 
-  // --- Status & Color Helpers ---
+  useEffect(() => {
+    if (selectedAppointment) {
+      fetchTimeLogs(selectedAppointment.id);
+    } else {
+      setTimeLogs([]);
+    }
+  }, [selectedAppointment, fetchTimeLogs]);
+
+  // ------------------ Update Appointment Status ------------------
+  const updateAppointmentStatus = async () => {
+    if (!newStatus || !selectedAppointment) return;
+    if (newStatus === 'COMPLETED' && !completionDescription.trim()) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
+        {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` }, // <-- use dynamic token
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to update status');
+      await fetchAppointments();
+      setShowStatusUpdate(false);
+      setNewStatus('');
+      setCompletionDescription('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------ Time Log Helpers ------------------
+  const calculateDuration = (): string => {
+    if (timeLogForm.startTime && timeLogForm.endTime) {
+      const start = new Date(`${timeLogForm.date}T${timeLogForm.startTime}`);
+      const end = new Date(`${timeLogForm.date}T${timeLogForm.endTime}`);
+      const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+      return diff > 0 ? diff.toFixed(2) : '0.00';
+    }
+    return '0.00';
+  };
+
+  const validateTimeLog = (): boolean => {
+    const errors: TimeLogErrors = {};
+    const { date, startTime, endTime, description } = timeLogForm;
+
+    if (!date) errors.date = 'Date is required.';
+    if (!startTime) errors.startTime = 'Start time is required.';
+    if (!endTime) errors.endTime = 'End time is required.';
+    if (!description.trim()) errors.description = 'Description is required.';
+
+    if (date && startTime && endTime) {
+      const start = new Date(`${date}T${startTime}`);
+      const end = new Date(`${date}T${endTime}`);
+      if (end <= start) errors.endTime = 'End time must be after start time.';
+    }
+
+    setTimeLogErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const submitTimeLog = async () => {
+    if (!validateTimeLog() || !selectedAppointment) return;
+
+    setLoading(true);
+    try {
+      const payload = {
+        employeeId: EMPLOYEE_ID,
+        startTime: `${timeLogForm.date}T${timeLogForm.startTime}:00`,
+        endTime: `${timeLogForm.date}T${timeLogForm.endTime}:00`,
+        notes: timeLogForm.description,
+      };
+
+      const response = await fetch(
+        `${API_BASE_URL}/appointments/${selectedAppointment.id}/timelog`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // <-- use dynamic token
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to log time');
+      await fetchTimeLogs(selectedAppointment.id);
+      setShowTimeLog(false);
+      setTimeLogForm({
+        date: new Date().toISOString().split('T')[0],
+        startTime: '',
+        endTime: '',
+        description: '',
+      });
+      setTimeLogErrors({});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------ Helpers / UI Formatting ------------------
   const getStatusColor = (status: string): string => {
-    switch(status) {
-      case 'completed': return 'bg-chart-2/20 text-chart-2 border-chart-2/30';
-      case 'in_progress': return 'bg-chart-4/20 text-chart-4 border-chart-4/30';
-      case 'not_started': return 'bg-chart-1/20 text-chart-1 border-chart-1/30'; 
-      default: return 'bg-muted text-muted-foreground border-border';
+    switch (status) {
+      case 'CONFIRMED':
+        return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'IN_PROGRESS':
+        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'COMPLETED':
+        return 'bg-green-500/10 text-green-500 border-green-500/20';
+      default:
+        return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
   };
 
   const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'completed': return <CheckCircle className="w-5 h-5 text-chart-2" />;
-      case 'in_progress': return <Loader className="w-5 h-5 text-chart-4" />; 
-      case 'not_started': return <CircleDashed className="w-5 h-5 text-chart-1" />; 
-      default: return null;
+    switch (status) {
+      case 'CONFIRMED':
+        return <AlertCircle className="w-4 h-4" />;
+      case 'IN_PROGRESS':
+        return <Clock className="w-4 h-4" />;
+      case 'COMPLETED':
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <XCircle className="w-4 h-4" />;
     }
   };
 
-  const filteredServices = filterStatus === 'all' 
-    ? assignedServices 
-    : assignedServices.filter(s => s.status === filterStatus);
+  const getDisplayStatus = (status: string): string =>
+    status === 'CONFIRMED' ? 'NOT STARTED' : status.replace('_', ' ');
 
-  // --- Stat Calculations ---
-  const activeProjects = assignedServices.filter(s => s.status === 'in_progress').length;
-  const notStartedTasks = assignedServices.filter(s => s.status === 'not_started').length;
-  const completedTasks = assignedServices.filter(s => s.status === 'completed').length; 
-
-  // --- Event Handlers ---
-  const handleSelectService = (service: AssignedService) => {
-    setSelectedService(service);
-    setActiveSection('none');
-  };
-  
-  const handleToggleSection = (section: ActiveSection) => {
-    setActiveSection(prev => (prev === section ? 'none' : section));
-  };
-
-  const handleStatusUpdate = (newStatus: ServiceStatus, description?: string) => {
-    if (!selectedService) return;
-
-    let newStartDate = selectedService.startDate;
-    let newEstimatedCompletion = selectedService.estimatedCompletion;
-
-    if (selectedService.status === 'not_started' && newStatus === 'in_progress') {
-      const now = new Date();
-      const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-      
-      newStartDate = now.toISOString();
-      newEstimatedCompletion = oneHourLater.toISOString();
-      
-      showNotification(`Service Started. Est. completion: ${oneHourLater.toLocaleTimeString()}`, 'success');
-    } else {
-       showNotification(`Status updated to: ${newStatus.replace('_', ' ').toUpperCase()}`, 'success');
-    }
-    
-    if (newStatus === 'completed') {
-      console.log("Saving Completion Description:", description);
-    }
-
-    const updatedService = { 
-      ...selectedService, 
-      status: newStatus, 
-      startDate: newStartDate,
-      estimatedCompletion: newEstimatedCompletion
-    };
-    
-    setSelectedService(updatedService);
-    setAssignedServices(prevServices => 
-      prevServices.map(s => s.id === updatedService.id ? updatedService : s)
-    );
-    
-    setActiveSection('none');
-  };
-
-  const handleSaveLog = (newLog: Omit<TimeLog, 'id' | 'serviceId' | 'duration'>) => {
-    if (!selectedService) return;
-    
-    const duration = calculateDuration(newLog.startTime, newLog.endTime);
-    const logToSave: TimeLog = {
-      ...newLog,
-      id: Date.now(),
-      serviceId: selectedService.id,
-      duration: duration
-    };
-
-    setTimeLogs(prevLogs => {
-      const currentLogs = prevLogs[selectedService.id] || [];
-      return {
-        ...prevLogs,
-        [selectedService.id]: [...currentLogs, logToSave]
-      };
+  const formatDateTime = (dateTime: string): string =>
+    new Date(dateTime).toLocaleString('en-GB', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
-    
-    showNotification('Time log saved successfully!', 'success');
-  };
-  
-  const handleUpdateLog = (updatedLog: TimeLog) => {
-    if (!selectedService) return;
 
-    const duration = calculateDuration(updatedLog.startTime, updatedLog.endTime);
-    const logToUpdate = { ...updatedLog, duration };
-    
-    setTimeLogs(prevLogs => {
-      const currentLogs = prevLogs[selectedService.id] || [];
-      return {
-        ...prevLogs,
-        [selectedService.id]: currentLogs.map(log => 
-          log.id === logToUpdate.id ? logToUpdate : log
-        )
-      };
+  const formatDate = (dateTime: string): string =>
+    new Date(dateTime).toLocaleDateString('en-GB', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
-    
-    showNotification('Time log updated successfully!', 'success');
-  };
 
-  const handleDeleteLogRequest = (log: TimeLog) => {
-    setLogToDelete(log); 
-  };
-
-  const handleConfirmDelete = () => {
-    if (!logToDelete || !selectedService) return;
-
-    setTimeLogs(prevLogs => {
-      const currentLogs = prevLogs[selectedService.id] || [];
-      return {
-        ...prevLogs,
-        [selectedService.id]: currentLogs.filter(log => log.id !== logToDelete.id)
-      };
-    });
-    
-    showNotification('Log entry deleted.', 'success');
-    setLogToDelete(null); 
-  };
-  
-  const changeMonth = (direction: 'prev' | 'next') => {
-    const newDate = new Date(summaryMonth);
-    const amount = direction === 'prev' ? -1 : 1;
-    newDate.setMonth(newDate.getMonth() + amount);
-    setSummaryMonth(newDate);
-    setSelectedCalendarDate(null);
-  };
-
-  // --- RENDER ---
+  // ------------------ Render ------------------
   return (
-    <div className="min-h-screen bg-background relative"> 
-      
-      {/* --- ToastNotification --- */}
-      {notification && (
-        <ToastNotification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-      
-      {/* --- Delete Confirmation Modal --- */}
-      {logToDelete && (
-        <DeleteConfirmationModal
-          onCancel={() => setLogToDelete(null)}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
+    <div className="min-h-screen bg-black flex flex-col pt-12">
+      <AuthenticatedNavbar />
 
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Employee Dashboard</h1>
-              <p className="text-primary-foreground/80 mt-1">
-                Welcome back, {user?.firstName} {user?.lastName}! {user?.department && `(${user.department})`}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={handleLogout}
-                className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg font-semibold hover:bg-destructive/90 transition border border-border"
-              >
-                Logout
-              </button>
-              <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center border border-border">
-                <User className="w-6 h-6 text-accent-foreground" />
-              </div>
-            </div>
-          </div>
+      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700 pt-4">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
+          <p className="text-gray-400 mt-2">
+            Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
+          </p>
         </div>
-      </header>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card rounded-lg shadow-md p-6 border border-border flex items-center gap-4">
-            <div className="p-3 bg-chart-4/10 rounded-lg">
-              <Briefcase className="w-6 h-6 text-chart-4" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Active Projects</p>
-              <p className="text-2xl font-bold text-card-foreground">{activeProjects}</p>
-            </div>
-          </div>
-          <div className="bg-card rounded-lg shadow-md p-6 border border-border flex items-center gap-4">
-            <div className="p-3 bg-chart-1/10 rounded-lg">
-              <CircleDashed className="w-6 h-6 text-chart-1" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Not Started</p>
-              <p className="text-2xl font-bold text-card-foreground">{notStartedTasks}</p>
-            </div>
-          </div>
-          <div className="bg-card rounded-lg shadow-md p-6 border border-border flex items-center gap-4">
-            <div className="p-3 bg-chart-2/10 rounded-lg">
-              <CheckCircle className="w-6 h-6 text-chart-2" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Completed This Week</p>
-              <p className="text-2xl font-bold text-card-foreground">{completedTasks}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions / Navigation Cards */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-card-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="#" className="bg-card rounded-lg shadow-md p-6 border border-border flex flex-col items-start gap-3 hover:bg-accent transition-colors group">
-              <div className="p-3 bg-secondary rounded-lg border border-border">
-                <ClipboardList className="w-6 h-6 text-chart-3" />
-              </div>
-              <h3 className="text-xl font-bold text-card-foreground">Manage Inventory</h3>
-              <p className="text-sm text-muted-foreground flex-1">View and update service parts and stock levels.</p>
-              <div className="mt-2 text-sm font-semibold text-primary group-hover:underline flex items-center">
-                Go to Inventory <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </a>
-            <a href="#" className="bg-card rounded-lg shadow-md p-6 border border-border flex flex-col items-start gap-3 hover:bg-accent transition-colors group">
-              <div className="p-3 bg-secondary rounded-lg border border-border">
-                <ClipboardX className="w-6 h-6 text-chart-5" />
-              </div>
-              <h3 className="text-xl font-bold text-card-foreground">Unassigned Services</h3>
-              <p className="text-sm text-muted-foreground flex-1">View and claim new jobs from the service pool.</p>
-              <div className="mt-2 text-sm font-semibold text-primary group-hover:underline flex items-center">
-                View All <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </a>
-            <a 
-              href="#" 
-              className="bg-card rounded-lg shadow-md p-6 border border-border flex flex-col items-start gap-3 hover:bg-accent transition-colors group"
-            >
-              <div className="p-3 bg-secondary rounded-lg border border-border">
-                <Calendar className="w-6 h-6 text-chart-1" />
-              </div>
-              <h3 className="text-xl font-bold text-card-foreground">Service Scheduling</h3>
-              <p className="text-sm text-muted-foreground flex-1">See the list of your assigned services.</p>
-              <div className="mt-2 text-sm font-semibold text-primary group-hover:underline flex items-center">
-                View all services <ChevronRight className="w-4 h-4 ml-1" />
-              </div>
-            </a>
-          </div>
-        </div>
-
-        {/* Main Content: List + Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Services List */}
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel - Assigned Services */}
           <div className="lg:col-span-1">
-            <div className="bg-card rounded-lg shadow-md p-4 border border-border">
+            <div className="bg-zinc-900/50 rounded-lg p-6 border border-zinc-800">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-card-foreground">Assigned Services</h2>
+                <h2 className="text-xl font-bold text-white">Assigned Services</h2>
+                <Filter className="w-5 h-5 text-gray-500" />
               </div>
+
               <div className="flex gap-2 mb-4 flex-wrap">
-                {['all', 'in_progress', 'not_started', 'completed'].map(status => (
+                {['ALL', 'NOT STARTED', 'IN PROGRESS', 'COMPLETED'].map(status => (
                   <button
                     key={status}
-                    onClick={() => setFilterStatus(status)}
+                    onClick={() => setStatusFilter(status)}
                     className={`px-3 py-1 rounded-full text-sm font-medium transition border ${
-                      filterStatus === status 
-                        ? 'bg-primary text-primary-foreground border-primary' 
-                        : 'bg-secondary text-secondary-foreground border-border hover:bg-accent'
+                      statusFilter === status
+                        ? 'bg-orange-500 text-white border-orange-500'
+                        : 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700'
                     }`}
                   >
-                    {status.replace('_', ' ').toUpperCase()}
+                    {status}
                   </button>
                 ))}
               </div>
+
+              {error && (
+                <div className="bg-red-500/10 text-red-500 p-3 rounded-lg mb-4 text-sm border border-red-500/20">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {filteredServices.map(service => (
+                {loading && appointments.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    Loading appointments...
+                  </div>
+                )}
+
+                {appointments.map(apt => (
                   <div
-                    key={service.id}
-                    onClick={() => handleSelectService(service)}
+                    key={apt.id}
+                    onClick={() => setSelectedAppointment(apt)}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition ${
-                      selectedService?.id === service.id
-                        ? 'border-primary bg-accent/50'
-                        : 'border-border hover:border-primary/50 bg-card'
+                      selectedAppointment?.id === apt.id
+                        ? 'border-orange-500 bg-zinc-800'
+                        : 'border-zinc-800 hover:border-zinc-700 bg-zinc-900/50'
                     }`}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Car className="w-4 h-4 text-muted-foreground" />
-                          <p className="font-semibold text-card-foreground">{service.vehicleName}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <Car className="w-4 h-4 text-gray-500" />
+                          <p className="font-semibold text-white">
+                            {apt.brand} {apt.model} ({apt.year})
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{service.vehicleNumber}</p>
-                        <p className="text-xs text-muted-foreground mb-2">{service.serviceType}</p>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(service.status)}`}>
-                          {getStatusIcon(service.status)}
-                          {service.status.replace('_', ' ').toUpperCase()}
+                        <p className="text-sm text-gray-400 mb-2">{apt.appointmentType}</p>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                            apt.status
+                          )}`}
+                        >
+                          {getStatusIcon(apt.status)}
+                          {getDisplayStatus(apt.status)}
                         </span>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      {formatDate(apt.appointmentDate)}
                     </div>
                   </div>
                 ))}
+
+                {!loading && appointments.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    No appointments found for this filter
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Service Details + Action Sections */}
-          <div className="lg:col-span-2 space-y-6">
-            {selectedService && (
-              <>
-                {/* Main Info Card */}
-                <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-                  <div className="flex items-start justify-between mb-6">
+          {/* Right Panel - Job Detail */}
+          <div className="lg:col-span-2">
+            {selectedAppointment ? (
+              <div className="space-y-6">
+                <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
+                  {/* VEHICLE INFO */}
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h2 className="text-2xl font-bold text-card-foreground mb-1">{selectedService.vehicleName}</h2>
-                      <p className="text-lg font-semibold text-muted-foreground mb-2">{selectedService.vehicleNumber}</p>
-                      <p className="text-muted-foreground">{selectedService.serviceType}</p>
+                      <h2 className="text-2xl font-bold text-white mb-2">
+                        {selectedAppointment.brand} {selectedAppointment.model} (
+                        {selectedAppointment.year})
+                      </h2>
+                      <p className="text-gray-400">
+                        {selectedAppointment.licensePlate} •{' '}
+                        {selectedAppointment.color}
+                      </p>
                     </div>
-                    <span className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(selectedService.status)}`}>
-                      {getStatusIcon(selectedService.status)}
-                      {selectedService.status.replace('_', ' ').toUpperCase()}
+                    <span
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+                        selectedAppointment.status
+                      )}`}
+                    >
+                      {getStatusIcon(selectedAppointment.status)}
+                      {getDisplayStatus(selectedAppointment.status)}
                     </span>
                   </div>
-                  <div className="flex gap-3 mt-6">
-                    <button 
-                      onClick={() => handleToggleSection('updateStatus')}
-                      className={`flex-1 px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border ${
-                        activeSection === 'updateStatus' ? 'bg-primary text-primary-foreground' : 'bg-primary/80 text-primary-foreground hover:bg-primary/90'
-                      }`}
+
+                  {/* CUSTOMER INFO */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <User className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Customer</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.userFullName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {selectedAppointment.email}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Phone className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Phone</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.phoneNumber}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ADDRESS */}
+                  <div className="flex items-center gap-3 mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                    <MapPin className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <p className="text-xs text-gray-400">Address</p>
+                      <p className="font-semibold text-white">
+                        {selectedAppointment.address}
+                      </p>
+                    </div>
+                  </div>
+
+                                    {/* SERVICE INFO */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Wrench className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Service / Modification</p>
+                        <p className="font-semibold text-white">
+                          {selectedAppointment.serviceOrModificationName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {selectedAppointment.serviceOrModificationDescription}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        <Coins className="w-5 h-5 text-orange-500" />
+                        <span>Estimated Cost</span>
+                      </div>
+                      <p className="text-white font-semibold">
+                        £{selectedAppointment.estimatedCost?.toFixed(2) ?? 'N/A'}
+                      </p>
+                      <div className="flex items-center gap-2 text-gray-400 mt-1">
+                        <Timer className="w-5 h-5 text-orange-500" />
+                        <span>Estimated Time</span>
+                      </div>
+                      <p className="text-white font-semibold">
+                        {selectedAppointment.estimatedTimeMinutes ?? 'N/A'} mins
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* LAST SERVICE DATE */}
+                  {selectedAppointment.lastServiceDate && (
+                    <div className="flex items-center gap-3 mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <Calendar className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-xs text-gray-400">Last Service Date</p>
+                        <p className="font-semibold text-white">
+                          {formatDate(selectedAppointment.lastServiceDate)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* DESCRIPTION */}
+                  {selectedAppointment.description && (
+                    <div className="mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <p className="text-xs text-gray-400 mb-1">Appointment Notes</p>
+                      <p className="text-sm text-white">
+                        {selectedAppointment.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* ASSIGNED EMPLOYEES */}
+                  {selectedAppointment.assignedEmployeeIds?.length > 0 && (
+                    <div className="mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
+                      <p className="text-xs text-gray-400 mb-1">Assigned Employees</p>
+                      <p className="text-sm text-white">
+                        {selectedAppointment.assignedEmployeeIds.join(', ')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* CONTROL BUTTONS */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowStatusUpdate(prev => !prev);
+                        setShowTimeLog(false);
+                      }}
+                      className="flex-1 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition"
                     >
-                      <Check className="w-4 h-4" />
                       Update Status
                     </button>
-                    {/* --- LOG TIME BUTTON --- */}
-                    <button 
-                      onClick={() => handleToggleSection('logTime')}
-                      disabled={selectedService.status === 'not_started'}
-                      className={`flex-1 px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border ${
-                        activeSection === 'logTime' 
-                          ? 'bg-chart-2 text-white border-chart-2/50' 
-                          : 'bg-chart-2/80 text-white hover:bg-chart-2 border-chart-2/50'
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    <button
+                      onClick={() => {
+                        setShowTimeLog(prev => !prev);
+                        setShowStatusUpdate(false);
+                      }}
+                      disabled={selectedAppointment.status === 'CONFIRMED'}
+                      className="flex-1 bg-zinc-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-zinc-700 transition border border-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Clock className="w-4 h-4" />
                       Log Time
                     </button>
                   </div>
                 </div>
-                
-                {activeSection === 'updateStatus' && (
-                  <UpdateStatusSection 
-                    service={selectedService}
-                    onStatusUpdate={handleStatusUpdate}
-                    showNotification={showNotification}
-                  />
+
+                {/* STATUS UPDATE SECTION */}
+                {showStatusUpdate && (
+                  <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Update Service Status
+                    </h3>
+
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      {['CONFIRMED', 'IN_PROGRESS', 'COMPLETED'].map(status => {
+                        const isSelected = newStatus === status;
+                        const statusColors: Record<string, string> = {
+                          CONFIRMED: isSelected
+                            ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                            : 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700/50',
+                          IN_PROGRESS: isSelected
+                            ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                            : 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700/50',
+                          COMPLETED: isSelected
+                            ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                            : 'bg-zinc-800 text-gray-300 border-zinc-700 hover:bg-zinc-700/50',
+                        };
+                        return (
+                          <button
+                            key={status}
+                            onClick={() => setNewStatus(status)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition border ${
+                              statusColors[status]
+                            }`}
+                          >
+                            {getDisplayStatus(status)}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {newStatus === 'COMPLETED' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Completion Description
+                        </label>
+                        <textarea
+                          value={completionDescription}
+                          onChange={e => setCompletionDescription(e.target.value)}
+                          className="w-full px-3 py-2 border border-zinc-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-black text-white"
+                          rows={3}
+                          placeholder="Enter completion remarks..."
+                        />
+                        {!completionDescription.trim() && (
+                          <p className="text-red-500 text-xs mt-1">
+                            Completion description is required.
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex justify-center">
+                      <button
+                        onClick={updateAppointmentStatus}
+                        disabled={
+                          !newStatus ||
+                          (newStatus === 'COMPLETED' &&
+                            !completionDescription.trim()) ||
+                          loading
+                        }
+                        className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50"
+                      >
+                        {loading ? 'Updating...' : 'Save Status'}
+                      </button>
+                    </div>
+                  </div>
                 )}
-                
-                {activeSection === 'logTime' && (
-                  <LogTimeSection 
-                    serviceId={selectedService.id}
-                    logs={timeLogs[selectedService.id] || []}
-                    onSaveLog={handleSaveLog}
-                    onUpdateLog={handleUpdateLog}
-                    onDeleteRequest={handleDeleteLogRequest}
-                    showNotification={showNotification}
-                    // --- Pass selected calendar date ---
-                    selectedCalendarDate={selectedCalendarDate} 
-                  />
+
+                {/* TIME LOG SECTION */}
+                {showTimeLog && (
+                  <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Log Work Time
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Date
+                        </label>
+                        <input
+                          type="date"
+                          name="date"
+                          value={timeLogForm.date}
+                          onChange={e => setTimeLogForm(prev => ({ ...prev, date: e.target.value }))}
+                          className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
+                        />
+                        {timeLogErrors.date && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.date}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Duration (hrs)
+                        </label>
+                        <input
+                          type="text"
+                          value={calculateDuration()}
+                          readOnly
+                          className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-zinc-800 text-gray-400"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Start Time
+                        </label>
+                        <input
+                          type="time"
+                          name="startTime"
+                          value={timeLogForm.startTime}
+                          onChange={e =>
+                            setTimeLogForm(prev => ({ ...prev, startTime: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
+                        />
+                        {timeLogErrors.startTime && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.startTime}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          End Time
+                        </label>
+                        <input
+                          type="time"
+                          name="endTime"
+                          value={timeLogForm.endTime}
+                          onChange={e =>
+                            setTimeLogForm(prev => ({ ...prev, endTime: e.target.value }))
+                          }
+                          className="w-full px-3 py-2 border border-zinc-700 rounded-lg bg-black text-white"
+                        />
+                        {timeLogErrors.endTime && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {timeLogErrors.endTime}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Work Description
+                      </label>
+                      <textarea
+                        name="description"
+                        value={timeLogForm.description}
+                        onChange={e =>
+                          setTimeLogForm(prev => ({ ...prev, description: e.target.value }))
+                        }
+                        rows={3}
+                        placeholder="Describe the work done..."
+                        className="w-full px-3 py-2 border border-zinc-700 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-black text-white"
+                      />
+                      {timeLogErrors.description && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {timeLogErrors.description}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex justify-center">
+                      <button
+                        onClick={submitTimeLog}
+                        disabled={loading}
+                        className="px-6 py-2 bg-zinc-800 text-white rounded-lg font-semibold hover:bg-zinc-700 transition disabled:opacity-50"
+                      >
+                        {loading ? 'Logging...' : 'Submit Time Log'}
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </>
+
+                {/* LOGGED TIME ENTRIES */}
+                <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Logged Time Entries
+                  </h3>
+
+                  {timeLogs.length > 0 ? (
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                      {timeLogs.map(log => (
+                        <div
+                          key={log.id}
+                          className="flex justify-between items-start p-3 bg-zinc-800 rounded-lg border border-zinc-700"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              {formatDateTime(log.startTime)} →{' '}
+                              {formatDateTime(log.endTime)}
+                            </p>
+                            {log.notes && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                {log.notes}
+                              </p>
+                            )}
+                          </div>
+                          <p className="text-sm font-semibold text-orange-500">
+                            {log.hoursLogged.toFixed(2)}h
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm">
+                      No time logs recorded yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                Select an appointment to view details
+              </div>
             )}
           </div>
         </div>
-
-        {/* --- Monthly Calendar Section --- */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-card-foreground mb-4">Monthly Work Summary</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <MonthlyCalendar 
-              currentMonth={summaryMonth}
-              allLogs={timeLogs}
-              selectedDate={selectedCalendarDate}
-              onDateClick={setSelectedCalendarDate}
-              onChangeMonth={changeMonth}
-            />
-            <DailyLogSummary 
-              selectedDate={selectedCalendarDate}
-              allLogs={timeLogs}
-              services={assignedServices}
-            />
-          </div>
-        </div>
-
       </div>
+
       <Footer />
     </div>
   );
 };
 
-// --- SUB-COMPONENTS ---
-
-// --- ToastNotification Component ---
-interface ToastNotificationProps {
-  message: string;
-  type: NotificationType;
-  onClose: () => void;
-}
-
-const ToastNotification: React.FC<ToastNotificationProps> = ({ message, type, onClose }) => {
-  const isSuccess = type === 'success';
-
-  return (
-    <div className="fixed top-20 right-6 z-50 bg-card rounded-lg shadow-xl p-4 border border-border w-full max-w-sm m-4 animate-fade-in-down">
-      <div className="flex items-start gap-4">
-        <div className={`shrink-0 p-2 rounded-full border ${
-          isSuccess 
-          ? 'bg-chart-2/10 border-chart-2/20' 
-          : 'bg-destructive/10 border-destructive/20'
-        }`}>
-          {isSuccess ? (
-            <CheckCircle className="w-5 h-5 text-chart-2" />
-          ) : (
-            <AlertTriangle className="w-5 h-5 text-destructive" />
-          )}
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-card-foreground">
-            {isSuccess ? 'Success' : 'Error'}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {message}
-          </p>
-        </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-card-foreground">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
-
-// --- Update Status Component ---
-interface UpdateStatusProps {
-  service: AssignedService;
-  onStatusUpdate: (newStatus: ServiceStatus, description?: string) => void;
-  showNotification: (message: string, type: NotificationType) => void;
-}
-
-const UpdateStatusSection: React.FC<UpdateStatusProps> = ({ service, onStatusUpdate, showNotification }) => {
-  const [pendingStatus, setPendingStatus] = useState<ServiceStatus>(service.status);
-  const [description, setDescription] = useState('');
-
-  const getSolidStatusColor = (status: string): string => {
-    switch(status) {
-      case 'completed': return 'bg-chart-2 text-white border-chart-2';
-      case 'in_progress': return 'bg-chart-4 text-white border-chart-4';
-      case 'not_started': return 'bg-chart-1 text-white border-chart-1';
-      default: return 'bg-muted text-muted-foreground border-border';
-    }
-  };
-
-  const getButtonClass = (status: ServiceStatus) => {
-    return `flex-1 p-4 rounded-lg font-semibold border-2 transition text-center ${
-      pendingStatus === status 
-      ? getSolidStatusColor(status)
-      : `bg-secondary text-secondary-foreground border-border hover:bg-accent`
-    }`;
-  };
-  
-  const handleSaveClick = () => {
-    if (pendingStatus === 'completed' && !description.trim()) {
-      showNotification('Please add a completion description.', 'error');
-      return;
-    }
-    onStatusUpdate(pendingStatus, description);
-  };
-
-  return (
-    <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-      <h3 className="text-xl font-bold text-card-foreground mb-4">Update Service Status</h3>
-      <div className="mb-4">
-        <p className="text-sm text-muted-foreground">Select the new status for:</p>
-        <p className="font-semibold text-card-foreground">{service.vehicleName} ({service.vehicleNumber})</p>
-      </div>
-      <div className="flex gap-3 mb-6">
-        <button className={getButtonClass('not_started')} onClick={() => setPendingStatus('not_started')}>
-          NOT STARTED
-        </button>
-        <button className={getButtonClass('in_progress')} onClick={() => setPendingStatus('in_progress')}>
-          IN PROGRESS
-        </button>
-        <button className={getButtonClass('completed')} onClick={() => setPendingStatus('completed')}>
-          COMPLETED
-        </button>
-      </div>
-
-      {pendingStatus === 'completed' && (
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-muted-foreground mb-1">Completion Description</label>
-          <textarea 
-            value={description} 
-            onChange={e => setDescription(e.target.value)} 
-            rows={4}
-            placeholder="Describe the work completed, parts used, and final checks."
-            className="w-full p-2 bg-background border border-border rounded-lg"
-          ></textarea>
-        </div>
-      )}
-
-      <button 
-        onClick={handleSaveClick}
-        disabled={pendingStatus === service.status && (pendingStatus !== 'completed' || description === '')}
-        className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border disabled:opacity-50"
-      >
-        <Save className="w-4 h-4" />
-        Save Status
-      </button>
-    </div>
-  );
-};
-
-
-// --- MODIFIED Log Time Component ---
-interface LogTimeProps {
-  serviceId: number;
-  logs: TimeLog[];
-  onSaveLog: (newLog: Omit<TimeLog, 'id' | 'serviceId' | 'duration'>) => void;
-  onUpdateLog: (updatedLog: TimeLog) => void;
-  onDeleteRequest: (log: TimeLog) => void;
-  showNotification: (message: string, type: NotificationType) => void;
-  selectedCalendarDate: Date | null; // Added prop
-}
-
-const LogTimeSection: React.FC<LogTimeProps> = ({  
-  logs, 
-  onSaveLog, 
-  onUpdateLog, 
-  onDeleteRequest, 
-  showNotification, 
-  selectedCalendarDate // Use prop
-}) => {
-  const [editingLog, setEditingLog] = useState<TimeLog | null>(null);
-  
-  // --- Initialize state with current date/time OR selected calendar date ---
-  const getDefaultDate = () => selectedCalendarDate ? formatDate(selectedCalendarDate) : formatDate(new Date());
-  const [date, setDate] = useState(getDefaultDate());
-  const [startTime, setStartTime] = useState(() => formatTime(new Date()));
-  const [endTime, setEndTime] = useState(() => formatTime(new Date()));
-  const [duration, setDuration] = useState('0h 0m');
-  const [description, setDescription] = useState('');
-  
-  const resetForm = () => {
-    // --- Reset state to current time, but date to selectedCalendarDate or today ---
-    const now = new Date();
-    setDate(getDefaultDate()); // Use selected calendar date or today
-    setStartTime(formatTime(now));
-    setEndTime(formatTime(now));
-    setDuration('0h 0m');
-    setDescription('');
-    setEditingLog(null);
-  };
-  
-  // --- Effect to update default date if calendar selection changes ---
-  useEffect(() => {
-    // Only update the date field if not currently editing a log
-    if (!editingLog) {
-      setDate(getDefaultDate());
-    }
-  }, [selectedCalendarDate, editingLog]); // Rerun when calendar date changes or edit mode changes
-
-  useEffect(() => {
-    if (editingLog) {
-      setDate(editingLog.date);
-      setStartTime(editingLog.startTime);
-      setEndTime(editingLog.endTime);
-      setDuration(editingLog.duration);
-      setDescription(editingLog.description);
-    } 
-    // No 'else' needed here, resetForm handles non-edit state, 
-    // and the other useEffect handles date changes from calendar
-  }, [editingLog]);
-
-  const handleDurationCalc = () => {
-    setDuration(calculateDuration(startTime, endTime));
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!description.trim() || duration === '0h 0m' || startTime >= endTime) {
-      showNotification("Please enter a valid description and time range.", "error");
-      return;
-    }
-    
-    if (editingLog) {
-      onUpdateLog({
-        ...editingLog,
-        date,
-        startTime,
-        endTime,
-        description,
-        duration 
-      });
-    } else {
-      onSaveLog({ date, startTime, endTime, description });
-    }
-    
-    resetForm();
-  };
-  
-  return (
-    <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-      <h3 className="text-xl font-bold text-card-foreground mb-4">Log Time</h3>
-      
-      {/* Log Form */}
-      <form onSubmit={handleSave} className="bg-secondary p-4 rounded-lg border border-border mb-6 space-y-4">
-        <h4 className="text-lg font-semibold text-card-foreground">
-          {editingLog ? 'Edit Log Entry' : 'New Log Entry'}
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">Date</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full p-2 bg-background border border-border rounded-lg" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">Start Time</label>
-            <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} onBlur={handleDurationCalc} className="w-full p-2 bg-background border border-border rounded-lg" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">End Time</label>
-            <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} onBlur={handleDurationCalc} className="w-full p-2 bg-background border border-border rounded-lg" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">Duration</label>
-            <input type="text" value={duration} readOnly className="w-full p-2 bg-background border border-border rounded-lg text-muted-foreground" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
-          <textarea 
-            value={description} 
-            onChange={e => setDescription(e.target.value)} 
-            rows={3}
-            placeholder="What work was done?"
-            className="w-full p-2 bg-background border border-border rounded-lg"
-          ></textarea>
-        </div>
-        <div className="flex justify-end gap-3">
-          {editingLog && (
-            <button 
-              type="button" 
-              onClick={resetForm} 
-              className="bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-accent transition flex items-center justify-center gap-2 border border-border"
-            >
-              Cancel Edit
-            </button>
-          )}
-          <button 
-            type="submit" 
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold hover:bg-primary/90 transition flex items-center justify-center gap-2 border border-border"
-          >
-            <Save className="w-4 h-4" />
-            {editingLog ? 'Update Log' : 'Save Log'}
-          </button>
-        </div>
-      </form>
-
-      {/* Previous Logs */}
-      <div>
-        <h4 className="text-lg font-semibold text-card-foreground mb-3">Previous Log Entries</h4>
-        <div className="space-y-3 max-h-60 overflow-y-auto">
-          {logs.length === 0 && (
-            <p className="text-muted-foreground text-center p-4">No time logged for this service yet.</p>
-          )}
-          {logs.slice().reverse().map(log => (
-            <div key={log.id} className="p-3 bg-secondary rounded-lg border border-border flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <span className="font-semibold text-card-foreground">{log.date}</span>
-                  <span className="text-sm text-muted-foreground">{log.startTime} - {log.endTime}</span>
-                  <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">{log.duration}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">{log.description}</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => setEditingLog(log)} className="p-2 text-muted-foreground hover:text-primary"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => onDeleteRequest(log)} className="p-2 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Calendar Sub-Components ---
-
-interface MonthlyCalendarProps {
-  currentMonth: Date;
-  allLogs: { [key: number]: TimeLog[] };
-  selectedDate: Date | null;
-  onDateClick: (date: Date) => void;
-  onChangeMonth: (direction: 'prev' | 'next') => void;
-}
-
-const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ currentMonth, allLogs, selectedDate, onDateClick, onChangeMonth }) => {
-  // --- Get today's date string once ---
-  const todayString = formatDate(new Date()); 
-  const monthGrid = generateMonthGrid(currentMonth);
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  return (
-    <div className="md:col-span-2 bg-card rounded-lg shadow-md p-6 border border-border">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-card-foreground">
-          {currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
-        </h3>
-        <div className="flex gap-2">
-          <button onClick={() => onChangeMonth('prev')} className="p-2 bg-secondary rounded-lg border border-border hover:bg-accent"><ChevronLeft className="w-5 h-5" /></button>
-          <button onClick={() => onChangeMonth('next')} className="p-2 bg-secondary rounded-lg border border-border hover:bg-accent"><ChevronRight className="w-5 h-5" /></button>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-7 gap-1 text-center mb-2">
-        {weekdays.map(day => (
-          <div key={day} className="text-xs font-bold text-muted-foreground">{day}</div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 gap-1">
-        {monthGrid.map((day, index) => {
-          if (!day.isCurrentMonth) {
-            return <div key={index} className="h-16 rounded-lg bg-secondary/30 border border-transparent"></div>;
-          }
-
-          const isSelected = selectedDate && formatDate(day.date) === formatDate(selectedDate);
-          const hasLogs = dateHasLogs(day.date, allLogs);
-          const isToday = formatDate(day.date) === todayString;
-
-          // --- Determine cell background and text color ---
-          let cellClasses = 'border-border bg-secondary hover:bg-accent';
-          let textClasses = 'text-card-foreground';
-
-          if (isToday) {
-            cellClasses = 'border-border bg-accent hover:bg-accent/80'; 
-            textClasses = 'text-accent-foreground font-bold'; 
-          }
-          if (isSelected) {
-            cellClasses = 'border-primary bg-primary/10'; 
-            textClasses = 'text-primary font-bold'; 
-          }
-
-          return (
-            <button
-              key={index}
-              onClick={() => onDateClick(day.date)}
-              className={`h-16 p-2 rounded-lg border transition-colors relative flex flex-col items-center justify-start ${cellClasses}`}
-            >
-              <span className={`font-semibold ${textClasses}`}>
-                {day.date.getDate()}
-              </span>
-              {hasLogs && <Dot className="text-primary w-6 h-6 absolute bottom-0 left-1/2 -translate-x-1/2" />}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-interface DailyLogSummaryProps {
-  selectedDate: Date | null;
-  allLogs: { [key: number]: TimeLog[] };
-  services: AssignedService[];
-}
-
-const DailyLogSummary: React.FC<DailyLogSummaryProps> = ({ selectedDate, allLogs, services }) => {
-  if (!selectedDate) {
-    return (
-      <div className="md:col-span-1 bg-card rounded-lg shadow-md p-6 border border-border flex items-center justify-center">
-        <p className="text-muted-foreground text-center">Select a date from the calendar to view logged work.</p>
-      </div>
-    );
-  }
-
-  const logsForDay = getLogsForDate(selectedDate, allLogs, services);
-
-  return (
-    <div className="md:col-span-1 bg-card rounded-lg shadow-md p-6 border border-border">
-      <h3 className="text-xl font-bold text-card-foreground mb-4">
-        Logs for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-      </h3>
-      <div className="space-y-3 max-h-96 overflow-y-auto">
-        {logsForDay.length === 0 ? (
-          <p className="text-muted-foreground text-center p-4">No time logged for this date.</p>
-        ) : (
-          logsForDay.map(log => (
-            <div key={log.id} className="p-3 bg-secondary rounded-lg border border-border">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-card-foreground">{log.vehicleNumber}</span>
-                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">{log.duration}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">{log.startTime} - {log.endTime}</p>
-              <p className="text-sm text-card-foreground/90">{log.description}</p>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
-
-
-// --- Delete Confirmation Modal (Backdrop removed) ---
-interface DeleteConfirmationModalProps {
-  onCancel: () => void;
-  onConfirm: () => void;
-}
-
-const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ onCancel, onConfirm }) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="bg-card rounded-lg shadow-xl p-6 border border-border w-full max-w-md m-4">
-        <div className="flex items-start gap-4">
-          <div className="shrink-0 p-3 bg-destructive/10 rounded-full border border-destructive/20">
-            <AlertTriangle className="w-6 h-6 text-destructive" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-card-foreground mb-2">Delete Log Entry</h3>
-            <p className="text-muted-foreground">
-              Are you sure you want to delete this? This cannot be undone.
-            </p>
-          </div>
-        </div>
-        <div className="flex justify-end gap-3 mt-6">
-          <button 
-            onClick={onCancel}
-            className="px-4 py-2 rounded-lg font-semibold bg-secondary text-secondary-foreground hover:bg-accent transition border border-border"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 rounded-lg font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition border border-border"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default EmployeeDashboard;
+
+// Add white clock icon for time input (works in Chromium browsers)
+// This is injected as a style tag for component-scoped effect
+// You can move this to a global CSS file if you prefer
+const style = document.createElement('style');
+style.innerHTML = `
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+`;
+if (typeof window !== 'undefined' && !document.getElementById('white-time-icon-style')) {
+  style.id = 'white-time-icon-style';
+  document.head.appendChild(style);
+}
+
