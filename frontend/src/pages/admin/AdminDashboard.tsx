@@ -359,7 +359,8 @@ const AdminDashboard = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-16">
+      <div className='pr-30'>
+        <header className="bg-primary text-primary-foreground shadow-lg border-b border-border rounded-xl">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
@@ -376,8 +377,11 @@ const AdminDashboard = () => {
         </div>
       </header>
 
+      </div>
+      
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto pr-30 py-8">
           {/* Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             
@@ -496,7 +500,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Unassigned Services Section */}
-            <div className="rounded-lg shadow-md p-6 border-2 border-red-500/30 bg-red-500/5">
+            <div className="rounded-lg shadow-md p-6 border-2 border-red-500/30 bg-white">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-card-foreground flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-500" />
