@@ -5,6 +5,8 @@ import com.ead.backend.entity.Appointment;
 import com.ead.backend.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,42 +39,39 @@ public class ShiftScheduleService {
         }).toList();
     }
 
-//    private boolean canEmployeeTakeAppointment(Long employeeId, Appointment appointment) {
-//        LocalTime endTime = calculateEndTime(appointment);
-//
-//        // Check shift
-//        boolean hasShift = shiftRepository.findActiveShift(
-//                employeeId,
-//                appointment.getAppointmentDate(),
-//                appointment.getStartTime(),
-//                EmployeeShift.ShiftStatus.SCHEDULED
-//        ).isPresent();
-//
-//        if (!hasShift) return false;
-//
-//        // Check conflicts
-//        boolean hasConflict = assignmentRepository.existsConflictingAssignment(
-//                employeeId,
-//                appointment.getAppointmentDate(),
-//                appointment.getStartTime(),
-//                endTime
-//        );
-//
-//        if (hasConflict) return false;
-//
-//        // Check skills
-//        return employeeSkillRepository.hasAllRequiredSkillsForService(
-//                employeeId,
-//                appointment.getServiceId()
-//        );
-//    }
-//
-//    private LocalTime calculateEndTime(Appointment appointment) {
-//
-//        int estimatedDurationOfAppointmentMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
-//
-//        int totalMinutes = service.getEstimatedDuration() + BUFFER_MINUTES;
-//        return appointment.getStartTime().plusMinutes(totalMinutes);
-//    }
+    private boolean canEmployeeTakeAppointment(Long employeeId, Appointment appointment) {
+        LocalDateTime endTime = calculateEndTime(appointment);
+
+        // Check shift
+        boolean hasShift = appointmentRepository.findActiveShift(
+                employeeId,
+                appointment.getAppointmentDate(),
+                appointment.getStartTime()
+        ).isPresent();
+
+        if (!hasShift) return false;
+
+        // Check conflicts
+        boolean hasConflict = assignmentRepository.existsConflictingAssignment(
+                employeeId,
+                appointment.getAppointmentDate(),
+                appointment.getStartTime(),
+                endTime
+        );
+
+        if (hasConflict) return false;
+
+        // Check skills
+        return employeeSkillRepository.hasAllRequiredSkillsForService(
+                employeeId,
+                appointment.getServiceId()
+        );
+    }
+
+    private LocalDateTime calculateEndTime(Appointment appointment) {
+
+        int estimatedDurationOfAppointmentMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
+        return appointment.getStartTime().plusMinutes(estimatedDurationOfAppointmentMinutes);
+    }
 
 }
