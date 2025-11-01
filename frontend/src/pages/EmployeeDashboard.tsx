@@ -94,6 +94,8 @@ const EmployeeDashboard = () => {
   });
 
   const [timeLogErrors, setTimeLogErrors] = useState<TimeLogErrors>({});
+  const [timeLogTouched, setTimeLogTouched] = useState(false);
+  const [statusTouched, setStatusTouched] = useState(false);
 
   // ------------------ Fetch Appointments ------------------
   const fetchAppointments = useCallback(async () => {
@@ -174,6 +176,7 @@ const EmployeeDashboard = () => {
     } else {
       setTimeLogs([]);
     }
+    setShowTimeLog(false); // Close Log Time panel when switching appointments
   }, [selectedAppointment, fetchTimeLogs]);
 
   // ------------------ Update Appointment Status ------------------
@@ -234,6 +237,7 @@ const EmployeeDashboard = () => {
   };
 
   const submitTimeLog = async () => {
+    setTimeLogTouched(true);
     if (!validateTimeLog() || !selectedAppointment) return;
 
     setLoading(true);
@@ -267,6 +271,7 @@ const EmployeeDashboard = () => {
         description: '',
       });
       setTimeLogErrors({});
+      setTimeLogTouched(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -377,10 +382,14 @@ const EmployeeDashboard = () => {
                     setNewStatus={setNewStatus}
                     completionDescription={completionDescription}
                     setCompletionDescription={setCompletionDescription}
-                    updateAppointmentStatus={updateAppointmentStatus}
+                    updateAppointmentStatus={() => {
+                      setStatusTouched(true);
+                      updateAppointmentStatus();
+                    }}
                     loading={loading}
                     setShowStatusUpdate={setShowStatusUpdate}
                     getDisplayStatus={getDisplayStatus}
+                    statusTouched={statusTouched}
                   />
                 )}
                 {showTimeLog && (
@@ -388,10 +397,12 @@ const EmployeeDashboard = () => {
                     timeLogForm={timeLogForm}
                     timeLogErrors={timeLogErrors}
                     setTimeLogForm={setTimeLogForm}
+                    setTimeLogErrors={setTimeLogErrors}
                     calculateDuration={calculateDuration}
                     submitTimeLog={submitTimeLog}
                     loading={loading}
                     setShowTimeLog={setShowTimeLog}
+                    timeLogTouched={timeLogTouched}
                   />
                 )}
                 <TimeLogList
