@@ -30,11 +30,11 @@ const MyVehiclesPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
+  const [vehicleToDelete, setVehicleToDelete] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<VehicleFormData>({
     brand: "",
@@ -151,7 +151,7 @@ const MyVehiclesPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setVehicleToDelete(id);
     setIsDeleteDialogOpen(true);
   };
@@ -214,7 +214,7 @@ const MyVehiclesPage = () => {
       <AuthenticatedNavbar />
 
       {/* Header Section with proper spacing from navbar */}
-      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800">
+      <div className="bg-linear-to-r from-zinc-900 to-zinc-800">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-white">My Vehicles</h1>
         </div>

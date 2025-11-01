@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, LayoutDashboard, Calendar } from "lucide-react";
+import { User, LayoutDashboard, Calendar, Navigation } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
 import NotificationBell from '@/components/Notification/NotificationBell';
@@ -38,6 +38,12 @@ const AuthenticatedNavbar = () => {
       name: "My Vehicles",
       path: "/my-vehicles",
       icon: Car, 
+      roles: ["CUSTOMER"],
+    },
+    {
+      name: "Service Centers",
+      path: "/service-centers",
+      icon: Navigation, 
       roles: ["CUSTOMER"],
     },
     // Add more tabs here as needed
