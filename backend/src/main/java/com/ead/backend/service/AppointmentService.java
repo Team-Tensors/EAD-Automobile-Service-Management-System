@@ -139,7 +139,7 @@ public class AppointmentService {
     // ===================================================================
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
-    public Appointment assignEmployees(UUID appointmentId, Set<Long> employeeIds) {
+    public Appointment assignEmployees(UUID appointmentId, Set<UUID> employeeIds) {
         User currentUser = getCurrentUser();
 
         boolean isManagerOrAdmin = currentUser.getRoles().stream()
@@ -151,7 +151,7 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        for (Long empId : employeeIds) {
+        for (UUID empId : employeeIds) {
             User employee = userRepository.findById(empId)
                     .orElseThrow(() -> new RuntimeException("Employee not found: " + empId));
 
@@ -180,7 +180,7 @@ public class AppointmentService {
 
         // Send notifications to assigned employees
         try {
-            for (Long empId : employeeIds) {
+            for (UUID empId : employeeIds) {
                 User employee = userRepository.findById(empId).orElse(null);
                 if (employee != null) {
                     // Send notification
