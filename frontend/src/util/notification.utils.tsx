@@ -3,21 +3,24 @@ import type { LucideIcon } from 'lucide-react';
 import {
   LogIn,
   Calendar,
-  CreditCard,
   Wrench,
   Bell,
   Clock,
   Settings,
+  CheckCircle,
 } from 'lucide-react';
 
 export const getNotificationIcon = (type: NotificationType): LucideIcon => {
   const icons: Record<NotificationType, LucideIcon> = {
-    LOGIN: LogIn,
-    BOOKING: Calendar,
-    PAYMENT: CreditCard,
-    SERVICE: Wrench,
-    REMINDER: Clock,
-    SYSTEM: Settings,
+    LOGIN_SUCCESS: LogIn,
+    APPOINTMENT_CREATED: Calendar,
+    APPOINTMENT_ASSIGNED: Calendar,
+    TASK_ASSIGNED: Wrench,
+    APPOINTMENT_STARTED: Clock,
+    APPOINTMENT_COMPLETED: CheckCircle,
+    VEHICLE_ADDED: Settings,
+    VEHICLE_UPDATED: Settings,
+    VEHICLE_DELETED: Settings,
   };
 
   return icons[type] || Bell;
