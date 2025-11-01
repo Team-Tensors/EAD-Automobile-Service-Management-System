@@ -6,17 +6,31 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AppointmentDTO {
-    private Long id;
+    private UUID id;
     private Long userId;
-    private Long vehicleId;
+    private String userFullName;
+    private String address;
+    private String phoneNumber;
+    private String email;
+    private UUID vehicleId;
+    private String brand;
+    private String model;
+    private String year;
+    private String color;
+    private LocalDateTime lastServiceDate;
+    private String licensePlate;
     private String appointmentType;
-    private Long serviceTypeId;
-    private Long modificationTypeId;
+    private Long serviceOrModificationId;
+    private String serviceOrModificationName;
+    private String serviceOrModificationDescription;
+    private Double estimatedCost;
+    private Integer estimatedTimeMinutes;
     private LocalDateTime appointmentDate;
     private String status;
     private String description;

@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, LayoutDashboard, Calendar } from "lucide-react";
+import { User, LayoutDashboard, Calendar, Navigation } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
+import NotificationBell from '@/components/Notification/NotificationBell';
 
 interface NavTab {
   name: string;
@@ -38,7 +39,13 @@ const AuthenticatedNavbar = () => {
       path: "/my-vehicles",
       icon: Car, 
       roles: ["CUSTOMER"],
-    }
+    },
+    {
+      name: "Service Centers",
+      path: "/service-centers",
+      icon: Navigation, 
+      roles: ["CUSTOMER"],
+    },
     // Add more tabs here as needed
   ];
 
@@ -89,6 +96,8 @@ const AuthenticatedNavbar = () => {
 
           {/* User Info & Actions */}
           <div className="flex items-center gap-4">
+            {/* Notification Bell */}
+            <NotificationBell userId={user?.id} />
             {/* Logout Button */}
             <button
               onClick={handleLogout}
