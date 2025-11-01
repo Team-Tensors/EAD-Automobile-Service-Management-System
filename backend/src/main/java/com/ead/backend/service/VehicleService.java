@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -26,6 +27,7 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -39,13 +41,29 @@ public class VehicleService {
         vehicle.setUser(user);
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
+        // Send notification
+        notificationService.sendNotification(
+                user.getId(),
+                "VEHICLE_ADDED",
+                String.format("Your %s %s has been added successfully!",
+                        savedVehicle.getBrand(), savedVehicle.getModel()),
+                Map.of(
+                        "vehicleId", savedVehicle.getId().toString(),
+                        "brand", savedVehicle.getBrand(),
+                        "model", savedVehicle.getModel(),
+                        "licensePlate", savedVehicle.getLicensePlate(),
+                        "year", savedVehicle.getYear() != null ? savedVehicle.getYear().toString() : "N/A"
+                )
+        );
+
         // Send confirmation email asynchronously
         try {
-            emailService.sendVehicleAddedEmail(user.getEmail(), user.getFullName(), formatVehicleInfo(savedVehicle), savedVehicle.getLicensePlate(), savedVehicle.getBrand(), savedVehicle.getModel(), savedVehicle.getYear() != null ? savedVehicle.getYear().toString() : "N/A");
+            emailService.sendVehicleAddedEmail(user.getEmail(), user.getFullName(), formatVehicleInfo(savedVehicle),
+                    savedVehicle.getLicensePlate(), savedVehicle.getBrand(), savedVehicle.getModel(),
+                    savedVehicle.getYear() != null ? savedVehicle.getYear().toString() : "N/A");
             logger.info("Vehicle added email sent to user: {}", user.getEmail());
         } catch (Exception e) {
             logger.error("Failed to send vehicle added email to: {}", user.getEmail(), e);
-            // Don't throw - vehicle is already saved
         }
 
         return savedVehicle;
@@ -73,15 +91,27 @@ public class VehicleService {
             throw new RuntimeException("Vehicle not found or access denied");
         }
 
-        // Check if critical fields changed
         boolean criticalChange = hasCriticalChanges(existingVehicle, vehicle);
-
         Vehicle updatedVehicle = vehicleRepository.save(vehicle);
 
-        // Send email only for critical changes
+        // Send notification for critical changes
         if (criticalChange) {
+            String changesSummary = getChangesSummary(existingVehicle, vehicle);
+            notificationService.sendNotification(
+                    user.getId(),
+                    "VEHICLE_UPDATED",
+                    String.format("Vehicle %s has been updated", vehicle.getLicensePlate()),
+                    Map.of(
+                            "vehicleId", updatedVehicle.getId().toString(),
+                            "licensePlate", vehicle.getLicensePlate(),
+                            "changes", changesSummary
+                    )
+            );
+
+            // Send email only for critical changes
             try {
-                emailService.sendVehicleUpdatedEmail(user.getEmail(), user.getFullName(), formatVehicleInfo(updatedVehicle), vehicle.getLicensePlate(), getChangesSummary(existingVehicle, vehicle));
+                emailService.sendVehicleUpdatedEmail(user.getEmail(), user.getFullName(),
+                        formatVehicleInfo(updatedVehicle), vehicle.getLicensePlate(), changesSummary);
                 logger.info("Vehicle updated email sent to user: {}", user.getEmail());
             } catch (Exception e) {
                 logger.error("Failed to send vehicle updated email to: {}", user.getEmail(), e);
@@ -103,9 +133,22 @@ public class VehicleService {
 
             vehicleRepository.delete(vehicle);
 
+            // Send notification
+            notificationService.sendNotification(
+                    user.getId(),
+                    "VEHICLE_DELETED",
+                    String.format("Vehicle %s has been removed from your account", regNumber),
+                    Map.of(
+                            "vehicleInfo", vehicleInfo,
+                            "licensePlate", regNumber,
+                            "deletedAt", LocalDateTime.now().format(DATE_FORMATTER)
+                    )
+            );
+
             // Send deletion confirmation email
             try {
-                emailService.sendVehicleDeletedEmail(user.getEmail(), user.getFullName(), vehicleInfo, regNumber, LocalDateTime.now().format(DATE_FORMATTER));
+                emailService.sendVehicleDeletedEmail(user.getEmail(), user.getFullName(), vehicleInfo,
+                        regNumber, LocalDateTime.now().format(DATE_FORMATTER));
                 logger.info("Vehicle deleted email sent to user: {}", user.getEmail());
             } catch (Exception e) {
                 logger.error("Failed to send vehicle deleted email to: {}", user.getEmail(), e);
@@ -126,11 +169,9 @@ public class VehicleService {
     }
 
     private boolean hasCriticalChanges(Vehicle old, Vehicle updated) {
-        // Consider registration number change as critical
         if (!old.getLicensePlate().equals(updated.getLicensePlate())) {
             return true;
         }
-        // Consider make/model change as critical
         if (!old.getBrand().equals(updated.getBrand()) || !old.getModel().equals(updated.getModel())) {
             return true;
         }
