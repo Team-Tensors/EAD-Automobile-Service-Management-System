@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AppointmentDTO {
     private UUID id;
-    private Long userId;
+    private UUID userId;
     private String userFullName;
     private String address;
     private String phoneNumber;
@@ -34,5 +34,5 @@ public class AppointmentDTO {
     private LocalDateTime appointmentDate;
     private String status;
     private String description;
-    private Set<Long> assignedEmployeeIds;
+    private Set<UUID> assignedEmployeeIds;
 }

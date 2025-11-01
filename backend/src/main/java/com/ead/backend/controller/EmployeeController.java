@@ -36,7 +36,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/appointments/{appointmentId}/employees/{employeeId}/timelogs")
-    public ResponseEntity<?> getTimeLogs(@PathVariable UUID appointmentId, @PathVariable Long employeeId)  {
+    public ResponseEntity<?> getTimeLogs(@PathVariable UUID appointmentId, @PathVariable UUID employeeId)  {
         logger.info("=== RETRIEVE TIME LOGS REQUEST RECEIVED ===");
         logger.info("Appointment Id: {}", appointmentId);
         logger.info("Employee Id: {}", employeeId);
@@ -72,7 +72,7 @@ public class EmployeeController {
             )
     })
     @GetMapping("/appointments/{employeeId}")
-    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable Long employeeId, @RequestParam(required = false) String status) {
+    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable UUID employeeId, @RequestParam(required = false) String status) {
         logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
         try {
             List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employeeId, status);

@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
-    List<Vehicle> findByUserId(Long userId);
+    List<Vehicle> findByUserId(UUID userId);
 }

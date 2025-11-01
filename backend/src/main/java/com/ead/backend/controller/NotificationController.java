@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/notifications")
@@ -23,7 +24,7 @@ public class NotificationController {
     // SSE subscription endpoint
     @GetMapping(value = "/subscribe/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam(required = false) String token
     ) {
         return notificationService.subscribe(userId);
@@ -31,19 +32,19 @@ public class NotificationController {
 
     // Get all notifications
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable Long userId) {
+    public ResponseEntity<List<Notification>> getUserNotifications(@PathVariable UUID userId) {
         return ResponseEntity.ok(notificationService.getUserNotifications(userId));
     }
 
     // Get unread notifications
     @GetMapping("/user/{userId}/unread")
-    public ResponseEntity<List<Notification>> getUnreadNotifications(@PathVariable Long userId) {
+    public ResponseEntity<List<Notification>> getUnreadNotifications(@PathVariable UUID userId) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
     }
 
     // Get unread count
     @GetMapping("/user/{userId}/unread/count")
-    public ResponseEntity<Long> getUnreadCount(@PathVariable Long userId) {
+    public ResponseEntity<Long> getUnreadCount(@PathVariable UUID userId) {
         return ResponseEntity.ok(notificationService.getUnreadCount(userId));
     }
 
@@ -56,14 +57,14 @@ public class NotificationController {
 
     // Mark all as read
     @PutMapping("/user/{userId}/read-all")
-    public ResponseEntity<Void> markAllAsRead(@PathVariable Long userId) {
+    public ResponseEntity<Void> markAllAsRead(@PathVariable UUID userId) {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok().build();
     }
 
     // Clear all notifications
     @DeleteMapping("/user/{userId}")
-    public ResponseEntity<Void> clearAllNotifications(@PathVariable Long userId) {
+    public ResponseEntity<Void> clearAllNotifications(@PathVariable UUID userId) {
         notificationService.clearAllNotifications(userId);
         return ResponseEntity.ok().build();
     }

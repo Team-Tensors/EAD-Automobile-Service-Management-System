@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { authService } from "../services/authService";
 import AuthenticatedNavbar from "../components/Navbar/AuthenticatedNavbar";
-import { User, Mail, Phone, MapPin, IdCard, Calendar } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import { Button } from "../components/ui/button";
 import FormInputField from "../components/ui/FormInputField";
 import type { User as UserType } from "../types/auth";
@@ -19,7 +19,6 @@ const ProfilePage = () => {
     fullName: user?.fullName || "",
     phoneNumber: user?.phoneNumber || "",
     address: user?.address || "",
-    employeeId: user?.employeeId || ""
   });
 
   useEffect(() => {
@@ -41,7 +40,6 @@ const ProfilePage = () => {
         fullName: userData.fullName || "",
         phoneNumber: userData.phoneNumber || "",
         address: userData.address || "",
-        employeeId: userData.employeeId || ""
       });
     }
   }, [userData]);
@@ -75,9 +73,6 @@ const ProfilePage = () => {
       }
       if (formData.address !== user?.address) {
         updatedData.address = formData.address;
-      }
-      if (formData.employeeId !== user?.employeeId && formData.employeeId) {
-        updatedData.employeeId = formData.employeeId;
       }
 
       if (Object.keys(updatedData).length === 0) {
@@ -120,8 +115,7 @@ const ProfilePage = () => {
       setFormData({
         fullName: user.fullName || "",
         phoneNumber: user.phoneNumber || "",
-        address: user.address || "",
-        employeeId: user.employeeId || ""
+        address: user.address || ""
       });
     }
     setIsEditing(false);
@@ -142,7 +136,7 @@ const ProfilePage = () => {
     );
   }
 
-  const isEmployee = user.roles?.includes("EMPLOYEE") || user.role === "EMPLOYEE";
+  // const isEmployee = user.roles?.includes("EMPLOYEE") || user.role === "EMPLOYEE";
 
   return (
     <>
@@ -249,22 +243,6 @@ const ProfilePage = () => {
                       disabled={!isEditing}
                     />
                   </div>
-
-                  {/* User ID */}
-                  <div className="group">
-                    <label className="flex items-center space-x-2 mb-3">
-                      <IdCard className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
-                      <span className="text-xs sm:text-sm font-semibold text-white uppercase tracking-wide">
-                        User ID
-                      </span>
-                    </label>
-                    <input
-                      type="text"
-                      value={user.id}
-                      disabled
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2.5 sm:py-3 text-sm sm:text-base text-gray-400 opacity-50 cursor-not-allowed"
-                    />
-                  </div>
                 </div>
 
                 {/* Address */}
@@ -281,21 +259,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                {/* Employee-specific fields */}
-                {isEmployee && (
-                  <div>
-                    <FormInputField
-                      name="employeeId"
-                      type="text"
-                      label="Employee ID"
-                      icon={<IdCard className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />}
-                      placeholder="Enter employee ID"
-                      value={formData.employeeId}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                )}
 
                 {/* Account Info */}
                 {user.createdAt && (
