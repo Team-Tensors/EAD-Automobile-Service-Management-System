@@ -511,31 +511,31 @@ public class EmailService {
                             <img src="%s" alt="DriveCare Logo" class="logo">
                             <h1>Password Changed Successfully</h1>
                         </div>
-                        
+                
                         <div class="content">
                             <p class="greeting">Hello <strong>%s</strong>,</p>
-                            
+                
                             <p>Your password has been successfully changed for your <strong>%s</strong> account.</p>
-                            
+                
                             <div class="info-box">
                                 <p><strong>Password Change Details</strong></p>
                                 <p>Time: Just now</p>
                                 <p>Status: Completed successfully</p>
                                 <p>All active sessions remain logged in</p>
                             </div>
-                            
+                
                             <div class="divider"></div>
-                            
+                
                             <div class="alert-box">
                                 <strong>Security Notice</strong>
                                 <p>If you didn't make this change, please contact our support team immediately. Your account security is our top priority.</p>
                             </div>
-                            
+                
                             <p style="color: #a1a1aa; font-size: 14px; margin-top: 24px;">
                                 You can now use your new password to log in to your account. Make sure to keep it secure and don't share it with anyone.
                             </p>
                         </div>
-                        
+                
                         <div class="footer">
                             <p>Best regards,</p>
                             <p class="brand">The %s Team</p>
@@ -553,16 +553,7 @@ public class EmailService {
     // ===================================================================
     // APPOINTMENT CONFIRMATION EMAIL (Customer books appointment)
     // ===================================================================
-    public void sendAppointmentConfirmationEmail(
-            String toEmail,
-            String userName,
-            String bookingId,
-            String appointmentDate,
-            String appointmentTime,
-            String serviceName,
-            String vehicleInfo,
-            String serviceCenterName
-    ) {
+    public void sendAppointmentConfirmationEmail(String toEmail, String userName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String serviceCenterName) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -580,14 +571,8 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Appointment Confirmed - " + appName);
 
-            String htmlContent = buildAppointmentConfirmationHtml(
-                    userName, bookingId, appointmentDate, appointmentTime,
-                    serviceName, vehicleInfo, serviceCenterName
-            );
-            String textContent = buildAppointmentConfirmationText(
-                    userName, bookingId, appointmentDate, appointmentTime,
-                    serviceName, vehicleInfo, serviceCenterName
-            );
+            String htmlContent = buildAppointmentConfirmationHtml(userName, bookingId, appointmentDate, appointmentTime, serviceName, vehicleInfo, serviceCenterName);
+            String textContent = buildAppointmentConfirmationText(userName, bookingId, appointmentDate, appointmentTime, serviceName, vehicleInfo, serviceCenterName);
 
             helper.setText(textContent, htmlContent);
             mimeMessage.setHeader("X-Mailer", appName);
@@ -600,217 +585,200 @@ public class EmailService {
         }
     }
 
-    private String buildAppointmentConfirmationText(
-            String userName, String bookingId, String appointmentDate,
-            String appointmentTime, String serviceName, String vehicleInfo, String serviceCenterName
-    ) {
+    private String buildAppointmentConfirmationText(String userName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String serviceCenterName) {
         return String.format("""
-            Hello %s,
-            
-            Your appointment has been successfully booked!
-            
-            Booking Details:
-            - Booking ID: %s
-            - Service: %s
-            - Vehicle: %s
-            - Date: %s
-            - Time: %s
-            - Location: %s
-            
-            Please arrive 10-15 minutes early for check-in.
-            
-            If you need to cancel or reschedule, please contact us as soon as possible.
-            
-            Best regards,
-            %s Team
-            """, userName, bookingId, serviceName, vehicleInfo, appointmentDate,
-                appointmentTime, serviceCenterName, appName);
+                Hello %s,
+                
+                Your appointment has been successfully booked!
+                
+                Booking Details:
+                - Booking ID: %s
+                - Service: %s
+                - Vehicle: %s
+                - Date: %s
+                - Time: %s
+                - Location: %s
+                
+                Please arrive 10-15 minutes early for check-in.
+                
+                If you need to cancel or reschedule, please contact us as soon as possible.
+                
+                Best regards,
+                %s Team
+                """, userName, bookingId, serviceName, vehicleInfo, appointmentDate, appointmentTime, serviceCenterName, appName);
     }
 
-    private String buildAppointmentConfirmationHtml(
-            String userName, String bookingId, String appointmentDate,
-            String appointmentTime, String serviceName, String vehicleInfo, String serviceCenterName
-    ) {
+    private String buildAppointmentConfirmationHtml(String userName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String serviceCenterName) {
         return String.format("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        background-color: #0a0a0a;
-                        color: #e5e5e5;
-                        padding: 32px;
-                        line-height: 1.6;
-                    }
-                    .email-wrapper {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #18181b;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-                    }
-                    .header {
-                        text-align: center;
-                        padding: 48px 32px 32px;
-                        border-bottom: 2px solid #22c55e;
-                        background-color: #1f1f23;
-                    }
-                    .logo {
-                        max-width: 150px;
-                        height: auto;
-                        margin-bottom: 16px;
-                    }
-                    .header h1 {
-                        color: #22c55e;
-                        font-size: 24px;
-                        font-weight: 600;
-                    }
-                    .content {
-                        padding: 40px 32px;
-                    }
-                    .greeting {
-                        font-size: 17px;
-                        color: #ffffff;
-                        font-weight: 500;
-                        margin-bottom: 24px;
-                    }
-                    .info-box {
-                        background-color: #1f1f23;
-                        padding: 24px;
-                        border-radius: 8px;
-                        margin: 24px 0;
-                        border: 1px solid #2e2e32;
-                    }
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 12px 0;
-                        border-bottom: 1px solid #2e2e32;
-                    }
-                    .info-row:last-child {
-                        border-bottom: none;
-                    }
-                    .info-label {
-                        color: #a1a1aa;
-                        font-size: 14px;
-                    }
-                    .info-value {
-                        color: #ffffff;
-                        font-weight: 600;
-                        font-size: 14px;
-                        text-align: right;
-                    }
-                    .highlight-box {
-                        background-color: #0a2818;
-                        padding: 16px;
-                        border-radius: 6px;
-                        margin: 24px 0;
-                        border-left: 4px solid #22c55e;
-                    }
-                    .highlight-box p {
-                        color: #86efac;
-                        font-size: 14px;
-                        margin: 0;
-                    }
-                    .footer {
-                        background-color: #18181b;
-                        padding: 32px;
-                        text-align: center;
-                        border-top: 1px solid #2e2e32;
-                    }
-                    .footer p {
-                        font-size: 13px;
-                        color: #71717a;
-                        margin: 6px 0;
-                    }
-                    .footer .brand {
-                        color: #f97316;
-                        font-weight: 600;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="email-wrapper">
-                    <div class="header">
-                        <img src="%s" alt="DriveCare Logo" class="logo">
-                        <h1>✓ Appointment Confirmed</h1>
-                    </div>
-                    
-                    <div class="content">
-                        <p class="greeting">Hello <strong>%s</strong>,</p>
-                        <p style="color: #d4d4d8; margin-bottom: 20px;">
-                            Your appointment has been successfully booked! We look forward to serving you.
-                        </p>
-                        
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="info-label">Booking ID</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Service</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Vehicle</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Date</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Time</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Location</span>
-                                <span class="info-value">%s</span>
-                            </div>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #22c55e;
+                            background-color: #1f1f23;
+                        }
+                        .logo {
+                            max-width: 150px;
+                            height: auto;
+                            margin-bottom: 16px;
+                        }
+                        .header h1 {
+                            color: #22c55e;
+                            font-size: 24px;
+                            font-weight: 600;
+                        }
+                        .content {
+                            padding: 40px 32px;
+                        }
+                        .greeting {
+                            font-size: 17px;
+                            color: #ffffff;
+                            font-weight: 500;
+                            margin-bottom: 24px;
+                        }
+                        .info-box {
+                            background-color: #1f1f23;
+                            padding: 24px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border: 1px solid #2e2e32;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #2e2e32;
+                        }
+                        .info-row:last-child {
+                            border-bottom: none;
+                        }
+                        .info-label {
+                            color: #a1a1aa;
+                            font-size: 14px;
+                        }
+                        .info-value {
+                            color: #ffffff;
+                            font-weight: 600;
+                            font-size: 14px;
+                            text-align: right;
+                        }
+                        .highlight-box {
+                            background-color: #0a2818;
+                            padding: 16px;
+                            border-radius: 6px;
+                            margin: 24px 0;
+                            border-left: 4px solid #22c55e;
+                        }
+                        .highlight-box p {
+                            color: #86efac;
+                            font-size: 14px;
+                            margin: 0;
+                        }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p {
+                            font-size: 13px;
+                            color: #71717a;
+                            margin: 6px 0;
+                        }
+                        .footer .brand {
+                            color: #f97316;
+                            font-weight: 600;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>✓ Appointment Confirmed</h1>
                         </div>
-                        
-                        <div class="highlight-box">
-                            <p>📍 Please arrive 10-15 minutes early for check-in and vehicle inspection.</p>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                Your appointment has been successfully booked! We look forward to serving you.
+                            </p>
+                
+                            <div class="info-box">
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Service</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Vehicle</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Date</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Location</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                            </div>
+                
+                            <div class="highlight-box">
+                                <p>📍 Please arrive 10-15 minutes early for check-in and vehicle inspection.</p>
+                            </div>
+                
+                            <p style="color: #a1a1aa; font-size: 14px; margin-top: 24px;">
+                                If you need to cancel or reschedule your appointment, please contact us as soon as possible.
+                            </p>
                         </div>
-                        
-                        <p style="color: #a1a1aa; font-size: 14px; margin-top: 24px;">
-                            If you need to cancel or reschedule your appointment, please contact us as soon as possible.
-                        </p>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                            <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
+                                © 2025 %s. All rights reserved.
+                            </p>
+                        </div>
                     </div>
-                    
-                    <div class="footer">
-                        <p>Best regards,</p>
-                        <p class="brand">The %s Team</p>
-                        <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
-                        <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
-                            © 2025 %s. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """, logoUrl, userName, bookingId, serviceName, vehicleInfo,
-                appointmentDate, appointmentTime, serviceCenterName, appName, appName);
+                </body>
+                </html>
+                """, logoUrl, userName, bookingId, serviceName, vehicleInfo, appointmentDate, appointmentTime, serviceCenterName, appName, appName);
     }
 
     // ===================================================================
     // EMPLOYEE ASSIGNMENT EMAIL (Manager assigns employees)
     // ===================================================================
-    public void sendEmployeeAssignmentEmail(
-            String toEmail,
-            String employeeName,
-            String bookingId,
-            String appointmentDate,
-            String appointmentTime,
-            String serviceName,
-            String vehicleInfo,
-            String customerName
-    ) {
+    public void sendEmployeeAssignmentEmail(String toEmail, String employeeName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String customerName) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -828,14 +796,8 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("New Assignment - " + appName);
 
-            String htmlContent = buildEmployeeAssignmentHtml(
-                    employeeName, bookingId, appointmentDate, appointmentTime,
-                    serviceName, vehicleInfo, customerName
-            );
-            String textContent = buildEmployeeAssignmentText(
-                    employeeName, bookingId, appointmentDate, appointmentTime,
-                    serviceName, vehicleInfo, customerName
-            );
+            String htmlContent = buildEmployeeAssignmentHtml(employeeName, bookingId, appointmentDate, appointmentTime, serviceName, vehicleInfo, customerName);
+            String textContent = buildEmployeeAssignmentText(employeeName, bookingId, appointmentDate, appointmentTime, serviceName, vehicleInfo, customerName);
 
             helper.setText(textContent, htmlContent);
             mimeMessage.setHeader("X-Mailer", appName);
@@ -847,158 +809,143 @@ public class EmailService {
         }
     }
 
-    private String buildEmployeeAssignmentText(
-            String employeeName, String bookingId, String appointmentDate,
-            String appointmentTime, String serviceName, String vehicleInfo, String customerName
-    ) {
+    private String buildEmployeeAssignmentText(String employeeName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String customerName) {
         return String.format("""
-            Hello %s,
-            
-            You have been assigned to a new appointment.
-            
-            Assignment Details:
-            - Booking ID: %s
-            - Customer: %s
-            - Service: %s
-            - Vehicle: %s
-            - Date: %s
-            - Time: %s
-            
-            Please review the details and prepare accordingly.
-            
-            Best regards,
-            %s Team
-            """, employeeName, bookingId, customerName, serviceName,
-                vehicleInfo, appointmentDate, appointmentTime, appName);
+                Hello %s,
+                
+                You have been assigned to a new appointment.
+                
+                Assignment Details:
+                - Booking ID: %s
+                - Customer: %s
+                - Service: %s
+                - Vehicle: %s
+                - Date: %s
+                - Time: %s
+                
+                Please review the details and prepare accordingly.
+                
+                Best regards,
+                %s Team
+                """, employeeName, bookingId, customerName, serviceName, vehicleInfo, appointmentDate, appointmentTime, appName);
     }
 
-    private String buildEmployeeAssignmentHtml(
-            String employeeName, String bookingId, String appointmentDate,
-            String appointmentTime, String serviceName, String vehicleInfo, String customerName
-    ) {
+    private String buildEmployeeAssignmentHtml(String employeeName, String bookingId, String appointmentDate, String appointmentTime, String serviceName, String vehicleInfo, String customerName) {
         return String.format("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        background-color: #0a0a0a;
-                        color: #e5e5e5;
-                        padding: 32px;
-                        line-height: 1.6;
-                    }
-                    .email-wrapper {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #18181b;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-                    }
-                    .header {
-                        text-align: center;
-                        padding: 48px 32px 32px;
-                        border-bottom: 2px solid #3b82f6;
-                        background-color: #1f1f23;
-                    }
-                    .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
-                    .header h1 { color: #3b82f6; font-size: 24px; font-weight: 600; }
-                    .content { padding: 40px 32px; }
-                    .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
-                    .info-box {
-                        background-color: #1f1f23;
-                        padding: 24px;
-                        border-radius: 8px;
-                        margin: 24px 0;
-                        border: 1px solid #2e2e32;
-                    }
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 12px 0;
-                        border-bottom: 1px solid #2e2e32;
-                    }
-                    .info-row:last-child { border-bottom: none; }
-                    .info-label { color: #a1a1aa; font-size: 14px; }
-                    .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
-                    .footer {
-                        background-color: #18181b;
-                        padding: 32px;
-                        text-align: center;
-                        border-top: 1px solid #2e2e32;
-                    }
-                    .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
-                    .footer .brand { color: #f97316; font-weight: 600; }
-                </style>
-            </head>
-            <body>
-                <div class="email-wrapper">
-                    <div class="header">
-                        <img src="%s" alt="DriveCare Logo" class="logo">
-                        <h1>🔧 New Assignment</h1>
-                    </div>
-                    
-                    <div class="content">
-                        <p class="greeting">Hello <strong>%s</strong>,</p>
-                        <p style="color: #d4d4d8; margin-bottom: 20px;">
-                            You have been assigned to a new appointment. Please review the details below.
-                        </p>
-                        
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="info-label">Booking ID</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Customer</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Service</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Vehicle</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Date</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Time</span>
-                                <span class="info-value">%s</span>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #3b82f6;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #3b82f6; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .info-box {
+                            background-color: #1f1f23;
+                            padding: 24px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border: 1px solid #2e2e32;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #2e2e32;
+                        }
+                        .info-row:last-child { border-bottom: none; }
+                        .info-label { color: #a1a1aa; font-size: 14px; }
+                        .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>🔧 New Assignment</h1>
+                        </div>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                You have been assigned to a new appointment. Please review the details below.
+                            </p>
+                
+                            <div class="info-box">
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Customer</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Service</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Vehicle</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Date</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Time</span>
+                                    <span class="info-value">%s</span>
+                                </div>
                             </div>
                         </div>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                        </div>
                     </div>
-                    
-                    <div class="footer">
-                        <p>Best regards,</p>
-                        <p class="brand">The %s Team</p>
-                        <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """, logoUrl, employeeName, bookingId, customerName, serviceName,
-                vehicleInfo, appointmentDate, appointmentTime, appName);
+                </body>
+                </html>
+                """, logoUrl, employeeName, bookingId, customerName, serviceName, vehicleInfo, appointmentDate, appointmentTime, appName);
     }
 
     // ===================================================================
     // WORK STARTED EMAIL (Employee starts work)
     // ===================================================================
-    public void sendAppointmentStartedEmail(
-            String toEmail,
-            String customerName,
-            String bookingId,
-            String serviceName,
-            String vehicleInfo,
-            String employeeName
-    ) {
+    public void sendAppointmentStartedEmail(String toEmail, String customerName, String bookingId, String serviceName, String vehicleInfo, String employeeName) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -1016,12 +963,8 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Work Started on Your Vehicle - " + appName);
 
-            String htmlContent = buildAppointmentStartedHtml(
-                    customerName, bookingId, serviceName, vehicleInfo, employeeName
-            );
-            String textContent = buildAppointmentStartedText(
-                    customerName, bookingId, serviceName, vehicleInfo, employeeName
-            );
+            String htmlContent = buildAppointmentStartedHtml(customerName, bookingId, serviceName, vehicleInfo, employeeName);
+            String textContent = buildAppointmentStartedText(customerName, bookingId, serviceName, vehicleInfo, employeeName);
 
             helper.setText(textContent, htmlContent);
             mimeMessage.setHeader("X-Mailer", appName);
@@ -1033,150 +976,136 @@ public class EmailService {
         }
     }
 
-    private String buildAppointmentStartedText(
-            String customerName, String bookingId, String serviceName,
-            String vehicleInfo, String employeeName
-    ) {
+    private String buildAppointmentStartedText(String customerName, String bookingId, String serviceName, String vehicleInfo, String employeeName) {
         return String.format("""
-            Hello %s,
-            
-            Great news! Work has started on your vehicle.
-            
-            Details:
-            - Booking ID: %s
-            - Service: %s
-            - Vehicle: %s
-            - Technician: %s
-            
-            We'll notify you when the work is completed.
-            
-            Best regards,
-            %s Team
-            """, customerName, bookingId, serviceName, vehicleInfo, employeeName, appName);
+                Hello %s,
+                
+                Great news! Work has started on your vehicle.
+                
+                Details:
+                - Booking ID: %s
+                - Service: %s
+                - Vehicle: %s
+                - Technician: %s
+                
+                We'll notify you when the work is completed.
+                
+                Best regards,
+                %s Team
+                """, customerName, bookingId, serviceName, vehicleInfo, employeeName, appName);
     }
 
-    private String buildAppointmentStartedHtml(
-            String customerName, String bookingId, String serviceName,
-            String vehicleInfo, String employeeName
-    ) {
+    private String buildAppointmentStartedHtml(String customerName, String bookingId, String serviceName, String vehicleInfo, String employeeName) {
         return String.format("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        background-color: #0a0a0a;
-                        color: #e5e5e5;
-                        padding: 32px;
-                        line-height: 1.6;
-                    }
-                    .email-wrapper {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #18181b;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-                    }
-                    .header {
-                        text-align: center;
-                        padding: 48px 32px 32px;
-                        border-bottom: 2px solid #eab308;
-                        background-color: #1f1f23;
-                    }
-                    .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
-                    .header h1 { color: #eab308; font-size: 24px; font-weight: 600; }
-                    .content { padding: 40px 32px; }
-                    .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
-                    .info-box {
-                        background-color: #1f1f23;
-                        padding: 24px;
-                        border-radius: 8px;
-                        margin: 24px 0;
-                        border: 1px solid #2e2e32;
-                    }
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 12px 0;
-                        border-bottom: 1px solid #2e2e32;
-                    }
-                    .info-row:last-child { border-bottom: none; }
-                    .info-label { color: #a1a1aa; font-size: 14px; }
-                    .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
-                    .footer {
-                        background-color: #18181b;
-                        padding: 32px;
-                        text-align: center;
-                        border-top: 1px solid #2e2e32;
-                    }
-                    .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
-                    .footer .brand { color: #f97316; font-weight: 600; }
-                </style>
-            </head>
-            <body>
-                <div class="email-wrapper">
-                    <div class="header">
-                        <img src="%s" alt="DriveCare Logo" class="logo">
-                        <h1>🚗 Work in Progress</h1>
-                    </div>
-                    
-                    <div class="content">
-                        <p class="greeting">Hello <strong>%s</strong>,</p>
-                        <p style="color: #d4d4d8; margin-bottom: 20px;">
-                            Great news! Our technician has started working on your vehicle.
-                        </p>
-                        
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="info-label">Booking ID</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Service</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Vehicle</span>
-                                <span class="info-value">%s</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Technician</span>
-                                <span class="info-value">%s</span>
-                            </div>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #eab308;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #eab308; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .info-box {
+                            background-color: #1f1f23;
+                            padding: 24px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border: 1px solid #2e2e32;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #2e2e32;
+                        }
+                        .info-row:last-child { border-bottom: none; }
+                        .info-label { color: #a1a1aa; font-size: 14px; }
+                        .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>🚗 Work in Progress</h1>
                         </div>
-                        
-                        <p style="color: #a1a1aa; font-size: 14px;">
-                            We'll notify you as soon as the work is completed.
-                        </p>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                Great news! Our technician has started working on your vehicle.
+                            </p>
+                
+                            <div class="info-box">
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Service</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Vehicle</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Technician</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                            </div>
+                
+                            <p style="color: #a1a1aa; font-size: 14px;">
+                                We'll notify you as soon as the work is completed.
+                            </p>
+                        </div>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                        </div>
                     </div>
-                    
-                    <div class="footer">
-                        <p>Best regards,</p>
-                        <p class="brand">The %s Team</p>
-                        <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            """, logoUrl, customerName, bookingId, serviceName, vehicleInfo, employeeName, appName);
+                </body>
+                </html>
+                """, logoUrl, customerName, bookingId, serviceName, vehicleInfo, employeeName, appName);
     }
 
     // ===================================================================
     // WORK COMPLETED EMAIL (Employee completes work)
     // ===================================================================
-    public void sendAppointmentCompletedEmail(
-            String toEmail,
-            String customerName,
-            String bookingId,
-            String serviceName,
-            String vehicleInfo,
-            String startTime,
-            String endTime
-    ) {
+    public void sendAppointmentCompletedEmail(String toEmail, String customerName, String bookingId, String serviceName, String vehicleInfo, String startTime, String endTime) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -1194,12 +1123,8 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Service Completed - " + appName);
 
-            String htmlContent = buildAppointmentCompletedHtml(
-                    customerName, bookingId, serviceName, vehicleInfo, startTime, endTime
-            );
-            String textContent = buildAppointmentCompletedText(
-                    customerName, bookingId, serviceName, vehicleInfo, startTime, endTime
-            );
+            String htmlContent = buildAppointmentCompletedHtml(customerName, bookingId, serviceName, vehicleInfo, startTime, endTime);
+            String textContent = buildAppointmentCompletedText(customerName, bookingId, serviceName, vehicleInfo, startTime, endTime);
 
             helper.setText(textContent, htmlContent);
             mimeMessage.setHeader("X-Mailer", appName);
@@ -1211,170 +1136,764 @@ public class EmailService {
         }
     }
 
-    private String buildAppointmentCompletedText(
-            String customerName, String bookingId, String serviceName,
-            String vehicleInfo, String startTime, String endTime
-    ) {
+    private String buildAppointmentCompletedText(String customerName, String bookingId, String serviceName, String vehicleInfo, String startTime, String endTime) {
         return String.format("""
-            Hello %s,
-            
-            Excellent news! The service on your vehicle has been completed successfully.
-            
-            Completion Details:
-            - Booking ID: %s
-            - Service: %s
-            - Vehicle: %s
-            - Started: %s
-            - Completed: %s
-            
-            Your vehicle is ready for pickup!
-            
-            Thank you for choosing %s.
-            
-            Best regards,
-            %s Team
-            """, customerName, bookingId, serviceName, vehicleInfo,
-                startTime, endTime, appName, appName);
+                Hello %s,
+                
+                Excellent news! The service on your vehicle has been completed successfully.
+                
+                Completion Details:
+                - Booking ID: %s
+                - Service: %s
+                - Vehicle: %s
+                - Started: %s
+                - Completed: %s
+                
+                Your vehicle is ready for pickup!
+                
+                Thank you for choosing %s.
+                
+                Best regards,
+                %s Team
+                """, customerName, bookingId, serviceName, vehicleInfo, startTime, endTime, appName, appName);
     }
 
-    private String buildAppointmentCompletedHtml(
-            String customerName, String bookingId, String serviceName,
-            String vehicleInfo, String startTime, String endTime
-    ) {
+    private String buildAppointmentCompletedHtml(String customerName, String bookingId, String serviceName, String vehicleInfo, String startTime, String endTime) {
         return String.format("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        background-color: #0a0a0a;
-                        color: #e5e5e5;
-                        padding: 32px;
-                        line-height: 1.6;
-                    }
-                    .email-wrapper {
-                        max-width: 600px;
-                        margin: 0 auto;
-                        background-color: #18181b;
-                        border-radius: 10px;
-                        overflow: hidden;
-                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-                    }
-                    .header {
-                        text-align: center;
-                        padding: 48px 32px 32px;
-                        border-bottom: 2px solid #22c55e;
-                        background-color: #1f1f23;
-                    }
-                    .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
-                    .header h1 { color: #22c55e; font-size: 24px; font-weight: 600; }
-                    .content { padding: 40px 32px; }
-                    .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
-                    .success-banner {
-                        background: linear-gradient(135deg, #166534 0%%, #22c55e 100%%);
-                        padding: 20px;
-                        border-radius: 8px;
-                        text-align: center;
-                        margin: 24px 0;
-                    }
-                    .success-banner h2 {
-                        color: #ffffff;
-                        font-size: 20px;
-                        margin-bottom: 8px;
-                    }
-                    .success-banner p {
-                        color: #dcfce7;
-                        font-size: 14px;
-                        margin: 0;
-                    }
-                    .info-box {
-                        background-color: #1f1f23;
-                        padding: 24px;
-                        border-radius: 8px;
-                        margin: 24px 0;
-                        border: 1px solid #2e2e32;
-                    }
-                    .info-row {
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 12px 0;
-                        border-bottom: 1px solid #2e2e32;
-                    }
-                    .info-row:last-child { border-bottom: none; }
-                    .info-label { color: #a1a1aa; font-size: 14px; }
-                    .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
-                    .footer {
-                        background-color: #18181b;
-                        padding: 32px;
-                        text-align: center;
-                        border-top: 1px solid #2e2e32;
-                    }
-                    .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
-                    .footer .brand { color: #f97316; font-weight: 600; }
-                </style>
-            </head>
-            <body>
-                <div class="email-wrapper">
-                    <div class="header">
-                        <img src="%s" alt="DriveCare Logo" class="logo">
-                        <h1>✓ Service Completed</h1>
-                    </div>
-                    
-                    <div class="content">
-                        <p class="greeting">Hello <strong>%s</strong>,</p>
-                        
-                        <div class="success-banner">
-                            <h2>🎉 All Done!</h2>
-                            <p>Your vehicle service has been completed successfully</p>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #22c55e;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #22c55e; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .success-banner {
+                            background: linear-gradient(135deg, #166534 0%%, #22c55e 100%%);
+                            padding: 20px;
+                            border-radius: 8px;
+                            text-align: center;
+                            margin: 24px 0;
+                        }
+                        .success-banner h2 {
+                            color: #ffffff;
+                            font-size: 20px;
+                            margin-bottom: 8px;
+                        }
+                        .success-banner p {
+                            color: #dcfce7;
+                            font-size: 14px;
+                            margin: 0;
+                        }
+                        .info-box {
+                            background-color: #1f1f23;
+                            padding: 24px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border: 1px solid #2e2e32;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #2e2e32;
+                        }
+                        .info-row:last-child { border-bottom: none; }
+                        .info-label { color: #a1a1aa; font-size: 14px; }
+                        .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>✓ Service Completed</h1>
                         </div>
-                        
-                        <div class="info-box">
-                            <div class="info-row">
-                                <span class="info-label">Booking ID</span>
-                                <span class="info-value">%s</span>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                
+                            <div class="success-banner">
+                                <h2>🎉 All Done!</h2>
+                                <p>Your vehicle service has been completed successfully</p>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Service</span>
-                                <span class="info-value">%s</span>
+                
+                            <div class="info-box">
+                                <div class="info-row">
+                                    <span class="info-label">Booking ID</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Service</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Vehicle</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Started At</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Completed At</span>
+                                    <span class="info-value">%s</span>
+                                </div>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Vehicle</span>
-                                <span class="info-value">%s</span>
+                
+                            <p style="color: #22c55e; font-size: 16px; font-weight: 600; text-align: center; margin: 24px 0;">
+                                Your vehicle is ready for pickup!
+                            </p>
+                
+                            <p style="color: #a1a1aa; font-size: 14px;">
+                                Thank you for choosing %s. We hope to serve you again soon!
+                            </p>
+                        </div>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                            <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
+                                © 2025 %s. All rights reserved.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, logoUrl, customerName, bookingId, serviceName, vehicleInfo, startTime, endTime, appName, appName, appName);
+    }
+
+    // ===================================================================
+// VEHICLE ADDED EMAIL
+// ===================================================================
+    public void sendVehicleAddedEmail(String toEmail, String userName, String vehicleInfo, String registrationNumber, String make, String model, String year) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            String fromAddress = fromEmail;
+            String fromName = "DriveCare";
+
+            if (fromEmail.contains("<") && fromEmail.contains(">")) {
+                int startIdx = fromEmail.indexOf("<");
+                fromName = fromEmail.substring(0, startIdx).trim();
+                fromAddress = fromEmail.substring(startIdx + 1, fromEmail.indexOf(">")).trim();
+            }
+
+            helper.setFrom(fromAddress, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("Vehicle Added Successfully - " + appName);
+
+            String htmlContent = buildVehicleAddedHtml(userName, vehicleInfo, registrationNumber, make, model, year);
+            String textContent = buildVehicleAddedText(userName, vehicleInfo, registrationNumber, make, model, year);
+
+            helper.setText(textContent, htmlContent);
+            mimeMessage.setHeader("X-Mailer", appName);
+
+            mailSender.send(mimeMessage);
+            logger.info("Vehicle added email sent to: {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Failed to send vehicle added email to: {}", toEmail, e);
+            throw new RuntimeException("Failed to send vehicle added email", e);
+        }
+    }
+
+    private String buildVehicleAddedText(String userName, String vehicleInfo, String registrationNumber, String make, String model, String year) {
+        return String.format("""
+                Hello %s,
+                
+                Great news! Your vehicle has been successfully added to your %s account.
+                
+                Vehicle Details:
+                - Registration Number: %s
+                - Make: %s
+                - Model: %s
+                - Year: %s
+                
+                You can now:
+                • Book service appointments for this vehicle
+                • Track service history
+                • Receive maintenance reminders
+                • Manage vehicle information
+                
+                If you didn't add this vehicle, please contact us immediately.
+                
+                Best regards,
+                %s Team
+                """, userName, appName, registrationNumber, make, model, year, appName);
+    }
+
+    private String buildVehicleAddedHtml(String userName, String vehicleInfo, String registrationNumber, String make, String model, String year) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #22c55e;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #22c55e; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .vehicle-card {
+                            background: linear-gradient(135deg, #1f1f23 0%%, #2e2e32 100%%);
+                            padding: 24px;
+                            border-radius: 12px;
+                            margin: 24px 0;
+                            border: 2px solid #22c55e;
+                        }
+                        .vehicle-card h2 {
+                            color: #22c55e;
+                            font-size: 20px;
+                            margin-bottom: 16px;
+                            text-align: center;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 12px 0;
+                            border-bottom: 1px solid #3f3f46;
+                        }
+                        .info-row:last-child { border-bottom: none; }
+                        .info-label { color: #a1a1aa; font-size: 14px; }
+                        .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
+                        .features-box {
+                            background-color: #1f1f23;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                        }
+                        .features-box h3 {
+                            color: #ffffff;
+                            font-size: 16px;
+                            margin-bottom: 12px;
+                        }
+                        .features-box ul {
+                            list-style: none;
+                            padding: 0;
+                        }
+                        .features-box li {
+                            color: #d4d4d8;
+                            font-size: 14px;
+                            padding: 8px 0;
+                            padding-left: 24px;
+                            position: relative;
+                        }
+                        .features-box li:before {
+                            content: "✓";
+                            color: #22c55e;
+                            font-weight: bold;
+                            position: absolute;
+                            left: 0;
+                        }
+                        .security-notice {
+                            background-color: #422006;
+                            padding: 16px;
+                            border-radius: 6px;
+                            margin: 24px 0;
+                        }
+                        .security-notice p {
+                            color: #fef3c7;
+                            font-size: 13px;
+                            margin: 0;
+                        }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>🚗 Vehicle Added Successfully</h1>
+                        </div>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                Great news! Your vehicle has been successfully added to your account.
+                            </p>
+                
+                            <div class="vehicle-card">
+                                <h2>%s</h2>
+                                <div class="info-row">
+                                    <span class="info-label">Registration Number</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Make</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Model</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Year</span>
+                                    <span class="info-value">%s</span>
+                                </div>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Started At</span>
-                                <span class="info-value">%s</span>
+                
+                            <div class="features-box">
+                                <h3>What's Next?</h3>
+                                <ul>
+                                    <li>Book service appointments for this vehicle</li>
+                                    <li>Track complete service history</li>
+                                    <li>Receive maintenance reminders</li>
+                                    <li>Manage vehicle information anytime</li>
+                                </ul>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Completed At</span>
-                                <span class="info-value">%s</span>
+                
+                            <div class="security-notice">
+                                <p><strong>Security Notice:</strong> If you didn't add this vehicle to your account, please contact our support team immediately.</p>
                             </div>
                         </div>
-                        
-                        <p style="color: #22c55e; font-size: 16px; font-weight: 600; text-align: center; margin: 24px 0;">
-                            Your vehicle is ready for pickup!
-                        </p>
-                        
-                        <p style="color: #a1a1aa; font-size: 14px;">
-                            Thank you for choosing %s. We hope to serve you again soon!
-                        </p>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                            <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
+                                © 2025 %s. All rights reserved.
+                            </p>
+                        </div>
                     </div>
-                    
-                    <div class="footer">
-                        <p>Best regards,</p>
-                        <p class="brand">The %s Team</p>
-                        <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
-                        <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
-                            © 2025 %s. All rights reserved.
-                        </p>
+                </body>
+                </html>
+                """, logoUrl, userName, vehicleInfo, registrationNumber, make, model, year, appName, appName);
+    }
+
+    // ===================================================================
+// VEHICLE UPDATED EMAIL
+// ===================================================================
+    public void sendVehicleUpdatedEmail(String toEmail, String userName, String vehicleInfo, String registrationNumber, String changesSummary) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            String fromAddress = fromEmail;
+            String fromName = "DriveCare";
+
+            if (fromEmail.contains("<") && fromEmail.contains(">")) {
+                int startIdx = fromEmail.indexOf("<");
+                fromName = fromEmail.substring(0, startIdx).trim();
+                fromAddress = fromEmail.substring(startIdx + 1, fromEmail.indexOf(">")).trim();
+            }
+
+            helper.setFrom(fromAddress, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("Vehicle Information Updated - " + appName);
+
+            String htmlContent = buildVehicleUpdatedHtml(userName, vehicleInfo, registrationNumber, changesSummary);
+            String textContent = buildVehicleUpdatedText(userName, vehicleInfo, registrationNumber, changesSummary);
+
+            helper.setText(textContent, htmlContent);
+            mimeMessage.setHeader("X-Mailer", appName);
+
+            mailSender.send(mimeMessage);
+            logger.info("Vehicle updated email sent to: {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Failed to send vehicle updated email to: {}", toEmail, e);
+        }
+    }
+
+    private String buildVehicleUpdatedText(String userName, String vehicleInfo, String registrationNumber, String changesSummary) {
+        return String.format("""
+                Hello %s,
+                
+                The information for your vehicle (%s) has been updated.
+                
+                Changes Made:
+                %s
+                
+                If you didn't make these changes, please contact us immediately.
+                
+                Best regards,
+                %s Team
+                """, userName, vehicleInfo, changesSummary, appName);
+    }
+
+    private String buildVehicleUpdatedHtml(String userName, String vehicleInfo, String registrationNumber, String changesSummary) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #3b82f6;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #3b82f6; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .changes-box {
+                            background-color: #1f1f23;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border-left: 4px solid #3b82f6;
+                        }
+                        .changes-box h3 {
+                            color: #3b82f6;
+                            font-size: 16px;
+                            margin-bottom: 12px;
+                        }
+                        .changes-box pre {
+                            color: #d4d4d8;
+                            font-size: 14px;
+                            white-space: pre-wrap;
+                            font-family: monospace;
+                            line-height: 1.6;
+                        }
+                        .security-notice {
+                            background-color: #422006;
+                            padding: 16px;
+                            border-radius: 6px;
+                            margin: 24px 0;
+                        }
+                        .security-notice p {
+                            color: #fef3c7;
+                            font-size: 13px;
+                            margin: 0;
+                        }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>🔄 Vehicle Information Updated</h1>
+                        </div>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                The information for your vehicle <strong>%s</strong> (Reg: %s) has been updated.
+                            </p>
+                
+                            <div class="changes-box">
+                                <h3>Changes Made:</h3>
+                                <pre>%s</pre>
+                            </div>
+                
+                            <div class="security-notice">
+                                <p><strong>Security Notice:</strong> If you didn't make these changes, please contact our support team immediately.</p>
+                            </div>
+                        </div>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                            <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
+                                © 2025 %s. All rights reserved.
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </body>
-            </html>
-            """, logoUrl, customerName, bookingId, serviceName, vehicleInfo,
-                startTime, endTime, appName, appName, appName);
+                </body>
+                </html>
+                """, logoUrl, userName, vehicleInfo, registrationNumber, changesSummary, appName, appName);
+    }
+
+    // ===================================================================
+// VEHICLE DELETED EMAIL
+// ===================================================================
+    public void sendVehicleDeletedEmail(String toEmail, String userName, String vehicleInfo, String registrationNumber, String deletionTime) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            String fromAddress = fromEmail;
+            String fromName = "DriveCare";
+
+            if (fromEmail.contains("<") && fromEmail.contains(">")) {
+                int startIdx = fromEmail.indexOf("<");
+                fromName = fromEmail.substring(0, startIdx).trim();
+                fromAddress = fromEmail.substring(startIdx + 1, fromEmail.indexOf(">")).trim();
+            }
+
+            helper.setFrom(fromAddress, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("Vehicle Removed from Account - " + appName);
+
+            String htmlContent = buildVehicleDeletedHtml(userName, vehicleInfo, registrationNumber, deletionTime);
+            String textContent = buildVehicleDeletedText(userName, vehicleInfo, registrationNumber, deletionTime);
+
+            helper.setText(textContent, htmlContent);
+            mimeMessage.setHeader("X-Mailer", appName);
+
+            mailSender.send(mimeMessage);
+            logger.info("Vehicle deleted email sent to: {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Failed to send vehicle deleted email to: {}", toEmail, e);
+        }
+    }
+
+    private String buildVehicleDeletedText(String userName, String vehicleInfo, String registrationNumber, String deletionTime) {
+        return String.format("""
+                Hello %s,
+                
+                Your vehicle has been removed from your %s account.
+                
+                Removed Vehicle:
+                - Vehicle: %s
+                - Registration: %s
+                - Removed At: %s
+                
+                Important:
+                • All service history for this vehicle has been retained
+                • You can add this vehicle again at any time
+                • Associated appointments are still accessible
+                
+                If you didn't remove this vehicle, please contact us immediately.
+                
+                Best regards,
+                %s Team
+                """, userName, appName, vehicleInfo, registrationNumber, deletionTime, appName);
+    }
+
+    private String buildVehicleDeletedHtml(String userName, String vehicleInfo, String registrationNumber, String deletionTime) {
+        return String.format("""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            background-color: #0a0a0a;
+                            color: #e5e5e5;
+                            padding: 32px;
+                            line-height: 1.6;
+                        }
+                        .email-wrapper {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background-color: #18181b;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                        }
+                        .header {
+                            text-align: center;
+                            padding: 48px 32px 32px;
+                            border-bottom: 2px solid #ef4444;
+                            background-color: #1f1f23;
+                        }
+                        .logo { max-width: 150px; height: auto; margin-bottom: 16px; }
+                        .header h1 { color: #ef4444; font-size: 24px; font-weight: 600; }
+                        .content { padding: 40px 32px; }
+                        .greeting { font-size: 17px; color: #ffffff; font-weight: 500; margin-bottom: 24px; }
+                        .vehicle-box {
+                            background-color: #1f1f23;
+                            padding: 20px;
+                            border-radius: 8px;
+                            margin: 24px 0;
+                            border-left: 4px solid #ef4444;
+                        }
+                        .vehicle-box h3 {
+                            color: #ef4444;
+                            font-size: 16px;
+                            margin-bottom: 12px;
+                        }
+                        .info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 8px 0;
+                        }
+                        .info-label { color: #a1a1aa; font-size: 14px; }
+                        .info-value { color: #ffffff; font-weight: 600; font-size: 14px; text-align: right; }
+                        .info-box {
+                            background-color: #1f1f23;
+                            padding: 16px;
+                            border-radius: 6px;
+                            margin: 24px 0;
+                        }
+                        .info-box h4 {
+                            color: #ffffff;
+                            font-size: 14px;
+                            margin-bottom: 8px;
+                        }
+                        .info-box ul {
+                            list-style: none;
+                            padding: 0;
+                        }
+                        .info-box li {
+                            color: #d4d4d8;
+                            font-size: 13px;
+                            padding: 6px 0;
+                            padding-left: 20px;
+                            position: relative;
+                        }
+                        .info-box li:before {
+                            content: "•";
+                            color: #a1a1aa;
+                            position: absolute;
+                            left: 0;
+                        }
+                        .security-notice {
+                            background-color: #7f1d1d;
+                            padding: 16px;
+                            border-radius: 6px;
+                            margin: 24px 0;
+                        }
+                        .security-notice p {
+                            color: #fecaca;
+                            font-size: 13px;
+                            margin: 0;
+                        }
+                        .footer {
+                            background-color: #18181b;
+                            padding: 32px;
+                            text-align: center;
+                            border-top: 1px solid #2e2e32;
+                        }
+                        .footer p { font-size: 13px; color: #71717a; margin: 6px 0; }
+                        .footer .brand { color: #f97316; font-weight: 600; }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-wrapper">
+                        <div class="header">
+                            <img src="%s" alt="DriveCare Logo" class="logo">
+                            <h1>🗑️ Vehicle Removed</h1>
+                        </div>
+                
+                        <div class="content">
+                            <p class="greeting">Hello <strong>%s</strong>,</p>
+                            <p style="color: #d4d4d8; margin-bottom: 20px;">
+                                Your vehicle has been removed from your account.
+                            </p>
+                
+                            <div class="vehicle-box">
+                                <h3>Removed Vehicle Details</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Vehicle</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Registration Number</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Removed At</span>
+                                    <span class="info-value">%s</span>
+                                </div>
+                            </div>
+                
+                            <div class="info-box">
+                                <h4>Important Information:</h4>
+                                <ul>
+                                    <li>All service history for this vehicle has been retained</li>
+                                    <li>You can add this vehicle again at any time</li>
+                                    <li>Associated appointments are still accessible in your history</li>
+                                </ul>
+                            </div>
+                
+                            <div class="security-notice">
+                                <p><strong>⚠️ Security Alert:</strong> If you didn't remove this vehicle, please contact our support team immediately. This could indicate unauthorized access to your account.</p>
+                            </div>
+                        </div>
+                
+                        <div class="footer">
+                            <p>Best regards,</p>
+                            <p class="brand">The %s Team</p>
+                            <p style="margin-top: 20px;">This is an automated email. Please do not reply.</p>
+                            <p style="color: #52525b; font-size: 12px; margin-top: 16px;">
+                                © 2025 %s. All rights reserved.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """, logoUrl, userName, vehicleInfo, registrationNumber, deletionTime, appName, appName);
     }
 }
