@@ -11,10 +11,8 @@ import {
   User,
   Filter,
   Phone,
-  Mail,
   MapPin,
   Wrench,
-  Tag,
   Timer,
   Coins,
 } from 'lucide-react';
