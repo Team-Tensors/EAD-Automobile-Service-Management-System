@@ -9,6 +9,7 @@ interface StatusUpdateModalProps {
   loading: boolean;
   setShowStatusUpdate: (show: boolean) => void;
   getDisplayStatus: (status: string) => string;
+  statusTouched: boolean;
 }
 
 const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
@@ -20,6 +21,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
   loading,
   setShowStatusUpdate,
   getDisplayStatus,
+  statusTouched,
 }) => (
   <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
     <h3 className="text-lg font-semibold text-white mb-4">Update Service Status</h3>
@@ -58,7 +60,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
           rows={3}
           placeholder="Enter completion remarks..."
         />
-        {!completionDescription.trim() && (
+        {statusTouched && !completionDescription.trim() && (
           <p className="text-red-500 text-xs mt-1">Completion description is required.</p>
         )}
       </div>
