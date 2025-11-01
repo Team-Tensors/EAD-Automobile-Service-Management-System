@@ -177,6 +177,10 @@ const EmployeeDashboard = () => {
       setTimeLogs([]);
     }
     setShowTimeLog(false); // Close Log Time panel when switching appointments
+    setShowStatusUpdate(false); // Close Update Status panel when switching appointments
+    setNewStatus('');
+    setCompletionDescription('');
+    setStatusTouched(false);
   }, [selectedAppointment, fetchTimeLogs]);
 
   // ------------------ Update Appointment Status ------------------
@@ -381,13 +385,25 @@ const EmployeeDashboard = () => {
                     newStatus={newStatus}
                     setNewStatus={setNewStatus}
                     completionDescription={completionDescription}
-                    setCompletionDescription={setCompletionDescription}
+                    setCompletionDescription={desc => {
+                      setCompletionDescription(desc);
+                      if (newStatus === 'COMPLETED' && desc.trim()) {
+                        setStatusTouched(false);
+                      }
+                    }}
                     updateAppointmentStatus={() => {
                       setStatusTouched(true);
                       updateAppointmentStatus();
                     }}
                     loading={loading}
-                    setShowStatusUpdate={setShowStatusUpdate}
+                    setShowStatusUpdate={show => {
+                      setShowStatusUpdate(show);
+                      if (!show) {
+                        setNewStatus('');
+                        setCompletionDescription('');
+                        setStatusTouched(false);
+                      }
+                    }}
                     getDisplayStatus={getDisplayStatus}
                     statusTouched={statusTouched}
                   />
