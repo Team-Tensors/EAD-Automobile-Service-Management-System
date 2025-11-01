@@ -1,5 +1,6 @@
 package com.ead.backend.entity;
 
+import com.ead.backend.enums.ShiftAssignmentType;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -19,12 +20,13 @@ public class ShiftSchedules {
     @Column(name = "shift_id")
     private UUID shiftId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "employee_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
     private User employee;
 
-    @Column(name = "appointment_id", nullable = false)
-    private UUID appointmentId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id", nullable = false)
+    private Appointment appointment;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
@@ -35,6 +37,8 @@ public class ShiftSchedules {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "assigned_by", nullable = false)
+    private ShiftAssignmentType assignedBy;
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
