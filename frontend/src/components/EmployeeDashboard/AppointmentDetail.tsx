@@ -98,29 +98,26 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
     </div>
     {/* SERVICE INFO */}
     <div className="grid grid-cols-2 gap-4 mb-6">
-      <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-        <Wrench className="w-5 h-5 text-orange-500" />
-        <div>
-          <p className="text-xs text-gray-400">Service / Modification</p>
-          <p className="font-semibold text-white">{appointment.serviceOrModificationName}</p>
-          <p className="text-xs text-gray-400">{appointment.serviceOrModificationDescription}</p>
+      {/* Service/Modification + Cost/Time Combined */}
+      <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 flex flex-col gap-3 md:col-span-2">
+        <div className="flex items-center gap-3 mb-1">
+          <Wrench className="w-5 h-5 text-orange-500" />
+          <span className="text-xs text-gray-400 font-medium">Service / Modification</span>
         </div>
-      </div>
-      <div className="flex flex-col gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-        <div className="flex items-center gap-2 text-gray-400">
-          <Coins className="w-5 h-5 text-orange-500" />
-          <span>Estimated Cost</span>
+        <div className="font-semibold text-white text-base leading-tight mb-1">{appointment.serviceOrModificationName}</div>
+        <div className="text-xs text-gray-400 mb-2">{appointment.serviceOrModificationDescription}</div>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-orange-500" />
+            <span className="text-xs text-gray-400 font-medium">Estimated Cost</span>
+            <span className="text-white font-semibold text-base ml-2">£{appointment.estimatedCost?.toFixed(2) ?? 'N/A'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Timer className="w-5 h-5 text-orange-500" />
+            <span className="text-xs text-gray-400 font-medium">Estimated Time</span>
+            <span className="text-white font-semibold text-base ml-2">{appointment.estimatedTimeMinutes ?? 'N/A'} mins</span>
+          </div>
         </div>
-        <p className="text-white font-semibold">
-          £{appointment.estimatedCost?.toFixed(2) ?? 'N/A'}
-        </p>
-        <div className="flex items-center gap-2 text-gray-400 mt-1">
-          <Timer className="w-5 h-5 text-orange-500" />
-          <span>Estimated Time</span>
-        </div>
-        <p className="text-white font-semibold">
-          {appointment.estimatedTimeMinutes ?? 'N/A'} mins
-        </p>
       </div>
     </div>
     {/* LAST SERVICE DATE */}
