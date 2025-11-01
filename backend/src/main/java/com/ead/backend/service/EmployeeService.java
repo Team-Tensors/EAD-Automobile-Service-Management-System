@@ -40,7 +40,7 @@ public class EmployeeService {
      * @throws RuntimeException if no logs are found
      */
     @Transactional(readOnly = true)
-    public List<TimeLogResponseDTO> getTimeLogsByAppointmentAndEmployee(UUID appointmentId, Long employeeId) {
+    public List<TimeLogResponseDTO> getTimeLogsByAppointmentAndEmployee(UUID appointmentId, UUID employeeId) {
         logger.info("=== EMPLOYEE SERVICE - GET TIME LOGS BY APPOINTMENT AND EMPLOYEE METHOD STARTED ===");
         List<TimeLog> timeLogs = timeLogRepository.findByAppointmentIdAndUserId(appointmentId, employeeId);
         if (timeLogs.isEmpty()) {
@@ -65,7 +65,7 @@ public class EmployeeService {
      * @return list of appointments
      */
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByEmployee(Long employeeId, String status) {
+    public List<AppointmentDTO> getAppointmentsByEmployee(UUID employeeId, String status) {
         logger.info("=== EMPLOYEE SERVICE - GET APPOINTMENTS BY EMPLOYEE METHOD STARTED ===");
         List<String> allowedStatuses = List.of("CONFIRMED", "IN_PROGRESS", "COMPLETED");
         List<Appointment> appointments;
@@ -80,7 +80,7 @@ public class EmployeeService {
         return appointments.stream().map(a -> {
             // User details
             User user = a.getUser();
-            Long userId = user != null ? user.getId() : null;
+            UUID userId = user != null ? user.getId() : null;
             String userFullName = user != null ? user.getFullName() : null;
             String address = user != null ? user.getAddress() : null;
             String phoneNumber = user != null ? user.getPhoneNumber() : null;
@@ -106,7 +106,7 @@ public class EmployeeService {
             Integer estimatedTimeMinutes = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedTimeMinutes() : null;
 
             // Assigned employee IDs
-            Set<Long> assignedEmployeeIds = a.getAssignedEmployees()
+            Set<UUID> assignedEmployeeIds = a.getAssignedEmployees()
                     .stream()
                     .map(User::getId)
                     .collect(Collectors.toSet());
@@ -220,4 +220,3 @@ public class EmployeeService {
         timeLogRepository.save(timeLog);
     }
 }
-

@@ -124,21 +124,24 @@ const EmployeeDashboard = () => {
 
       if (!response.ok) throw new Error('Failed to fetch appointments');
       const data = await response.json();
-      setAppointments(data);
+      
+      // Ensure data is always an array
+      const appointmentsArray = Array.isArray(data) ? data : [];
+      setAppointments(appointmentsArray);
 
       setSelectedAppointment(prev => {
         if (prev) {
-          const stillExists = data.find((apt: Appointment) => apt.id === prev.id);
+          const stillExists = appointmentsArray.find((apt: Appointment) => apt.id === prev.id);
           if (stillExists) return stillExists;
         }
-        return data.length > 0 ? data[0] : null;
+        return appointmentsArray.length > 0 ? appointmentsArray[0] : null;
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  }, [EMPLOYEE_ID, statusFilter]);
+  }, [EMPLOYEE_ID, statusFilter, token]);
 
   // ------------------ Fetch Time Logs ------------------
   const fetchTimeLogs = useCallback(
@@ -162,7 +165,7 @@ const EmployeeDashboard = () => {
         setTimeLogs([]);
       }
     },
-    [EMPLOYEE_ID]
+    [EMPLOYEE_ID, token]
   );
 
   useEffect(() => {
