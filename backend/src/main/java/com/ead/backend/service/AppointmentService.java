@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +22,7 @@ public class AppointmentService {
     @Autowired private ServiceOrModificationRepository serviceOrModificationRepository;
     @Autowired private ServiceCenterRepository serviceCenterRepository;
     @Autowired private EmailService emailService;
+    @Autowired private NotificationService notificationService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a");
@@ -92,6 +94,21 @@ public class AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
+        // Send notification to customer
+        notificationService.sendNotification(
+                customer.getId(),
+                "APPOINTMENT_CREATED",
+                String.format("Your appointment for %s has been scheduled", som.getName()),
+                Map.of(
+                        "appointmentId", savedAppointment.getId().toString(),
+                        "service", som.getName(),
+                        "vehicle", vehicle.getBrand() + " " + vehicle.getModel(),
+                        "date", savedAppointment.getAppointmentDate().format(DATE_FORMATTER),
+                        "time", savedAppointment.getAppointmentDate().format(TIME_FORMATTER),
+                        "serviceCenter", serviceCenter.getName()
+                )
+        );
+
         // Send confirmation email
         try {
             emailService.sendAppointmentConfirmationEmail(
@@ -105,7 +122,6 @@ public class AppointmentService {
                     serviceCenter.getName()
             );
         } catch (Exception e) {
-            // Log but don't fail the appointment creation
             System.err.println("Failed to send appointment confirmation email: " + e.getMessage());
         }
 
@@ -150,11 +166,41 @@ public class AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
-        // Send assignment emails to employees
+        // Send notification to customer about assignment
+        notificationService.sendNotification(
+                savedAppointment.getUser().getId(),
+                "APPOINTMENT_ASSIGNED",
+                "Technicians have been assigned to your appointment",
+                Map.of(
+                        "appointmentId", savedAppointment.getId().toString(),
+                        "service", savedAppointment.getServiceOrModification().getName(),
+                        "employeeCount", employeeIds.size()
+                )
+        );
+
+        // Send notifications to assigned employees
         try {
             for (Long empId : employeeIds) {
                 User employee = userRepository.findById(empId).orElse(null);
                 if (employee != null) {
+                    // Send notification
+                    notificationService.sendNotification(
+                            employee.getId(),
+                            "TASK_ASSIGNED",
+                            String.format("You've been assigned to %s appointment",
+                                    savedAppointment.getServiceOrModification().getName()),
+                            Map.of(
+                                    "appointmentId", savedAppointment.getId().toString(),
+                                    "service", savedAppointment.getServiceOrModification().getName(),
+                                    "vehicle", savedAppointment.getVehicle().getBrand() + " " +
+                                            savedAppointment.getVehicle().getModel(),
+                                    "date", savedAppointment.getAppointmentDate().format(DATE_FORMATTER),
+                                    "time", savedAppointment.getAppointmentDate().format(TIME_FORMATTER),
+                                    "customer", savedAppointment.getUser().getFullName()
+                            )
+                    );
+
+                    // Send email
                     emailService.sendEmployeeAssignmentEmail(
                             employee.getEmail(),
                             employee.getFullName(),
@@ -168,7 +214,7 @@ public class AppointmentService {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to send employee assignment emails: " + e.getMessage());
+            System.err.println("Failed to send employee assignment notifications: " + e.getMessage());
         }
 
         return savedAppointment;
@@ -210,7 +256,22 @@ public class AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appt);
 
-        // Send work started notification to customer
+        // Send notification to customer
+        notificationService.sendNotification(
+                savedAppointment.getUser().getId(),
+                "APPOINTMENT_STARTED",
+                String.format("Work has started on your %s", savedAppointment.getVehicle().getModel()),
+                Map.of(
+                        "appointmentId", savedAppointment.getId().toString(),
+                        "service", savedAppointment.getServiceOrModification().getName(),
+                        "vehicle", savedAppointment.getVehicle().getBrand() + " " +
+                                savedAppointment.getVehicle().getModel(),
+                        "technician", employee.getFullName(),
+                        "startTime", savedAppointment.getStartTime().format(TIME_FORMATTER)
+                )
+        );
+
+        // Send work started email to customer
         try {
             emailService.sendAppointmentStartedEmail(
                     savedAppointment.getUser().getEmail(),
@@ -256,7 +317,23 @@ public class AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appt);
 
-        // Send completion notification to customer
+        // Send notification to customer
+        notificationService.sendNotification(
+                savedAppointment.getUser().getId(),
+                "APPOINTMENT_COMPLETED",
+                String.format("Your %s service has been completed!",
+                        savedAppointment.getServiceOrModification().getName()),
+                Map.of(
+                        "appointmentId", savedAppointment.getId().toString(),
+                        "service", savedAppointment.getServiceOrModification().getName(),
+                        "vehicle", savedAppointment.getVehicle().getBrand() + " " +
+                                savedAppointment.getVehicle().getModel(),
+                        "startTime", savedAppointment.getStartTime().format(TIME_FORMATTER),
+                        "endTime", savedAppointment.getEndTime().format(TIME_FORMATTER)
+                )
+        );
+
+        // Send completion email to customer
         try {
             emailService.sendAppointmentCompletedEmail(
                     savedAppointment.getUser().getEmail(),
