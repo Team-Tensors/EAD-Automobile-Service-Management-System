@@ -1,7 +1,7 @@
 package com.ead.backend.mappers;
 
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
-import com.ead.backend.dto.ShiftScheduleRequestDTO;
+
 import com.ead.backend.entity.Appointment;
 
 public class ShiftScheduleMapper {

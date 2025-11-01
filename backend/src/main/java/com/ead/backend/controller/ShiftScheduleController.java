@@ -3,17 +3,12 @@ package com.ead.backend.controller;
 import com.ead.backend.annotation.JwtSecurityAnnotations;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.dto.ShiftScheduleRequestDTO;
-import com.ead.backend.entity.Appointment;
-import com.ead.backend.entity.Vehicle;
 import com.ead.backend.service.ShiftScheduleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/shift")

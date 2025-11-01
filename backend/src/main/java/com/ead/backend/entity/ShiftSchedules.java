@@ -2,16 +2,18 @@ package com.ead.backend.entity;
 
 import com.ead.backend.enums.ShiftAssignmentType;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name = "shift_schedules", indexes = {
-        @Index(name = "idx_employee_date", columnList = "employee_id, shift_date"),
-        @Index(name = "idx_shift_date", columnList = "shift_date, start_time")
+        @Index(name = "idx_employee_start_time", columnList = "employee_id, start_time"),
+        @Index(name = "idx_start_time", columnList = "start_time")
 })
 public class ShiftSchedules {
 
@@ -20,11 +22,11 @@ public class ShiftSchedules {
     @Column(name = "shift_id")
     private UUID shiftId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
     private User employee;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
