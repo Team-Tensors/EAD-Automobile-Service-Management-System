@@ -396,7 +396,10 @@ const EmployeeDashboard = () => {
                   <TimeLogForm
                     timeLogForm={timeLogForm}
                     timeLogErrors={timeLogErrors}
-                    setTimeLogForm={setTimeLogForm}
+                    setTimeLogForm={form => {
+                      setTimeLogForm(form);
+                      if (timeLogTouched) validateTimeLog();
+                    }}
                     setTimeLogErrors={setTimeLogErrors}
                     calculateDuration={calculateDuration}
                     submitTimeLog={submitTimeLog}
