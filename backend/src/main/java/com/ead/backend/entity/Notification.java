@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notifications")
@@ -20,7 +21,7 @@ public class Notification {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private UUID userId;
 
     @Column(nullable = false)
     private String type;
@@ -49,7 +50,7 @@ public class Notification {
     }
 
     // Constructor for easy creation
-    public Notification(Long userId, String type, String message, String data) {
+    public Notification(UUID userId, String type, String message, String data) {
         this.userId = userId;
         this.type = type;
         this.message = message;
