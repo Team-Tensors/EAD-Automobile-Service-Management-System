@@ -1,4 +1,5 @@
 import React from 'react';
+import './custom-scrollbar.css';
 import { Car, Filter } from 'lucide-react';
 
 interface Appointment {
@@ -68,7 +69,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
         {error}
       </div>
     )}
-    <div className="space-y-3 max-h-[600px] overflow-y-auto">
+  <div className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
       {loading && appointments.length === 0 && (
         <div className="text-center py-8 text-gray-400">Loading appointments...</div>
       )}
