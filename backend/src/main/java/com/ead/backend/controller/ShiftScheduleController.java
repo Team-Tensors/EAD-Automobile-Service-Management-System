@@ -7,6 +7,9 @@ import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.Vehicle;
 import com.ead.backend.service.ShiftScheduleService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,12 +38,20 @@ public class ShiftScheduleController {
 
     /**
      * Get available appointments for self-assignment
-     * @param employeeId
+     *
      */
 
     @JwtSecurityAnnotations.EmployeeAccess
-    @GetMapping("/possible-appointments/{employeeId}")
-    public void getPossibleAppointments(@PathVariable("employeeId") Long employeeId){
+    @GetMapping("/possible-appointments")
+    public ResponseEntity<List<ShiftScheduleAppointmentsDTO>> getPossibleAppointments(Authentication authentication){
+        try {
+            String email = authentication.getName();
+            List<ShiftScheduleAppointmentsDTO> possibleAppointments = shiftScheduleService.getAvailableAppointmentsForEmployee(email);
+            return ResponseEntity.ok(possibleAppointments);
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).build();
+        }
+
     }
 
     @JwtSecurityAnnotations.AdminOnly
