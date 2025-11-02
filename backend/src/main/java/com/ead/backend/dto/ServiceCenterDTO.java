@@ -3,10 +3,11 @@ package com.ead.backend.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 public class ServiceCenterDTO {
-    private Long id;
+    private UUID id;
     private String name;
     private String address;
     private String city;
