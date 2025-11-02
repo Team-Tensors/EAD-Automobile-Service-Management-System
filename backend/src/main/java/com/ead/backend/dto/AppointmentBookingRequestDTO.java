@@ -18,7 +18,7 @@ public class AppointmentBookingRequestDTO {
     private Long serviceOrModificationId;
 
     @NotNull(message = "Service center ID is required")
-    private Long serviceCenterId;
+    private UUID serviceCenterId;
 
     @NotNull(message = "Appointment type is required")
     private AppointmentType appointmentType;
