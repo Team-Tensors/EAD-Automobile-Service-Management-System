@@ -1,4 +1,3 @@
-// src/components/my-services/MyServiceDetails.tsx
 import { MapPin, Clock, Car, Calendar, User, Download } from "lucide-react";
 import type { Service } from "../../types/myService";
 
