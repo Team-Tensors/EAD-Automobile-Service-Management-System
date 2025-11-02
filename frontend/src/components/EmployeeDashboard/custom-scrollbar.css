@@ -1,0 +1,17 @@
+/* Modern, minimal scrollbar for Assigned Services panel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #23272f;
+  border-radius: 8px;
+  border: 2px solid #18181b;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #23272f #18181b;
+}
