@@ -2,8 +2,11 @@ package com.ead.backend.service;
 
 import com.ead.backend.dto.EmployeeOptionDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
+import com.ead.backend.dto.ShiftScheduleRequestDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.ShiftSchedules;
+import com.ead.backend.entity.User;
+import com.ead.backend.enums.ShiftAssignmentType;
 import com.ead.backend.mappers.ShiftScheduleMapper;
 import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.ShiftSchedulesRepository;
@@ -53,6 +56,43 @@ public class ShiftScheduleService {
 
     }
 
+    /**
+     * DTO to return minimal employee information for assignment.
+     */
+    public static class EmployeeOptionDTO {
+        private final UUID id;
+        private final String email;
+        private final String fullName;
+        private final String phoneNumber;
+
+        public EmployeeOptionDTO(UUID id, String email, String fullName, String phoneNumber) {
+            this.id = id;
+            this.email = email;
+            this.fullName = fullName;
+            this.phoneNumber = phoneNumber;
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+    }
+
+    /**
+     * Returns employees who can be assigned to the given appointment (no conflicting shifts,
+     * has EMPLOYEE role and is active, and not already assigned to the appointment).
+     */
     public List<EmployeeOptionDTO> getPossibleEmployeesForAppointment(UUID appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("APPOINTMENT_NOT_FOUND"));
@@ -61,6 +101,7 @@ public class ShiftScheduleService {
         int estimatedDurationMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
         LocalDateTime endTime = startTime.plusMinutes(estimatedDurationMinutes);
 
+        // Find all users, filter by role EMPLOYEE, active, not already assigned, and no shift conflicts
         return userRepository.findAll().stream()
                 .filter(user -> user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName())))
                 .filter(user -> Boolean.TRUE.equals(user.getActive()))
@@ -68,5 +109,62 @@ public class ShiftScheduleService {
                 .filter(user -> shiftSchedulesRepository.findConflictingShifts(user.getEmail(), startTime, endTime).isEmpty())
                 .map(u -> new EmployeeOptionDTO(u.getId(), u.getEmail(), u.getFullName(), u.getPhoneNumber()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Assign an employee to an appointment (self-assignment by an employee).
+     * Validates caller identity, role, and shift conflicts. Creates a ShiftSchedules record
+     * and adds the employee to appointment.assignedEmployees.
+     */
+    public void assignEmployeeToAppointment(ShiftScheduleRequestDTO dto, String callerEmail) {
+        if (dto == null) throw new RuntimeException("INVALID_REQUEST");
+
+        UUID appointmentId = dto.getAppointmentId();
+        UUID employeeId = dto.getEmployeeId();
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("APPOINTMENT_NOT_FOUND"));
+
+        User employee = userRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
+
+        // Caller must be the same employee (self-assignment)
+        if (!employee.getEmail().equals(callerEmail)) {
+            throw new RuntimeException("UNAUTHORIZED");
+        }
+
+        // Check role
+        boolean isEmployee = employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()));
+        if (!isEmployee) {
+            throw new RuntimeException("USER_IS_NOT_EMPLOYEE");
+        }
+
+        // Time window
+        LocalDateTime startTime = appointment.getAppointmentDate();
+        int estimatedDurationMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
+        LocalDateTime endTime = startTime.plusMinutes(estimatedDurationMinutes);
+
+        // Check conflicts
+        List<ShiftSchedules> conflicts = shiftSchedulesRepository.findConflictingShifts(employee.getEmail(), startTime, endTime);
+        if (!conflicts.isEmpty()) {
+            throw new RuntimeException("EMPLOYEE_HAS_CONFLICTING_SHIFT");
+        }
+
+        // Create ShiftSchedules
+        ShiftSchedules shift = new ShiftSchedules();
+        shift.setEmployee(employee);
+        shift.setAppointment(appointment);
+        shift.setStartTime(startTime);
+        shift.setEndTime(endTime);
+        shift.setAssignedBy(ShiftAssignmentType.BY_SELF);
+
+        shiftSchedulesRepository.save(shift);
+
+        // Add employee to appointment assignedEmployees if not already present
+        boolean alreadyAssigned = appointment.getAssignedEmployees().stream().anyMatch(u -> u.getId().equals(employee.getId()));
+        if (!alreadyAssigned) {
+            appointment.getAssignedEmployees().add(employee);
+            appointmentRepository.save(appointment);
+        }
     }
 }

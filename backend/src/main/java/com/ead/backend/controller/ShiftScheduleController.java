@@ -60,7 +60,20 @@ public class ShiftScheduleController {
 
     @JwtSecurityAnnotations.EmployeeAccess
     @PostMapping("/assign-employee")
-    public void assignEmployee(@RequestBody ShiftScheduleRequestDTO shiftScheduleRequestDTO){
+    public ResponseEntity<Void> assignEmployee(Authentication authentication, @RequestBody ShiftScheduleRequestDTO shiftScheduleRequestDTO){
+        try {
+            String callerEmail = authentication.getName();
+            shiftScheduleService.assignEmployeeToAppointment(shiftScheduleRequestDTO, callerEmail);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            String msg = e.getMessage();
+            return switch (msg) {
+                case "APPOINTMENT_NOT_FOUND", "EMPLOYEE_NOT_FOUND" -> ResponseEntity.notFound().build();
+                case "UNAUTHORIZED" -> ResponseEntity.status(403).build();
+                case "EMPLOYEE_HAS_CONFLICTING_SHIFT", "USER_IS_NOT_EMPLOYEE" -> ResponseEntity.badRequest().build();
+                default -> ResponseEntity.status(500).build();
+            };
+        }
     }
 
 }
