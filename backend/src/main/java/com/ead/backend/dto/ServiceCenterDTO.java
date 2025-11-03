@@ -17,6 +17,7 @@ public class ServiceCenterDTO {
     private String email;
     private String operatingHours;
     private Boolean isActive;
+    private Integer centerSlot;
 
     public ServiceCenterDTO() {}
 
@@ -31,5 +32,6 @@ public class ServiceCenterDTO {
         this.email = center.getEmail();
         this.operatingHours = center.getOperatingHours();
         this.isActive = center.getIsActive();
+        this.centerSlot = center.getCenterSlot();
     }
 }
