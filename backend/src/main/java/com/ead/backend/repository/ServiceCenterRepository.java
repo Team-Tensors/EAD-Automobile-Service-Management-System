@@ -24,4 +24,6 @@ public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, UU
             @Param("radius") double radiusInKm);
 
     List<ServiceCenter> findByCityAndIsActiveTrue(String city);
+
+    List<ServiceCenter> findByIsActiveTrueAndCenterSlotGreaterThan(Integer slots);
 }
