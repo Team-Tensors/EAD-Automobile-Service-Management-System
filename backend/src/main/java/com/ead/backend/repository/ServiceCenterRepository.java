@@ -8,9 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, Long> {
+public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, UUID> {
 
     List<ServiceCenter> findByIsActiveTrue();
 

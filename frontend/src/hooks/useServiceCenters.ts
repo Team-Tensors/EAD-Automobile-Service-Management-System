@@ -1,4 +1,3 @@
-// hooks/useServiceCenters.ts
 import { useState, useEffect } from "react";
 import { fetchServiceCenters as apiFetchServiceCenters } from "../services/serviceCenterService";
 import type { ServiceCenter, UserLocation } from "../types/serviceCenter";
