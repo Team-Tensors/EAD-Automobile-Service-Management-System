@@ -1,6 +1,7 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.annotation.JwtSecurityAnnotations;
+import com.ead.backend.dto.EmployeeOptionDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.dto.ShiftScheduleRequestDTO;
 import com.ead.backend.service.ShiftScheduleService;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/shift")
@@ -51,7 +53,10 @@ public class ShiftScheduleController {
 
     @JwtSecurityAnnotations.AdminOnly
     @GetMapping("/possible-employees/{appointmentId}")
-    public void getPossibleEmployees(@PathVariable("appointmentId") Long appointmentId){}
+    public ResponseEntity<List<EmployeeOptionDTO>> getPossibleEmployees(@PathVariable("appointmentId") UUID appointmentId){
+        List<EmployeeOptionDTO> possibleEmployees = shiftScheduleService.getPossibleEmployeesForAppointment(appointmentId);
+        return ResponseEntity.ok(possibleEmployees);
+    }
 
     @JwtSecurityAnnotations.EmployeeAccess
     @PostMapping("/assign-employee")
