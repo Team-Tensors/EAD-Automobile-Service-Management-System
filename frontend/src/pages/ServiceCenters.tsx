@@ -1,4 +1,3 @@
-// pages/ServiceCenters.tsx
 import { useState, useEffect } from "react";
 import { Navigation } from "lucide-react";
 import "leaflet/dist/leaflet.css";
