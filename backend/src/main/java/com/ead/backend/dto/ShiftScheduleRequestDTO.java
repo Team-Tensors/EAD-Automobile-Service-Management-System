@@ -2,12 +2,13 @@ package com.ead.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import java.util.UUID;
 
 @Data
 public class ShiftScheduleRequestDTO {
     @NotNull(message = "Employee id required")
-    private Long employeeId;
+    private UUID employeeId;
 
     @NotNull(message = "Appointment id required")
-    private Long appointmentId;
+    private UUID appointmentId;
 }
