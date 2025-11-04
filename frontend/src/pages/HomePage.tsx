@@ -3,6 +3,7 @@ import Hero from "@/components/HomePage/Hero";
 import Features from "@/components/HomePage/Features";
 import Services from "@/components/HomePage/Services";
 import Footer from "@/components/Footer/Footer";
+import FooterTop from "@/components/Footer/FooterTop";
 import ContactUs from "@/components/HomePage/ContactUs";
 import { SponsorLogoSlider } from "@/components/HomePage/SponsorLogoSlider"
 import ServicesSlider from "@/components/HomePage/ServicesSlider"
@@ -35,8 +36,9 @@ const HomePage = () => {
         <ServicesSlider />
         <ContactUs />
       </main>
-      <SponsorLogoSlider logos={sponsorLogos} backgroundColor="bg-orange-600" speed={10} />
-      <Footer />
+        <SponsorLogoSlider logos={sponsorLogos} backgroundColor="bg-orange-600" speed={10} />
+        <FooterTop />
+        <Footer />
     </div>
   );
 };
