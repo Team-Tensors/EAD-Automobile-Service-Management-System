@@ -39,8 +39,8 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
   onSubmit,
   isSubmitting = false,
 }) => {
-  // Define available time slots (business hours: 8 AM - 6 PM, full hours only)
-  const timeSlots = [
+  // Define available time slots based on day of week
+  const weekdayTimeSlots = [
     { value: "08:00", label: "8:00 AM" },
     { value: "09:00", label: "9:00 AM" },
     { value: "10:00", label: "10:00 AM" },
@@ -52,13 +52,44 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
     { value: "16:00", label: "4:00 PM" },
     { value: "17:00", label: "5:00 PM" },
     { value: "18:00", label: "6:00 PM" },
+    { value: "19:00", label: "7:00 PM" },
   ];
 
-  // Get minimum date - if it's past 6 PM, set minimum to tomorrow
+  const weekendTimeSlots = [
+    { value: "09:00", label: "9:00 AM" },
+    { value: "10:00", label: "10:00 AM" },
+    { value: "11:00", label: "11:00 AM" },
+    { value: "12:00", label: "12:00 PM" },
+    { value: "13:00", label: "1:00 PM" },
+    { value: "14:00", label: "2:00 PM" },
+    { value: "15:00", label: "3:00 PM" },
+    { value: "16:00", label: "4:00 PM" },
+  ];
+
+  // Determine which time slots to use based on selected date
+  const getTimeSlots = () => {
+    if (!formData.appointmentDate) return weekdayTimeSlots; // Default to weekday slots
+    
+    const selectedDate = new Date(formData.appointmentDate + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
+    
+    // Weekend: Saturday (6) or Sunday (0)
+    return (dayOfWeek === 0 || dayOfWeek === 6) ? weekendTimeSlots : weekdayTimeSlots;
+  };
+
+  const timeSlots = getTimeSlots();
+
+  // Get minimum date - if it's past closing time, set minimum to tomorrow
   const now = new Date();
   const currentHour = now.getHours();
+  const dayOfWeek = now.getDay(); // 0=Sunday, 6=Saturday
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  
+  // Weekend closes at 4 PM (16:00), weekday closes at 7 PM (19:00)
+  const closingHour = isWeekend ? 16 : 19;
+  
   const minDate =
-    currentHour >= 18
+    currentHour >= closingHour
       ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
           .toISOString()
           .split("T")[0]
@@ -146,6 +177,18 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
             Preferred Time *
           </span>
         </label>
+        {formData.appointmentDate && (
+          <p className="text-xs text-gray-400 mb-2">
+            {(() => {
+              const selectedDate = new Date(formData.appointmentDate + 'T00:00:00');
+              const dayOfWeek = selectedDate.getDay();
+              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+              return isWeekend 
+                ? "⏰ Weekend hours: 9:00 AM - 4:00 PM"
+                : "⏰ Weekday hours: 8:00 AM - 7:00 PM";
+            })()}
+          </p>
+        )}
         <select
           name="appointmentTime"
           value={formData.appointmentTime}
