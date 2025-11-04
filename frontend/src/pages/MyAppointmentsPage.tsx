@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { AppointmentTypeValues } from "@/types/appointment";
 import {
   appointmentService,
@@ -16,6 +17,9 @@ const MyAppointmentsPage = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -34,6 +38,46 @@ const MyAppointmentsPage = () => {
 
     fetchAppointments();
   }, []);
+
+  const handleCancelClick = (appointmentId: string) => {
+    setAppointmentToCancel(appointmentId);
+    setShowCancelDialog(true);
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+
+    setCancellingId(appointmentToCancel);
+
+    const cancelPromise = appointmentService
+      .cancelAppointment(appointmentToCancel)
+      .then(() => {
+        // Update the appointment status to CANCELLED in the list
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === appointmentToCancel ? { ...apt, status: "CANCELLED" } : apt
+          )
+        );
+        setCancellingId(null);
+        setAppointmentToCancel(null);
+      })
+      .catch((error) => {
+        setCancellingId(null);
+        throw error;
+      });
+
+    toast.promise(cancelPromise, {
+      loading: "Cancelling appointment...",
+      success: "Appointment cancelled successfully!",
+      error: (err) => {
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to cancel appointment";
+        return errorMessage;
+      },
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -173,16 +217,19 @@ const MyAppointmentsPage = () => {
                         >
                           {appointment.status}
                         </span>
-                        <div className="flex gap-2 mt-2">
-                          <button className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-all text-sm">
-                            View Details
-                          </button>
-                          {appointment.status === "PENDING" && (
-                            <button className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm">
-                              Cancel
+                        {appointment.status === "PENDING" && (
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => handleCancelClick(appointment.id)}
+                              disabled={cancellingId === appointment.id}
+                              className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {cancellingId === appointment.id
+                                ? "Cancelling..."
+                                : "Cancel"}
                             </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -194,6 +241,21 @@ const MyAppointmentsPage = () => {
       </div>
 
       <Footer />
+
+      {/* Cancellation Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        onClose={() => {
+          setShowCancelDialog(false);
+          setAppointmentToCancel(null);
+        }}
+        onConfirm={handleCancelAppointment}
+        title="Cancel Appointment?"
+        message="Are you sure you want to cancel this appointment? This action cannot be undone."
+        confirmText="Yes, Cancel"
+        cancelText="No, Keep It"
+        isDestructive={true}
+      />
     </div>
   );
 };
