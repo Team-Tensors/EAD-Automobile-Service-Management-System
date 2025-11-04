@@ -200,6 +200,46 @@ public class AppointmentService {
     }
 
     // ===================================================================
+    // 2.1 CUSTOMER: Cancel appointment
+    // ===================================================================
+    public Appointment cancelAppointment(UUID appointmentId) {
+        User customer = getCurrentUser();
+
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // Verify ownership
+        if (!appointment.getUser().getId().equals(customer.getId())) {
+            throw new RuntimeException("You can only cancel your own appointments");
+        }
+
+        // Only allow cancellation of PENDING appointments
+        if (!"PENDING".equals(appointment.getStatus())) {
+            throw new RuntimeException("Only pending appointments can be cancelled");
+        }
+
+        appointment.setStatus("CANCELLED");
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        // Send notification to customer
+        notificationService.sendNotification(
+                customer.getId(),
+                "APPOINTMENT_CANCELLED",
+                String.format("Your appointment for %s has been cancelled", 
+                        savedAppointment.getServiceOrModification().getName()),
+                Map.of(
+                        "appointmentId", savedAppointment.getId().toString(),
+                        "service", savedAppointment.getServiceOrModification().getName(),
+                        "vehicle", savedAppointment.getVehicle().getBrand() + " " + 
+                                savedAppointment.getVehicle().getModel(),
+                        "date", savedAppointment.getAppointmentDate().format(DATE_FORMATTER)
+                )
+        );
+
+        return savedAppointment;
+    }
+
+    // ===================================================================
     // 3. ADMIN/MANAGER: Assign employees
     // ===================================================================
     public Appointment assignEmployees(UUID appointmentId, Set<UUID> employeeIds) {
