@@ -6,7 +6,7 @@ const base = "/appointments";
 export interface AppointmentBookingRequest {
   vehicleId: string; // UUID as string
   serviceOrModificationId: number;
-  serviceCenterId: number;
+  serviceCenterId: string; // UUID as string
   appointmentType: AppointmentType;
   appointmentDate: string; // ISO format: "2025-10-30T14:00:00"
   description?: string;
@@ -44,7 +44,7 @@ export const appointmentService = {
 
   // Get user's appointments
   getMyAppointments: async (): Promise<AppointmentSummary[]> => {
-    const res = await api.get(`${base}/my`);
+    const res = await api.get(`${base}/my-appointments`);
     return res.data;
   },
 };
