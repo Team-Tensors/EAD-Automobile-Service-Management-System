@@ -7,7 +7,7 @@ const Footer = () => {
   ];
 
   const businessHours = [
-    { day: "Monday to Friday:", time: "8:00 AM - 6:00 PM" },
+    { day: "Monday to Friday:", time: "8:00 AM - 7:00 PM" },
     { day: "Saturday/Sunday:", time: "9:00 AM - 4:00 PM" },
   ];
 
