@@ -7,7 +7,7 @@ const Footer = () => {
   ];
 
   const businessHours = [
-    { day: "Monday to Friday:", time: "8:00 AM - 6:00 PM" },
+    { day: "Monday to Friday:", time: "8:00 AM - 7:00 PM" },
     { day: "Saturday/Sunday:", time: "9:00 AM - 4:00 PM" },
   ];
 
@@ -16,7 +16,7 @@ const Footer = () => {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto">
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-30">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Newsletter Section */}
           <div>
             <h3 className="text-2xl font-bold mb-4 text-white uppercase tracking-wide font-heading">
