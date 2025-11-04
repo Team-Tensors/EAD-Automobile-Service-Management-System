@@ -14,7 +14,7 @@ import TimeLogForm from '@/components/EmployeeDashboard/TimeLogForm';
 import TimeLogList from '@/components/EmployeeDashboard/TimeLogList';
 import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
-import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
+import AuthenticatedNavbar from '@/components/CustomerNavbar/CustomerNavbar';
 import ShiftShedule from '@/components/EmployeeDashboard/ShiftShedule';
 
 const API_BASE_URL = 'http://localhost:4000/api/employee';
