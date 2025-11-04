@@ -3,6 +3,7 @@ package com.ead.backend.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -14,7 +15,7 @@ public class VehicleCreateDTO {
     @NotBlank(message = "Model is required")
     private String model;
 
-    @NotBlank(message = "Year is required")
+    @NotNull(message = "Year is required")
     @Min(value = 1900, message = "Year cannot be less than 1900")
     @Max(value = 2099, message = "Year cannot be greater than 2099")
     private Integer year;
