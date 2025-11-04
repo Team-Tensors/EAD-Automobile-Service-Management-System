@@ -91,7 +91,7 @@ public class EmployeeService {
             UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
-            String year = vehicle != null ? vehicle.getYear() : null;
+            Integer year = vehicle != null ? vehicle.getYear() : null;
             String color = vehicle != null ? vehicle.getColor() : null;
             LocalDateTime lastServiceDate = vehicle != null ? vehicle.getLastServiceDate() : null;
             String licensePlate = vehicle != null ? vehicle.getLicensePlate() : null;

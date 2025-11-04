@@ -96,14 +96,21 @@ const MyVehiclesPage = () => {
     setIsSubmitting(true);
     try {
       const { vehicleService } = await import("../services/vehicleService");
+
+      // Convert year from string to number for the API
+      const vehicleData = {
+        ...data,
+        year: parseInt(data.year, 10),
+      };
+
       if (isEditing && editingId !== null) {
-        const updated = await vehicleService.update(editingId, data);
+        const updated = await vehicleService.update(editingId, vehicleData);
         setVehicles((prev) =>
           prev.map((v) => (v.id === editingId ? updated : v))
         );
         toast.success("Vehicle updated successfully!");
       } else {
-        const created = await vehicleService.create(data);
+        const created = await vehicleService.create(vehicleData);
         setVehicles((prev) => [...prev, created]);
         toast.success("Vehicle added successfully!");
       }
@@ -141,7 +148,7 @@ const MyVehiclesPage = () => {
     setFormData({
       brand: vehicle.brand,
       model: vehicle.model,
-      year: vehicle.year,
+      year: vehicle.year.toString(), // Convert number to string for form
       color: vehicle.color,
       licensePlate: vehicle.licensePlate,
       lastServiceDate: dateOnly,
