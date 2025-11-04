@@ -15,13 +15,10 @@ public class AppointmentDTO {
     private UUID id;
     private UUID userId;
     private String userFullName;
-    private String address;
     private String phoneNumber;
-    private String email;
     private UUID vehicleId;
     private String brand;
     private String model;
-    private Integer year;
     private String color;
     private LocalDateTime lastServiceDate;
     private String licensePlate;
@@ -29,10 +26,8 @@ public class AppointmentDTO {
     private Long serviceOrModificationId;
     private String serviceOrModificationName;
     private String serviceOrModificationDescription;
-    private Double estimatedCost;
     private Integer estimatedTimeMinutes;
     private LocalDateTime appointmentDate;
     private String status;
     private String description;
-    private Set<UUID> assignedEmployeeIds;
 }
