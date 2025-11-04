@@ -1,8 +1,8 @@
 package com.ead.backend.service;
 
 import com.ead.backend.dto.EmployeeOptionDTO;
+import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
-import com.ead.backend.dto.ShiftScheduleRequestDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.ShiftSchedules;
 import com.ead.backend.entity.User;
@@ -37,21 +37,24 @@ public class ShiftScheduleService {
     }
 
     public List<ShiftScheduleAppointmentsDTO> getAvailableAppointmentsForEmployee(String employeeEmail) {
+        User employee = userRepository.findByEmail(employeeEmail)
+                .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
+        UUID employeeId = employee.getId();
         List<Appointment> pendingAppointments = appointmentRepository.findByStatus("PENDING");
         return pendingAppointments.stream()
-                .filter(apt -> canEmployeeTakeAppointment(employeeEmail, apt))
+                .filter(apt -> canEmployeeTakeAppointment(employeeId, apt))
                 .map(ShiftScheduleMapper::toDTO)
                 .toList();
     }
 
 
-    private boolean canEmployeeTakeAppointment(String employeeEmail, Appointment appointment) {
+    private boolean canEmployeeTakeAppointment(UUID employeeId, Appointment appointment) {
 
         LocalDateTime startTime = appointment.getAppointmentDate();
         int estimatedDurationMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
         LocalDateTime endTime = startTime.plusMinutes(estimatedDurationMinutes);
 
-        List<ShiftSchedules> conflicts = shiftSchedulesRepository.findConflictingShifts(employeeEmail, startTime, endTime);
+        List<ShiftSchedules> conflicts = shiftSchedulesRepository.findConflictingShifts(employeeId, startTime, endTime);
         return conflicts.isEmpty();
 
     }
@@ -72,7 +75,7 @@ public class ShiftScheduleService {
                 .filter(user -> user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName())))
                 .filter(user -> Boolean.TRUE.equals(user.getActive()))
                 .filter(user -> appointment.getAssignedEmployees().stream().noneMatch(ae -> ae.getId().equals(user.getId())))
-                .filter(user -> shiftSchedulesRepository.findConflictingShifts(user.getEmail(), startTime, endTime).isEmpty())
+                .filter(user -> shiftSchedulesRepository.findConflictingShifts(user.getId(), startTime, endTime).isEmpty())
                 .map(u -> new EmployeeOptionDTO(u.getId(), u.getEmail(), u.getFullName(), u.getPhoneNumber()))
                 .collect(Collectors.toList());
     }
@@ -85,22 +88,16 @@ public class ShiftScheduleService {
      * Validates caller identity, role, and shift conflicts. Creates a ShiftSchedules record
      * and adds the employee to appointment.assignedEmployees.
      */
-    public void assignEmployeeToAppointment(ShiftScheduleRequestDTO dto, String callerEmail) {
+    public void selfAssignEmployeeToAppointment(SelfShiftScheduleRequestDTO dto, String callerEmail) {
         if (dto == null) throw new RuntimeException("INVALID_REQUEST");
 
         UUID appointmentId = dto.getAppointmentId();
-        UUID employeeId = dto.getEmployeeId();
 
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("APPOINTMENT_NOT_FOUND"));
 
-        User employee = userRepository.findById(employeeId)
+        User employee = userRepository.findByEmail(callerEmail)
                 .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
-
-        // Caller must be the same employee (self-assignment)
-        if (!employee.getEmail().equals(callerEmail)) {
-            throw new RuntimeException("UNAUTHORIZED");
-        }
 
         // Check role
         boolean isEmployee = employee.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName()));
@@ -114,7 +111,7 @@ public class ShiftScheduleService {
         LocalDateTime endTime = startTime.plusMinutes(estimatedDurationMinutes);
 
         // Check conflicts
-        List<ShiftSchedules> conflicts = shiftSchedulesRepository.findConflictingShifts(employee.getEmail(), startTime, endTime);
+        List<ShiftSchedules> conflicts = shiftSchedulesRepository.findConflictingShifts(employee.getId(), startTime, endTime);
         if (!conflicts.isEmpty()) {
             throw new RuntimeException("EMPLOYEE_HAS_CONFLICTING_SHIFT");
         }
