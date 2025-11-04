@@ -83,8 +83,39 @@ public class AppointmentService {
         if (appointment.getAppointmentDate() == null) {
             throw new RuntimeException("Please select your preferred appointment date and time");
         }
-        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new RuntimeException("Appointment date must be at least 1 hour from now");
+
+        // Check if appointment date is in the past
+        LocalDateTime now = LocalDateTime.now();
+        if (appointment.getAppointmentDate().isBefore(now)) {
+            throw new RuntimeException("Appointment date cannot be in the past");
+        }
+
+        // Check if appointment is at least 1 hour from now
+        if (appointment.getAppointmentDate().isBefore(now.plusHours(1))) {
+            throw new RuntimeException("Appointment must be scheduled at least 1 hour from now");
+        }
+
+        // Validate appointment time - must be on the full hour (no minutes)
+        int minute = appointment.getAppointmentDate().getMinute();
+        if (minute != 0) {
+            throw new RuntimeException("Appointment time must be on the hour (e.g., 8:00, 9:00, etc.)");
+        }
+
+        // Validate appointment time is within business hours (8 AM - 6 PM)
+        int hour = appointment.getAppointmentDate().getHour();
+        if (hour < 8 || hour > 18) {
+            throw new RuntimeException("Appointment time must be between 8:00 AM and 6:00 PM");
+        }
+
+        // Check for duplicate appointment (same vehicle, same date/time, not cancelled)
+        List<Appointment> existingAppointments = appointmentRepository
+                .findByVehicleIdAndAppointmentDateAndStatusNotCancelled(
+                        vehicle.getId(),
+                        appointment.getAppointmentDate()
+                );
+        
+        if (!existingAppointments.isEmpty()) {
+            throw new RuntimeException("This vehicle already has an appointment scheduled for the selected date and time");
         }
 
         // Finalize
