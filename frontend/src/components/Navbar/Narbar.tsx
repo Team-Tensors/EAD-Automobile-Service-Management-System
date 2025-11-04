@@ -1,16 +1,39 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Use targetId for in-page scrolling. If user is not on home page, navigate to
+  // '/' and pass the target id via location.state so HomePage can scroll on mount.
   const navLinks = [
-    { name: "HOME", path: "/" },
-    { name: "ABOUT US", path: "/about" },
-    { name: "SERVICES", path: "/services" },
-    { name: "CONTACT", path: "/contact" },
+    { name: "HOME", targetId: "top" },
+    { name: "ABOUT US", targetId: "choose-us" },
+    { name: "SERVICES", targetId: "services" },
+    { name: "CONTACT", targetId: "contact-us" },
   ];
+
+  const navigateToSection = (targetId: string) => {
+    if (!targetId) return;
+
+    // If already on home page, scroll directly
+    if (location.pathname === "/") {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } else {
+      // Navigate to home and pass desired id in state
+      navigate("/", { state: { scrollToId: targetId } });
+    }
+
+    // Close mobile menu if open
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="fixed top-6 left-0 right-0 z-50 pointer-events-none">
@@ -29,13 +52,13 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.name}
-                to={link.path}
+                onClick={() => navigateToSection(link.targetId)}
                 className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
               >
                 {link.name}
-              </Link>
+              </button>
             ))}
           </div>
 
@@ -65,14 +88,13 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 space-y-4 mt-2 px-2">
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.name}
-                to={link.path}
+                onClick={() => navigateToSection(link.targetId)}
                 className="block text-sm font-medium text-gray-400 hover:text-white transition-colors"
-                onClick={() => setIsMenuOpen(false)}
               >
                 {link.name}
-              </Link>
+              </button>
             ))}
             <div className="flex flex-col space-y-2 pt-4 border-t border-zinc-800">
               <Link to="/login" className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 rounded-md transition-colors text-center">
