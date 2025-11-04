@@ -74,7 +74,7 @@ public class AppointmentBookingController {
     // ===================================================================
     // 2. GET MY APPOINTMENTS (Customer)
     // ===================================================================
-    @GetMapping("/my")
+    @GetMapping("/my-appointments")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AppointmentSummaryDTO>> getMyAppointments() {
         List<AppointmentSummaryDTO> appointments = appointmentService.getUserAppointments()
