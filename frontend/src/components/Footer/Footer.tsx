@@ -16,7 +16,7 @@ const Footer = () => {
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto">
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-30">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Newsletter Section */}
           <div>
             <h3 className="text-2xl font-bold mb-4 text-white uppercase tracking-wide font-heading">
