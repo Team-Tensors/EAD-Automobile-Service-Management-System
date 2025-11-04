@@ -55,40 +55,6 @@ public class ShiftScheduleService {
         return conflicts.isEmpty();
 
     }
-
-    /**
-     * DTO to return minimal employee information for assignment.
-     */
-    public static class EmployeeOptionDTO {
-        private final UUID id;
-        private final String email;
-        private final String fullName;
-        private final String phoneNumber;
-
-        public EmployeeOptionDTO(UUID id, String email, String fullName, String phoneNumber) {
-            this.id = id;
-            this.email = email;
-            this.fullName = fullName;
-            this.phoneNumber = phoneNumber;
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getFullName() {
-            return fullName;
-        }
-
-        public String getPhoneNumber() {
-            return phoneNumber;
-        }
-    }
-
     /**
      * Returns employees who can be assigned to the given appointment (no conflicting shifts,
      * has EMPLOYEE role and is active, and not already assigned to the appointment).
@@ -111,6 +77,9 @@ public class ShiftScheduleService {
                 .collect(Collectors.toList());
     }
 
+    // TODO: Add transactional annotation to make sure ACID properties are maintained
+    // TODO: Need to send Notification to Employee when assigned by Admin
+    // TODO: Need to send Notification to Employee when self-assigned by Employee
     /**
      * Assign an employee to an appointment (self-assignment by an employee).
      * Validates caller identity, role, and shift conflicts. Creates a ShiftSchedules record
