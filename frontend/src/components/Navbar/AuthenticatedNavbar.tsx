@@ -137,7 +137,7 @@ const AuthenticatedNavbar = () => {
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 mt-3 w-35 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-50">
                   <Link
                     to="/profile"
                     onClick={() => setIsProfileDropdownOpen(false)}
