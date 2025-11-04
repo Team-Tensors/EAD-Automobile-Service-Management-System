@@ -9,12 +9,15 @@ export interface Notification {
 }
 
 export type NotificationType =
-  | "LOGIN"
-  | "BOOKING"
-  | "PAYMENT"
-  | "SERVICE"
-  | "REMINDER"
-  | "SYSTEM"
+  | "LOGIN_SUCCESS"
+  | "APPOINTMENT_CREATED"
+  | "APPOINTMENT_ASSIGNED"
+  | "TASK_ASSIGNED"
+  | "APPOINTMENT_STARTED"
+  | "APPOINTMENT_COMPLETED"
+  | "VEHICLE_ADDED"
+  | "VEHICLE_UPDATED"
+  | "VEHICLE_DELETED"
   | string;
 
 export interface NotificationEventDTO {

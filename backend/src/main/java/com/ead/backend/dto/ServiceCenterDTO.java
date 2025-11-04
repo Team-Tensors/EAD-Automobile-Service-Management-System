@@ -3,10 +3,11 @@ package com.ead.backend.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 public class ServiceCenterDTO {
-    private Long id;
+    private UUID id;
     private String name;
     private String address;
     private String city;
@@ -16,6 +17,7 @@ public class ServiceCenterDTO {
     private String email;
     private String operatingHours;
     private Boolean isActive;
+    private Integer centerSlot;
 
     public ServiceCenterDTO() {}
 
@@ -30,5 +32,6 @@ public class ServiceCenterDTO {
         this.email = center.getEmail();
         this.operatingHours = center.getOperatingHours();
         this.isActive = center.getIsActive();
+        this.centerSlot = center.getCenterSlot();
     }
 }

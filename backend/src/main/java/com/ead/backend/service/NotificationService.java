@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -23,9 +24,9 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final ObjectMapper objectMapper;
 
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final Map<UUID, SseEmitter> emitters = new ConcurrentHashMap<>();
 
-    public SseEmitter subscribe(Long userId) {
+    public SseEmitter subscribe(UUID userId) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.put(userId, emitter);
 
@@ -50,7 +51,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void sendNotification(Long userId, String type, String message, Object data) {
+    public void sendNotification(UUID userId, String type, String message, Object data) {
         try {
             // 1. Save to database
             String dataJson = objectMapper.writeValueAsString(data);
@@ -67,7 +68,7 @@ public class NotificationService {
         }
     }
 
-    private void sendSseEvent(Long userId, NotificationEventDTO event) {
+    private void sendSseEvent(UUID userId, NotificationEventDTO event) {
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
@@ -101,12 +102,12 @@ public class NotificationService {
     }
 
     // Get all notifications for a user
-    public List<Notification> getUserNotifications(Long userId) {
+    public List<Notification> getUserNotifications(UUID userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     // Get unread notifications
-    public List<Notification> getUnreadNotifications(Long userId) {
+    public List<Notification> getUnreadNotifications(UUID userId) {
         return notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
     }
 
@@ -121,7 +122,7 @@ public class NotificationService {
 
     // Mark all as read
     @Transactional
-    public void markAllAsRead(Long userId) {
+    public void markAllAsRead(UUID userId) {
         List<Notification> notifications = notificationRepository
                 .findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
         notifications.forEach(n -> n.setIsRead(true));
@@ -129,13 +130,13 @@ public class NotificationService {
     }
 
     // Get unread count
-    public Long getUnreadCount(Long userId) {
+    public Long getUnreadCount(UUID userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
     // Clear all notifications
     @Transactional
-    public void clearAllNotifications(Long userId) {
+    public void clearAllNotifications(UUID userId) {
         notificationRepository.deleteByUserId(userId);
     }
 }
