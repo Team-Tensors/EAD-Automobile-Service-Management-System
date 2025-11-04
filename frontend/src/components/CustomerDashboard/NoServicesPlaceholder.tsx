@@ -36,7 +36,7 @@ const NoServicesPlaceholder = () => {
   ];
 
   return (
-    <div className="py-16 px-4">
+    <div className="py-16 px-0">
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h2 className="text-3xl font-extrabold bg-orange-500 bg-clip-text text-transparent animate-pulse">
