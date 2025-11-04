@@ -2,8 +2,8 @@ package com.ead.backend.controller;
 
 import com.ead.backend.annotation.JwtSecurityAnnotations;
 import com.ead.backend.dto.EmployeeOptionDTO;
+import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
-import com.ead.backend.dto.ShiftScheduleRequestDTO;
 import com.ead.backend.service.ShiftScheduleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -59,11 +59,11 @@ public class ShiftScheduleController {
     }
 
     @JwtSecurityAnnotations.EmployeeAccess
-    @PostMapping("/assign-employee")
-    public ResponseEntity<Void> assignEmployee(Authentication authentication, @RequestBody ShiftScheduleRequestDTO shiftScheduleRequestDTO){
+    @PostMapping("/self-assign-employee")
+    public ResponseEntity<Void> assignEmployee(Authentication authentication, @RequestBody SelfShiftScheduleRequestDTO SelfshiftScheduleRequestDTO){
         try {
             String callerEmail = authentication.getName();
-            shiftScheduleService.assignEmployeeToAppointment(shiftScheduleRequestDTO, callerEmail);
+            shiftScheduleService.selfAssignEmployeeToAppointment(SelfshiftScheduleRequestDTO, callerEmail);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             String msg = e.getMessage();
