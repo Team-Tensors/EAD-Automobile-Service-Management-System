@@ -44,7 +44,7 @@ export const appointmentService = {
 
   // Get user's appointments
   getMyAppointments: async (): Promise<AppointmentSummary[]> => {
-    const res = await api.get(`${base}/my`);
+    const res = await api.get(`${base}/my-appointments`);
     return res.data;
   },
 };

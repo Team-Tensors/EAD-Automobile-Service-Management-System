@@ -21,7 +21,7 @@ public class AppointmentDTO {
     private UUID vehicleId;
     private String brand;
     private String model;
-    private String year;
+    private Integer year;
     private String color;
     private LocalDateTime lastServiceDate;
     private String licensePlate;
