@@ -9,6 +9,8 @@ import { SponsorLogoSlider } from "@/components/HomePage/SponsorLogoSlider"
 import ServicesSlider from "@/components/HomePage/ServicesSlider"
 import AboutSection from "@/components/HomePage/AboutSection";
 import ChooseUs from "@/components/HomePage/ChooseUs";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 
 const sponsorLogos = [
@@ -24,17 +26,38 @@ const sponsorLogos = [
 ]
 
 const HomePage = () => {
+  const location = useLocation();
+
+  // If navigated with state.scrollToId, scroll to that section on mount.
+  useEffect(() => {
+    const idFromState = (location.state as any)?.scrollToId;
+    const hashId = window.location.hash ? window.location.hash.substring(1) : null;
+    const targetId = idFromState || hashId;
+    if (targetId) {
+      const el = document.getElementById(targetId);
+      if (el) {
+        // small timeout to allow layout/mounting to finish
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      }
+
+      // Clear navigation state so back/forward won't keep resubmitting the scroll state
+      if (idFromState) {
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      }
+    }
+  }, [location]);
+
   return (
     <div className="min-h-screen bg-[#000000]">
       <Navbar />
       <main>
-        <Hero />
+        <section id="top"><Hero /></section>
         <Features />
         <AboutSection />
-        <ChooseUs />
-        <Services />
+        <section id="choose-us"><ChooseUs /></section>
+        <section id="services"><Services /></section>
         <ServicesSlider />
-        <ContactUs />
+        <section id="contact-us"><ContactUs /></section>
       </main>
         <SponsorLogoSlider logos={sponsorLogos} backgroundColor="bg-orange-600" speed={10} />
         <FooterTop />
