@@ -39,6 +39,48 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
   onSubmit,
   isSubmitting = false,
 }) => {
+  // Define available time slots (business hours: 8 AM - 6 PM, full hours only)
+  const timeSlots = [
+    { value: "08:00", label: "8:00 AM" },
+    { value: "09:00", label: "9:00 AM" },
+    { value: "10:00", label: "10:00 AM" },
+    { value: "11:00", label: "11:00 AM" },
+    { value: "12:00", label: "12:00 PM" },
+    { value: "13:00", label: "1:00 PM" },
+    { value: "14:00", label: "2:00 PM" },
+    { value: "15:00", label: "3:00 PM" },
+    { value: "16:00", label: "4:00 PM" },
+    { value: "17:00", label: "5:00 PM" },
+    { value: "18:00", label: "6:00 PM" },
+  ];
+
+  // Get minimum date - if it's past 6 PM, set minimum to tomorrow
+  const now = new Date();
+  const currentHour = now.getHours();
+  const minDate = currentHour >= 18 
+    ? new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+    : now.toISOString().split("T")[0];
+  
+  const today = now.toISOString().split("T")[0];
+
+  // Check if a time slot is available (not in the past)
+  const isTimeSlotAvailable = (timeValue: string) => {
+    if (!formData.appointmentDate) return true; // Allow all if no date selected
+
+    const selectedDate = formData.appointmentDate;
+    const isToday = selectedDate === today;
+
+    if (!isToday) return true; // All times available for future dates
+
+    // For today, check if the time slot has passed
+    const now = new Date();
+    const currentHour = now.getHours();
+    const slotHour = parseInt(timeValue.split(":")[0]);
+
+    // Add 1 hour buffer (must book at least 1 hour ahead)
+    return slotHour > currentHour;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -83,6 +125,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
           name="appointmentDate"
           value={formData.appointmentDate}
           onChange={onChange}
+          min={minDate}
           className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white"
         />
       </div>
@@ -94,13 +137,31 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
             Preferred Time *
           </span>
         </label>
-        <input
-          type="time"
+        <select
           name="appointmentTime"
           value={formData.appointmentTime}
           onChange={onChange}
-          className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white"
-        />
+          className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          <option value="" className="bg-zinc-800 text-gray-400">
+            Select a time slot
+          </option>
+          {timeSlots.map((slot) => {
+            const isAvailable = isTimeSlotAvailable(slot.value);
+            return (
+              <option
+                key={slot.value}
+                value={slot.value}
+                disabled={!isAvailable}
+                className={`bg-zinc-800 ${
+                  isAvailable ? "text-white" : "text-gray-500"
+                }`}
+              >
+                {slot.label} {!isAvailable ? "(Not available)" : ""}
+              </option>
+            );
+          })}
+        </select>
       </div>
 
       <div>
