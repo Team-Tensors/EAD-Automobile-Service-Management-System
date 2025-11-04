@@ -359,8 +359,8 @@ const AdminDashboard = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-0">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
