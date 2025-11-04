@@ -24,7 +24,7 @@ const ServiceCenters = () => {
   }, [userLocation]);
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
+    <div className="min-h-screen bg-black flex flex-col pt-22">
       <AuthenticatedNavbar />
       {/* Header */}
       <header className="bg-black border-b border-zinc-800">
