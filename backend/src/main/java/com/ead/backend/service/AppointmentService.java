@@ -114,9 +114,10 @@ public class AppointmentService {
 
         // Check for duplicate appointment (same vehicle, same date/time, not cancelled)
         List<Appointment> existingAppointments = appointmentRepository
-                .findByVehicleIdAndAppointmentDateAndStatusNotCancelled(
+                .findByVehicleIdAndAppointmentDateAndStatusNot(
                         vehicle.getId(),
-                        appointment.getAppointmentDate()
+                        appointment.getAppointmentDate(),
+                        "CANCELLED"
                 );
         
         if (!existingAppointments.isEmpty()) {
@@ -125,9 +126,10 @@ public class AppointmentService {
 
         // Check if service center has available slots for the selected date/time
         Long bookedSlots = appointmentRepository
-                .countByServiceCenterIdAndAppointmentDateAndStatusNotCancelled(
+                .countByServiceCenterIdAndAppointmentDateAndStatusNot(
                         serviceCenter.getId(),
-                        appointment.getAppointmentDate()
+                        appointment.getAppointmentDate(),
+                        "CANCELLED"
                 );
         
         if (bookedSlots >= serviceCenter.getCenterSlot()) {
@@ -180,6 +182,7 @@ public class AppointmentService {
     // ===================================================================
     // 2. CUSTOMER: Get own appointments
     // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Appointment> getUserAppointments() {
         User customer = getCurrentUser();
         return appointmentRepository.findByUserId(customer.getId());
