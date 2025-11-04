@@ -6,7 +6,6 @@ interface Appointment {
   id: string;
   brand: string;
   model: string;
-  year: string;
   appointmentType: string;
   status: string;
   appointmentDate: string;
