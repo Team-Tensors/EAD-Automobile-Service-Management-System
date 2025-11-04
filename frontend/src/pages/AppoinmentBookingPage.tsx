@@ -204,7 +204,7 @@ const AppointmentBookingPage = () => {
     const createDto: VehicleCreateDto = {
       brand: vehicleData.brand,
       model: vehicleData.model,
-      year: vehicleData.year,
+      year: parseInt(vehicleData.year, 10), // Convert string to number
       color: vehicleData.color,
       licensePlate: vehicleData.licensePlate,
       lastServiceDate: vehicleData.lastServiceDate || undefined,
