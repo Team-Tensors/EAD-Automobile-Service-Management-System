@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "service_center")
@@ -12,8 +13,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ServiceCenter {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "UUID")
+    private UUID id;
 
     @Column(nullable = false)
     private String name;
@@ -38,4 +40,7 @@ public class ServiceCenter {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "center_slot", nullable = false)
+    private Integer centerSlot = 2; // Default to 2 slots
 }
