@@ -47,6 +47,11 @@ export const appointmentService = {
     const res = await api.get(`${base}/my-appointments`);
     return res.data;
   },
+
+  // Cancel an appointment
+  cancelAppointment: async (appointmentId: string): Promise<void> => {
+    await api.put(`${base}/${appointmentId}/cancel`);
+  },
 };
 
 export default appointmentService;

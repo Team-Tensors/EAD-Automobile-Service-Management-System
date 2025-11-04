@@ -217,12 +217,12 @@ const MyVehiclesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-15">
+    <div className="min-h-screen bg-black flex flex-col pt-0">
       <AuthenticatedNavbar />
 
       {/* Header Section with proper spacing from navbar */}
       <div className="bg-linear-to-r from-zinc-900 to-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
           <h1 className="text-3xl font-bold text-white">My Vehicles</h1>
         </div>
       </div>

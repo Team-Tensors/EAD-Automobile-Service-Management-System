@@ -24,13 +24,10 @@ interface Appointment {
   id: string;
   userId: number;
   userFullName: string;
-  address: string;
   phoneNumber: string;
-  email: string;
   vehicleId: string;
   brand: string;
   model: string;
-  year: string;
   color: string;
   lastServiceDate: string | null;
   licensePlate: string;
@@ -38,12 +35,10 @@ interface Appointment {
   serviceOrModificationId: number;
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
-  estimatedCost: number;
   estimatedTimeMinutes: number;
   appointmentDate: string;
   status: string;
   description: string;
-  assignedEmployeeIds: number[];
 }
 
 interface TimeLog {

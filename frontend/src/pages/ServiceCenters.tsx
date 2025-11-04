@@ -28,7 +28,7 @@ const ServiceCenters = () => {
       <AuthenticatedNavbar />
       {/* Header */}
       <header className="bg-black border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-0 py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Service Centers</h1>
