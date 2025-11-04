@@ -317,6 +317,13 @@ public class AppointmentService {
 
         Appointment savedAppointment = appointmentRepository.save(appt);
 
+        // Update vehicle's last service date if this is a SERVICE appointment
+        if (savedAppointment.getAppointmentType() == AppointmentType.SERVICE) {
+            Vehicle vehicle = savedAppointment.getVehicle();
+            vehicle.setLastServiceDate(LocalDateTime.now());
+            vehicleRepository.save(vehicle);
+        }
+
         // Send notification to customer
         notificationService.sendNotification(
                 savedAppointment.getUser().getId(),
