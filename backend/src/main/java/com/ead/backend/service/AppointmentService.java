@@ -5,6 +5,7 @@ import com.ead.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -202,6 +203,7 @@ public class AppointmentService {
     // ===================================================================
     // 2.1 CUSTOMER: Cancel appointment
     // ===================================================================
+    @Transactional
     public Appointment cancelAppointment(UUID appointmentId) {
         User customer = getCurrentUser();
 
@@ -221,20 +223,25 @@ public class AppointmentService {
         appointment.setStatus("CANCELLED");
         Appointment savedAppointment = appointmentRepository.save(appointment);
 
-        // Send notification to customer
-        notificationService.sendNotification(
-                customer.getId(),
-                "APPOINTMENT_CANCELLED",
-                String.format("Your appointment for %s has been cancelled", 
-                        savedAppointment.getServiceOrModification().getName()),
-                Map.of(
-                        "appointmentId", savedAppointment.getId().toString(),
-                        "service", savedAppointment.getServiceOrModification().getName(),
-                        "vehicle", savedAppointment.getVehicle().getBrand() + " " + 
-                                savedAppointment.getVehicle().getModel(),
-                        "date", savedAppointment.getAppointmentDate().format(DATE_FORMATTER)
-                )
-        );
+        // Try to send notification to customer (don't fail if notification fails)
+        try {
+            notificationService.sendNotification(
+                    customer.getId(),
+                    "APPOINTMENT_CANCELLED",
+                    String.format("Your appointment for %s has been cancelled", 
+                            savedAppointment.getServiceOrModification().getName()),
+                    Map.of(
+                            "appointmentId", savedAppointment.getId().toString(),
+                            "service", savedAppointment.getServiceOrModification().getName(),
+                            "vehicle", savedAppointment.getVehicle().getBrand() + " " + 
+                                    savedAppointment.getVehicle().getModel(),
+                            "date", savedAppointment.getAppointmentDate().format(DATE_FORMATTER)
+                    )
+            );
+        } catch (Exception e) {
+            // Log the error but don't fail the cancellation
+            System.err.println("Failed to send cancellation notification: " + e.getMessage());
+        }
 
         return savedAppointment;
     }
