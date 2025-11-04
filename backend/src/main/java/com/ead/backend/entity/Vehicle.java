@@ -27,7 +27,7 @@ public class Vehicle {
     private String model;
 
     @Column(nullable = false)
-    private int year;
+    private Integer year;
 
     @Column(nullable = false)
     private String color;
