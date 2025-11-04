@@ -32,4 +32,10 @@ public class ServiceCenterService {
                 .map(ServiceCenterDTO::new)
                 .collect(Collectors.toList());
     }
+
+    public List<ServiceCenterDTO> getWithAvailableSlots() {
+        return repository.findByIsActiveTrueAndCenterSlotGreaterThan(0).stream()
+                .map(ServiceCenterDTO::new)
+                .collect(Collectors.toList());
+    }
 }

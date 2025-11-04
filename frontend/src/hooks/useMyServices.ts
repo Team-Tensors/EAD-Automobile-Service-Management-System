@@ -1,4 +1,3 @@
-// src/hooks/useMyServices.ts
 import { useState, useEffect } from "react";
 import { appointmentService } from "../services/appointmentService";
 import { myServicesRealtimeService } from "../services/myServicesRealtimeService";

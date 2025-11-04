@@ -1,5 +1,3 @@
-// src/types/myService.ts
-// Maps backend AppointmentSummary → frontend Service
 import type { AppointmentSummary } from "@/services/appointmentService";
 
 export interface Service {
