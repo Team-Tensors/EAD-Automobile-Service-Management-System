@@ -7,6 +7,7 @@ import com.ead.backend.entity.Appointment;
 public class ShiftScheduleMapper {
     public static ShiftScheduleAppointmentsDTO toDTO(Appointment appointment) {
         ShiftScheduleAppointmentsDTO dto = new ShiftScheduleAppointmentsDTO();
+        dto.setAppointmentId(appointment.getId().toString());
         dto.setUserName(appointment.getUser().getFullName());
         dto.setVehicle(appointment.getVehicle().getLicensePlate());
         dto.setAppointmentType(appointment.getAppointmentType().name());

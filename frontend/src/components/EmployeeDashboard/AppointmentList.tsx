@@ -6,7 +6,6 @@ interface Appointment {
   id: string;
   brand: string;
   model: string;
-  year: string;
   appointmentType: string;
   status: string;
   appointmentDate: string;
@@ -88,7 +87,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
               <div className="flex items-center gap-2 mb-1">
                 <Car className="w-4 h-4 text-gray-500" />
                 <p className="font-semibold text-white">
-                  {apt.brand} {apt.model} ({apt.year})
+                  {apt.brand} {apt.model}
                 </p>
               </div>
               <p className="text-sm text-gray-400 mb-2">{apt.appointmentType}</p>

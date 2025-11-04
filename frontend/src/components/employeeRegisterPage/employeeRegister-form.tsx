@@ -145,10 +145,10 @@ export function EmployeeRegisterForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <span className="text-3xl font-bold text-white tracking-wider">
+                <span className="text-3xl font-bold text-white tracking-wider font-heading">
                   DRIVE<span className="text-orange-600">CARE</span>
                 </span>
-                <h1 className="text-2xl font-bold font-heading text-white">
+                <h1 className="text-2xl font-bold  text-white">
                   Employee Registration
                 </h1>
                 <p className="text-balance text-gray-400">

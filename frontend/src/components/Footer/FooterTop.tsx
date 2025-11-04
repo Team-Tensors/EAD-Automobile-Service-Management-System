@@ -107,7 +107,10 @@ const FooterTop = () => {
           </div>
         </div>
       </div>
+      {/* Divider (top border for the bottom/footer area) */}
+      <div className="border-t border-orange-500/30 mt-16"></div>
     </div>
+    
   )
 }
 
