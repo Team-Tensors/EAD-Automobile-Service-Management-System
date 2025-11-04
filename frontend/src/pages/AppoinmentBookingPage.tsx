@@ -276,7 +276,7 @@ const AppointmentBookingPage = () => {
     const appointmentRequest = {
       vehicleId: formData.vehicleId, // UUID as string
       serviceOrModificationId: parseInt(serviceOrModificationId),
-      serviceCenterId: parseInt(formData.serviceCenterId),
+      serviceCenterId: formData.serviceCenterId, // UUID as string
       appointmentType: formData.appointmentType as AppointmentType,
       appointmentDate: appointmentDateTime,
       description: formData.description || undefined,
