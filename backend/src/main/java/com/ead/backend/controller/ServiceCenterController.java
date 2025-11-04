@@ -30,4 +30,10 @@ public class ServiceCenterController {
         List<ServiceCenterDTO> centers = service.getNearby(lat, lng, radius);
         return ResponseEntity.ok(centers);
     }
+
+    @GetMapping("/with-available-slots")
+    public ResponseEntity<List<ServiceCenterDTO>> getWithAvailableSlots() {
+        List<ServiceCenterDTO> centers = service.getWithAvailableSlots();
+        return ResponseEntity.ok(centers);
+    }
 }

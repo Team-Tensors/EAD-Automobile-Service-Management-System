@@ -1,4 +1,3 @@
-// src/components/my-services/MyServicesList.tsx
 import { Filter, Car, ChevronRight, CheckCircle, CircleDashed } from "lucide-react";
 import type { Service } from "../../types/myService";
 
