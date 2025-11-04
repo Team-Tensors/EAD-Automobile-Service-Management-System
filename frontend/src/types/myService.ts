@@ -1,9 +1,10 @@
 import type { AppointmentSummary } from "@/services/appointmentService";
+import { vehicleService } from "@/services/vehicleService";
 
 export interface Service {
   id: string;
   vehicleName: string;
-  vehicleNumber: string;
+  licensePlate: string;
   serviceType: string;
   status: "completed" | "not_completed";
   startDate: string;
@@ -13,20 +14,42 @@ export interface Service {
   centerSlot: string;
 }
 
-export const mapSummaryToService = (summary: AppointmentSummary): Service => {
-  const [vehicleName, vehicleNumber] = summary.vehicle.split(" • ");
-  const isCompleted = summary.status === "COMPLETED";
+export const mapSummaryToService = async (summary: AppointmentSummary): Promise<Service> => {
+  let vehicleName = "Unknown Vehicle";
+  let licensePlate = "N/A";
+
+  if (summary.vehicle && summary.vehicle.includes(" • ")) {
+    const [name, plate] = summary.vehicle.split(" • ");
+    vehicleName = name || "Unknown Vehicle";
+    licensePlate = plate || "N/A";
+  } else {
+    try {
+      const vehicles = await vehicleService.list();
+      const matchedVehicle = vehicles.find((v) => `${v.brand} ${v.model}` === summary.vehicle);
+      if (matchedVehicle) {
+        vehicleName = `${matchedVehicle.brand} ${matchedVehicle.model}`;
+        licensePlate = matchedVehicle.licensePlate;
+      } else {
+        vehicleName = summary.vehicle || "Unknown Vehicle";
+      }
+    } catch (err) {
+      console.error("Failed to fetch vehicles:", err);
+      vehicleName = summary.vehicle || "Unknown Vehicle";
+    }
+  }
+
+  const status: "completed" | "not_completed" = summary.status === "COMPLETED" ? "completed" : "not_completed";
 
   return {
     id: summary.id,
-    vehicleName: vehicleName || "Unknown Vehicle",
-    vehicleNumber: vehicleNumber || "N/A",
+    vehicleName,
+    licensePlate,
     serviceType: summary.service,
-    status: isCompleted ? "completed" : "not_completed",
+    status,
     startDate: summary.date,
     estimatedCompletion: (summary as any).estimatedCompletion ?? "TBD",
     assignedEmployee: (summary as any).assignedEmployee ?? "Not Assigned",
     serviceCenter: (summary as any).serviceCenter ?? "TBD",
     centerSlot: (summary as any).centerSlot ?? "TBD",
-  };
+  } as Service;
 };
