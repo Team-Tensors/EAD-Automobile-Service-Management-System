@@ -108,7 +108,7 @@ public class AppointmentService {
 
         // Validate appointment time is within business hours (8 AM - 6 PM)
         int hour = appointment.getAppointmentDate().getHour();
-        if (hour < 8 || hour > 18) {
+        if (hour < 8 || hour >= 19) {
             throw new RuntimeException("Appointment time must be between 8:00 AM and 6:00 PM");
         }
 
