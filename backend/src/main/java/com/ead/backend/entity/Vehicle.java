@@ -1,10 +1,10 @@
 package com.ead.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class Vehicle {
     private String model;
 
     @Column(nullable = false)
-    private String year;
+    private int year;
 
     @Column(nullable = false)
     private String color;
@@ -35,10 +35,17 @@ public class Vehicle {
     @Column
     private LocalDateTime lastServiceDate;
 
+    @Size(max = 10)
     @Column(nullable = false, unique = true)
     private String licensePlate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
