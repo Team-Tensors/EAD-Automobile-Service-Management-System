@@ -42,7 +42,7 @@ export function SponsorLogoSlider({
         {duplicatedLogos.map((logo, index) => (
           <div
             key={index}
-            className="flex-shrink-0 flex items-center justify-center min-w-max h-35"
+            className="flex-shrink-0 flex items-center justify-center min-w-max h-20"
           >
             <img
               src={logo || "/placeholder.svg"}

@@ -12,9 +12,12 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1d1c1c] text-white py-10 px-6 md:px-8">
+    <footer className="bg-[#1d1c1c] text-white pb-10 pt-5 px-6 md:px-8">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto">
+        {/* Divider (top border for the bottom/footer area) */}
+        <div className="border-t border-orange-500/30 my-10"></div>
+
         {/* Bottom Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Newsletter Section */}
