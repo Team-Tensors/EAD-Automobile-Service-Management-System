@@ -7,6 +7,7 @@ import com.ead.backend.entity.*;
 import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.TimeLogRepository;
 import com.ead.backend.repository.UserRepository;
+import com.ead.backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class EmployeeService {
     private final TimeLogRepository timeLogRepository;
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
 
     /**
      * Retrieves all time logs for a given appointment and employee.
@@ -91,7 +93,7 @@ public class EmployeeService {
             UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
-            String year = vehicle != null ? vehicle.getYear() : null;
+            Integer year = vehicle != null ? vehicle.getYear() : null;
             String color = vehicle != null ? vehicle.getColor() : null;
             LocalDateTime lastServiceDate = vehicle != null ? vehicle.getLastServiceDate() : null;
             String licensePlate = vehicle != null ? vehicle.getLicensePlate() : null;
@@ -170,6 +172,13 @@ public class EmployeeService {
                 if (appointment.getEndTime() == null) {
                     appointment.setEndTime(now);
                     logger.info("End time set to {}", now);
+                }
+                // Update vehicle's last service date if this is a SERVICE appointment
+                if (appointment.getAppointmentType() == AppointmentType.SERVICE) {
+                    Vehicle vehicle = appointment.getVehicle();
+                    vehicle.setLastServiceDate(now);
+                    vehicleRepository.save(vehicle);
+                    logger.info("Updated last service date for vehicle: {}", vehicle.getId());
                 }
                 break;
             case "CONFIRMED":

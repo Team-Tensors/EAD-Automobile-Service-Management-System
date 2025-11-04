@@ -1,8 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { User, LayoutDashboard, Calendar, Navigation } from "lucide-react";
+import {
+  User,
+  LayoutDashboard,
+  Calendar,
+  Navigation,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
-import NotificationBell from '@/components/Notification/NotificationBell';
+import NotificationBell from "@/components/Notification/NotificationBell";
+import { useState, useRef, useEffect } from "react";
 
 interface NavTab {
   name: string;
@@ -15,6 +22,8 @@ const AuthenticatedNavbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -24,6 +33,23 @@ const AuthenticatedNavbar = () => {
       console.error("Logout error:", error);
     }
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Define navigation tabs
   const navTabs: NavTab[] = [
@@ -37,13 +63,13 @@ const AuthenticatedNavbar = () => {
     {
       name: "My Vehicles",
       path: "/my-vehicles",
-      icon: Car, 
+      icon: Car,
       roles: ["CUSTOMER"],
     },
     {
       name: "Service Centers",
       path: "/service-centers",
-      icon: Navigation, 
+      icon: Navigation,
       roles: ["CUSTOMER"],
     },
     // Add more tabs here as needed
@@ -98,22 +124,41 @@ const AuthenticatedNavbar = () => {
           <div className="flex items-center gap-4">
             {/* Notification Bell */}
             <NotificationBell userId={user?.id} />
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition text-sm cursor-pointer"
-            >
-              Logout
-            </button>
 
-            {/* User Avatar - Clickable to go to profile */}
-            <Link
-              to="/profile"
-              className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-700 transition-colors"
-              title="View Profile"
-            >
-              <User className="w-6 h-6 text-white" />
-            </Link>
+            {/* Profile Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-orange-700 transition-colors"
+                title="Profile"
+              >
+                <User className="w-6 h-6 text-white" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-35 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-50">
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">My Profile</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm font-medium">Log Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
