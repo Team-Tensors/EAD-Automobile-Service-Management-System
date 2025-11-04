@@ -83,8 +83,59 @@ public class AppointmentService {
         if (appointment.getAppointmentDate() == null) {
             throw new RuntimeException("Please select your preferred appointment date and time");
         }
-        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new RuntimeException("Appointment date must be at least 1 hour from now");
+
+        // Check if appointment date is in the past
+        LocalDateTime now = LocalDateTime.now();
+        if (appointment.getAppointmentDate().isBefore(now)) {
+            throw new RuntimeException("Appointment date cannot be in the past");
+        }
+
+        // Check if appointment is at least 1 hour from now
+        if (appointment.getAppointmentDate().isBefore(now.plusHours(1))) {
+            throw new RuntimeException("Appointment must be scheduled at least 1 hour from now");
+        }
+
+        // Check if appointment is not more than 1 month from now
+        if (appointment.getAppointmentDate().isAfter(now.plusDays(30))) {
+            throw new RuntimeException("Appointment cannot be scheduled more than 1 month in advance");
+        }
+
+        // Validate appointment time - must be on the full hour (no minutes)
+        int minute = appointment.getAppointmentDate().getMinute();
+        if (minute != 0) {
+            throw new RuntimeException("Appointment time must be on the hour (e.g., 8:00, 9:00, etc.)");
+        }
+
+        // Validate appointment time is within business hours (8 AM - 6 PM)
+        int hour = appointment.getAppointmentDate().getHour();
+        if (hour < 8 || hour > 18) {
+            throw new RuntimeException("Appointment time must be between 8:00 AM and 6:00 PM");
+        }
+
+        // Check for duplicate appointment (same vehicle, same date/time, not cancelled)
+        List<Appointment> existingAppointments = appointmentRepository
+                .findByVehicleIdAndAppointmentDateAndStatusNot(
+                        vehicle.getId(),
+                        appointment.getAppointmentDate(),
+                        "CANCELLED"
+                );
+        
+        if (!existingAppointments.isEmpty()) {
+            throw new RuntimeException("This vehicle already has an appointment scheduled for the selected date and time");
+        }
+
+        // Check if service center has available slots for the selected date/time
+        Long bookedSlots = appointmentRepository
+                .countByServiceCenterIdAndAppointmentDateAndStatusNot(
+                        serviceCenter.getId(),
+                        appointment.getAppointmentDate(),
+                        "CANCELLED"
+                );
+        
+        if (bookedSlots >= serviceCenter.getCenterSlot()) {
+            throw new RuntimeException(
+                String.format("Service center is fully booked for this time slot. Please select a different time or service center.")
+            );
         }
 
         // Finalize
@@ -131,6 +182,7 @@ public class AppointmentService {
     // ===================================================================
     // 2. CUSTOMER: Get own appointments
     // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Appointment> getUserAppointments() {
         User customer = getCurrentUser();
         return appointmentRepository.findByUserId(customer.getId());
@@ -316,6 +368,13 @@ public class AppointmentService {
         appt.setStatus("COMPLETED");
 
         Appointment savedAppointment = appointmentRepository.save(appt);
+
+        // Update vehicle's last service date if this is a SERVICE appointment
+        if (savedAppointment.getAppointmentType() == AppointmentType.SERVICE) {
+            Vehicle vehicle = savedAppointment.getVehicle();
+            vehicle.setLastServiceDate(LocalDateTime.now());
+            vehicleRepository.save(vehicle);
+        }
 
         // Send notification to customer
         notificationService.sendNotification(

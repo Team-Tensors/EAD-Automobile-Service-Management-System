@@ -3,7 +3,6 @@ package com.ead.backend.service;
 import com.ead.backend.entity.RefreshToken;
 import com.ead.backend.entity.User;
 import com.ead.backend.repository.RefreshTokenRepository;
-import com.ead.backend.repository.UserRepository;
 import com.ead.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,6 @@ import java.util.UUID;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService; // Added UserDetailsService
 
