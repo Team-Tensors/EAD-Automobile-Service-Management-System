@@ -106,10 +106,21 @@ public class AppointmentService {
             throw new RuntimeException("Appointment time must be on the hour (e.g., 8:00, 9:00, etc.)");
         }
 
-        // Validate appointment time is within business hours (8 AM - 6 PM)
+        // Validate appointment time is within business hours
         int hour = appointment.getAppointmentDate().getHour();
-        if (hour < 8 || hour > 18) {
-            throw new RuntimeException("Appointment time must be between 8:00 AM and 6:00 PM");
+        int dayOfWeek = appointment.getAppointmentDate().getDayOfWeek().getValue(); // 1=Monday, 7=Sunday
+        
+        // Weekend hours: Saturday(6) and Sunday(7) are 9 AM - 4 PM
+        if (dayOfWeek == 6 || dayOfWeek == 7) {
+            if (hour < 9 || hour >= 17) {
+                throw new RuntimeException("Weekend appointments must be between 9:00 AM and 4:00 PM");
+            }
+        } 
+        // Weekday hours: Monday-Friday are 8 AM - 7 PM
+        else {
+            if (hour < 8 || hour >= 20) {
+                throw new RuntimeException("Weekday appointments must be between 8:00 AM and 7:00 PM");
+            }
         }
 
         // Check for duplicate appointment (same vehicle, same date/time, not cancelled)
