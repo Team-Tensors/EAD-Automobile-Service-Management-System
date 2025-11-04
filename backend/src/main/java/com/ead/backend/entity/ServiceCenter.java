@@ -40,4 +40,7 @@ public class ServiceCenter {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @Column(name = "center_slot", nullable = false)
+    private Integer centerSlot = 2; // Default to 2 slots
 }
