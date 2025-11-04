@@ -15,6 +15,17 @@ const faqs = [
   "What makes your service unique?",
 ];
 
+const answers = [
+  "We offer a full range of services including routine maintenance (oil changes, filters), diagnostics and repairs, brake and suspension work, electrical and battery services, A/C service, and more. If you need something specific, reach out and we'll advise.",
+  "You can schedule an appointment online via our booking page, by phone, or by dropping a message in the contact form below — we'll confirm available slots and preferred service center.",
+  "To maintain your car battery: keep terminals clean, avoid long periods of inactivity, limit excessive short trips, and have the battery tested during regular service intervals. We'll also replace it if it's weak.",
+  "The check engine light covers many issues — from minor sensor faults to important engine problems. We'll run a diagnostic scan to get the trouble codes and explain the recommended fixes and costs.",
+  "Yes — we provide fleet maintenance plans including scheduled servicing, priority booking, and consolidated billing. Contact our sales team for a tailored fleet plan.",
+  "Absolutely — our shop can perform many customization tasks such as performance tuning, aesthetic upgrades, audio installs, and accessory fitting. We'll provide a quote based on your requirements.",
+  "For most vehicles, servicing at least once a year or every 10,000–12,000 miles (whichever comes first) is recommended. Check your manufacturer's schedule for more precise intervals.",
+  "We combine experienced technicians, transparent pricing, and fast turnarounds. We also provide clear diagnostic reports and warranty on many repairs — our goal is to make maintenance stress-free.",
+];
+
 const ContactUs: React.FC = () => {
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
@@ -46,22 +57,49 @@ const ContactUs: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {faqs.map((q, i) => (
-              <div key={q} className="flex items-center justify-between bg-[#0f0f0f] border border-zinc-800 rounded-md px-4 py-3">
-                <button
-                  onClick={() => toggle(i)}
-                  className="text-left text-sm font-medium text-white flex-1"
-                  aria-expanded={!!open[i]}
-                  aria-controls={`faq-${i}`}
+              <div key={q} className="bg-[#0f0f0f] border border-zinc-800 rounded-md px-4 py-3">
+                <div className="flex items-center justify-between gap-4">
+                  <button
+                    id={`faq-${i}-button`}
+                    onClick={() => toggle(i)}
+                    className="text-left text-sm font-medium text-white flex-1 pr-2 leading-tight hover:text-orange-400 focus:outline-none"
+                    aria-expanded={!!open[i]}
+                    aria-controls={`faq-${i}`}
+                  >
+                    {q}
+                  </button>
+
+                  <button
+                    onClick={() => toggle(i)}
+                    aria-label={open[i] ? `Collapse ${q}` : `Expand ${q}`}
+                    className="ml-4 inline-flex items-center justify-center w-9 h-9 bg-orange-600 text-white rounded-md flex-shrink-0 relative overflow-hidden"
+                  >
+                    {/* Crossfade and slight slide between + and - */}
+                    <span
+                      aria-hidden
+                      className={`absolute inset-0 flex items-center justify-center text-lg font-bold transition-all duration-200 ${open[i] ? "opacity-0 -translate-y-1" : "opacity-100 translate-y-0"}`}
+                    >
+                      +
+                    </span>
+
+                    <span
+                      aria-hidden
+                      className={`absolute inset-0 flex items-center justify-center text-lg font-bold transition-all duration-200 ${open[i] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
+                    >
+                      -
+                    </span>
+                  </button>
+                </div>
+
+                {/* Answer panel */}
+                <div
+                  id={`faq-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-${i}-button`}
+                  className={`mt-3 text-sm text-gray-400 transition-all duration-150 ${open[i] ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0 overflow-hidden"}`}
                 >
-                  {q}
-                </button>
-                <button
-                  onClick={() => toggle(i)}
-                  className="ml-4 inline-flex items-center justify-center w-9 h-9 bg-orange-600 text-white rounded-md"
-                  aria-hidden
-                >
-                  +
-                </button>
+                  {open[i] && <p className="leading-relaxed pl-1">{answers[i] ?? "We will update this answer soon."}</p>}
+                </div>
               </div>
             ))}
           </div>
