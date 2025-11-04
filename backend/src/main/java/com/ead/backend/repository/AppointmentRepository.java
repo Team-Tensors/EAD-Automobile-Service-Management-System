@@ -33,4 +33,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             @Param("vehicleId") UUID vehicleId,
             @Param("appointmentDate") LocalDateTime appointmentDate
     );
+
+    // Count appointments for a service center at a specific date/time (excluding cancelled)
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.serviceCenter.id = :serviceCenterId " +
+           "AND a.appointmentDate = :appointmentDate " +
+           "AND a.status != 'CANCELLED'")
+    Long countByServiceCenterIdAndAppointmentDateAndStatusNotCancelled(
+            @Param("serviceCenterId") UUID serviceCenterId,
+            @Param("appointmentDate") LocalDateTime appointmentDate
+    );
 }
