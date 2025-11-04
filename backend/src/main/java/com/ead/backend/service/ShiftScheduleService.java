@@ -136,7 +136,7 @@ public class ShiftScheduleService {
 
         shiftSchedulesRepository.save(shift);
         appointment.setStatus("CONFIRMED");
-        
+
         boolean alreadyAssigned = appointment.getAssignedEmployees().stream().anyMatch(u -> u.getId().equals(employee.getId()));
         if (!alreadyAssigned) {
             appointment.getAssignedEmployees().add(employee);
