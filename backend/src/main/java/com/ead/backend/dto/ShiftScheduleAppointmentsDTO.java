@@ -11,6 +11,7 @@ import java.util.Set;
 @Data
 public class ShiftScheduleAppointmentsDTO {
 
+    private String appointmentId;
     private String userName;
     private String vehicle;
     private String appointmentType;

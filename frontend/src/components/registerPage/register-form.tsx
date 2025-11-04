@@ -117,8 +117,8 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <span className="text-3xl font-bold text-white tracking-wider">DRIVE<span className="text-orange-500">CARE</span></span>
-                <h1 className="text-2xl font-bold font-heading text-white">Create an account</h1>
+                <span className="text-3xl font-bold text-white tracking-wider font-heading">DRIVE<span className="text-orange-600">CARE</span></span>
+                <h1 className="text-2xl font-bold text-white">Create an account</h1>
                 <p className="text-balance text-gray-400">Sign up for your DriveCare account</p>
               </div>
               
@@ -253,7 +253,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   </span>
                 )}
               </div>
-              <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={isLoading}>
                 {isLoading ? 'Creating Account...' : 'Sign Up'}
               </Button>
               <div className="relative text-center text-sm">
@@ -275,13 +275,13 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               </Button>
               <div className="text-center text-sm text-gray-400">
                 Already have an account?{" "}
-                <Link to="/login" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                <Link to="/login" className="underline underline-offset-4 text-orange-600 hover:text-orange-700">
                   Login
                 </Link>
               </div>
               <div className="text-center text-sm text-gray-400">
                 Joining as a service technician?{" "}
-                <Link to="/register/employee" className="underline underline-offset-4 text-orange-500 hover:text-orange-600">
+                <Link to="/register/employee" className="underline underline-offset-4 text-orange-600 hover:text-orange-700">
                   Employee Registration
                 </Link>
               </div>
