@@ -86,6 +86,22 @@ public class AppointmentBookingController {
     }
 
     // ===================================================================
+    // 3. CANCEL APPOINTMENT (Customer)
+    // ===================================================================
+    @PutMapping("/{appointmentId}/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> cancelAppointment(@PathVariable java.util.UUID appointmentId) {
+        try {
+            Appointment cancelled = appointmentService.cancelAppointment(appointmentId);
+            return ResponseEntity.ok(new MessageResponseDTO(
+                    "Appointment cancelled successfully", true));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponseDTO(e.getMessage(), false));
+        }
+    }
+
+    // ===================================================================
     // Helper: Convert Appointment → Summary DTO
     // ===================================================================
     private AppointmentSummaryDTO toSummaryDTO(Appointment a) {

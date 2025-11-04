@@ -16,6 +16,7 @@ const MyAppointmentsPage = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -34,6 +35,43 @@ const MyAppointmentsPage = () => {
 
     fetchAppointments();
   }, []);
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    if (!confirm("Are you sure you want to cancel this appointment?")) {
+      return;
+    }
+
+    setCancellingId(appointmentId);
+
+    const cancelPromise = appointmentService
+      .cancelAppointment(appointmentId)
+      .then(() => {
+        // Remove the cancelled appointment from the list or update its status
+        setAppointments((prev) =>
+          prev.map((apt) =>
+            apt.id === appointmentId ? { ...apt, status: "CANCELLED" } : apt
+          )
+        );
+        setCancellingId(null);
+      })
+      .catch((error) => {
+        setCancellingId(null);
+        throw error;
+      });
+
+    toast.promise(cancelPromise, {
+      loading: "Cancelling appointment...",
+      success: "Appointment cancelled successfully!",
+      error: (err) => {
+        console.error("Cancel appointment error:", err);
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to cancel appointment";
+        return errorMessage;
+      },
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -173,16 +211,17 @@ const MyAppointmentsPage = () => {
                         >
                           {appointment.status}
                         </span>
-                        <div className="flex gap-2 mt-2">
-                          <button className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-all text-sm">
-                            View Details
-                          </button>
-                          {appointment.status === "PENDING" && (
-                            <button className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm">
-                              Cancel
+                        {appointment.status === "PENDING" && (
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() => handleCancelAppointment(appointment.id)}
+                              disabled={cancellingId === appointment.id}
+                              className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {cancellingId === appointment.id ? "Cancelling..." : "Cancel"}
                             </button>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
