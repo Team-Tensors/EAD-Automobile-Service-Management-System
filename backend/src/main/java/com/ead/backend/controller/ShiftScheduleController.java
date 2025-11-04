@@ -67,12 +67,7 @@ public class ShiftScheduleController {
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             String msg = e.getMessage();
-            return switch (msg) {
-                case "APPOINTMENT_NOT_FOUND", "EMPLOYEE_NOT_FOUND" -> ResponseEntity.notFound().build();
-                case "UNAUTHORIZED" -> ResponseEntity.status(403).build();
-                case "EMPLOYEE_HAS_CONFLICTING_SHIFT", "USER_IS_NOT_EMPLOYEE" -> ResponseEntity.badRequest().build();
-                default -> ResponseEntity.status(500).build();
-            };
+            return ResponseEntity.status(500).build();
         }
     }
 
