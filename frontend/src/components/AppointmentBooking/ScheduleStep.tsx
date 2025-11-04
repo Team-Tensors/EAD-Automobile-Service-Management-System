@@ -57,10 +57,18 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
   // Get minimum date - if it's past 6 PM, set minimum to tomorrow
   const now = new Date();
   const currentHour = now.getHours();
-  const minDate = currentHour >= 18 
-    ? new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-    : now.toISOString().split("T")[0];
-  
+  const minDate =
+    currentHour >= 18
+      ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0]
+      : now.toISOString().split("T")[0];
+
+  // Get maximum date - 1 month from today
+  const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+
   const today = now.toISOString().split("T")[0];
 
   // Check if a time slot is available (not in the past)
@@ -126,6 +134,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
           value={formData.appointmentDate}
           onChange={onChange}
           min={minDate}
+          max={maxDate}
           className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white"
         />
       </div>

@@ -95,6 +95,11 @@ public class AppointmentService {
             throw new RuntimeException("Appointment must be scheduled at least 1 hour from now");
         }
 
+        // Check if appointment is not more than 1 month from now
+        if (appointment.getAppointmentDate().isAfter(now.plusDays(30))) {
+            throw new RuntimeException("Appointment cannot be scheduled more than 1 month in advance");
+        }
+
         // Validate appointment time - must be on the full hour (no minutes)
         int minute = appointment.getAppointmentDate().getMinute();
         if (minute != 0) {
@@ -116,6 +121,19 @@ public class AppointmentService {
         
         if (!existingAppointments.isEmpty()) {
             throw new RuntimeException("This vehicle already has an appointment scheduled for the selected date and time");
+        }
+
+        // Check if service center has available slots for the selected date/time
+        Long bookedSlots = appointmentRepository
+                .countByServiceCenterIdAndAppointmentDateAndStatusNotCancelled(
+                        serviceCenter.getId(),
+                        appointment.getAppointmentDate()
+                );
+        
+        if (bookedSlots >= serviceCenter.getCenterSlot()) {
+            throw new RuntimeException(
+                String.format("Service center is fully booked for this time slot. Please select a different time or service center.")
+            );
         }
 
         // Finalize
