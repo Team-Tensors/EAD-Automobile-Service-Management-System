@@ -175,6 +175,9 @@ public class VehicleService {
         if (!old.getBrand().equals(updated.getBrand()) || !old.getModel().equals(updated.getModel())) {
             return true;
         }
+        if (old.getYear() != null && updated.getYear() != null && !old.getYear().equals(updated.getYear())) {
+            return true;
+        }
         return false;
     }
 

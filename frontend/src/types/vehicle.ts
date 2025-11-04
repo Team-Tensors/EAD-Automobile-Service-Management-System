@@ -2,7 +2,7 @@ export interface Vehicle {
   id: string; // UUID as string
   brand: string;
   model: string;
-  year: string;
+  year: number; // Changed from string to number
   color: string;
   licensePlate: string;
   lastServiceDate?: string;
@@ -11,7 +11,7 @@ export interface Vehicle {
 export interface VehicleCreateDto {
   brand: string;
   model: string;
-  year: string;
+  year: number; // Changed from string to number
   color: string;
   licensePlate: string;
   lastServiceDate?: string;

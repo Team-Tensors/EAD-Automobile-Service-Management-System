@@ -31,20 +31,20 @@ public class AppointmentBookingController {
         try {
             // Map DTO → Entity
             Appointment appointment = new Appointment();
-            
+
             // Set vehicle by ID (service will fetch it)
             Vehicle vehicle = new Vehicle();
             vehicle.setId(request.getVehicleId());
             appointment.setVehicle(vehicle);
-            
+
             ServiceOrModification som = new ServiceOrModification();
             som.setId(request.getServiceOrModificationId());
             appointment.setServiceOrModification(som);
-            
+
             ServiceCenter serviceCenter = new ServiceCenter();
             serviceCenter.setId(request.getServiceCenterId());
             appointment.setServiceCenter(serviceCenter);
-            
+
             appointment.setAppointmentType(request.getAppointmentType());
             appointment.setAppointmentDate(request.getAppointmentDate());
             appointment.setDescription(request.getDescription());
@@ -74,7 +74,7 @@ public class AppointmentBookingController {
     // ===================================================================
     // 2. GET MY APPOINTMENTS (Customer)
     // ===================================================================
-    @GetMapping("/my")
+    @GetMapping("/my-appointments")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<List<AppointmentSummaryDTO>> getMyAppointments() {
         List<AppointmentSummaryDTO> appointments = appointmentService.getUserAppointments()

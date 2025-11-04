@@ -204,7 +204,7 @@ const AppointmentBookingPage = () => {
     const createDto: VehicleCreateDto = {
       brand: vehicleData.brand,
       model: vehicleData.model,
-      year: vehicleData.year,
+      year: parseInt(vehicleData.year, 10), // Convert string to number
       color: vehicleData.color,
       licensePlate: vehicleData.licensePlate,
       lastServiceDate: vehicleData.lastServiceDate || undefined,
@@ -276,7 +276,7 @@ const AppointmentBookingPage = () => {
     const appointmentRequest = {
       vehicleId: formData.vehicleId, // UUID as string
       serviceOrModificationId: parseInt(serviceOrModificationId),
-      serviceCenterId: parseInt(formData.serviceCenterId),
+      serviceCenterId: formData.serviceCenterId, // UUID as string
       appointmentType: formData.appointmentType as AppointmentType,
       appointmentDate: appointmentDateTime,
       description: formData.description || undefined,
