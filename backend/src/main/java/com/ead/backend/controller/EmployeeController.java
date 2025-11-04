@@ -4,8 +4,6 @@ import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.MessageResponseDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.dto.TimeLogResponseDTO;
-import com.ead.backend.entity.Appointment;
-import com.ead.backend.entity.TimeLog;
 import com.ead.backend.service.EmployeeService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.annotation.Validated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
