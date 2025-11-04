@@ -31,4 +31,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             LocalDateTime appointmentDate,
             String status
     );
+    List<Appointment> findByStatus(String pending);
 }
