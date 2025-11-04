@@ -11,8 +11,8 @@ import java.util.UUID;
 public interface ShiftSchedulesRepository extends JpaRepository<ShiftSchedules, UUID> {
     @Query("""
         SELECT s FROM ShiftSchedules s
-        WHERE s.employee.email = :employeeEmail
+        WHERE s.employee.id = :employeeId
           AND ((s.startTime <= :endTime) AND (s.endTime >= :startTime))
     """)
-    List<ShiftSchedules> findConflictingShifts(String employeeEmail, LocalDateTime startTime, LocalDateTime endTime);
+    List<ShiftSchedules> findConflictingShifts(UUID employeeId, LocalDateTime startTime, LocalDateTime endTime);
 }

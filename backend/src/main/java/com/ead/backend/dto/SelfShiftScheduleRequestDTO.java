@@ -5,9 +5,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ShiftScheduleRequestDTO {
-    @NotNull(message = "Employee id required")
-    private UUID employeeId;
+public class SelfShiftScheduleRequestDTO {
 
     @NotNull(message = "Appointment id required")
     private UUID appointmentId;
