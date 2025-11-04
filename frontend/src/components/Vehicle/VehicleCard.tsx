@@ -1,11 +1,11 @@
-import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import React from "react";
+import { Edit, Trash2 } from "lucide-react";
 
 interface Vehicle {
   id: string; // UUID as string
   brand: string;
   model: string;
-  year: string;
+  year: number; // Changed from string to number
   color: string;
   licensePlate: string;
   lastServiceDate?: string;
@@ -41,9 +41,7 @@ const VehicleCard: React.FC<{
         </div>
       </div>
 
-      <h3 className="text-3xl font-bold text-white mb-4">
-        {vehicle.model}
-      </h3>
+      <h3 className="text-3xl font-bold text-white mb-4">{vehicle.model}</h3>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -56,7 +54,9 @@ const VehicleCard: React.FC<{
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-400">License:</span>
-          <span className="text-white font-semibold uppercase">{vehicle.licensePlate}</span>
+          <span className="text-white font-semibold uppercase">
+            {vehicle.licensePlate}
+          </span>
         </div>
         {vehicle.lastServiceDate && (
           <div className="flex items-center justify-between text-sm pt-2 border-t border-zinc-800">
