@@ -90,11 +90,11 @@ const AuthenticatedNavbar = () => {
 
   return (
     <nav className="fixed top-6 left-0 right-0 z-50 pointer-events-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pointer-events-auto">
         <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-white tracking-wider">
+            <span className="text-2xl font-bold text-white tracking-wider font-heading">
               DRIVE<span className="text-orange-600">CARE</span>
             </span>
           </Link>
@@ -109,8 +109,8 @@ const AuthenticatedNavbar = () => {
                   to={tab.path}
                   className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
                     isActiveTab(tab.path)
-                      ? "bg-orange-500 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-zinc-800"
+                      ? "text-orange-600"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
                   <Icon className="w-4 h-4" />

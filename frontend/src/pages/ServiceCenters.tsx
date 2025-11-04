@@ -8,7 +8,7 @@ import ServiceCenterMap from "../components/ServiceCenters/ServiceCenterMap";
 import SelectedCenterDetails from "../components/ServiceCenters/ServiceCenterDetails";
 import type { ServiceCenter, MapCenter } from "../types/serviceCenter";
 import { calculateDistance, getDirectionsUrl } from "../services/serviceCenterService";
-import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
 import Footer from "@/components/Footer/Footer";
 
 const ServiceCenters = () => {
