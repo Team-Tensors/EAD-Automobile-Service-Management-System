@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Calendar, Clock, Car, Wrench, Package } from "lucide-react";
 import toast from "react-hot-toast";
-import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
 import { AppointmentTypeValues } from "@/types/appointment";

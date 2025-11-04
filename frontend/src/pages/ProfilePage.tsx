@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { authService } from "../services/authService";
-import AuthenticatedNavbar from "../components/Navbar/AuthenticatedNavbar";
+import AuthenticatedNavbar from "../components/CustomerNavbar/CustomerNavbar";
 import { User, Mail, Phone, MapPin, Calendar } from "lucide-react";
 import { Button } from "../components/ui/button";
 import FormInputField from "../components/ui/FormInputField";
