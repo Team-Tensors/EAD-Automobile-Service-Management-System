@@ -198,20 +198,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   </span>
                 )}
               </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="role" className="text-white">Account Type</Label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white px-3 py-1 text-base font-sans shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                >
-                  <option value={UserRole.CUSTOMER}>Vehicle Owner (Customer)</option>
-                  <option value={UserRole.EMPLOYEE}>Service Technician (Employee)</option>
-                </select>
-              </div>
+  
               <div className="grid gap-2">
                 <Label htmlFor="password" className="text-white">Password</Label>
                 <div className="relative">
