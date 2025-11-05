@@ -8,7 +8,9 @@ import {
   Trash2,
   X,
   PackagePlus,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { inventoryService } from '../../services/inventoryService';
@@ -39,6 +41,10 @@ const AdminInventory = () => {
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [restockQuantity, setRestockQuantity] = useState(0);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Form state for adding new item
   const [formData, setFormData] = useState<InventoryItemCreateDto>({
@@ -73,6 +79,7 @@ const AdminInventory = () => {
     }
 
     setFilteredItems(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [items, searchQuery, selectedCategory]);
 
   const loadInventory = async () => {
@@ -153,10 +160,24 @@ const AdminInventory = () => {
 
   const lowStockCount = items.filter(item => item.lowStock).length;
 
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    setCurrentPage((page) => Math.min(page + 1, totalPages));
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage((page) => Math.max(page - 1, 1));
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-zinc-900 to-zinc-800 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -281,7 +302,7 @@ const AdminInventory = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map(item => (
+                  currentItems.map(item => (
                     <tr
                       key={item.id}
                       className={`border-b border-zinc-800 hover:bg-zinc-800/50 transition ${
@@ -339,6 +360,44 @@ const AdminInventory = () => {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination */}
+          {filteredItems.length > 0 && (
+            <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between">
+              <div className="text-sm text-gray-400">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === 1
+                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                  }`}
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm text-white px-4">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === totalPages
+                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                  }`}
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
