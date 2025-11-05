@@ -1,12 +1,14 @@
+// src/main/java/com/ead/backend/service/VehicleService.java
 package com.ead.backend.service;
 
+import com.ead.backend.dto.VehicleCreateDTO;
+import com.ead.backend.dto.VehicleResponseDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.entity.Vehicle;
+import com.ead.backend.mappers.VehicleMapper;
 import com.ead.backend.repository.UserRepository;
 import com.ead.backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,191 +17,201 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class VehicleService {
 
-    private static final Logger logger = LoggerFactory.getLogger(VehicleService.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
-
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
 
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
+
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // === CREATE ===
+    // CREATE
     @Transactional
-    public Vehicle addVehicle(Vehicle vehicle) {
+    public VehicleResponseDTO addVehicle(VehicleCreateDTO dto) {
         User user = getCurrentUser();
+        
+        // Check for duplicate license plate
+        if (vehicleRepository.findByLicensePlate(dto.getLicensePlate()).isPresent()) {
+            throw new RuntimeException("A vehicle with this license plate already exists");
+        }
+        
+        Vehicle vehicle = new Vehicle();
+
+        VehicleMapper.updateEntity(dto, vehicle);  // ← Mapper
         vehicle.setUser(user);
-        Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
-        // Send notification
-        notificationService.sendNotification(
-                user.getId(),
-                "VEHICLE_ADDED",
-                String.format("Your %s %s has been added successfully!",
-                        savedVehicle.getBrand(), savedVehicle.getModel()),
-                Map.of(
-                        "vehicleId", savedVehicle.getId().toString(),
-                        "brand", savedVehicle.getBrand(),
-                        "model", savedVehicle.getModel(),
-                        "licensePlate", savedVehicle.getLicensePlate(),
-                        "year", savedVehicle.getYear() != null ? savedVehicle.getYear().toString() : "N/A"
-                )
-        );
+        Vehicle saved = vehicleRepository.save(vehicle);
 
-        // Send confirmation email asynchronously
-        try {
-            emailService.sendVehicleAddedEmail(user.getEmail(), user.getFullName(), formatVehicleInfo(savedVehicle),
-                    savedVehicle.getLicensePlate(), savedVehicle.getBrand(), savedVehicle.getModel(),
-                    savedVehicle.getYear() != null ? savedVehicle.getYear().toString() : "N/A");
-            logger.info("Vehicle added email sent to user: {}", user.getEmail());
-        } catch (Exception e) {
-            logger.error("Failed to send vehicle added email to: {}", user.getEmail(), e);
-        }
-
-        return savedVehicle;
+        sendAddNotifications(saved, user);
+        return VehicleMapper.toDTO(saved);
     }
 
-    // === READ: All ===
-    public List<Vehicle> getUserVehicles() {
+    // READ ALL
+    public List<VehicleResponseDTO> getUserVehicles() {
         User user = getCurrentUser();
-        return vehicleRepository.findByUserId(user.getId());
+        List<Vehicle> vehicles = vehicleRepository.findByUserId(user.getId());
+        return VehicleMapper.toDTOList(vehicles);
     }
 
-    // === READ: One (with ownership) ===
-    public Vehicle getVehicleByIdAndUser(UUID id) {
+    // READ ONE
+    public VehicleResponseDTO getVehicleById(UUID id) {
         User user = getCurrentUser();
-        return vehicleRepository.findById(id).filter(v -> v.getUser().getId().equals(user.getId())).orElse(null);
+        Vehicle vehicle = vehicleRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found or access denied"));
+        return VehicleMapper.toDTO(vehicle);
     }
 
-    // === UPDATE ===
+    // UPDATE
     @Transactional
-    public Vehicle updateVehicle(Vehicle vehicle) {
+    public VehicleResponseDTO updateVehicle(UUID id, VehicleCreateDTO dto) {
         User user = getCurrentUser();
-        Vehicle existingVehicle = getVehicleByIdAndUser(vehicle.getId());
+        Vehicle existing = vehicleRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found or access denied"));
 
-        if (existingVehicle == null) {
-            throw new RuntimeException("Vehicle not found or access denied");
+        // Check for duplicate license plate (excluding current vehicle)
+        vehicleRepository.findByLicensePlate(dto.getLicensePlate())
+                .ifPresent(v -> {
+                    if (!v.getId().equals(id)) {
+                        throw new RuntimeException("A vehicle with this license plate already exists");
+                    }
+                });
+
+        boolean critical = hasCriticalChanges(existing, dto);
+        VehicleMapper.updateEntity(dto, existing);  // ← Mapper
+
+        Vehicle updated = vehicleRepository.save(existing);
+
+        if (critical) {
+            sendUpdateNotifications(updated, existing, user);
         }
 
-        boolean criticalChange = hasCriticalChanges(existingVehicle, vehicle);
-        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
-
-        // Send notification for critical changes
-        if (criticalChange) {
-            String changesSummary = getChangesSummary(existingVehicle, vehicle);
-            notificationService.sendNotification(
-                    user.getId(),
-                    "VEHICLE_UPDATED",
-                    String.format("Vehicle %s has been updated", vehicle.getLicensePlate()),
-                    Map.of(
-                            "vehicleId", updatedVehicle.getId().toString(),
-                            "licensePlate", vehicle.getLicensePlate(),
-                            "changes", changesSummary
-                    )
-            );
-
-            // Send email only for critical changes
-            try {
-                emailService.sendVehicleUpdatedEmail(user.getEmail(), user.getFullName(),
-                        formatVehicleInfo(updatedVehicle), vehicle.getLicensePlate(), changesSummary);
-                logger.info("Vehicle updated email sent to user: {}", user.getEmail());
-            } catch (Exception e) {
-                logger.error("Failed to send vehicle updated email to: {}", user.getEmail(), e);
-            }
-        }
-
-        return updatedVehicle;
+        return VehicleMapper.toDTO(updated);
     }
 
-    // === DELETE ===
+    // DELETE
     @Transactional
-    public boolean deleteVehicleByIdAndUser(UUID id) {
+    public void deleteVehicle(UUID id) {
         User user = getCurrentUser();
-        Vehicle vehicle = getVehicleByIdAndUser(id);
+        Vehicle vehicle = vehicleRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found or access denied"));
 
-        if (vehicle != null) {
-            String vehicleInfo = formatVehicleInfo(vehicle);
-            String regNumber = vehicle.getLicensePlate();
-
-            vehicleRepository.delete(vehicle);
-
-            // Send notification
-            notificationService.sendNotification(
-                    user.getId(),
-                    "VEHICLE_DELETED",
-                    String.format("Vehicle %s has been removed from your account", regNumber),
-                    Map.of(
-                            "vehicleInfo", vehicleInfo,
-                            "licensePlate", regNumber,
-                            "deletedAt", LocalDateTime.now().format(DATE_FORMATTER)
-                    )
-            );
-
-            // Send deletion confirmation email
-            try {
-                emailService.sendVehicleDeletedEmail(user.getEmail(), user.getFullName(), vehicleInfo,
-                        regNumber, LocalDateTime.now().format(DATE_FORMATTER));
-                logger.info("Vehicle deleted email sent to user: {}", user.getEmail());
-            } catch (Exception e) {
-                logger.error("Failed to send vehicle deleted email to: {}", user.getEmail(), e);
-            }
-
-            return true;
-        }
-        return false;
+        vehicleRepository.delete(vehicle);
+        sendDeleteNotifications(vehicle, user);
     }
 
     // === HELPER METHODS ===
 
-    private String formatVehicleInfo(Vehicle vehicle) {
-        StringBuilder info = new StringBuilder();
-        info.append(vehicle.getYear() != null ? vehicle.getYear() + " " : "");
-        info.append(vehicle.getBrand()).append(" ").append(vehicle.getModel());
-        return info.toString();
+    private boolean hasCriticalChanges(Vehicle old, VehicleCreateDTO dto) {
+        return !old.getLicensePlate().equals(dto.getLicensePlate()) ||
+                !old.getBrand().equals(dto.getBrand()) ||
+                !old.getModel().equals(dto.getModel()) ||
+                !Objects.equals(old.getYear(), dto.getYear());
     }
 
-    private boolean hasCriticalChanges(Vehicle old, Vehicle updated) {
-        if (!old.getLicensePlate().equals(updated.getLicensePlate())) {
-            return true;
+    private void sendAddNotifications(Vehicle v, User u) {
+        String info = formatVehicleInfo(v);
+        notificationService.sendNotification(
+                u.getId(),
+                "VEHICLE_ADDED",
+                String.format("Your %s has been added!", info),
+                Map.of(
+                        "vehicleId", v.getId().toString(),
+                        "licensePlate", v.getLicensePlate(),
+                        "brand", v.getBrand(),
+                        "model", v.getModel()
+                )
+        );
+
+        try {
+            emailService.sendVehicleAddedEmail(
+                    u.getEmail(),
+                    u.getFullName(),
+                    info,
+                    v.getLicensePlate(),
+                    v.getBrand(),
+                    v.getModel(),
+                    v.getYear() != null ? v.getYear().toString() : "N/A"
+            );
+        } catch (Exception e) {
+            // log error
         }
-        if (!old.getBrand().equals(updated.getBrand()) || !old.getModel().equals(updated.getModel())) {
-            return true;
+    }
+
+    private void sendUpdateNotifications(Vehicle updated, Vehicle old, User u) {
+        String changes = getChangesSummary(old, updated);
+        notificationService.sendNotification(
+                u.getId(),
+                "VEHICLE_UPDATED",
+                String.format("Vehicle %s updated", updated.getLicensePlate()),
+                Map.of("changes", changes)
+        );
+
+        try {
+            emailService.sendVehicleUpdatedEmail(
+                    u.getEmail(),
+                    u.getFullName(),
+                    formatVehicleInfo(updated),
+                    updated.getLicensePlate(),
+                    changes
+            );
+        } catch (Exception e) {
+            // log
         }
-        if (old.getYear() != null && updated.getYear() != null && !old.getYear().equals(updated.getYear())) {
-            return true;
+    }
+
+    private void sendDeleteNotifications(Vehicle v, User u) {
+        String info = formatVehicleInfo(v);
+        notificationService.sendNotification(
+                u.getId(),
+                "VEHICLE_DELETED",
+                String.format("Vehicle %s removed", v.getLicensePlate()),
+                Map.of("licensePlate", v.getLicensePlate())
+        );
+
+        try {
+            emailService.sendVehicleDeletedEmail(
+                    u.getEmail(),
+                    u.getFullName(),
+                    info,
+                    v.getLicensePlate(),
+                    LocalDateTime.now().format(DATE_FORMATTER)
+            );
+        } catch (Exception e) {
+            // log
         }
-        return false;
+    }
+
+    private String formatVehicleInfo(Vehicle v) {
+        return (v.getYear() != null ? v.getYear() + " " : "") + v.getBrand() + " " + v.getModel();
     }
 
     private String getChangesSummary(Vehicle old, Vehicle updated) {
-        StringBuilder changes = new StringBuilder();
-
+        StringBuilder sb = new StringBuilder();
         if (!old.getLicensePlate().equals(updated.getLicensePlate())) {
-            changes.append("Registration Number: ").append(old.getLicensePlate()).append(" → ").append(updated.getLicensePlate()).append("\n");
+            sb.append("Plate: ").append(old.getLicensePlate()).append(" to ").append(updated.getLicensePlate()).append("\n");
         }
-
         if (!old.getBrand().equals(updated.getBrand())) {
-            changes.append("Make: ").append(old.getBrand()).append(" → ").append(updated.getBrand()).append("\n");
+            sb.append("Brand: ").append(old.getBrand()).append(" to ").append(updated.getBrand()).append("\n");
         }
-
         if (!old.getModel().equals(updated.getModel())) {
-            changes.append("Model: ").append(old.getModel()).append(" → ").append(updated.getModel()).append("\n");
+            sb.append("Model: ").append(old.getModel()).append(" to ").append(updated.getModel()).append("\n");
         }
-
-        if (old.getYear() != null && updated.getYear() != null && !old.getYear().equals(updated.getYear())) {
-            changes.append("Year: ").append(old.getYear()).append(" → ").append(updated.getYear());
+        if (!Objects.equals(old.getYear(), updated.getYear())) {
+            sb.append("Year: ").append(old.getYear()).append(" to ").append(updated.getYear());
         }
-
-        return changes.toString().trim();
+        return sb.toString().trim();
     }
 }
