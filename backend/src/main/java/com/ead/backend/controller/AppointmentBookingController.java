@@ -5,11 +5,15 @@ import com.ead.backend.entity.*;
 import com.ead.backend.service.AppointmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -102,22 +106,45 @@ public class AppointmentBookingController {
     }
 
     // ===================================================================
-    // 4. GET AVAILABLE TIME SLOTS
+    // 3. CHECK AVAILABLE SLOTS (Customer)
     // ===================================================================
     @GetMapping("/available-slots")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getAvailableTimeSlots(
-            @RequestParam String serviceCenterId,
-            @RequestParam String date) {
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getAvailableSlots(
+            @RequestParam(required = true) UUID serviceCenterId,
+            @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
-            java.util.UUID serviceCenterUuid = java.util.UUID.fromString(serviceCenterId);
-            List<String> availableSlots = appointmentService.getAvailableTimeSlots(serviceCenterUuid, date);
-            return ResponseEntity.ok(availableSlots);
-        } catch (RuntimeException e) {
+            // Validate service center exists
+            if (serviceCenterId == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponseDTO("Service Center ID is required", false));
+            }
+
+            if (date == null) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponseDTO("Date is required", false));
+            }
+
+            // Validate date is not in the past
+            if (date.isBefore(LocalDate.now())) {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponseDTO("Cannot check slots for past dates", false));
+            }
+
+            Map<Integer, Integer> slots = appointmentService.getAvailableSlotsByHour(serviceCenterId, date);
+            return ResponseEntity.ok(slots);
+
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDTO(e.getMessage(), false));
+        } catch (Exception e) {
+            // Log the full exception for debugging
+            e.printStackTrace(); // Or use logger
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponseDTO("Error fetching available slots: " + e.getMessage(), false));
         }
     }
+
 
     // ===================================================================
     // Helper: Convert Appointment → Summary DTO
