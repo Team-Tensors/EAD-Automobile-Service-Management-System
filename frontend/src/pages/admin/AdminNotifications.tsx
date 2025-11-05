@@ -7,8 +7,8 @@ const AdminNotifications = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-0">
+        <div className="max-w-7xl mx-auto pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Notifications</h1>
@@ -25,7 +25,7 @@ const AdminNotifications = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-0 py-8">
         <div className="bg-card rounded-lg shadow-md p-12 border border-border text-center">
           <div className="text-6xl mb-4">🔔</div>
           <h2 className="text-2xl font-bold text-card-foreground mb-2">

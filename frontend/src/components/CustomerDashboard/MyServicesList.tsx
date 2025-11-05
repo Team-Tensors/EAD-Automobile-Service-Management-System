@@ -74,7 +74,7 @@ export const MyServicesList: React.FC<MyServicesListProps> = ({
                   <Car className="w-4 h-4 text-gray-400" />
                   <p className="font-semibold text-white">{service.vehicleName}</p>
                 </div>
-                <p className="text-sm text-gray-400 mb-2">{service.vehicleNumber}</p>
+                <p className="text-sm text-gray-400 mb-2">{service.licensePlate}</p>
                 <p className="text-xs text-gray-500 mb-2">{service.serviceType}</p>
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
