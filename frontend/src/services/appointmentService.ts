@@ -33,6 +33,11 @@ export interface AppointmentSummary {
   canStart: boolean;
 }
 
+// New interface for slot availability
+export interface SlotAvailability {
+  [hour: number]: number; // hour -> available slots count
+}
+
 export const appointmentService = {
   // Book a new appointment
   bookAppointment: async (
@@ -51,6 +56,20 @@ export const appointmentService = {
   // Cancel an appointment
   cancelAppointment: async (appointmentId: string): Promise<void> => {
     await api.put(`${base}/${appointmentId}/cancel`);
+  },
+
+  // Get available slots for a specific service center and date
+  getAvailableSlots: async (
+    serviceCenterId: string,
+    date: string // Format: "2025-11-05"
+  ): Promise<SlotAvailability> => {
+    const res = await api.get(`${base}/available-slots`, {
+      params: {
+        serviceCenterId,
+        date,
+      },
+    });
+    return res.data;
   },
 };
 
