@@ -1,7 +1,7 @@
 // src/pages/MyAppointmentsPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Calendar, Clock, Car, Wrench, Package } from "lucide-react";
+import { Plus, Calendar, Clock, Car, Wrench, Package, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
@@ -20,6 +20,10 @@ const MyAppointmentsPage = () => {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null);
+  
+  // Calendar state
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Fetch appointments on component mount
   useEffect(() => {
@@ -103,6 +107,150 @@ const MyAppointmentsPage = () => {
     });
   };
 
+  // Calendar helper functions
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    return { daysInMonth, startingDayOfWeek };
+  };
+
+  const isSameDay = (date1: Date, date2: Date) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
+  };
+
+  const hasAppointmentOnDate = (date: Date) => {
+    return appointments.some((apt) => {
+      const aptDate = new Date(apt.date);
+      return isSameDay(aptDate, date);
+    });
+  };
+
+  const getAppointmentCountOnDate = (date: Date) => {
+    return appointments.filter((apt) => {
+      const aptDate = new Date(apt.date);
+      return isSameDay(aptDate, date);
+    }).length;
+  };
+
+  const previousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  const renderCalendar = () => {
+    const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
+    const days = [];
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(<div key={`empty-${i}`} className="h-10"></div>);
+    }
+
+    // Add cells for each day of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const isToday = isSameDay(date, new Date());
+      const hasAppointment = hasAppointmentOnDate(date);
+      const appointmentCount = getAppointmentCountOnDate(date);
+      const isSelected = selectedDate && isSameDay(date, selectedDate);
+
+      days.push(
+        <div
+          key={day}
+          onClick={() => setSelectedDate(date)}
+          className={`h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all relative ${
+            isSelected
+              ? "bg-orange-500 text-white font-bold"
+              : isToday
+              ? "bg-orange-500/20 text-orange-400 font-semibold border border-orange-500/50"
+              : hasAppointment
+              ? "bg-zinc-800 text-white hover:bg-zinc-700"
+              : "text-gray-400 hover:bg-zinc-800/50"
+          }`}
+        >
+          <span className="text-sm">{day}</span>
+          {hasAppointment && !isSelected && (
+            <div className="absolute bottom-1 flex gap-0.5">
+              {[...Array(Math.min(appointmentCount, 3))].map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1 h-1 rounded-full bg-orange-500"
+                ></div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+        {/* Calendar Header */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={previousMonth}
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-400" />
+          </button>
+          <h3 className="text-white font-semibold">
+            {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          </h3>
+          <button
+            onClick={nextMonth}
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
+
+        {/* Day Names */}
+        <div className="grid grid-cols-7 gap-2 mb-2">
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            <div key={day} className="text-center text-xs text-gray-500 font-semibold">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar Days */}
+        <div className="grid grid-cols-7 gap-2">{days}</div>
+
+        {/* Legend */}
+        <div className="mt-4 pt-4 border-t border-zinc-800 space-y-2 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-orange-500"></div>
+            <span className="text-gray-400">Selected Date</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/50"></div>
+            <span className="text-gray-400">Today</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded bg-zinc-800 flex items-center justify-center">
+              <div className="w-1 h-1 rounded-full bg-orange-500"></div>
+            </div>
+            <span className="text-gray-400">Has Appointments</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-black flex flex-col pt-12">
       <AuthenticatedNavbar />
@@ -156,8 +304,11 @@ const MyAppointmentsPage = () => {
                 </button>
               </div>
 
-              <div className="space-y-6">
-                {appointments.map((appointment) => (
+              {/* Two Column Layout: Appointments List + Calendar */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Appointments List - Takes 2 columns */}
+                <div className="lg:col-span-2 space-y-6">
+                  {appointments.map((appointment) => (
                   <div
                     key={appointment.id}
                     className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 hover:border-zinc-700 transition-all"
@@ -234,6 +385,81 @@ const MyAppointmentsPage = () => {
                     </div>
                   </div>
                 ))}
+                </div>
+
+                {/* Calendar - Takes 1 column */}
+                <div className="lg:col-span-1">
+                  <div className="sticky top-20">
+                    <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-orange-500" />
+                      Appointment Calendar
+                    </h2>
+                    {renderCalendar()}
+                    
+                    {/* Show appointments for selected date */}
+                    {selectedDate && (
+                      <div className="mt-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+                        <h3 className="text-white font-semibold mb-3">
+                          Appointments on {formatDate(selectedDate.toISOString())}
+                        </h3>
+                        {appointments.filter((apt) => {
+                          const aptDate = new Date(apt.date);
+                          return selectedDate && isSameDay(aptDate, selectedDate);
+                        }).length === 0 ? (
+                          <p className="text-gray-400 text-sm">No appointments on this date</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {appointments
+                              .filter((apt) => {
+                                const aptDate = new Date(apt.date);
+                                return selectedDate && isSameDay(aptDate, selectedDate);
+                              })
+                              .map((apt) => (
+                                <div
+                                  key={apt.id}
+                                  className="bg-zinc-800/50 rounded p-3 border border-zinc-700"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    {apt.type === AppointmentTypeValues.SERVICE ? (
+                                      <Wrench className="w-4 h-4 text-orange-500 mt-0.5" />
+                                    ) : (
+                                      <Package className="w-4 h-4 text-orange-500 mt-0.5" />
+                                    )}
+                                    <div className="flex-1">
+                                      <p className="text-white text-sm font-medium">{apt.service}</p>
+                                      <p className="text-gray-400 text-xs">{apt.vehicle}</p>
+                                      <div className="flex items-center gap-1 mt-1">
+                                        <Clock className="w-3 h-3 text-gray-500" />
+                                        <span className="text-gray-400 text-xs">
+                                          {new Date(apt.date).toLocaleTimeString("en-US", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <span
+                                      className={`text-xs px-2 py-1 rounded ${
+                                        apt.status === "PENDING"
+                                          ? "bg-yellow-500/10 text-yellow-500"
+                                          : apt.status === "CONFIRMED"
+                                          ? "bg-green-500/10 text-green-500"
+                                          : apt.status === "COMPLETED"
+                                          ? "bg-blue-500/10 text-blue-500"
+                                          : "bg-red-500/10 text-red-500"
+                                      }`}
+                                    >
+                                      {apt.status}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </>
           )}
