@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { AdminService, Employee } from '@/types/admin';
+import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees, assignEmployeeToAppointment } from '../../services/adminService';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -21,286 +22,33 @@ const AdminDashboard = () => {
   const [selectedService, setSelectedService] = useState<AdminService | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchEmployee, setSearchEmployee] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Mock data - Replace with actual API calls
-  // Note: This mock data is structured to match backend entities
+  // Fetch all data on component mount
   useEffect(() => {
-    const mockUpcoming: AdminService[] = [
-      {
-        id: 1,
-        vehicleBrand: 'Mercedes-Benz',
-        vehicleModel: 'E-Class',
-        vehicleYear: '2023',
-        vehicleLicensePlate: 'WP-5678',
-        serviceTypeName: 'Premium Detailing',
-        serviceTypeDescription: 'Complete interior and exterior detailing',
-        estimatedCost: 25000,
-        estimatedDuration: 180,
-        appointmentDate: '2025-10-28T09:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'upcoming',
-        customerName: 'Sarah Johnson',
-        customerEmail: 'sarah.j@email.com',
-        assignedEmployeeName: 'Michael Roberts',
-        assignedEmployeeId: 3,
-        serviceCenter: 'DriveCare Colombo Center',
-        centerSlot: 'Bay 2'
-      },
-      {
-        id: 2,
-        vehicleBrand: 'Audi',
-        vehicleModel: 'Q7',
-        vehicleYear: '2022',
-        vehicleLicensePlate: 'CAA-9012',
-        serviceTypeName: 'Engine Diagnostic',
-        serviceTypeDescription: 'Complete engine system diagnostic check',
-        estimatedCost: 15000,
-        estimatedDuration: 120,
-        appointmentDate: '2025-10-29T10:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'upcoming',
-        customerName: 'Robert Williams',
-        customerEmail: 'robert.w@email.com',
-        assignedEmployeeName: 'David Chen',
-        assignedEmployeeId: 4,
-        serviceCenter: 'DriveCare Negombo Center',
-        centerSlot: 'Bay 1'
-      },
-      {
-        id: 3,
-        vehicleBrand: 'Tesla',
-        vehicleModel: 'Model 3',
-        vehicleYear: '2024',
-        vehicleLicensePlate: 'EP-3456',
-        serviceTypeName: 'Software Update',
-        serviceTypeDescription: 'Tesla system software update and diagnostics',
-        estimatedCost: 5000,
-        estimatedDuration: 60,
-        appointmentDate: '2025-10-30T14:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'upcoming',
-        customerName: 'Emily Davis',
-        customerEmail: 'emily.d@email.com',
-        assignedEmployeeName: 'Alex Kumar',
-        assignedEmployeeId: 5,
-        serviceCenter: 'DriveCare Colombo Center',
-        centerSlot: 'Bay 5'
+    const fetchData = async () => {
+      try {
+        setErrorMessage(null);
+        
+        const [upcoming, ongoing, unassigned, employeeList] = await Promise.all([
+          getUpcomingAppointments(),
+          getOngoingAppointments(),
+          getUnassignedAppointments(),
+          getAllEmployees()
+        ]);
+        
+        setUpcomingAppointments(upcoming);
+        setOngoingAppointments(ongoing);
+        setUnassignedAppointments(unassigned);
+        setEmployees(employeeList);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to load dashboard data');
       }
-    ];
-
-    const mockOngoing: AdminService[] = [
-      {
-        id: 4,
-        vehicleBrand: 'Toyota',
-        vehicleModel: 'Camry',
-        vehicleYear: '2020',
-        vehicleLicensePlate: 'ABC-1234',
-        serviceTypeName: 'Regular Maintenance',
-        serviceTypeDescription: 'Oil change, filter replacement, general checkup',
-        estimatedCost: 12000,
-        estimatedDuration: 90,
-        appointmentDate: '2025-10-24T08:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'ongoing',
-        customerName: 'James Anderson',
-        customerEmail: 'james.a@email.com',
-        assignedEmployeeName: 'John Mechanic',
-        assignedEmployeeId: 1,
-        serviceCenter: 'DriveCare Negombo Center',
-        centerSlot: 'Bay 3',
-        progress: 65,
-        ongoingStatus: 'IN_PROGRESS'
-      },
-      {
-        id: 5,
-        vehicleBrand: 'BMW',
-        vehicleModel: 'X5',
-        vehicleYear: '2021',
-        vehicleLicensePlate: 'LMN-9012',
-        serviceTypeName: 'Transmission Repair',
-        serviceTypeDescription: 'Transmission system repair and replacement',
-        estimatedCost: 85000,
-        estimatedDuration: 480,
-        appointmentDate: '2025-10-23T09:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'ongoing',
-        customerName: 'Michael Brown',
-        customerEmail: 'michael.b@email.com',
-        assignedEmployeeName: 'Sarah Engineer',
-        assignedEmployeeId: 2,
-        serviceCenter: 'DriveCare Colombo Center',
-        centerSlot: 'Bay 4',
-        progress: 40,
-        ongoingStatus: 'AWAITING_PARTS'
-      },
-      {
-        id: 6,
-        vehicleBrand: 'Honda',
-        vehicleModel: 'Accord',
-        vehicleYear: '2019',
-        vehicleLicensePlate: 'XYZ-7890',
-        serviceTypeName: 'Brake System Overhaul',
-        serviceTypeDescription: 'Complete brake system inspection and replacement',
-        estimatedCost: 35000,
-        estimatedDuration: 240,
-        appointmentDate: '2025-10-25T07:00:00',
-        status: 'CONFIRMED',
-        displayStatus: 'ongoing',
-        customerName: 'Lisa Martinez',
-        customerEmail: 'lisa.m@email.com',
-        assignedEmployeeName: 'Tom Wilson',
-        assignedEmployeeId: 6,
-        serviceCenter: 'DriveCare Negombo Center',
-        centerSlot: 'Bay 2',
-        progress: 85,
-        ongoingStatus: 'QUALITY_CHECK'
-      }
-    ];
-
-    const mockUnassigned: AdminService[] = [
-      {
-        id: 7,
-        vehicleBrand: 'Ford',
-        vehicleModel: 'Mustang',
-        vehicleYear: '2022',
-        vehicleLicensePlate: 'DEF-4567',
-        serviceTypeName: 'Custom Modification',
-        serviceTypeDescription: 'Custom performance and aesthetic modifications',
-        estimatedCost: 150000,
-        estimatedDuration: 720,
-        appointmentDate: '2025-10-26T10:00:00',
-        status: 'PENDING',
-        displayStatus: 'unassigned',
-        customerName: 'Kevin Taylor',
-        customerEmail: 'kevin.t@email.com',
-        serviceCenter: 'DriveCare Colombo Center',
-        centerSlot: 'Bay 6'
-      },
-      {
-        id: 8,
-        vehicleBrand: 'Nissan',
-        vehicleModel: 'Leaf',
-        vehicleYear: '2023',
-        vehicleLicensePlate: 'GHI-7891',
-        serviceTypeName: 'Battery Check & Service',
-        serviceTypeDescription: 'EV battery health check and maintenance',
-        estimatedCost: 8000,
-        estimatedDuration: 90,
-        appointmentDate: '2025-10-27T11:00:00',
-        status: 'PENDING',
-        displayStatus: 'unassigned',
-        customerName: 'Amanda White',
-        customerEmail: 'amanda.w@email.com',
-        serviceCenter: 'DriveCare Negombo Center',
-        centerSlot: 'Bay 7'
-      },
-      {
-        id: 9,
-        vehicleBrand: 'Porsche',
-        vehicleModel: '911',
-        vehicleYear: '2021',
-        vehicleLicensePlate: 'JKL-2345',
-        serviceTypeName: 'Performance Tune',
-        serviceTypeDescription: 'High-performance tuning and optimization',
-        estimatedCost: 95000,
-        estimatedDuration: 360,
-        appointmentDate: '2025-10-28T13:00:00',
-        status: 'PENDING',
-        displayStatus: 'unassigned',
-        customerName: 'Daniel Garcia',
-        customerEmail: 'daniel.g@email.com',
-        serviceCenter: 'DriveCare Colombo Center',
-        centerSlot: 'Bay 8'
-      }
-    ];
-
-    const mockEmployees: Employee[] = [
-      {
-        id: 1,
-        name: 'John Mechanic',
-        email: 'john.m@drivecare.com',
-        specialization: 'General Maintenance',
-        availability: 'busy',
-        currentWorkload: 2,
-        rating: 4.8,
-        phoneNumber: '0771234567'
-      },
-      {
-        id: 2,
-        name: 'Sarah Engineer',
-        email: 'sarah.e@drivecare.com',
-        specialization: 'Engine & Transmission',
-        availability: 'busy',
-        currentWorkload: 1,
-        rating: 4.9,
-        phoneNumber: '0772345678'
-      },
-      {
-        id: 3,
-        name: 'Michael Roberts',
-        email: 'michael.r@drivecare.com',
-        specialization: 'Detailing & Aesthetics',
-        availability: 'available',
-        currentWorkload: 1,
-        rating: 4.7,
-        phoneNumber: '0773456789'
-      },
-      {
-        id: 4,
-        name: 'David Chen',
-        email: 'david.c@drivecare.com',
-        specialization: 'Diagnostics',
-        availability: 'available',
-        currentWorkload: 1,
-        rating: 4.9,
-        phoneNumber: '0774567890'
-      },
-      {
-        id: 5,
-        name: 'Alex Kumar',
-        email: 'alex.k@drivecare.com',
-        specialization: 'Electric Vehicles',
-        availability: 'available',
-        currentWorkload: 1,
-        rating: 5.0,
-        phoneNumber: '0775678901'
-      },
-      {
-        id: 6,
-        name: 'Tom Wilson',
-        email: 'tom.w@drivecare.com',
-        specialization: 'Brake Systems',
-        availability: 'busy',
-        currentWorkload: 1,
-        rating: 4.6,
-        phoneNumber: '0776789012'
-      },
-      {
-        id: 7,
-        name: 'Emma Rodriguez',
-        email: 'emma.r@drivecare.com',
-        specialization: 'Custom Modifications',
-        availability: 'available',
-        currentWorkload: 0,
-        rating: 4.8,
-        phoneNumber: '0777890123'
-      },
-      {
-        id: 8,
-        name: 'Chris Anderson',
-        email: 'chris.a@drivecare.com',
-        specialization: 'Performance Tuning',
-        availability: 'available',
-        currentWorkload: 0,
-        rating: 4.9,
-        phoneNumber: '0778901234'
-      }
-    ];
-
-    setUpcomingAppointments(mockUpcoming);
-    setOngoingAppointments(mockOngoing);
-    setUnassignedAppointments(mockUnassigned);
-    setEmployees(mockEmployees);
+    };
+    
+    fetchData();
   }, []);
 
 
@@ -333,22 +81,32 @@ const AdminDashboard = () => {
     setShowAssignModal(true);
   };
 
-  const assignEmployeeToService = (employee: Employee) => {
+  const assignEmployeeToService = async (employee: Employee) => {
     if (selectedService) {
-      // Update the service with assigned employee
-      const updatedService: AdminService = {
-        ...selectedService,
-        assignedEmployeeId: employee.id,
-        assignedEmployeeName: employee.name,
-        status: 'CONFIRMED',
-        displayStatus: 'upcoming'
-      };
-      
-      setUnassignedAppointments(prev => prev.filter(s => s.id !== selectedService.id));
-      setUpcomingAppointments(prev => [...prev, updatedService]);
-      setShowAssignModal(false);
-      setSelectedService(null);
-      setSearchEmployee('');
+      try {
+        setIsAssigning(true);
+        setErrorMessage(null);
+        
+        // Call the API to assign employee
+        const updatedService = await assignEmployeeToAppointment(
+          selectedService.id,
+          [employee.id]
+        );
+        
+        // Remove from unassigned and add to upcoming
+        setUnassignedAppointments(prev => prev.filter(s => s.id !== selectedService.id));
+        setUpcomingAppointments(prev => [...prev, updatedService]);
+        
+        // Close modal and reset
+        setShowAssignModal(false);
+        setSelectedService(null);
+        setSearchEmployee('');
+      } catch (error) {
+        console.error('Error assigning employee:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to assign employee');
+      } finally {
+        setIsAssigning(false);
+      }
     }
   };
 
@@ -398,8 +156,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+        <div className="max-w-7xl mx-auto px-0 sm:px-6 md:px-8 lg:px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -416,10 +174,26 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+      <div className="max-w-7xl mx-auto sm:px-6 md:px-8 lg:px-0 py-8 w-full">
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500" />
+              <p className="text-red-500 text-sm">{errorMessage}</p>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="ml-auto text-red-500 hover:text-red-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Awaiting Assignment Section - Full Width */}
-        <div className="mb-6">
-          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
+        <div className="mb-6 w-full">
+          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6 w-full">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-orange-500" />
@@ -431,7 +205,7 @@ const AdminDashboard = () => {
             </div>
 
             {unassignedAppointments.length === 0 ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 w-full">
                 <AlertCircle className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
                 <p className="text-gray-400 text-lg">No appointments awaiting assignment</p>
                 <p className="text-zinc-500 text-sm mt-2">All appointments have been assigned to employees</p>
@@ -701,14 +475,20 @@ const AdminDashboard = () => {
 
                     <button
                       onClick={() => assignEmployeeToService(employee)}
-                      disabled={employee.availability === 'busy'}
+                      disabled={employee.availability === 'busy' || isAssigning}
                       className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
-                        employee.availability === 'available'
+                        employee.availability === 'available' && !isAssigning
                           ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
                           : 'bg-zinc-600 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      Assign
+                      {isAssigning ? (
+                        <>
+                          <span className="inline-block mr-2">Loading...</span>
+                        </>
+                      ) : (
+                        'Assign'
+                      )}
                     </button>
                   </div>
                 </div>
