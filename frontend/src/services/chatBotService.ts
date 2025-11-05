@@ -24,6 +24,11 @@ chatApi.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+interface Location {
+    latitude: number;
+    longitude: number;
+}
+
 class ChatBotService {
     private base = '/chat';
 
@@ -31,9 +36,41 @@ class ChatBotService {
      * Send a message to the chatbot and receive a response.
      * Backend endpoint: /chatbot/message
      */
-    public async sendMessage(payload: { message: string }) {
+    public async sendMessage(payload: { message: string; location?: Location }) {
         const res = await chatApi.post(`${this.base}/message`, payload);
         return res.data;
+    }
+
+    /**
+     * Get the user's current location using the browser's Geolocation API
+     * Returns a Promise that resolves with the location or null if unavailable
+     */
+    public async getUserLocation(): Promise<Location | null> {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                console.warn('Geolocation is not supported by this browser.');
+                resolve(null);
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.warn('Error getting location:', error.message);
+                    resolve(null);
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 300000, // Cache location for 5 minutes
+                }
+            );
+        });
     }
 }
 
