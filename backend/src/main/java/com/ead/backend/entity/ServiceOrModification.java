@@ -3,6 +3,8 @@ package com.ead.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(
         name = "service_or_modification",
@@ -16,8 +18,9 @@ import lombok.*;
 public class ServiceOrModification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "UUID")
+    private UUID id;
 
     /** SERVICE or MODIFICATION */
     @Enumerated(EnumType.STRING)

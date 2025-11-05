@@ -101,7 +101,7 @@ public class EmployeeService {
             // Appointment type info
             String appointmentType = a.getAppointmentType() != null ? a.getAppointmentType().name() : null;
             ServiceOrModification serviceOrModificationType = a.getServiceOrModification();
-            Long serviceOrModificationId = serviceOrModificationType != null ? serviceOrModificationType.getId() : null;
+            UUID serviceOrModificationId = serviceOrModificationType != null ? serviceOrModificationType.getId() : null;
             String serviceOrModificationName = serviceOrModificationType != null ? serviceOrModificationType.getName() : null;
             String serviceOrModificationDescription = serviceOrModificationType != null ? serviceOrModificationType.getDescription() : null;
             Double estimatedCost = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedCost() : null;

@@ -1,9 +1,9 @@
 // src/components/appointment/ServiceTypeSelector.tsx
-import React from 'react';
-import { Clock, ChevronRight, Wrench } from 'lucide-react';
+import React from "react";
+import { Clock, ChevronRight, Wrench } from "lucide-react";
 
 interface ServiceType {
-  id: number;
+  id: string; // UUID as string
   name: string;
   description: string;
   estimatedDuration: string;
@@ -17,7 +17,12 @@ interface ServiceTypeSelectorProps {
   label: string;
 }
 
-const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({ types, selectedId, onSelectType, label }) => {
+const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({
+  types,
+  selectedId,
+  onSelectType,
+  label,
+}) => {
   return (
     <div>
       <label className="flex items-center space-x-2 mb-3">
@@ -33,8 +38,8 @@ const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({ types, select
             onClick={() => onSelectType(type.id.toString())}
             className={`cursor-pointer p-4 rounded-lg border-2 transition-all duration-300 ${
               selectedId === type.id.toString()
-                ? 'border-orange-500 bg-orange-500/10'
-                : 'border-zinc-700 bg-zinc-800/50 hover:border-orange-500/50'
+                ? "border-orange-500 bg-orange-500/10"
+                : "border-zinc-700 bg-zinc-800/50 hover:border-orange-500/50"
             }`}
           >
             <div className="flex items-start justify-between">
@@ -46,7 +51,9 @@ const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({ types, select
                     <Clock className="w-3 h-3 inline mr-1" />
                     {type.estimatedDuration}
                   </span>
-                  <span className="text-orange-500 font-semibold">${type.price}</span>
+                  <span className="text-orange-500 font-semibold">
+                    ${type.price}
+                  </span>
                 </div>
               </div>
               {selectedId === type.id.toString() && (
