@@ -8,7 +8,9 @@ import {
   ListChecks,
   X,
   Filter,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
@@ -36,9 +38,13 @@ const EmployeeInventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-  const [buyQuantity, setBuyQuantity] = useState(0);
+  const [getQuantity, setGetQuantity] = useState(0);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Load inventory items
   useEffect(() => {
@@ -58,6 +64,7 @@ const EmployeeInventory = () => {
       );
     }
     setFilteredItems(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [items, searchQuery, selectedCategory]);
 
   const loadInventory = async () => {
@@ -72,18 +79,18 @@ const EmployeeInventory = () => {
     }
   };
 
-  const handleBuyItem = async (e: React.FormEvent) => {
+  const handleGetItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedItem || buyQuantity <= 0) return;
+    if (!selectedItem || getQuantity <= 0) return;
     try {
-      await inventoryService.buy(selectedItem.id, { quantity: buyQuantity });
-      setShowBuyModal(false);
+      await inventoryService.buy(selectedItem.id, { quantity: getQuantity });
+      setShowGetModal(false);
       setSelectedItem(null);
-      setBuyQuantity(0);
+      setGetQuantity(0);
       loadInventory();
     } catch (error: any) {
-      console.error('Failed to buy item:', error);
-      alert(error.response?.data?.message || 'Failed to buy item');
+      console.error('Failed to get item:', error);
+      alert(error.response?.data?.message || 'Failed to get item');
     }
   };
 
@@ -93,6 +100,20 @@ const EmployeeInventory = () => {
 
   const lowStockCount = items.filter(item => item.lowStock).length;
   const availableItems = items.filter(item => item.quantity > 0).length;
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    setCurrentPage((page) => Math.min(page + 1, totalPages));
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage((page) => Math.max(page - 1, 1));
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -159,7 +180,7 @@ const EmployeeInventory = () => {
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
             {/* Category Filter */}
@@ -168,7 +189,7 @@ const EmployeeInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -207,7 +228,7 @@ const EmployeeInventory = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map(item => (
+                  currentItems.map(item => (
                     <tr
                       key={item.id}
                       className={`border-b border-zinc-700 hover:bg-zinc-800/50 transition ${
@@ -240,7 +261,7 @@ const EmployeeInventory = () => {
                           <button
                             onClick={() => {
                               setSelectedItem(item);
-                              setShowBuyModal(true);
+                              setShowGetModal(true);
                             }}
                             disabled={item.quantity === 0}
                             className={`px-4 py-2 rounded-lg font-normal flex items-center gap-2 transition ${
@@ -249,7 +270,7 @@ const EmployeeInventory = () => {
                                 : 'bg-orange-500 hover:bg-orange-600 text-white'
                             }`}
                           >
-                            Buy Item
+                            Get Item
                           </button>
                         </div>
                       </td>
@@ -259,27 +280,65 @@ const EmployeeInventory = () => {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination */}
+          {filteredItems.length > 0 && (
+            <div className="px-6 py-4 border-t border-zinc-700 flex items-center justify-between">
+              <div className="text-sm text-gray-400">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === 1
+                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                  }`}
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm text-white px-4">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`p-2 rounded-lg transition ${
+                    currentPage === totalPages
+                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                  }`}
+                  title="Next page"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Buy Item Modal */}
-      {showBuyModal && selectedItem && (
+      {/* Get Item Modal */}
+      {showGetModal && selectedItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-700">
             <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between">
-              <h3 className="text-2xl font-bold">Buy Item</h3>
+              <h3 className="text-2xl font-bold">Get Item</h3>
               <button
                 onClick={() => {
-                  setShowBuyModal(false);
+                  setShowGetModal(false);
                   setSelectedItem(null);
-                  setBuyQuantity(0);
+                  setGetQuantity(0);
                 }}
                 className="text-gray-300 hover:bg-zinc-600 p-2 rounded-lg transition"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form onSubmit={handleBuyItem} className="p-6 space-y-4">
+            <form onSubmit={handleGetItem} className="p-6 space-y-4">
               <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-600">
                 <p className="text-sm text-gray-400 mb-1">Item</p>
                 <p className="font-semibold text-white">{selectedItem.itemName}</p>
@@ -290,31 +349,31 @@ const EmployeeInventory = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-white mb-2">
-                  Quantity to Buy *
+                  Quantity to Get
                 </label>
                 <input
                   type="number"
                   required
                   min="1"
                   max={selectedItem.quantity}
-                  value={buyQuantity}
-                  onChange={(e) => setBuyQuantity(parseInt(e.target.value) || 0)}
+                  value={getQuantity}
+                  onChange={(e) => setGetQuantity(parseInt(e.target.value) || 0)}
                   className="w-full px-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   placeholder="Enter quantity"
                 />
               </div>
-              {buyQuantity > 0 && buyQuantity <= selectedItem.quantity && (
+              {getQuantity > 0 && getQuantity <= selectedItem.quantity && (
                 <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
-                  <p className="text-sm text-blue-400 mb-1">Total Cost</p>
-                  <p className="text-2xl font-bold text-blue-400">
-                    {formatCurrency(selectedItem.unitPrice * buyQuantity)}
+                  <p className="text-sm text-gray-400 mb-1">Total Value</p>
+                  <p className="text-sm font-bold text-gray-400">
+                    {formatCurrency(selectedItem.unitPrice * getQuantity)}
                   </p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Remaining stock: {selectedItem.quantity - buyQuantity} units
+                  <p className="text-xl text-blue-400 mt-2">
+                    Remaining stock: {selectedItem.quantity - getQuantity} units
                   </p>
                 </div>
               )}
-              {buyQuantity > selectedItem.quantity && (
+              {getQuantity > selectedItem.quantity && (
                 <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-lg">
                   <p className="text-sm text-red-400">
                     Insufficient stock! Maximum available: {selectedItem.quantity} units
@@ -325,9 +384,9 @@ const EmployeeInventory = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowBuyModal(false);
+                    setShowGetModal(false);
                     setSelectedItem(null);
-                    setBuyQuantity(0);
+                    setGetQuantity(0);
                   }}
                   className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-semibold transition"
                 >
@@ -335,14 +394,14 @@ const EmployeeInventory = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={buyQuantity <= 0 || buyQuantity > selectedItem.quantity}
+                  disabled={getQuantity <= 0 || getQuantity > selectedItem.quantity}
                   className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${
-                    buyQuantity > 0 && buyQuantity <= selectedItem.quantity
+                    getQuantity > 0 && getQuantity <= selectedItem.quantity
                       ? 'bg-orange-500 hover:bg-orange-600 text-white'
                       : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  Confirm Purchase
+                  Confirm
                 </button>
               </div>
             </form>
