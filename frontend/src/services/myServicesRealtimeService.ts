@@ -1,19 +1,25 @@
-// src/services/myServicesRealtimeService.ts
 export interface ServiceUpdate {
   id: string;
   status?: string;
   assignedEmployee?: string;
+  serviceCenter?: string;
+  centerSlot?: number | null;
+  estimatedCompletion?: string; // Added
 }
 
-class MyServicesRealtimeService {
+export class MyServicesRealtimeService {
   private eventSource: EventSource | null = null;
   private listeners: ((update: ServiceUpdate) => void)[] = [];
 
-  connect(customerId: number) {
+  connect(customerId: string) {
     if (this.eventSource) return;
 
     const token = localStorage.getItem("token");
-    const url = `${import.meta.env.VITE_API_URL}/appointments/sse/${customerId}`;
+    if (!customerId) {
+      console.error("Customer ID is required for SSE");
+      return;
+    }
+    const url = `${import.meta.env.VITE_API_URL}/slot-appointments/sse/${customerId}`;
 
     this.eventSource = new EventSource(url, {
       headers: { Authorization: `Bearer ${token}` },

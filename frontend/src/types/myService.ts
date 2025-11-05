@@ -1,4 +1,4 @@
-import type { AppointmentSummary } from "@/services/appointmentService";
+import type { AppointmentSummary } from "@/services/slotAppointmentService";
 import { vehicleService } from "@/services/vehicleService";
 
 export interface Service {
@@ -11,31 +11,25 @@ export interface Service {
   estimatedCompletion: string;
   assignedEmployee: string;
   serviceCenter: string;
-  centerSlot: string;
+  centerSlot: string | number;
 }
 
 export const mapSummaryToService = async (summary: AppointmentSummary): Promise<Service> => {
   let vehicleName = "Unknown Vehicle";
   let licensePlate = "N/A";
 
-  if (summary.vehicle && summary.vehicle.includes(" • ")) {
-    const [name, plate] = summary.vehicle.split(" • ");
-    vehicleName = name || "Unknown Vehicle";
-    licensePlate = plate || "N/A";
-  } else {
-    try {
-      const vehicles = await vehicleService.list();
-      const matchedVehicle = vehicles.find((v) => `${v.brand} ${v.model}` === summary.vehicle);
-      if (matchedVehicle) {
-        vehicleName = `${matchedVehicle.brand} ${matchedVehicle.model}`;
-        licensePlate = matchedVehicle.licensePlate;
-      } else {
-        vehicleName = summary.vehicle || "Unknown Vehicle";
-      }
-    } catch (err) {
-      console.error("Failed to fetch vehicles:", err);
+  try {
+    const vehicles = await vehicleService.list();
+    const matchedVehicle = vehicles.find((v) => v.id === summary.vehicle);
+    if (matchedVehicle) {
+      vehicleName = `${matchedVehicle.brand} ${matchedVehicle.model}`;
+      licensePlate = matchedVehicle.licensePlate;
+    } else {
       vehicleName = summary.vehicle || "Unknown Vehicle";
     }
+  } catch (err) {
+    console.error("Failed to fetch vehicles:", err);
+    vehicleName = summary.vehicle || "Unknown Vehicle";
   }
 
   const status: "completed" | "not_completed" = summary.status === "COMPLETED" ? "completed" : "not_completed";
@@ -47,9 +41,9 @@ export const mapSummaryToService = async (summary: AppointmentSummary): Promise<
     serviceType: summary.service,
     status,
     startDate: summary.date,
-    estimatedCompletion: (summary as any).estimatedCompletion ?? "TBD",
-    assignedEmployee: (summary as any).assignedEmployee ?? "Not Assigned",
-    serviceCenter: (summary as any).serviceCenter ?? "TBD",
-    centerSlot: (summary as any).centerSlot ?? "TBD",
+    estimatedCompletion: summary.estimatedCompletion || "TBD",
+    assignedEmployee: summary.assignedEmployee || "Not Assigned",
+    serviceCenter: summary.serviceCenter || "Unknown Center",
+    centerSlot: summary.centerSlot != null ? summary.centerSlot.toString() : "None",
   } as Service;
 };
