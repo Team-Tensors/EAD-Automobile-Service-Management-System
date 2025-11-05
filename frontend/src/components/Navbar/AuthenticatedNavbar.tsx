@@ -53,27 +53,27 @@ const AuthenticatedNavbar = () => {
 
   // Define navigation tabs
   const navTabs: NavTab[] = [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "DASHBOARD", path: "/dashboard", icon: LayoutDashboard },
     {
-      name: "My Appointments",
+      name: "MY APPOINTMENTS",
       path: "/my-appointments",
       icon: Calendar,
       roles: ["CUSTOMER"],
     },
     {
-      name: "My Vehicles",
+      name: "MY VEHICLES",
       path: "/my-vehicles",
       icon: Car,
       roles: ["CUSTOMER"],
     },
     {
-      name: "Service Centers",
+      name: "SERVICE CENTERS",
       path: "/service-centers",
       icon: Navigation,
       roles: ["CUSTOMER"],
     },
     {
-      name: "Employee Inventory",
+      name: "INVENTORY",
       path: "/employee-inventory",
       icon: Navigation,
       roles: ["EMPLOYEE"],

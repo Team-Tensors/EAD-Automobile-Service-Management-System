@@ -26,6 +26,7 @@ public class InventoryService {
     private final InventoryItemRepository inventoryItemRepository;
     private final UserRepository userRepository;
     private final InventoryItemMapper inventoryItemMapper;
+    private final EmailService emailService;
 
     /**
      * Get all inventory items
@@ -152,6 +153,9 @@ public class InventoryService {
         InventoryItem updatedItem = inventoryItemRepository.save(item);
         log.info("Successfully updated inventory item with id: {}", id);
 
+        // Check for low stock and send alert if needed (in case quantity was reduced)
+        checkAndSendLowStockAlert(updatedItem);
+
         return inventoryItemMapper.toDTO(updatedItem);
     }
 
@@ -195,6 +199,9 @@ public class InventoryService {
         InventoryItem updatedItem = inventoryItemRepository.save(item);
         log.info("Successfully reduced item quantity. New quantity: {}", updatedItem.getQuantity());
 
+        // Check for low stock and send alert if needed
+        checkAndSendLowStockAlert(updatedItem);
+
         return inventoryItemMapper.toDTO(updatedItem);
     }
 
@@ -219,5 +226,57 @@ public class InventoryService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    /**
+     * Check if item is low on stock and send alert emails to all admins
+     */
+    private void checkAndSendLowStockAlert(InventoryItem item) {
+        log.info("=== LOW STOCK CHECK START ===");
+        log.info("Item: {}", item.getItemName());
+        log.info("Current Quantity: {}", item.getQuantity());
+        log.info("Minimum Stock: {}", item.getMinStock());
+        log.info("Is Low Stock? {}", item.getQuantity() < item.getMinStock());
+
+        if (item.getQuantity() < item.getMinStock()) {
+            log.warn("⚠️ LOW STOCK DETECTED for item: {} (Current: {}, Min: {})",
+                    item.getItemName(), item.getQuantity(), item.getMinStock());
+
+            // Get all admin users
+            List<User> admins = userRepository.findByRoleName("ADMIN");
+            log.info("Found {} admin users", admins.size());
+
+            if (admins.isEmpty()) {
+                log.error("❌ NO ADMIN USERS FOUND! Cannot send low stock alert for item: {}", item.getItemName());
+                log.error("Please verify that admin users exist in database with role name 'ADMIN'");
+                return;
+            }
+
+            // Send email to each admin
+            for (User admin : admins) {
+                try {
+                    log.info("Attempting to send low stock alert to admin: {}", admin.getEmail());
+                    String adminName = admin.getFullName() != null ? admin.getFullName() : admin.getEmail();
+
+                    emailService.sendLowStockAlert(
+                            admin.getEmail(),
+                            adminName,
+                            item.getItemName(),
+                            item.getQuantity(),
+                            item.getMinStock(),
+                            item.getCategory());
+
+                    log.info("✅ Low stock alert email sent successfully to: {}", admin.getEmail());
+                } catch (Exception e) {
+                    log.error("❌ FAILED to send low stock alert to admin: {} for item: {}",
+                            admin.getEmail(), item.getItemName(), e);
+                    log.error("Exception details: ", e);
+                }
+            }
+        } else {
+            log.info("Stock level is OK - No alert needed (Current: {} >= Min: {})",
+                    item.getQuantity(), item.getMinStock());
+        }
+        log.info("=== LOW STOCK CHECK END ===");
     }
 }
