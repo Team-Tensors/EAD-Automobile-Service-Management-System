@@ -54,13 +54,13 @@ export const inventoryService = {
 
   // Restock item (Admin only)
   restock: async (id: string, payload: InventoryRestockDto): Promise<InventoryItem> => {
-    const res = await api.patch(`${base}/${id}/restock`, payload);
+    const res = await api.put(`${base}/${id}/restock`, payload);
     return res.data;
   },
 
   // Buy/Use item (Employee only)
   buy: async (id: string, payload: InventoryBuyDto): Promise<InventoryItem> => {
-    const res = await api.patch(`${base}/${id}/buy`, payload);
+    const res = await api.put(`${base}/${id}/buy`, payload);
     return res.data;
   },
 

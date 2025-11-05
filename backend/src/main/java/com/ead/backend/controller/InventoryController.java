@@ -108,29 +108,29 @@ public class InventoryController {
     }
 
     /**
-     * PATCH /inventory/{id}/restock - Restock item (add quantity)
+     * PUT /inventory/{id}/restock - Restock item (add quantity)
      * Accessible by: ADMIN only
      */
-    @PatchMapping("/{id}/restock")
+    @PutMapping("/{id}/restock")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<InventoryItemDTO> restockItem(
             @PathVariable UUID id,
             @Valid @RequestBody InventoryRestockDTO dto) {
-        log.info("PATCH /inventory/{}/restock - Restocking item with quantity: {}", id, dto.getQuantity());
+        log.info("PUT /inventory/{}/restock - Restocking item with quantity: {}", id, dto.getQuantity());
         InventoryItemDTO restockedItem = inventoryService.restockItem(id, dto);
         return ResponseEntity.ok(restockedItem);
     }
 
     /**
-     * PATCH /inventory/{id}/buy - Buy/Use item (reduce quantity)
+     * PUT /inventory/{id}/buy - Buy/Use item (reduce quantity)
      * Accessible by: EMPLOYEE only
      */
-    @PatchMapping("/{id}/buy")
+    @PutMapping("/{id}/buy")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<InventoryItemDTO> buyItem(
             @PathVariable UUID id,
             @Valid @RequestBody InventoryBuyDTO dto) {
-        log.info("PATCH /inventory/{}/buy - Employee buying item with quantity: {}", id, dto.getQuantity());
+        log.info("PUT /inventory/{}/buy - Employee buying item with quantity: {}", id, dto.getQuantity());
         InventoryItemDTO boughtItem = inventoryService.buyItem(id, dto);
         return ResponseEntity.ok(boughtItem);
     }
