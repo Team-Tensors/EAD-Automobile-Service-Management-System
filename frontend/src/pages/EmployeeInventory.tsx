@@ -5,7 +5,7 @@ import {
   Package,
   Search,
   AlertCircle,
-  ShoppingCart,
+  ListChecks,
   X,
   Filter,
   Calendar
@@ -98,7 +98,7 @@ const EmployeeInventory = () => {
     <div className="min-h-screen bg-black">
       <AuthenticatedNavbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-zinc to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -134,7 +134,7 @@ const EmployeeInventory = () => {
                 <p className="text-gray-400 text-sm">Available Items</p>
                 <p className="text-3xl font-bold text-green-500 mt-1">{availableItems}</p>
               </div>
-              <ShoppingCart className="w-12 h-12 text-green-500" />
+              <ListChecks className="w-12 h-12 text-green-500" />
             </div>
           </div>
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700">
@@ -249,7 +249,6 @@ const EmployeeInventory = () => {
                                 : 'bg-orange-500 hover:bg-orange-600 text-white'
                             }`}
                           >
-                            <ShoppingCart className="w-4 h-4" />
                             Buy Item
                           </button>
                         </div>
