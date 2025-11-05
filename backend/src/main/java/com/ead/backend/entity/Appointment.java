@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import com.ead.backend.enums.AppointmentType;
 
 @Entity
 @Table(name = "appointment")
@@ -73,9 +74,7 @@ public class Appointment {
     )
     private Set<User> assignedEmployees = new HashSet<>();
 
-    // -----------------------------------------------------------------
     // ENSURE appointmentType matches serviceOrModification.type
-    // -----------------------------------------------------------------
     @PrePersist
     @PreUpdate
     private void validateTypeConsistency() {

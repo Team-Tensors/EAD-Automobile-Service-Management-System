@@ -1,9 +1,8 @@
-// src/components/appointment/ServiceTypeSelector.tsx
 import React from "react";
 import { Clock, ChevronRight, Wrench } from "lucide-react";
 
 interface ServiceType {
-  id: string; // UUID as string
+  id: string;
   name: string;
   description: string;
   estimatedDuration: string;
@@ -52,7 +51,7 @@ const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({
                     {type.estimatedDuration}
                   </span>
                   <span className="text-orange-500 font-semibold">
-                    ${type.price}
+                    Rs. {type.price}
                   </span>
                 </div>
               </div>

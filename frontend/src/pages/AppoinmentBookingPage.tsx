@@ -1,4 +1,3 @@
-// src/pages/AppointmentBookingPage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -25,7 +24,7 @@ import {
 
 // Local interface for transformed service/modification types
 interface ServiceType {
-  id: string; // UUID as string
+  id: string; 
   name: string;
   description: string;
   estimatedDuration: string;
@@ -204,7 +203,7 @@ const AppointmentBookingPage = () => {
     const createDto: VehicleCreateDto = {
       brand: vehicleData.brand,
       model: vehicleData.model,
-      year: parseInt(vehicleData.year, 10), // Convert string to number
+      year: parseInt(vehicleData.year, 10), 
       color: vehicleData.color,
       licensePlate: vehicleData.licensePlate,
       lastServiceDate: vehicleData.lastServiceDate || undefined,
@@ -274,9 +273,9 @@ const AppointmentBookingPage = () => {
     const appointmentDateTime = `${formData.appointmentDate}T${formData.appointmentTime}:00`;
 
     const appointmentRequest = {
-      vehicleId: formData.vehicleId, // UUID as string
-      serviceOrModificationId: serviceOrModificationId, // UUID as string
-      serviceCenterId: formData.serviceCenterId, // UUID as string
+      vehicleId: formData.vehicleId, 
+      serviceOrModificationId: serviceOrModificationId, 
+      serviceCenterId: formData.serviceCenterId, 
       appointmentType: formData.appointmentType as AppointmentType,
       appointmentDate: appointmentDateTime,
       description: formData.description || undefined,
