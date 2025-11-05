@@ -1,4 +1,3 @@
-// src/pages/MyVehiclesDashboardPage.tsx
 import React, { useState } from "react";
 import { Plus, Car } from "lucide-react";
 import toast from "react-hot-toast";
@@ -45,7 +44,7 @@ const MyVehiclesPage = () => {
     lastServiceDate: "",
   });
 
-  // load vehicles from backend
+  
   React.useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -78,12 +77,12 @@ const MyVehiclesPage = () => {
   };
 
   const handleFormSubmit = async (data: VehicleFormData) => {
-    // Check for duplicate license plate
+    
     const normalizedLicensePlate = data.licensePlate.trim().toUpperCase();
     const isDuplicate = vehicles.some(
       (v) =>
         v.licensePlate.toUpperCase() === normalizedLicensePlate &&
-        v.id !== editingId // Allow same plate for the vehicle being edited
+        v.id !== editingId 
     );
 
     if (isDuplicate) {
@@ -148,7 +147,7 @@ const MyVehiclesPage = () => {
     setFormData({
       brand: vehicle.brand,
       model: vehicle.model,
-      year: vehicle.year.toString(), // Convert number to string for form
+      year: vehicle.year.toString(), 
       color: vehicle.color,
       licensePlate: vehicle.licensePlate,
       lastServiceDate: dateOnly,
@@ -220,7 +219,6 @@ const MyVehiclesPage = () => {
     <div className="min-h-screen bg-black flex flex-col pt-5">
       <AuthenticatedNavbar />
 
-      {/* Header Section with proper spacing from navbar */}
       <div className="bg-black border-zinc-700 border-b">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
           <h1 className="text-3xl font-bold text-white">My Vehicles</h1>
