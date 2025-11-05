@@ -18,7 +18,7 @@ interface AppointmentListProps {
   statusFilter: string;
   setStatusFilter: (status: string) => void;
   loading: boolean;
-  error: string | null;
+  error?: string | null;
   getStatusColor: (status: string) => string;
   getStatusIcon: (status: string) => React.ReactNode;
   getDisplayStatus: (status: string) => string;
