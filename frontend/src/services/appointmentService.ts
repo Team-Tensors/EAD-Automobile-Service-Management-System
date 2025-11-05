@@ -1,5 +1,9 @@
 import api from "../util/apiUtils";
-import type { AppointmentType } from "../types/appointment";
+import type {
+  AppointmentType,
+  AppointmentStatus,
+  AppointmentSummary,
+} from "../types/appointment";
 
 const base = "/appointments";
 
@@ -19,19 +23,12 @@ export interface AppointmentBookingResponse {
   serviceName: string;
   appointmentType: AppointmentType;
   appointmentDate: string;
-  status: string;
+  status: AppointmentStatus;
   message: string;
 }
 
-export interface AppointmentSummary {
-  id: string; // UUID as string
-  vehicle: string;
-  service: string;
-  type: AppointmentType;
-  date: string;
-  status: string;
-  canStart: boolean;
-}
+// Export AppointmentSummary from types/appointment.ts
+export type { AppointmentSummary };
 
 // New interface for slot availability
 export interface SlotAvailability {
