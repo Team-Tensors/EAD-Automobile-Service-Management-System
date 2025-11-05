@@ -44,7 +44,17 @@ public class AdminAppointmentController {
     }
 
     // ===================================================================
-    // 3. ADMIN: Assign employees to appointment
+    // 3. ADMIN: Get all unassigned appointments
+    // ===================================================================
+    @GetMapping("/unassigned")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AdminAppointmentDTO>> getUnassignedAppointments() {
+        List<AdminAppointmentDTO> dtos = appointmentService.getAllUnassignedAppointments();
+        return ResponseEntity.ok(dtos);
+    }
+
+    // ===================================================================
+    // 4. ADMIN: Assign employees to appointment
     // ===================================================================
     @PostMapping("/{appointmentId}/assign-employees")
     @PreAuthorize("hasRole('ADMIN')")
@@ -61,7 +71,7 @@ public class AdminAppointmentController {
     }
 
     // ===================================================================
-    // 4. ADMIN: Get all employees (for dropdown)
+    // 5. ADMIN: Get all employees (for dropdown)
     // ===================================================================
     @GetMapping("/employees")
     @PreAuthorize("hasRole('ADMIN')")
