@@ -45,7 +45,7 @@ export const useMyServices = () => {
                   status: update.status || service.status,
                   date: service.startDate,
                   serviceCenter: update.serviceCenter || service.serviceCenter,
-                  centerSlot: update.centerSlot != null ? update.centerSlot : service.centerSlot,
+  centerSlot: update.centerSlot != null ? Number(update.centerSlot) : null, // Keep as number | null for AppointmentSummary
                   estimatedCompletion: update.estimatedCompletion || service.estimatedCompletion,
                   assignedEmployee: update.assignedEmployee || service.assignedEmployee,
                 };
