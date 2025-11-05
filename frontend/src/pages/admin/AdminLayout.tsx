@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import AdminNavbar from '@/components/AdminNavbar/AdminNavbar';
+import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 import Footer from '@/components/Footer/Footer';
 
 const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AdminNavbar />
+      <AuthenticatedNavbar />
       <div className="grow">
         <Outlet />
       </div>
