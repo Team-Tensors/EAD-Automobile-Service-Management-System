@@ -16,12 +16,9 @@ public class ChatbotService {
 
     @Value("${groq.api.key}")
     private String apiKey;
-
     private final WebClient webClient;
     private final ShiftScheduleService shiftScheduleService;
     private final AppointmentService appointmentService;
-
-    // Memory for conversation history (per user IP)
     private final Map<String, Deque<Map<String, String>>> conversationHistory = new ConcurrentHashMap<>();
 
     private static final int MAX_HISTORY = 50;
@@ -40,25 +37,14 @@ public class ChatbotService {
 
     public String getChatResponse(String userMessage, String userIp) {
         try {
-            // Step 1: Get intent from LLM
-            String intent = detectIntentFromLLM(userMessage, userIp);
+            String intent = detectIntentFromLLM(userMessage);
 
-            // Step 2: Route based on intent
-            String reply;
-            switch (intent) {
-                case "appointment_info":
-                    reply = handleAppointmentInfo(userMessage);
-                    break;
-                case "book_appointment":
-                    reply = handleBooking(userMessage);
-                    break;
-                case "general":
-                default:
-                    reply = handleGeneralConversation(userMessage, userIp);
-                    break;
-            }
+            String reply = switch (intent) {
+                case "appointment_info" -> handleAppointmentInfo(userMessage);
+                case "book_appointment" -> handleBooking(userMessage);
+                default -> handleGeneralConversation(userMessage, userIp);
+            };
 
-            // Step 3: Save to memory
             storeMessage(userIp, "user", userMessage);
             storeMessage(userIp, "assistant", reply);
 
@@ -69,11 +55,7 @@ public class ChatbotService {
         }
     }
 
-    /** Use LLM to detect user intent **/
-    private String detectIntentFromLLM(String message, String userIp) {
-        List<Map<String, String>> context = new ArrayList<>(getConversationHistory(userIp));
-        context.add(Map.of("role", "user", "content", message));
-
+    private String detectIntentFromLLM(String message) {
         Map<String, Object> body = Map.of(
                 "model", "llama-3.1-8b-instant",
                 "messages", new Object[]{
@@ -105,17 +87,36 @@ public class ChatbotService {
         return "general";
     }
 
-    /** Handle general conversation with context **/
     private String handleGeneralConversation(String userMessage, String userIp) {
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(Map.of("role", "system",
-                "content", "You are a friendly automobile service assistant. Keep responses under 300 characters."));
 
-        // Add previous context
+        // Comprehensive DriveCare knowledge injected into system prompt
+        String driveCareContext = """
+        You are the official virtual assistant for DriveCare — a premium automobile service provider in Colombo, Sri Lanka.
+        DriveCare offers maintenance, repair, diagnostics, brake repair, engine repair, tire repair, AC repair, radiator service, and system diagnostics.
+        Core values: integrity, excellence, customer satisfaction.
+        DriveCare ensures top-quality service, expert technicians (90% rating), quick turnaround (85%), and quality assurance (95%).
+        Office: 320A, T.B. Jayah Mawatha, Colombo 10, Sri Lanka.
+        Working hours: Mon–Fri 8:00 AM–7:00 PM, Sat/Sun 9:00 AM–4:00 PM.
+        Contact: +1-800-123-4567 | support@example.com
+        Motto: "From our garage to your driveway – your trusted partner in car care."
+        Services include appointment scheduling, vehicle addition, and locating nearest service stations.
+        Respond concisely (≤300 characters) in a friendly and professional tone as DriveCare Assistant.
+    """;
+
+        // System instruction to set identity and context
+        messages.add(Map.of("role", "system", "content", driveCareContext));
+
+        // Add previous user context for conversation continuity
         messages.addAll(getConversationHistory(userIp));
+
+        // Add current user message
         messages.add(Map.of("role", "user", "content", userMessage));
 
-        Map<String, Object> body = Map.of("model", "llama-3.1-8b-instant", "messages", messages);
+        Map<String, Object> body = Map.of(
+                "model", "llama-3.1-8b-instant",
+                "messages", messages
+        );
 
         Map<?, ?> response = webClient.post()
                 .uri("/chat/completions")
@@ -131,7 +132,7 @@ public class ChatbotService {
         return reply.length() > 300 ? reply.substring(0, 297) + "..." : reply;
     }
 
-    /** Handle appointment info requests **/
+
     private String handleAppointmentInfo(String message) {
         String dateHint = extractDayFromMessage(message);
         if (dateHint == null) {
@@ -140,7 +141,6 @@ public class ChatbotService {
         return "Available appointment slots on " + dateHint + ": 9:00 AM, 11:00 AM, 2:00 PM.";
     }
 
-    /** Handle booking requests **/
     private String handleBooking(String message) {
         String dateHint = extractDayFromMessage(message);
         if (dateHint == null) {
@@ -149,7 +149,6 @@ public class ChatbotService {
         return "Your appointment has been successfully booked for " + dateHint + " at 10:00 AM.";
     }
 
-    /** Extract days **/
     private String extractDayFromMessage(String msg) {
         msg = msg.toLowerCase();
         if (msg.contains("today")) return "today";
@@ -164,20 +163,17 @@ public class ChatbotService {
         return null;
     }
 
-    /** Store message in user memory **/
     private void storeMessage(String userIp, String role, String content) {
         conversationHistory.computeIfAbsent(userIp, k -> new ArrayDeque<>());
 
         Deque<Map<String, String>> history = conversationHistory.get(userIp);
         history.addLast(Map.of("role", role, "content", content));
 
-        // Trim old messages
         while (history.size() > MAX_HISTORY) {
             history.removeFirst();
         }
     }
 
-    /** Get history safely **/
     private List<Map<String, String>> getConversationHistory(String userIp) {
         return new ArrayList<>(conversationHistory.getOrDefault(userIp, new ArrayDeque<>()));
     }
