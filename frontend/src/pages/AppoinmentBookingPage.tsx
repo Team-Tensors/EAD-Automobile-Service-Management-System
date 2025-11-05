@@ -10,7 +10,7 @@ import ScheduleStep from "../components/AppointmentBooking/ScheduleStep";
 import StepIndicator from "../components/ui/StepIndicator";
 import ActionModal from "../components/ui/ActionModal";
 import VehicleFormComponent from "../components/Vehicle/VehicleForm";
-import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { vehicleService } from "../services/vehicleService";
 import type { Vehicle, VehicleCreateDto } from "../types/vehicle";
