@@ -625,6 +625,28 @@ public class AppointmentService {
     }
 
     // ===================================================================
+    // 10. ADMIN: Get all unassigned appointments (PENDING or CONFIRMED, future dates, no employees assigned)
+    // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<AdminAppointmentDTO> getAllUnassignedAppointments() {
+        User currentUser = getCurrentUser();
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> "ADMIN".equals(r.getName()));
+        if (!isAdmin) {
+            throw new RuntimeException("Only ADMIN can view all appointments");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        return appointmentRepository.findAll().stream()
+                .filter(a -> (a.getStatus().equals("PENDING") || a.getStatus().equals("CONFIRMED"))
+                        && a.getAppointmentDate().isAfter(now)
+                        && a.getAssignedEmployees().isEmpty())
+                .sorted((a1, a2) -> a1.getAppointmentDate().compareTo(a2.getAppointmentDate()))
+                .map(this::toAdminAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ===================================================================
     // HELPER: Get current authenticated user
     // ===================================================================
     private User getCurrentUser() {
