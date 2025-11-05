@@ -100,14 +100,6 @@ public class AuthService {
 
         logger.info("Login completed successfully for user: {}", user.getEmail());
 
-        notificationService.sendNotification(
-                user.getId(),
-                "LOGIN_SUCCESS",
-                "You have successfully logged in!",
-                Map.of("email", user.getEmail(), "device", deviceInfo)
-        );
-
-
         return new AuthResponseDTO(token, refreshToken.getToken(), user.getId(),
                                user.getEmail(), user.getFullName(), roles);
     }
