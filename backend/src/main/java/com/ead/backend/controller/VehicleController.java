@@ -1,8 +1,7 @@
-// src/main/java/com/ead/backend/controller/VehicleController.java
 package com.ead.backend.controller;
 
 import com.ead.backend.dto.VehicleCreateDTO;
-import com.ead.backend.entity.Vehicle;
+import com.ead.backend.dto.VehicleResponseDTO;
 import com.ead.backend.service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,67 +21,32 @@ public class VehicleController {
 
     private final VehicleService vehicleService;
 
-    // === GET: List all vehicles for current user ===
     @GetMapping
-    public ResponseEntity<List<Vehicle>> getUserVehicles() {
-        List<Vehicle> vehicles = vehicleService.getUserVehicles();
-        return ResponseEntity.ok(vehicles);
+    public ResponseEntity<List<VehicleResponseDTO>> getUserVehicles() {
+        return ResponseEntity.ok(vehicleService.getUserVehicles());
     }
 
-    // === GET: Get one vehicle by ID (with ownership check) ===
     @GetMapping("/{id}")
-    public ResponseEntity<Vehicle> getVehicle(@PathVariable UUID id) {
-        Vehicle vehicle = vehicleService.getVehicleByIdAndUser(id);
-        return ResponseEntity.ok(vehicle);
+    public ResponseEntity<VehicleResponseDTO> getVehicle(@PathVariable UUID id) {
+        return ResponseEntity.ok(vehicleService.getVehicleById(id));
     }
 
-    // === POST: Add new vehicle ===
     @PostMapping
-    public ResponseEntity<Vehicle> addVehicle(@Valid @RequestBody VehicleCreateDTO dto) {
-        Vehicle vehicle = new Vehicle();
-        mapDtoToEntity(dto, vehicle);
-        Vehicle saved = vehicleService.addVehicle(vehicle);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    public ResponseEntity<VehicleResponseDTO> addVehicle(@Valid @RequestBody VehicleCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(vehicleService.addVehicle(dto));
     }
 
-    // === PUT: Update existing vehicle ===
     @PutMapping("/{id}")
-    public ResponseEntity<Vehicle> updateVehicle(
+    public ResponseEntity<VehicleResponseDTO> updateVehicle(
             @PathVariable UUID id,
             @Valid @RequestBody VehicleCreateDTO dto) {
-
-        Vehicle existing = vehicleService.getVehicleByIdAndUser(id);
-        if (existing == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        mapDtoToEntity(dto, existing);
-        Vehicle updated = vehicleService.updateVehicle(existing);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(vehicleService.updateVehicle(id, dto));
     }
 
-    // === DELETE: Remove vehicle ===
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable UUID id) {
-        boolean deleted = vehicleService.deleteVehicleByIdAndUser(id);
-        return deleted
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-
-    // === Helper: Map DTO → Entity ===
-    private void mapDtoToEntity(VehicleCreateDTO dto, Vehicle vehicle) {
-        vehicle.setBrand(dto.getBrand());
-        vehicle.setModel(dto.getModel());
-        vehicle.setYear(dto.getYear());
-        vehicle.setColor(dto.getColor());
-        vehicle.setLicensePlate(dto.getLicensePlate());
-
-        if (dto.getLastServiceDate() != null && !dto.getLastServiceDate().isBlank()) {
-            LocalDate date = LocalDate.parse(dto.getLastServiceDate());
-            vehicle.setLastServiceDate(date.atStartOfDay()); // LocalDate → LocalDateTime
-        } else {
-            vehicle.setLastServiceDate(null);
-        }
+        vehicleService.deleteVehicle(id);
+        return ResponseEntity.noContent().build();
     }
 }
