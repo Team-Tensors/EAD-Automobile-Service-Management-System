@@ -44,7 +44,6 @@ const MyVehiclesPage = () => {
     lastServiceDate: "",
   });
 
-  
   React.useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -77,12 +76,11 @@ const MyVehiclesPage = () => {
   };
 
   const handleFormSubmit = async (data: VehicleFormData) => {
-    
     const normalizedLicensePlate = data.licensePlate.trim().toUpperCase();
     const isDuplicate = vehicles.some(
       (v) =>
         v.licensePlate.toUpperCase() === normalizedLicensePlate &&
-        v.id !== editingId 
+        v.id !== editingId
     );
 
     if (isDuplicate) {
@@ -147,7 +145,7 @@ const MyVehiclesPage = () => {
     setFormData({
       brand: vehicle.brand,
       model: vehicle.model,
-      year: vehicle.year.toString(), 
+      year: vehicle.year.toString(),
       color: vehicle.color,
       licensePlate: vehicle.licensePlate,
       lastServiceDate: dateOnly,
@@ -223,7 +221,9 @@ const MyVehiclesPage = () => {
         <div className="max-w-7xl mx-auto px-0 pt-22 pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white uppercase">My Vehicles</h1>
+              <h1 className="text-2xl font-bold text-white uppercase">
+                My Vehicles
+              </h1>
               <p className="text-gray-400 mt-2">
                 View and manage your service vehicles
               </p>

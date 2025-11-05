@@ -2,15 +2,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Calendar } from "lucide-react";
+
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+
 import { appointmentService, type AppointmentSummary } from "@/services/appointmentService";
-import { AppointmentsHeader } from "@/components/AppointmentBooking/AppointmentHeader";
-import { AppointmentsLoadingState } from "@/components/AppointmentBooking/AppointmentLoadingState";
-import { AppointmentsList } from "@/components/AppointmentBooking/AppointmentList";
-import { AppointmentsCalendar } from "@/components/AppointmentBooking/AppointmentCalendar";
+
+import { AppointmentsHeader } from "@/components/MyAppointments/AppointmentsHeader";
+import { AppointmentsLoadingState } from "@/components/MyAppointments/AppointmentsLoadingState";
+import { AppointmentsList } from "@/components/MyAppointments/AppointmentsList";
+import { AppointmentsCalendar } from "@/components/MyAppointments/AppointmentsCalendar";
 
 const MyAppointmentsPage = () => {
   const navigate = useNavigate();
@@ -73,7 +76,8 @@ const MyAppointmentsPage = () => {
     toast.promise(promise, {
       loading: "Cancelling appointment...",
       success: "Appointment cancelled successfully!",
-      error: (err) => err?.response?.data?.message ?? err?.message ?? "Failed to cancel",
+      error: (err) =>
+        err?.response?.data?.message ?? err?.message ?? "Failed to cancel",
     });
   };
 
