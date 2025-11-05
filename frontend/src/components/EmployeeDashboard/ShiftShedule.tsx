@@ -2,20 +2,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { Calendar, MapPin, Wrench, AlertCircle, CheckCircle2 } from "lucide-react"
 import shiftSchedulingService from "@/services/shiftSchedulingService"
-
-interface ShiftAppointment {
-  appointmentId: string
-  userName: string
-  vehicle: string
-  appointmentType: string
-  serviceOrModification: string
-  serviceCenter: string
-  appointmentDate: string
-  startTime: string
-  endTime: string
-  status: string
-  description: string
-}
+import type { ShiftAppointment } from "@/types/ShiftScheduling"
 
 const ShiftSchedule: React.FC = () => {
   const [appointments, setAppointments] = useState<ShiftAppointment[]>([])
