@@ -48,7 +48,7 @@ const ContactUs: React.FC = () => {
   return (
     <>
       {/* Top: FAQ section */}
-      <section className="py-16 bg-black text-white">
+      <section className="pt-26 pb-16 bg-black text-white">
         <div className="max-w-7xl mx-auto px-6 md:px-10 lg:px-0">
           <div className="mb-10">
             <p className="text-4xl font-bold mb-6 font-heading text-orange-700">Get in Touch</p>
@@ -121,17 +121,17 @@ const ContactUs: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="name">Name</Label>
-                        <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Your name" />
+                        <Input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Your name" className="text-white" />
                       </div>
                       <div>
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" />
+                        <Input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" className="text-white" />
                       </div>
                     </div>
 
                     <div>
                       <Label htmlFor="subject">Subject</Label>
-                      <Input id="subject" name="subject" value={form.subject} onChange={handleChange} placeholder="Subject" />
+                      <Input id="subject" name="subject" value={form.subject} onChange={handleChange} placeholder="Subject" className="text-white" />
                     </div>
 
                     <div>
@@ -142,7 +142,7 @@ const ContactUs: React.FC = () => {
                         value={form.message}
                         onChange={handleChange}
                         rows={5}
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-white placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         placeholder="Write your message here"
                       />
                     </div>

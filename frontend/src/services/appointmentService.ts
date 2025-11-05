@@ -33,9 +33,9 @@ export interface AppointmentSummary {
   canStart: boolean;
 }
 
-export interface TimeSlotAvailability {
-  time: string; // Format: "09:00"
-  availableSlots: number; // Number of available slots
+// New interface for slot availability
+export interface SlotAvailability {
+  [hour: number]: number; // hour -> available slots count
 }
 
 export const appointmentService = {
@@ -58,22 +58,18 @@ export const appointmentService = {
     await api.put(`${base}/${appointmentId}/cancel`);
   },
 
-  // Get available time slots for a specific service center and date
-  getAvailableTimeSlots: async (
+  // Get available slots for a specific service center and date
+  getAvailableSlots: async (
     serviceCenterId: string,
-    date: string // Format: "YYYY-MM-DD"
-  ): Promise<TimeSlotAvailability[]> => {
+    date: string // Format: "2025-11-05"
+  ): Promise<SlotAvailability> => {
     const res = await api.get(`${base}/available-slots`, {
-      params: { serviceCenterId, date },
+      params: {
+        serviceCenterId,
+        date,
+      },
     });
-    // Backend returns array of strings like ["09:00|3", "10:00|5"]
-    return res.data.map((slot: string) => {
-      const [time, count] = slot.split("|");
-      return {
-        time,
-        availableSlots: parseInt(count),
-      };
-    });
+    return res.data;
   },
 };
 

@@ -6,7 +6,7 @@ import VehicleFormComponent from "../components/Vehicle/VehicleForm";
 import VehicleEmptyState from "../components/Vehicle/VehicleEmptyState";
 import ActionModal from "../components/ui/ActionModal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
-import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { useAuth } from "@/hooks/useAuth";
 

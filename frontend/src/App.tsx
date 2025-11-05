@@ -17,6 +17,7 @@ import ServiceCenters from './pages/ServiceCenters'
 import AddVehiclePage from './pages/MyVehiclesPage'
 import MyAppointmentsPage from "./pages/MyAppointmentsPage";
 import NotificationsPage from './pages/NotificationsPage';
+import EmployeeInventory from './pages/EmployeeInventory'
 
 function App() {
   return (
@@ -160,6 +161,21 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+
+
+      {/* Employee Inventory Route */}
+      <Route
+        path="/employee-inventory"
+        element={
+          <ProtectedRoute requiredRole={UserRole.EMPLOYEE}>
+            <EmployeeInventory />
+          </ProtectedRoute>
+        }
+      />
+
+
+
 
       {/* Example: Permission-based route */}
       <Route
