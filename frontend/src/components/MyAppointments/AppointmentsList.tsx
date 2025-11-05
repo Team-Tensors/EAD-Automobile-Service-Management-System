@@ -62,10 +62,10 @@ export const AppointmentsList = ({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-4">
       {selectedDate && (
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-2.5 sm:p-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-start sm:items-center gap-2 sm:gap-3">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div>
