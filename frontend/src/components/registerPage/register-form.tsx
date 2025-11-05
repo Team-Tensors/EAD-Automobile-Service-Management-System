@@ -151,7 +151,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   id="email" 
                   name="email"
                   type="email" 
-                  placeholder="m@example.com" 
+                  placeholder="john@example.com" 
                   value={formData.email}
                   onChange={handleChange}
                   className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.email ? 'border-red-400 focus:border-red-500' : ''}`}
@@ -169,7 +169,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
                   id="phoneNumber" 
                   name="phoneNumber"
                   type="tel" 
-                  placeholder="+1 (555) 000-0000" 
+                  placeholder="+94 000 000 000" 
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   className={`border-zinc-800 bg-zinc-900 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:ring-offset-zinc-950 ${formErrors.phoneNumber ? 'border-red-400 focus:border-red-500' : ''}`}

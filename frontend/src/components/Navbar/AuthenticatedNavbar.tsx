@@ -72,6 +72,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["CUSTOMER"],
     },
+    {
+      name: "Employee Inventory",
+      path: "/employee-inventory",
+      icon: Navigation,
+      roles: ["EMPLOYEE"],
+    },
     // Add more tabs here as needed
   ];
 
@@ -97,12 +103,12 @@ const AuthenticatedNavbar = () => {
             <span className="text-2xl font-bold text-white tracking-wider font-heading">
               DRIVE<span className="text-orange-600">CARE</span>
             </span>
+            <span className="text-xs text-gray-400 ml-2">{user?.roles.join(", ")}</span>
           </Link>
 
           {/* Navigation Tabs */}
           <div className="hidden md:flex items-center space-x-1">
             {availableTabs.map((tab) => {
-              const Icon = tab.icon;
               return (
                 <Link
                   key={tab.path}
@@ -113,7 +119,6 @@ const AuthenticatedNavbar = () => {
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
                   {tab.name}
                 </Link>
               );
