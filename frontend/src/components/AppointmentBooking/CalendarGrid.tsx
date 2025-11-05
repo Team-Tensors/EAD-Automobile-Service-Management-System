@@ -36,10 +36,11 @@ export const CalendarGrid = ({
 
   const appointmentCount = (day: number) => {
     const d = new Date(month.getFullYear(), month.getMonth(), day);
-    return appointments.filter((apt) => isSameDay(new Date(apt.date), d)).length;
+    return appointments.filter((apt) => isSameDay(new Date(apt.date), d))
+      .length;
   };
 
-  const cells: JSX.Element[] = [];
+  const cells: React.JSX.Element[] = [];
 
   // empty cells before month start
   for (let i = 0; i < startingDayOfWeek; i++) {
@@ -73,10 +74,7 @@ export const CalendarGrid = ({
         {has && !selected && (
           <div className="absolute bottom-1 flex gap-0.5">
             {[...Array(Math.min(count, 3))].map((_, i) => (
-              <div
-                key={i}
-                className="w-1 h-1 rounded-full bg-orange-500"
-              />
+              <div key={i} className="w-1 h-1 rounded-full bg-orange-500" />
             ))}
           </div>
         )}
