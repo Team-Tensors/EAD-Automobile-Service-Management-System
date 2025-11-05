@@ -76,7 +76,7 @@ const Footer = () => {
             <p className="text-gray-500 text-sm">
               © DRIVECARE 2025. All rights reserved. Designed by{" "}
               <span className="text-orange-600 font-semibold font-heading text-xs">
-                DriveCare
+                Drive <span className="text-white">Care</span>
               </span>
             </p>
           </div>

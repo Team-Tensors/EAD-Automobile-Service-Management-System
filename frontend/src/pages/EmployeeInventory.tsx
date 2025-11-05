@@ -197,20 +197,19 @@ const EmployeeInventory = () => {
                   <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">Quantity</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">Min Stock</th>
                   <th className="px-6 py-4 text-right text-sm font-semibold text-card-foreground">Unit Price</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-card-foreground">Total Value</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-card-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       Loading inventory...
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       No items found
                     </td>
                   </tr>
@@ -244,9 +243,6 @@ const EmployeeInventory = () => {
                       </td>
                       <td className="px-6 py-4 text-center text-muted-foreground">{item.minStock}</td>
                       <td className="px-6 py-4 text-right text-card-foreground">{formatCurrency(item.unitPrice)}</td>
-                      <td className="px-6 py-4 text-right font-semibold text-card-foreground">
-                        {formatCurrency(item.totalValue)}
-                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center">
                           <button
