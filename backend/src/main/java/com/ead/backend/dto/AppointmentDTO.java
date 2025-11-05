@@ -23,7 +23,7 @@ public class AppointmentDTO {
     private LocalDateTime lastServiceDate;
     private String licensePlate;
     private String appointmentType;
-    private Long serviceOrModificationId;
+    private UUID serviceOrModificationId;
     private String serviceOrModificationName;
     private String serviceOrModificationDescription;
     private Integer estimatedTimeMinutes;

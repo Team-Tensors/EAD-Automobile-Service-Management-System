@@ -25,7 +25,7 @@ import {
 
 // Local interface for transformed service/modification types
 interface ServiceType {
-  id: number;
+  id: string; // UUID as string
   name: string;
   description: string;
   estimatedDuration: string;
@@ -275,7 +275,7 @@ const AppointmentBookingPage = () => {
 
     const appointmentRequest = {
       vehicleId: formData.vehicleId, // UUID as string
-      serviceOrModificationId: parseInt(serviceOrModificationId),
+      serviceOrModificationId: serviceOrModificationId, // UUID as string
       serviceCenterId: formData.serviceCenterId, // UUID as string
       appointmentType: formData.appointmentType as AppointmentType,
       appointmentDate: appointmentDateTime,
