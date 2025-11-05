@@ -14,9 +14,9 @@ import type { AdminService, Employee } from '@/types/admin';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const [upcomingServices, setUpcomingServices] = useState<AdminService[]>([]);
-  const [ongoingServices, setOngoingServices] = useState<AdminService[]>([]);
-  const [unassignedServices, setUnassignedServices] = useState<AdminService[]>([]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState<AdminService[]>([]);
+  const [ongoingAppointments, setOngoingAppointments] = useState<AdminService[]>([]);
+  const [unassignedAppointments, setUnassignedAppointments] = useState<AdminService[]>([]);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedService, setSelectedService] = useState<AdminService | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -297,53 +297,13 @@ const AdminDashboard = () => {
       }
     ];
 
-    setUpcomingServices(mockUpcoming);
-    setOngoingServices(mockOngoing);
-    setUnassignedServices(mockUnassigned);
+    setUpcomingAppointments(mockUpcoming);
+    setOngoingAppointments(mockOngoing);
+    setUnassignedAppointments(mockUnassigned);
     setEmployees(mockEmployees);
   }, []);
 
-  useEffect(() => {
-    // Inject custom scrollbar styles
-    const existingStyle = document.getElementById("admin-dashboard-scrollbar-style");
-    if (!existingStyle) {
-      const style = document.createElement("style");
-      style.id = "admin-dashboard-scrollbar-style";
-      style.innerHTML = `
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: linear-gradient(180deg, #1f1f23 0%, #27272a 50%, #1f1f23 100%);
-          border-radius: 6px;
-          margin: 2px;
-          border: 1px solid #3f3f46;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, #52525b 0%, #71717a 50%, #52525b 100%);
-          border-radius: 6px;
-          border: 1px solid #3f3f46;
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, #71717a 0%, #9ca3af 50%, #71717a 100%);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-        .custom-scrollbar::-webkit-scrollbar-corner {
-          background: #1f1f23;
-        }
-      `;
-      document.head.appendChild(style);
-    }
 
-    // Cleanup function to remove styles when component unmounts
-    return () => {
-      const styleElement = document.getElementById("admin-dashboard-scrollbar-style");
-      if (styleElement) {
-        styleElement.remove();
-      }
-    };
-  }, []);
 
   const getOngoingStatusBadge = (status?: string) => {
     switch(status) {
@@ -384,8 +344,8 @@ const AdminDashboard = () => {
         displayStatus: 'upcoming'
       };
       
-      setUnassignedServices(prev => prev.filter(s => s.id !== selectedService.id));
-      setUpcomingServices(prev => [...prev, updatedService]);
+      setUnassignedAppointments(prev => prev.filter(s => s.id !== selectedService.id));
+      setUpcomingAppointments(prev => [...prev, updatedService]);
       setShowAssignModal(false);
       setSelectedService(null);
       setSearchEmployee('');
@@ -397,14 +357,52 @@ const AdminDashboard = () => {
     emp.specialization.toLowerCase().includes(searchEmployee.toLowerCase())
   );
 
+  // Add custom scrollbar styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'admin-scrollbar-styles';
+    style.textContent = `
+      .admin-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .admin-scrollbar::-webkit-scrollbar-track {
+        background: #18181b;
+        border-radius: 4px;
+      }
+      .admin-scrollbar::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #f97316;
+      }
+      .admin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #3f3f46 #18181b;
+      }
+    `;
+    
+    if (!document.getElementById('admin-scrollbar-styles')) {
+      document.head.appendChild(style);
+    }
+
+    return () => {
+      const existingStyle = document.getElementById('admin-scrollbar-styles');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
       <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              <h1 className="text-3xl font-bold">Dashboard</h1>
               <p className="text-gray-400 mt-2">
                 Welcome back, {user?.firstName} {user?.lastName}!
               </p>
@@ -420,36 +418,36 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
         {/* Awaiting Assignment Section - Full Width */}
-        <div className="mb-8">
-          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+        <div className="mb-6">
+          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-red-500" />
+                <AlertCircle className="w-5 h-5 text-orange-500" />
                 Awaiting Assignment
               </h2>
-              <span className="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-sm font-bold border border-red-500/30 animate-pulse">
-                {unassignedServices.length}
+              <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
+                {unassignedAppointments.length}
               </span>
             </div>
 
-            {unassignedServices.length === 0 ? (
+            {unassignedAppointments.length === 0 ? (
               <div className="text-center py-12">
-                <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg">No services awaiting assignment</p>
-                <p className="text-gray-500 text-sm mt-2">All services have been assigned to employees</p>
+                <AlertCircle className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg">No appointments awaiting assignment</p>
+                <p className="text-zinc-500 text-sm mt-2">All appointments have been assigned to employees</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {unassignedServices.map(service => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {unassignedAppointments.map(service => (
                   <div
                     key={service.id}
-                    className="bg-zinc-800 rounded-lg border border-zinc-700 p-5 hover:border-red-500/50 transition-all duration-200 hover:shadow-lg"
+                    className="bg-zinc-800 rounded-lg border border-zinc-700 p-5 hover:border-orange-500/50 transition-all duration-200"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
-                          <Car className="w-5 h-5 text-red-500" />
+                        <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                          <Car className="w-5 h-5 text-orange-500" />
                         </div>
                         <div>
                           <h3 className="font-semibold text-white text-sm leading-tight">
@@ -458,7 +456,7 @@ const AdminDashboard = () => {
                           <p className="text-xs text-gray-400 mt-1">{service.vehicleLicensePlate}</p>
                         </div>
                       </div>
-                      <span className="px-2 py-1 bg-red-500/20 text-red-500 border border-red-500/30 rounded-full text-xs font-semibold">
+                      <span className="px-2 py-1 bg-orange-500/20 text-orange-500 border border-orange-500/30 rounded-full text-xs font-semibold">
                         PENDING
                       </span>
                     </div>
@@ -505,33 +503,27 @@ const AdminDashboard = () => {
         {/* Dashboard Grid - 2 Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Upcoming Services Section */}
-          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+          {/* Upcoming Appointments Section */}
+          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-orange-600" />
-                Upcoming Services
+                <Calendar className="w-5 h-5 text-orange-500" />
+                Upcoming Appointments
               </h2>
               <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
-                {upcomingServices.length}
+                {upcomingAppointments.length}
               </span>
             </div>
 
-            <div 
-              className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#71717a #27272a'
-              }}
-            >
-              {upcomingServices.map(service => (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto admin-scrollbar pr-2">
+              {upcomingAppointments.map(service => (
                 <div
                   key={service.id}
-                  className="p-4 mr-1 rounded-lg border-2 border-zinc-800 bg-zinc-800 hover:border-orange-600/50 transition cursor-pointer"
+                  className="p-4 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-orange-500/50 transition cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Car className="w-4 h-4 text-orange-600" />
+                      <Car className="w-4 h-4 text-orange-500" />
                       <p className="font-semibold text-white text-sm">{getVehicleDisplayName(service)}</p>
                     </div>
                   </div>
@@ -549,8 +541,8 @@ const AdminDashboard = () => {
                   </div>
 
                   <div className="flex items-center gap-2 mb-3">
-                    <User className="w-3 h-3 text-chart-2" />
-                    <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
+                    <User className="w-3 h-3 text-green-500" />
+                    <p className="text-xs text-green-500 font-semibold">{service.assignedEmployeeName}</p>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-zinc-700">
@@ -564,33 +556,27 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Ongoing Services Section */}
-          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+          {/* Ongoing Appointments Section */}
+          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <CircleDashed className="w-5 h-5 text-yellow-500" />
-                Ongoing Services
+                <CircleDashed className="w-5 h-5 text-orange-500" />
+                Ongoing Appointments
               </h2>
-              <span className="px-3 py-1 bg-yellow-500/20 text-yellow-500 rounded-full text-sm font-bold border border-yellow-500/30">
-                {ongoingServices.length}
+              <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
+                {ongoingAppointments.length}
               </span>
             </div>
 
-            <div 
-              className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#71717a #27272a'
-              }}
-            >
-              {ongoingServices.map(service => (
+            <div className="space-y-3 max-h-[600px] overflow-y-auto admin-scrollbar pr-2">
+              {ongoingAppointments.map(service => (
                 <div
                   key={service.id}
-                  className="p-4 mr-1 rounded-lg border-2 border-zinc-800 bg-zinc-800 hover:border-yellow-500/50 transition cursor-pointer"
+                  className="p-4 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-orange-500/50 transition cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Car className="w-4 h-4 text-yellow-500" />
+                      <Car className="w-4 h-4 text-orange-500" />
                       <p className="font-semibold text-white text-sm">{getVehicleDisplayName(service)}</p>
                     </div>
                     {getOngoingStatusBadge(service.ongoingStatus)}
@@ -611,15 +597,15 @@ const AdminDashboard = () => {
                     </div>
                     <div className="w-full bg-zinc-700 rounded-full h-2">
                       <div 
-                        className="bg-yellow-500 h-2 rounded-full transition-all"
+                        className="bg-orange-500 h-2 rounded-full transition-all"
                         style={{ width: `${service.progress}%` }}
                       />
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="w-3 h-3 text-chart-2" />
-                    <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
+                    <User className="w-3 h-3 text-green-500" />
+                    <p className="text-xs text-green-500 font-semibold">{service.assignedEmployeeName}</p>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-zinc-700">
@@ -636,9 +622,9 @@ const AdminDashboard = () => {
       {/* Employee Assignment Modal */}
       {showAssignModal && selectedService && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-zinc-800">
+          <div className="bg-zinc-900 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden border border-zinc-800">
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
+            <div className="bg-zinc-800 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
               <div>
                 <h3 className="text-2xl font-bold mb-2">Assign Employee</h3>
                 <p className="text-sm text-gray-400">
@@ -651,7 +637,7 @@ const AdminDashboard = () => {
                   setSelectedService(null);
                   setSearchEmployee('');
                 }}
-                className="text-white hover:bg-white/20 p-2 rounded-lg transition"
+                className="text-white hover:bg-zinc-700 p-2 rounded-lg transition"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -672,17 +658,11 @@ const AdminDashboard = () => {
             </div>
 
             {/* Employee List */}
-            <div 
-              className="p-6 space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#71717a #27272a'
-              }}
-            >
+            <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto admin-scrollbar pr-2">
               {filteredEmployees.map(employee => (
                 <div
                   key={employee.id}
-                  className={`p-4 rounded-lg border-2 transition ${
+                  className={`p-4 rounded-lg border transition ${
                     employee.availability === 'available'
                       ? 'border-zinc-700 bg-zinc-800 hover:border-orange-500'
                       : 'border-zinc-700 bg-zinc-800/50 opacity-60'
@@ -691,8 +671,8 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-orange-500" />
                         </div>
                         <div>
                           <p className="font-semibold text-white">{employee.name}</p>
@@ -707,7 +687,7 @@ const AdminDashboard = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-xs text-gray-400">Rating:</span>
-                          <span className="text-xs font-semibold text-yellow-500">★ {employee.rating}</span>
+                          <span className="text-xs font-semibold text-orange-500">★ {employee.rating}</span>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                           employee.availability === 'available'
@@ -725,7 +705,7 @@ const AdminDashboard = () => {
                       className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
                         employee.availability === 'available'
                           ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
-                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          : 'bg-zinc-600 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       Assign

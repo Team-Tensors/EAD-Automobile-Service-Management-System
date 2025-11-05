@@ -4,9 +4,9 @@ import Footer from '@/components/Footer/Footer';
 
 const AdminLayout = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col">
       <AuthenticatedNavbar />
-      <div className="grow">
+      <div className="flex-1">
         <Outlet />
       </div>
       <Footer />
