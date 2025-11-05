@@ -3,7 +3,7 @@ import { Car, Plus } from 'lucide-react';
 
 const VehicleEmptyState: React.FC<{ onAddClick: () => void }> = ({ onAddClick }) => {
   return (
-    <div className="text-center py-20">
+    <div className="text-center py-10">
       <div className="bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg p-12 max-w-2xl mx-auto">
         <Car className="w-20 h-20 text-orange-500 mx-auto mb-6" />
         <h3 className="text-3xl font-bold text-white mb-4">
