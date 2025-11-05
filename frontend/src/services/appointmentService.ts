@@ -1,5 +1,9 @@
 import api from "../util/apiUtils";
-import type { AppointmentType } from "../types/appointment";
+import type {
+  AppointmentType,
+  AppointmentStatus,
+  AppointmentSummary,
+} from "../types/appointment";
 
 const base = "/appointments";
 
@@ -19,19 +23,12 @@ export interface AppointmentBookingResponse {
   serviceName: string;
   appointmentType: AppointmentType;
   appointmentDate: string;
-  status: string;
+  status: AppointmentStatus;
   message: string;
 }
 
-export interface AppointmentSummary {
-  id: string; // UUID as string
-  vehicle: string;
-  service: string;
-  type: AppointmentType;
-  date: string;
-  status: string;
-  canStart: boolean;
-}
+// Export AppointmentSummary from types/appointment.ts
+export type { AppointmentSummary };
 
 export interface DetailedAppointment {
   id: string;
@@ -84,7 +81,19 @@ export const appointmentService = {
         date,
       },
     });
-    return res.data;
+
+    // Backend returns array like ["09:00|3", "10:00|5"]
+    // Convert to object { 9: 3, 10: 5 }
+    const slots: SlotAvailability = {};
+    if (Array.isArray(res.data)) {
+      res.data.forEach((slot: string) => {
+        const [time, count] = slot.split("|");
+        const hour = parseInt(time.split(":")[0], 10);
+        slots[hour] = parseInt(count, 10);
+      });
+    }
+
+    return slots;
   },
 
   // Get detailed appointments with all fields

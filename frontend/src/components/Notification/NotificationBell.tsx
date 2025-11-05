@@ -115,12 +115,12 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) => {
     <div className="relative" ref={bellRef}>
       <button
         onClick={handleTogglePanel}
-        className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+        className="relative p-1.5 sm:p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
+        <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center animate-pulse">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
