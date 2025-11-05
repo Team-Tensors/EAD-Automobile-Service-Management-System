@@ -1,31 +1,33 @@
 // src/pages/EmployeeDashboard.tsx
 
-import { useState, useEffect, useCallback } from "react";
-import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
-import AppointmentList from "@/components/EmployeeDashboard/AppointmentList";
-import AppointmentDetail from "@/components/EmployeeDashboard/AppointmentDetail";
-import StatusUpdateModal from "@/components/EmployeeDashboard/StatusUpdateModal";
-import TimeLogForm from "@/components/EmployeeDashboard/TimeLogForm";
-import TimeLogList from "@/components/EmployeeDashboard/TimeLogList";
-import { useAuth } from "../hooks/useAuth";
-import Footer from "@/components/Footer/Footer";
-import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
-import ShiftShedule from "@/components/EmployeeDashboard/ShiftShedule";
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+} from 'lucide-react';
+import AppointmentList from '@/components/EmployeeDashboard/AppointmentList';
+import AppointmentDetail from '@/components/EmployeeDashboard/AppointmentDetail';
+import StatusUpdateModal from '@/components/EmployeeDashboard/StatusUpdateModal';
+import TimeLogForm from '@/components/EmployeeDashboard/TimeLogForm';
+import TimeLogList from '@/components/EmployeeDashboard/TimeLogList';
+import { useAuth } from '../hooks/useAuth';
+import Footer from '@/components/Footer/Footer';
+import AuthenticatedNavbar from '@/components/CustomerNavbar/CustomerNavbar';
+import ShiftShedule from '@/components/EmployeeDashboard/ShiftShedule';
 
-const API_BASE_URL = "http://localhost:4000/api/employee";
+const API_BASE_URL = 'http://localhost:4000/api/employee';
 
 // ------------------ Types ------------------
 interface Appointment {
   id: string;
   userId: number;
   userFullName: string;
-  address: string;
   phoneNumber: string;
-  email: string;
   vehicleId: string;
   brand: string;
   model: string;
-  year: string;
   color: string;
   lastServiceDate: string | null;
   licensePlate: string;
@@ -33,12 +35,10 @@ interface Appointment {
   serviceOrModificationId: string; // UUID as string
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
-  estimatedCost: number;
   estimatedTimeMinutes: number;
   appointmentDate: string;
   status: string;
   description: string;
-  assignedEmployeeIds: number[];
 }
 
 interface TimeLog {

@@ -1,25 +1,14 @@
-import React from "react";
-import {
-  User,
-  Phone,
-  MapPin,
-  Wrench,
-  Coins,
-  Timer,
-  Calendar,
-} from "lucide-react";
+import React from 'react';
+import { User, Phone, Wrench, Timer, Calendar } from 'lucide-react';
 
 interface Appointment {
   id: string;
   userId: number;
   userFullName: string;
-  address: string;
   phoneNumber: string;
-  email: string;
   vehicleId: string;
   brand: string;
   model: string;
-  year: string;
   color: string;
   lastServiceDate: string | null;
   licensePlate: string;
@@ -27,12 +16,10 @@ interface Appointment {
   serviceOrModificationId: string; // UUID as string
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
-  estimatedCost: number;
   estimatedTimeMinutes: number;
   appointmentDate: string;
   status: string;
   description: string;
-  assignedEmployeeIds: number[];
 }
 
 interface AppointmentDetailProps {
@@ -62,9 +49,9 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
     {/* VEHICLE INFO */}
     <div className="flex items-start justify-between mb-4">
       <div>
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {appointment.brand} {appointment.model} ({appointment.year})
-        </h2>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {appointment.brand} {appointment.model}
+          </h2>
         <p className="text-gray-400">
           {appointment.licensePlate} • {appointment.color}
         </p>
@@ -85,7 +72,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         <div>
           <p className="text-xs text-gray-400">Customer</p>
           <p className="font-semibold text-white">{appointment.userFullName}</p>
-          <p className="text-xs text-gray-400">{appointment.email}</p>
+            {/* Removed email display */}
         </div>
       </div>
       <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
@@ -96,14 +83,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         </div>
       </div>
     </div>
-    {/* ADDRESS */}
-    <div className="flex items-center gap-3 mb-6 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-      <MapPin className="w-5 h-5 text-orange-500" />
-      <div>
-        <p className="text-xs text-gray-400">Address</p>
-        <p className="font-semibold text-white">{appointment.address}</p>
-      </div>
-    </div>
+    {/* ADDRESS removed as requested */}
     {/* SERVICE INFO */}
     <div className="grid grid-cols-2 gap-4 mb-6">
       {/* Service/Modification + Cost/Time Combined */}
@@ -121,15 +101,7 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
           {appointment.serviceOrModificationDescription}
         </div>
         <div className="flex flex-wrap gap-6">
-          <div className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-orange-500" />
-            <span className="text-xs text-gray-400 font-medium">
-              Estimated Cost
-            </span>
-            <span className="text-white font-semibold text-base ml-2">
-              £{appointment.estimatedCost?.toFixed(2) ?? "N/A"}
-            </span>
-          </div>
+          {/* Estimated Cost removed as requested */}
           <div className="flex items-center gap-2">
             <Timer className="w-5 h-5 text-orange-500" />
             <span className="text-xs text-gray-400 font-medium">
