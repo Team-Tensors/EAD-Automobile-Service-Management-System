@@ -43,6 +43,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle resource not found exceptions
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        logger.error("=== RESOURCE NOT FOUND ===");
+        logger.error("Resource not found: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new MessageResponseDTO(ex.getMessage(), false));
+    }
+
+    /**
+     * Handle illegal argument exceptions
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("=== ILLEGAL ARGUMENT ERROR ===");
+        logger.error("Illegal argument: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new MessageResponseDTO(ex.getMessage(), false));
+    }
+
+    /**
      * Handle general runtime exceptions
      */
     @ExceptionHandler(RuntimeException.class)
