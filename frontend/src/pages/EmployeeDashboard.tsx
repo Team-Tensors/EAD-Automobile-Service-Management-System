@@ -16,8 +16,7 @@ import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
 import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 import ShiftShedule from '@/components/EmployeeDashboard/ShiftShedule';
-
-const API_BASE_URL = 'http://localhost:4000/api/employee';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/employee`;
 
 // ------------------ Types ------------------
 interface Appointment {
