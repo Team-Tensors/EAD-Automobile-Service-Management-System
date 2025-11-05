@@ -83,7 +83,7 @@ const FooterTop = () => {
                 <div className="relative bg-black/50 rounded-lg overflow-hidden h-64 lg:h-80 flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 text-orange-600 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">World Map</p>
+                    <p className="text-gray-400 text-sm">Sri Lanka Map</p>
                   </div>
                 </div>
               </div>
