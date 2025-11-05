@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 import { MyServicesList } from "@/components/CustomerDashboard/MyServicesList";
 import { MyServiceDetails } from "@/components/CustomerDashboard/MyServiceDetails";

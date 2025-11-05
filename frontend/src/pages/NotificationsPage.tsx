@@ -4,7 +4,7 @@ import notificationService from "@/services/NotificationService";
 import NotificationItem from "@/components/Notification/NotificationItem";
 import type { Notification } from "../types/notification.types";
 import { useAuth } from "@/hooks/useAuth";
-import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 
 const NotificationsPage: React.FC = () => {
