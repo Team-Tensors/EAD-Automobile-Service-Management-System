@@ -1,7 +1,7 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.dto.ServiceOrModificationDTO;
-import com.ead.backend.entity.AppointmentType;
+import com.ead.backend.enums.AppointmentType;
 import com.ead.backend.entity.ServiceOrModification;
 import com.ead.backend.repository.ServiceOrModificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;

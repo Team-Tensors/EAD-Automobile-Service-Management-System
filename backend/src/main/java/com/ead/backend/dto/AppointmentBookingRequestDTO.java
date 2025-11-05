@@ -1,6 +1,6 @@
 package com.ead.backend.dto;
 
-import com.ead.backend.entity.AppointmentType;
+import com.ead.backend.enums.AppointmentType;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

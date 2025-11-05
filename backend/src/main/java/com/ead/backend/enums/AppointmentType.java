@@ -1,4 +1,4 @@
-package com.ead.backend.entity;
+package com.ead.backend.enums;
 
 public enum AppointmentType {
     SERVICE,

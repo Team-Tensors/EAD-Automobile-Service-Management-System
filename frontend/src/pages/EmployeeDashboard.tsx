@@ -16,8 +16,7 @@ import { useAuth } from '../hooks/useAuth';
 import Footer from '@/components/Footer/Footer';
 import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
 import ShiftShedule from '@/components/EmployeeDashboard/ShiftShedule';
-
-const API_BASE_URL = 'http://localhost:4000/api/employee';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:4000/api'}/employee`;
 
 // ------------------ Types ------------------
 interface Appointment {
@@ -179,12 +178,24 @@ const EmployeeDashboard = () => {
     setNewStatus("");
     setCompletionDescription("");
     setStatusTouched(false);
+    setError(null); // Reset appointment data validation error when switching appointments
   }, [selectedAppointment, fetchTimeLogs]);
 
   // ------------------ Update Appointment Status ------------------
   const updateAppointmentStatus = async () => {
     if (!newStatus || !selectedAppointment) return;
     if (newStatus === "COMPLETED" && !completionDescription.trim()) return;
+
+    // Validation: Only allow status update if current date >= appointment scheduled date
+    const appointmentDate = new Date(selectedAppointment.appointmentDate);
+    const today = new Date();
+    // Set both dates to midnight for comparison
+    appointmentDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    if (today < appointmentDate) {
+      setError("You can only update the status after the scheduled appointment date.");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -353,7 +364,6 @@ const EmployeeDashboard = () => {
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               loading={loading}
-              error={error}
               getStatusColor={getStatusColor}
               getStatusIcon={getStatusIcon}
               getDisplayStatus={getDisplayStatus}
@@ -403,10 +413,12 @@ const EmployeeDashboard = () => {
                         setNewStatus("");
                         setCompletionDescription("");
                         setStatusTouched(false);
+                        setError(null);
                       }
                     }}
                     getDisplayStatus={getDisplayStatus}
                     statusTouched={statusTouched}
+                    error={error}
                   />
                 )}
                 {showTimeLog && (

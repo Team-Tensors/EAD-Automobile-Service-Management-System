@@ -2,6 +2,7 @@ package com.ead.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.ead.backend.enums.AppointmentType;
 
 import java.util.UUID;
 

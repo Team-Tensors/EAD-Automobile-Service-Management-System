@@ -33,7 +33,7 @@ const VehicleForm: React.FC<VehicleFormComponentProps> = ({
 
   const popularBrands = ['Toyota', 'Honda', 'Ford', 'Chevrolet', 'BMW', 'Mercedes-Benz', 'Audi', 'Nissan', 'Hyundai', 'Mazda', 'Other'];
 
-  // Validation moved here
+
   const validate = (): boolean => {
     const newErrors: Partial<VehicleFormData> = {};
 
