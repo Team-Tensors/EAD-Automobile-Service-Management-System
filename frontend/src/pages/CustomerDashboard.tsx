@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
@@ -6,6 +6,7 @@ import { MyServicesList } from "@/components/CustomerDashboard/MyServicesList";
 import { MyServiceDetails } from "@/components/CustomerDashboard/MyServiceDetails";
 import { useMyServices } from "@/hooks/useMyServices";
 import NoServicesPlaceholder from "@/components/CustomerDashboard/NoServicesPlaceholder";
+import { LayoutDashboard } from "lucide-react";
 import type { Service } from "@/types/myService";
 
 const CustomerDashboard = () => {
@@ -14,6 +15,12 @@ const CustomerDashboard = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [filter, setFilter] = useState("all");
   const [showMap, setShowMap] = useState(false);
+
+  useEffect(() => {
+    if (!loading && services.length > 0 && !selectedService) {
+      setSelectedService(services[0]);
+    }
+  }, [loading, services, selectedService]);
 
   return (
     <div className="min-h-screen bg-black pt-5">
@@ -30,8 +37,20 @@ const CustomerDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-0 py-8">
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <div className="flex items-center justify-center py-20">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <LayoutDashboard className="w-16 h-16 text-orange-500 animate-bounce" />
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
+                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                </div>
+              </div>
+              <p className="text-zinc-400 text-sm">
+                Loading your services...
+              </p>
+            </div>
           </div>
         ) : services.length === 0 ? (
           <NoServicesPlaceholder />
