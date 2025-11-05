@@ -1,6 +1,6 @@
 package com.ead.backend.dto;
 
-import com.ead.backend.entity.AppointmentType;
+import com.ead.backend.enums.AppointmentType;
 
 public class DetailedAppointmentDTO {
     private java.util.UUID id;
