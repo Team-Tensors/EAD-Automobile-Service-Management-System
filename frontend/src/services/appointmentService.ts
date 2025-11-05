@@ -33,6 +33,21 @@ export interface AppointmentSummary {
   canStart: boolean;
 }
 
+export interface DetailedAppointment {
+  id: string;
+  vehicleId: string;
+  vehicleName: string;
+  licensePlate: string;
+  service: string;
+  type: AppointmentType;
+  date: string;
+  status: string;
+  canStart: boolean;
+  serviceCenter: string;
+  assignedEmployee: string;
+  estimatedCompletion: string;
+}
+
 // New interface for slot availability
 export interface SlotAvailability {
   [hour: number]: number; // hour -> available slots count
@@ -69,6 +84,12 @@ export const appointmentService = {
         date,
       },
     });
+    return res.data;
+  },
+
+  // Get detailed appointments with all fields
+  getMyDetailedAppointments: async (): Promise<DetailedAppointment[]> => {
+    const res = await api.get(`${base}/my-detailed-appointments`);
     return res.data;
   },
 };

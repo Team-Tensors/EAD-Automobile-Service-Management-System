@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { appointmentService } from "@/services/appointmentService";
-import { mapSummaryToService } from "@/types/myService";
+import { mapDetailedToService } from "@/types/myService";   // <-- NEW
 import type { Service } from "@/types/myService";
 
 export const useMyServices = () => {
@@ -11,11 +11,11 @@ export const useMyServices = () => {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const summaries = await appointmentService.getMyAppointments();
-        const mappedServices = await Promise.all(
-          summaries.map((summary) => mapSummaryToService(summary))
+        const detailedAppointments = await appointmentService.getMyDetailedAppointments();
+        const mapped = await Promise.all(
+          detailedAppointments.map(mapDetailedToService)
         );
-        setServices(mappedServices);
+        setServices(mapped);
       } catch (err) {
         console.error("Failed to fetch services:", err);
         setServices([]);
@@ -23,6 +23,7 @@ export const useMyServices = () => {
         setLoading(false);
       }
     };
+
     fetchServices();
   }, []);
 
