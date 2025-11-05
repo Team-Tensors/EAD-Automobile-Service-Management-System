@@ -470,6 +470,77 @@ public class AppointmentService {
     }
 
     // ===================================================================
+    // 7. Get available time slots for a service center on a specific date
+    // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<String> getAvailableTimeSlots(UUID serviceCenterId, String dateString) {
+        // Validate service center
+        ServiceCenter serviceCenter = serviceCenterRepository.findById(serviceCenterId)
+                .orElseThrow(() -> new RuntimeException("Service center not found"));
+
+        if (!serviceCenter.getIsActive()) {
+            throw new RuntimeException("Service center is not currently available");
+        }
+
+        // Parse date string to LocalDate
+        java.time.LocalDate date;
+        try {
+            date = java.time.LocalDate.parse(dateString);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid date format. Use YYYY-MM-DD");
+        }
+
+        // Check if date is in the past
+        if (date.isBefore(java.time.LocalDate.now())) {
+            throw new RuntimeException("Cannot check availability for past dates");
+        }
+
+        // Determine business hours based on day of week
+        int dayOfWeek = date.getDayOfWeek().getValue(); // 1=Monday, 7=Sunday
+        List<Integer> businessHours;
+        
+        // Weekend hours: Saturday(6) and Sunday(7) are 9 AM - 4 PM
+        if (dayOfWeek == 6 || dayOfWeek == 7) {
+            businessHours = List.of(9, 10, 11, 12, 13, 14, 15, 16);
+        } 
+        // Weekday hours: Monday-Friday are 8 AM - 7 PM
+        else {
+            businessHours = List.of(8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        boolean isToday = date.equals(now.toLocalDate());
+        
+        List<String> availableSlots = new java.util.ArrayList<>();
+
+        for (Integer hour : businessHours) {
+            LocalDateTime slotDateTime = date.atTime(hour, 0);
+
+            // Skip past time slots if checking today
+            if (isToday && slotDateTime.isBefore(now.plusHours(1))) {
+                continue;
+            }
+
+            // Check how many appointments are booked for this slot
+            Long bookedSlots = appointmentRepository
+                    .countByServiceCenterIdAndAppointmentDateAndStatusNot(
+                            serviceCenterId,
+                            slotDateTime,
+                            "CANCELLED"
+                    );
+
+            // Check if slot is available
+            if (bookedSlots < serviceCenter.getCenterSlot()) {
+                String timeSlot = String.format("%02d:00", hour);
+                Long availableCount = serviceCenter.getCenterSlot() - bookedSlots;
+                availableSlots.add(timeSlot + "|" + availableCount); // Format: "09:00|3"
+            }
+        }
+
+        return availableSlots;
+    }
+
+    // ===================================================================
     // HELPER: Get current authenticated user
     // ===================================================================
     private User getCurrentUser() {

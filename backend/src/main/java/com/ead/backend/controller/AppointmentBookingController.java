@@ -102,6 +102,24 @@ public class AppointmentBookingController {
     }
 
     // ===================================================================
+    // 4. GET AVAILABLE TIME SLOTS
+    // ===================================================================
+    @GetMapping("/available-slots")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getAvailableTimeSlots(
+            @RequestParam String serviceCenterId,
+            @RequestParam String date) {
+        try {
+            java.util.UUID serviceCenterUuid = java.util.UUID.fromString(serviceCenterId);
+            List<String> availableSlots = appointmentService.getAvailableTimeSlots(serviceCenterUuid, date);
+            return ResponseEntity.ok(availableSlots);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponseDTO(e.getMessage(), false));
+        }
+    }
+
+    // ===================================================================
     // Helper: Convert Appointment → Summary DTO
     // ===================================================================
     private AppointmentSummaryDTO toSummaryDTO(Appointment a) {
