@@ -1,5 +1,13 @@
-import React from 'react';
-import { User, Phone, MapPin, Wrench, Coins, Timer, Calendar } from 'lucide-react';
+import React from "react";
+import {
+  User,
+  Phone,
+  MapPin,
+  Wrench,
+  Coins,
+  Timer,
+  Calendar,
+} from "lucide-react";
 
 interface Appointment {
   id: string;
@@ -16,7 +24,7 @@ interface Appointment {
   lastServiceDate: string | null;
   licensePlate: string;
   appointmentType: string;
-  serviceOrModificationId: number;
+  serviceOrModificationId: string; // UUID as string
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
   estimatedCost: number;
@@ -102,20 +110,34 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 flex flex-col gap-3 md:col-span-2">
         <div className="flex items-center gap-3 mb-1">
           <Wrench className="w-5 h-5 text-orange-500" />
-          <span className="text-xs text-gray-400 font-medium">Service / Modification</span>
+          <span className="text-xs text-gray-400 font-medium">
+            Service / Modification
+          </span>
         </div>
-        <div className="font-semibold text-white text-base leading-tight mb-1">{appointment.serviceOrModificationName}</div>
-        <div className="text-xs text-gray-400 mb-2">{appointment.serviceOrModificationDescription}</div>
+        <div className="font-semibold text-white text-base leading-tight mb-1">
+          {appointment.serviceOrModificationName}
+        </div>
+        <div className="text-xs text-gray-400 mb-2">
+          {appointment.serviceOrModificationDescription}
+        </div>
         <div className="flex flex-wrap gap-6">
           <div className="flex items-center gap-2">
             <Coins className="w-5 h-5 text-orange-500" />
-            <span className="text-xs text-gray-400 font-medium">Estimated Cost</span>
-            <span className="text-white font-semibold text-base ml-2">£{appointment.estimatedCost?.toFixed(2) ?? 'N/A'}</span>
+            <span className="text-xs text-gray-400 font-medium">
+              Estimated Cost
+            </span>
+            <span className="text-white font-semibold text-base ml-2">
+              £{appointment.estimatedCost?.toFixed(2) ?? "N/A"}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Timer className="w-5 h-5 text-orange-500" />
-            <span className="text-xs text-gray-400 font-medium">Estimated Time</span>
-            <span className="text-white font-semibold text-base ml-2">{appointment.estimatedTimeMinutes ?? 'N/A'} mins</span>
+            <span className="text-xs text-gray-400 font-medium">
+              Estimated Time
+            </span>
+            <span className="text-white font-semibold text-base ml-2">
+              {appointment.estimatedTimeMinutes ?? "N/A"} mins
+            </span>
           </div>
         </div>
       </div>
@@ -126,7 +148,9 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
         <Calendar className="w-5 h-5 text-orange-500" />
         <div>
           <p className="text-xs text-gray-400">Last Service Date</p>
-          <p className="font-semibold text-white">{formatDate(appointment.lastServiceDate)}</p>
+          <p className="font-semibold text-white">
+            {formatDate(appointment.lastServiceDate)}
+          </p>
         </div>
       </div>
     )}
