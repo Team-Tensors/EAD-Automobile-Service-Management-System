@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Calendar, Clock, Car, Wrench, Package } from "lucide-react";
 import toast from "react-hot-toast";
-import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
 import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -104,12 +104,12 @@ const MyAppointmentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
+    <div className="min-h-screen bg-black flex flex-col pt-5">
       <AuthenticatedNavbar />
 
       {/* Header Section */}
-      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-black border-b border-zinc-700">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
           <h1 className="text-3xl font-bold text-white">My Appointments</h1>
           <p className="text-gray-400 mt-2">
             View and manage your service appointments
