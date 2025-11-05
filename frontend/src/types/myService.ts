@@ -1,55 +1,75 @@
-import type { AppointmentSummary } from "@/services/appointmentService";
+import type { DetailedAppointment } from "@/services/appointmentService";
 import { vehicleService } from "@/services/vehicleService";
+
+/* ---------- 4 possible statuses ---------- */
+export type ServiceStatus =
+  | "not_started"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
 
 export interface Service {
   id: string;
   vehicleName: string;
   licensePlate: string;
   serviceType: string;
-  status: "completed" | "not_completed";
+  status: ServiceStatus;
   startDate: string;
   estimatedCompletion: string;
   assignedEmployee: string;
   serviceCenter: string;
-  centerSlot: string;
 }
 
-export const mapSummaryToService = async (summary: AppointmentSummary): Promise<Service> => {
-  let vehicleName = "Unknown Vehicle";
-  let licensePlate = "N/A";
+/* ---------- Mapping from the detailed backend response ---------- */
+export const mapDetailedToService = async (
+  detailed: DetailedAppointment
+): Promise<Service> => {
+  // ---- Vehicle name / plate (backend should already give them) ----
+  let vehicleName = detailed.vehicleName || "Unknown Vehicle";
+  let licensePlate = detailed.licensePlate || "N/A";
 
-  if (summary.vehicle && summary.vehicle.includes(" • ")) {
-    const [name, plate] = summary.vehicle.split(" • ");
-    vehicleName = name || "Unknown Vehicle";
-    licensePlate = plate || "N/A";
-  } else {
+  // Fallback – fetch from vehicle service if the backend omitted them
+  if (!vehicleName || !licensePlate) {
     try {
-      const vehicles = await vehicleService.list();
-      const matchedVehicle = vehicles.find((v) => `${v.brand} ${v.model}` === summary.vehicle);
-      if (matchedVehicle) {
-        vehicleName = `${matchedVehicle.brand} ${matchedVehicle.model}`;
-        licensePlate = matchedVehicle.licensePlate;
-      } else {
-        vehicleName = summary.vehicle || "Unknown Vehicle";
+      const vehicles = await vehicleService.list(); // all user vehicles
+      const match = vehicles.find(v => v.id === detailed.vehicleId);
+      if (match) {
+        vehicleName = `${match.brand} ${match.model}`;
+        licensePlate = match.licensePlate;
       }
     } catch (err) {
       console.error("Failed to fetch vehicles:", err);
-      vehicleName = summary.vehicle || "Unknown Vehicle";
     }
   }
 
-  const status: "completed" | "not_completed" = summary.status === "COMPLETED" ? "completed" : "not_completed";
+  // ---- Map raw DB status to the UI status ----
+  let status: ServiceStatus = "not_started";
+  switch (detailed.status.toUpperCase()) {
+    case "NOT_STARTED":
+      status = "not_started";
+      break;
+    case "IN_PROGRESS":
+      status = "in_progress";
+      break;
+    case "COMPLETED":
+      status = "completed";
+      break;
+    case "CANCELLED":
+      status = "cancelled";
+      break;
+    default:
+      status = "not_started";
+  }
 
   return {
-    id: summary.id,
+    id: detailed.id,
     vehicleName,
     licensePlate,
-    serviceType: summary.service,
+    serviceType: detailed.service,
     status,
-    startDate: summary.date,
-    estimatedCompletion: (summary as any).estimatedCompletion ?? "TBD",
-    assignedEmployee: (summary as any).assignedEmployee ?? "Not Assigned",
-    serviceCenter: (summary as any).serviceCenter ?? "TBD",
-    centerSlot: (summary as any).centerSlot ?? "TBD",
-  } as Service;
+    startDate: detailed.date,
+    estimatedCompletion: detailed.estimatedCompletion ?? "TBD",
+    assignedEmployee: detailed.assignedEmployee ?? "Not Assigned",
+    serviceCenter: detailed.serviceCenter ?? "TBD",
+  };
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface StatusUpdateModalProps {
+  error?: string | null;
   newStatus: string;
   setNewStatus: (status: string) => void;
   completionDescription: string;
@@ -22,6 +23,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
   setShowStatusUpdate,
   getDisplayStatus,
   statusTouched,
+  error,
 }) => (
   <div className="bg-zinc-900/50 rounded-lg shadow-md p-6 border border-zinc-800">
     <h3 className="text-lg font-semibold text-white mb-4">Update Service Status</h3>
@@ -63,6 +65,11 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
         {statusTouched && !completionDescription.trim() && (
           <p className="text-red-500 text-xs mt-1">Completion description is required.</p>
         )}
+      </div>
+    )}
+    {error && (
+      <div className="mb-2 text-center">
+        <p className="text-red-500 text-sm font-semibold">{error}</p>
       </div>
     )}
     <div className="flex justify-center gap-2">

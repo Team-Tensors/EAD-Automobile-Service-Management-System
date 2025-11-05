@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/employee")
-@CrossOrigin(origins = "http://localhost:3000") // For React frontend
+@CrossOrigin(origins = "*")
 public class EmployeeController {
 
     private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
