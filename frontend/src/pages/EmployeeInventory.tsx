@@ -323,9 +323,9 @@ const EmployeeInventory = () => {
 
       {/* Get Item Modal */}
       {showGetModal && selectedItem && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-700">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
               <h3 className="text-2xl font-bold">Get Item</h3>
               <button
                 onClick={() => {
@@ -364,11 +364,11 @@ const EmployeeInventory = () => {
               </div>
               {getQuantity > 0 && getQuantity <= selectedItem.quantity && (
                 <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
-                  <p className="text-sm text-gray-400 mb-1">Total Value</p>
-                  <p className="text-sm font-bold text-gray-400">
+                  
+                  <p className="text-xs text-gray-400"> <span className="text-xs text-gray-400">Total Value: </span>
                     {formatCurrency(selectedItem.unitPrice * getQuantity)}
                   </p>
-                  <p className="text-xl text-blue-400 mt-2">
+                  <p className="text-xl text-blue-400 mt-2 font-bold">
                     Remaining stock: {selectedItem.quantity - getQuantity} units
                   </p>
                 </div>

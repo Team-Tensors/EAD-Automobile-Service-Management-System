@@ -13,10 +13,10 @@ const AdminNavbar = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems: { id: NavSection; label: string }[] = [
-    { id: 'dashboard' as NavSection, label: 'Dashboard' },
-    { id: 'analytics' as NavSection, label: 'Analytics' },
-    { id: 'inventory' as NavSection, label: 'Inventory' },
-    { id: 'notifications' as NavSection, label: 'Notifications' }
+    { id: 'dashboard' as NavSection, label: 'DASHBOARD' },
+    { id: 'analytics' as NavSection, label: 'ANALYTICS' },
+    { id: 'inventory' as NavSection, label: 'INVENTORY' },
+    { id: 'notifications' as NavSection, label: 'NOTIFICATIONS' }
   ];
 
   const handleLogout = async () => {
