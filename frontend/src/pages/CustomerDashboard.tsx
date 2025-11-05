@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import AuthenticatedNavbar from "@/components/CustomerNavbar/CustomerNavbar";
 import Footer from "@/components/Footer/Footer";
@@ -14,6 +14,13 @@ const CustomerDashboard = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [filter, setFilter] = useState("all");
   const [showMap, setShowMap] = useState(false);
+
+  // Automatically select the first service when services are loaded
+  useEffect(() => {
+    if (!loading && services.length > 0 && !selectedService) {
+      setSelectedService(services[0]);
+    }
+  }, [loading, services, selectedService]);
 
   return (
     <div className="min-h-screen bg-black pt-5">
