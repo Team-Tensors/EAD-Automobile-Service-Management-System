@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Calendar, 
   User, 
@@ -26,9 +26,21 @@ const AdminDashboard = () => {
   const [isAssigning, setIsAssigning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Ref to track if data has been fetched (prevents double fetch in React Strict Mode)
+  const hasFetchedData = useRef(false);
 
   // Fetch all data on component mount
   useEffect(() => {
+    // Prevent double fetching in React Strict Mode (development)
+    if (hasFetchedData.current) {
+      console.log('AdminDashboard: Data already fetched, skipping duplicate request');
+      return;
+    }
+    
+    console.log('AdminDashboard: Fetching dashboard data...');
+    hasFetchedData.current = true;
+    
     const fetchData = async () => {
       try {
         setIsLoading(true);
@@ -40,6 +52,13 @@ const AdminDashboard = () => {
           getUnassignedAppointments(),
           getAllEmployees()
         ]);
+        
+        console.log('AdminDashboard: Data fetched successfully', {
+          upcoming: upcoming.length,
+          ongoing: ongoing.length,
+          unassigned: unassigned.length,
+          employees: employeeList.length
+        });
         
         setUpcomingAppointments(upcoming);
         setOngoingAppointments(ongoing);
