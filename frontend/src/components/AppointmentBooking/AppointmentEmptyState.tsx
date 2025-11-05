@@ -1,4 +1,3 @@
-// src/components/AppointmentBooking/AppointmentEmptyState.tsx
 import React from "react";
 import { Calendar, Plus } from "lucide-react";
 

@@ -1,4 +1,3 @@
-// src/components/appointment/ScheduleStep.tsx
 import React from "react";
 import { Calendar, Clock, FileText, MapPin } from "lucide-react";
 
