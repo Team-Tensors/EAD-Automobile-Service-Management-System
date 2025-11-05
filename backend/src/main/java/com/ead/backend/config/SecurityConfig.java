@@ -95,6 +95,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/check-email/**", "/auth/check-username/**").permitAll()
                 .requestMatchers("/auth/forgot-password", "/auth/reset-password", "/auth/verify-reset-token/**").permitAll()
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/chat/**").permitAll()
 
                         // OAuth2 endpoints - allow all OAuth2 related paths
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
