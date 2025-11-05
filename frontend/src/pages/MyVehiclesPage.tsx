@@ -221,10 +221,21 @@ const MyVehiclesPage = () => {
 
       <div className="bg-black border-zinc-700 border-b">
         <div className="max-w-7xl mx-auto px-0 pt-22 pb-4">
-          <h1 className="text-2xl font-bold text-white uppercase">My Vehicles</h1>
-          <p className="text-gray-400 mt-2">
-            View and manage your service vehicles
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white uppercase">My Vehicles</h1>
+              <p className="text-gray-400 mt-2">
+                View and manage your service vehicles
+              </p>
+            </div>
+            <button
+              onClick={openAddModal}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add Vehicle</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -248,18 +259,6 @@ const MyVehiclesPage = () => {
             </div>
           ) : (
             <>
-              {vehicles.length > 0 && (
-                <div className="mb-8">
-                  <button
-                    onClick={openAddModal}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300"
-                  >
-                    <Plus className="w-5 h-5" />
-                    <span>Add Vehicle</span>
-                  </button>
-                </div>
-              )}
-
               {vehicles.length === 0 ? (
                 <VehicleEmptyState onAddClick={openAddModal} />
               ) : (
