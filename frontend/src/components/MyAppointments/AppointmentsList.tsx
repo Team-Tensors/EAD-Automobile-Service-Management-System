@@ -1,5 +1,5 @@
 import type { AppointmentSummary } from "@/types/appointment";
-import { AppointmentCard } from "./AppointmentCard";
+import { AppointmentCard } from "../AppointmentBooking/AppointmentCard";
 import { Calendar } from "lucide-react";
 
 interface Props {
@@ -21,11 +21,11 @@ export const AppointmentsList = ({
 }: Props) => {
   const filtered = selectedDate
     ? appointments.filter((a) => {
-        const aptDate = new Date(a.date);
+        const d = new Date(a.date);
         return (
-          aptDate.getFullYear() === selectedDate.getFullYear() &&
-          aptDate.getMonth() === selectedDate.getMonth() &&
-          aptDate.getDate() === selectedDate.getDate()
+          d.getFullYear() === selectedDate.getFullYear() &&
+          d.getMonth() === selectedDate.getMonth() &&
+          d.getDate() === selectedDate.getDate()
         );
       })
     : appointments;
@@ -59,7 +59,6 @@ export const AppointmentsList = ({
 
   return (
     <div className="space-y-6">
-      {/* Selected-date banner */}
       {selectedDate && (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -84,7 +83,6 @@ export const AppointmentsList = ({
         </div>
       )}
 
-      {/* Cards */}
       {filtered.map((apt) => (
         <AppointmentCard
           key={apt.id}

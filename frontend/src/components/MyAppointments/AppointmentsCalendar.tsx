@@ -1,6 +1,6 @@
-import { CalendarHeader } from "./CalendarHeader";
-import { CalendarGrid } from "./CalendarGrid";
-import { CalendarLegend } from "./CalendarLegend";
+import { CalendarHeader } from "../AppointmentBooking/CalendarHeader";
+import { CalendarGrid } from "../AppointmentBooking/CalendarGrid";
+import { CalendarLegend } from "../AppointmentBooking/CalendarLegend";
 
 interface Props {
   month: Date;
@@ -25,7 +25,10 @@ export const AppointmentsCalendar = ({
     {/* Day names */}
     <div className="grid grid-cols-7 gap-2 mb-2">
       {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-        <div key={d} className="text-center text-xs text-gray-500 font-semibold">
+        <div
+          key={d}
+          className="text-center text-xs text-gray-500 font-semibold"
+        >
           {d}
         </div>
       ))}
