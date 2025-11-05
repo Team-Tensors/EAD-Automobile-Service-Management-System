@@ -20,12 +20,8 @@ interface AdminAppointmentDTO {
 
 interface EmployeeDTO {
   id: string;
-  fullName: string;
   email: string;
-  specialization: string;
-  availability: string;
-  currentWorkload: number;
-  rating: number;
+  fullName: string;
   phoneNumber: string;
 }
 
@@ -103,6 +99,8 @@ export const getUnassignedAppointments = async (): Promise<AdminService[]> => {
 
 /**
  * Get all employees (for dropdown/assignment modal)
+ * Note: Backend DTO only provides basic info (id, email, fullName, phoneNumber)
+ * Other fields like specialization, availability, workload, rating are set to defaults
  */
 export const getAllEmployees = async (): Promise<Employee[]> => {
   try {
@@ -111,11 +109,11 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
       id: parseInt(dto.id as unknown as string) || 0,
       name: dto.fullName || '',
       email: dto.email,
-      specialization: dto.specialization || 'General',
-      availability: dto.availability === 'available' ? 'available' : 'busy',
-      currentWorkload: dto.currentWorkload || 0,
-      rating: dto.rating || 0,
-      phoneNumber: dto.phoneNumber,
+      specialization: 'General Service', // Default value - not provided by backend
+      availability: 'available' as const, // Default value - not provided by backend
+      currentWorkload: 0, // Default value - not provided by backend
+      rating: 4.5, // Default value - not provided by backend
+      phoneNumber: dto.phoneNumber || '',
     }));
   } catch (error) {
     console.error('Error fetching employees:', error);
