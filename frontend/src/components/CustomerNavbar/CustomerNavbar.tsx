@@ -72,6 +72,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["CUSTOMER"],
     },
+    {
+      name: "Employee Inventory",
+      path: "/employee-inventory",
+      icon: Navigation,
+      roles: ["EMPLOYEE"],
+    },
     // Add more tabs here as needed
   ];
 
