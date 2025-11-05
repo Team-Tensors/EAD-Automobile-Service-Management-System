@@ -7,18 +7,47 @@ interface Message {
   text: string;
 }
 
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+
 const Chatbot: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, from: 'bot', text: "Hi! I'm here to help — ask me anything about the service." },
   ]);
   const [input, setInput] = useState('');
+  const [userLocation, setUserLocation] = useState<Location | null>(null);
+  const [locationRequested, setLocationRequested] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
+
+  // Request user location when chatbot is opened for the first time
+  useEffect(() => {
+    if (open && !locationRequested) {
+      requestUserLocation();
+      setLocationRequested(true);
+    }
+  }, [open, locationRequested]);
+
+  const requestUserLocation = async () => {
+    try {
+      const location = await chatBotService.getUserLocation();
+      if (location) {
+        setUserLocation(location);
+        console.log('User location obtained:', location);
+      } else {
+        console.log('Location access denied or unavailable');
+      }
+    } catch (error) {
+      console.error('Error requesting location:', error);
+    }
+  };
 
   const [isSending, setIsSending] = useState(false);
 
@@ -38,7 +67,13 @@ const Chatbot: React.FC = () => {
     setIsSending(true);
 
     try {
-        const res: any = await chatBotService.sendMessage({ message: text });
+        // Include location in the request if available
+        const payload: { message: string; location?: Location } = { message: text };
+        if (userLocation) {
+          payload.location = userLocation;
+        }
+        
+        const res: any = await chatBotService.sendMessage(payload);
         console.log('Chatbot response:', res);
       // axios responses usually have data property; support both shapes
         const data = res?.data ?? res;
