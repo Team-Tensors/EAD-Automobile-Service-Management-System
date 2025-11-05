@@ -227,20 +227,6 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
           max={maxDate}
           className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
         />
-        {formData.appointmentDate && (
-          <p className="text-xs text-gray-400 mt-2">
-            {(() => {
-              const selectedDate = new Date(
-                formData.appointmentDate + "T00:00:00"
-              );
-              const dayOfWeek = selectedDate.getDay();
-              const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-              return isWeekend
-                ? "⏰ Weekend hours: 9:00 AM - 4:00 PM"
-                : "⏰ Weekday hours: 8:00 AM - 7:00 PM";
-            })()}
-          </p>
-        )}
       </div>
 
       {/* Visual Time Slot Selection */}
@@ -285,8 +271,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
 
               {/* Instruction Text */}
               <p className="text-sm text-gray-400 mb-4">
-                Click on a time slot to select (showing available slots / total
-                capacity)
+                Click on a time slot to select
               </p>
 
               {/* Time Slots Grid */}

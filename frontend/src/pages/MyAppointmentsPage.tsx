@@ -8,7 +8,10 @@ import Footer from "@/components/Footer/Footer";
 import AppointmentEmptyState from "@/components/AppointmentBooking/AppointmentEmptyState";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
-import { appointmentService, type AppointmentSummary } from "@/services/appointmentService";
+import {
+  appointmentService,
+  type AppointmentSummary,
+} from "@/services/appointmentService";
 
 import { AppointmentsHeader } from "@/components/MyAppointments/AppointmentsHeader";
 import { AppointmentsLoadingState } from "@/components/MyAppointments/AppointmentsLoadingState";
@@ -25,7 +28,9 @@ const MyAppointmentsPage = () => {
   // ----- cancel flow -----
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(
+    null
+  );
 
   // ----- calendar -----
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -104,12 +109,14 @@ const MyAppointmentsPage = () => {
       <AppointmentsHeader />
 
       <div className="flex-1 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
           {isLoading ? (
             <AppointmentsLoadingState />
           ) : appointments.length === 0 ? (
             <AppointmentEmptyState
-              onBookClick={() => navigate("/my-appointments/appointment-booking")}
+              onBookClick={() =>
+                navigate("/my-appointments/appointment-booking")
+              }
             />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -127,10 +134,13 @@ const MyAppointmentsPage = () => {
 
               {/* CALENDAR – 1 column */}
               <div className="lg:col-span-1">
-                <div className="sticky top-20">
-                  <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-orange-500" />
-                    Appointment Calendar
+                <div className="lg:sticky lg:top-20">
+                  <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+                    <span className="hidden sm:inline">
+                      Appointment Calendar
+                    </span>
+                    <span className="sm:hidden">Calendar</span>
                   </h2>
                   <AppointmentsCalendar
                     month={currentMonth}

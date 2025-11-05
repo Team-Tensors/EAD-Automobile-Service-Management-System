@@ -29,62 +29,65 @@ export const AppointmentCard = ({
     });
 
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 hover:border-zinc-700 transition-all">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        {/* Left */}
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-orange-500/10 rounded-lg">
+    <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-700 transition-all">
+      <div className="flex flex-col gap-4">
+        {/* Top Section */}
+        <div className="flex items-start justify-between gap-3">
+          {/* Left - Service Info */}
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="p-2 bg-orange-500/10 rounded-lg flex-shrink-0">
               {appointment.type === AppointmentTypeValues.SERVICE ? (
-                <Wrench className="w-5 h-5 text-orange-500" />
+                <Wrench className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
               ) : (
-                <Package className="w-5 h-5 text-orange-500" />
+                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
               )}
             </div>
-            <div>
-              <h3 className="text-xl font-semibold text-white">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-xl font-semibold text-white truncate">
                 {appointment.service}
               </h3>
-              <span className="text-sm text-gray-400">{appointment.type}</span>
+              <span className="text-xs sm:text-sm text-gray-400">
+                {appointment.type}
+              </span>
             </div>
           </div>
 
-          <div className="space-y-2 text-gray-300">
-            <div className="flex items-center gap-2">
-              <Car className="w-4 h-4 text-gray-500" />
-              <span>{appointment.vehicle}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-gray-500" />
-              <span>{formatDate(appointment.date)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span>{formatTime(appointment.date)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right */}
-        <div className="flex flex-col items-end gap-3">
+          {/* Status Badge */}
           <span
-            className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+            className={`px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold border whitespace-nowrap ${getStatusColor(
               appointment.status
             )}`}
           >
             {appointment.status}
           </span>
-
-          {appointment.status === "PENDING" && (
-            <button
-              onClick={() => onCancel(appointment.id)}
-              disabled={isCancelling}
-              className="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isCancelling ? "Cancelling..." : "Cancel"}
-            </button>
-          )}
         </div>
+
+        {/* Details Section */}
+        <div className="space-y-2 text-sm sm:text-base text-gray-300">
+          <div className="flex items-center gap-2">
+            <Car className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
+            <span className="truncate">{appointment.vehicle}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
+            <span>{formatDate(appointment.date)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500 flex-shrink-0" />
+            <span>{formatTime(appointment.date)}</span>
+          </div>
+        </div>
+
+        {/* Cancel Button */}
+        {appointment.status === "PENDING" && (
+          <button
+            onClick={() => onCancel(appointment.id)}
+            disabled={isCancelling}
+            className="w-full sm:w-auto sm:self-end px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCancelling ? "Cancelling..." : "Cancel Appointment"}
+          </button>
+        )}
       </div>
     </div>
   );

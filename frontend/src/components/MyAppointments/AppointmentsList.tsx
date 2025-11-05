@@ -31,7 +31,11 @@ export const AppointmentsList = ({
     : appointments;
 
   const formatDate = (d: Date) =>
-    d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
   if (filtered.length === 0) {
     return (
@@ -58,24 +62,24 @@ export const AppointmentsList = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {selectedDate && (
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-orange-500" />
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div>
-                <p className="text-white font-semibold">
+                <p className="text-white font-semibold text-sm sm:text-base">
                   Showing appointments for {formatDate(selectedDate)}
                 </p>
-                <p className="text-orange-300 text-sm">
+                <p className="text-orange-300 text-xs sm:text-sm">
                   {filtered.length} appointment(s) found
                 </p>
               </div>
             </div>
             <button
               onClick={onClearFilter}
-              className="px-4 py-2 bg-orange-500/20 text-orange-300 rounded-lg hover:bg-orange-500/30 transition-all text-sm font-medium"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-500/20 text-orange-300 rounded-lg hover:bg-orange-500/30 transition-all text-xs sm:text-sm font-medium w-full sm:w-auto"
             >
               Clear Filter
             </button>

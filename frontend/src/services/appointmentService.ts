@@ -66,7 +66,19 @@ export const appointmentService = {
         date,
       },
     });
-    return res.data;
+
+    // Backend returns array like ["09:00|3", "10:00|5"]
+    // Convert to object { 9: 3, 10: 5 }
+    const slots: SlotAvailability = {};
+    if (Array.isArray(res.data)) {
+      res.data.forEach((slot: string) => {
+        const [time, count] = slot.split("|");
+        const hour = parseInt(time.split(":")[0], 10);
+        slots[hour] = parseInt(count, 10);
+      });
+    }
+
+    return slots;
   },
 };
 
