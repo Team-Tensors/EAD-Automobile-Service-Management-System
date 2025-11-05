@@ -22,6 +22,6 @@ public class InventoryItemUpdateDTO {
 
     private String category;
 
-    @Min(value = 1, message = "Minimum stock must be at least 1")
-    private Integer minStock;
+    // Note: minStock is intentionally excluded - it cannot be changed after item
+    // creation
 }

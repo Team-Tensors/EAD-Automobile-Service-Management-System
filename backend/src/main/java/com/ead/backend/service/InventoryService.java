@@ -147,9 +147,7 @@ public class InventoryService {
             item.setCategory(dto.getCategory());
         }
 
-        if (dto.getMinStock() != null) {
-            item.setMinStock(dto.getMinStock());
-        }
+        // Note: minStock cannot be updated after item creation for business consistency
 
         InventoryItem updatedItem = inventoryItemRepository.save(item);
         log.info("Successfully updated inventory item with id: {}", id);
