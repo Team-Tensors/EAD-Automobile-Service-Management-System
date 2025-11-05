@@ -34,18 +34,23 @@ export interface AppointmentSummary {
 }
 
 export interface DetailedAppointment {
-  id: string; // UUID as string
-  vehicleId: string; // UUID as string
-  vehicleName: string; // e.g., "Tesla Model 3"
-  licensePlate: string; // e.g., "ABC123"
-  service: string; // Service name/type
+  id: string;
+  vehicleId: string;
+  vehicleName: string;
+  licensePlate: string;
+  service: string;
   type: AppointmentType;
-  date: string; // Appointment date/time
+  date: string;
   status: string;
   canStart: boolean;
-  serviceCenter: string; // e.g., "Downtown Service Center"
-  assignedEmployee: string; // e.g., "John Doe"
-  estimatedCompletion: string; // e.g., "2025-11-01T18:00:00" or human-readable
+  serviceCenter: string;
+  assignedEmployee: string;
+  estimatedCompletion: string;
+}
+
+// New interface for slot availability
+export interface SlotAvailability {
+  [hour: number]: number; // hour -> available slots count
 }
 
 export const appointmentService = {
@@ -66,6 +71,20 @@ export const appointmentService = {
   // Cancel an appointment
   cancelAppointment: async (appointmentId: string): Promise<void> => {
     await api.put(`${base}/${appointmentId}/cancel`);
+  },
+
+  // Get available slots for a specific service center and date
+  getAvailableSlots: async (
+    serviceCenterId: string,
+    date: string // Format: "2025-11-05"
+  ): Promise<SlotAvailability> => {
+    const res = await api.get(`${base}/available-slots`, {
+      params: {
+        serviceCenterId,
+        date,
+      },
+    });
+    return res.data;
   },
 
   // Get detailed appointments with all fields

@@ -7,12 +7,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -31,6 +30,7 @@ public class AppointmentService {
     // ===================================================================
     // 1. CUSTOMER: Book appointment
     // ===================================================================
+    @Transactional
     public Appointment createAppointment(Appointment appointment) {
         User customer = getCurrentUser();
 
@@ -146,7 +146,8 @@ public class AppointmentService {
         
         if (bookedSlots >= serviceCenter.getCenterSlot()) {
             throw new RuntimeException(
-                String.format("Service center is fully booked for this time slot. Please select a different time or service center.")
+                    String.format("Service center is fully booked for this time slot. Available slots: 0/%d",
+                            serviceCenter.getCenterSlot())
             );
         }
 
@@ -466,6 +467,46 @@ public class AppointmentService {
         }
 
         return savedAppointment;
+    }
+
+
+    public Map<Integer, Integer> getAvailableSlotsByHour(UUID serviceCenterId, LocalDate date) {
+        ServiceCenter serviceCenter = serviceCenterRepository.findById(serviceCenterId)
+                .orElseThrow(() -> new RuntimeException("Service center not found"));
+
+        if (!serviceCenter.getIsActive()) {
+            throw new RuntimeException("Service center is not active");
+        }
+
+        // Get all appointments for this center on this date
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        List<Appointment> appointments = appointmentRepository
+                .findByServiceCenterAndDate(serviceCenterId, startOfDay);
+
+        // Count bookings per hour
+        Map<Integer, Long> bookedPerHour = appointments.stream()
+                .collect(Collectors.groupingBy(
+                        a -> a.getAppointmentDate().getHour(),
+                        Collectors.counting()
+                ));
+
+        // Calculate available slots per hour
+        Map<Integer, Integer> availableSlots = new HashMap<>();
+        int dayOfWeek = date.getDayOfWeek().getValue();
+
+        // Determine operating hours based on day
+        int startHour = (dayOfWeek == 6 || dayOfWeek == 7) ? 9 : 8;
+        int endHour = (dayOfWeek == 6 || dayOfWeek == 7) ? 17 : 20;
+
+        for (int hour = startHour; hour < endHour; hour++) {
+            long booked = bookedPerHour.getOrDefault(hour, 0L);
+            int available = serviceCenter.getCenterSlot() - (int) booked;
+            availableSlots.put(hour, Math.max(0, available));
+        }
+
+        return availableSlots;
     }
 
     // ===================================================================
