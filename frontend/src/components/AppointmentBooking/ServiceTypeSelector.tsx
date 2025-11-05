@@ -1,9 +1,8 @@
-// src/components/appointment/ServiceTypeSelector.tsx
 import React from "react";
 import { Clock, ChevronRight, Wrench } from "lucide-react";
 
 interface ServiceType {
-  id: string; // UUID as string
+  id: string; 
   name: string;
   description: string;
   estimatedDuration: string;

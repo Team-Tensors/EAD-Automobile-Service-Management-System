@@ -1,4 +1,3 @@
-// src/components/appointment/AppointmentTypeSelector.tsx
 import React from "react";
 import { Wrench, Settings } from "lucide-react";
 import type { AppointmentType } from "../../types/appointment";
