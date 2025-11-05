@@ -1,5 +1,6 @@
-import React from "react";
-import { Calendar, Clock, FileText, MapPin } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Calendar, Clock, FileText, MapPin, Loader2 } from "lucide-react";
+import { appointmentService, type TimeSlotAvailability } from "../../services/appointmentService";
 
 interface ScheduleFormData {
   serviceCenterId: string;
@@ -38,45 +39,38 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
   onSubmit,
   isSubmitting = false,
 }) => {
-  // Define available time slots based on day of week
-  const weekdayTimeSlots = [
-    { value: "08:00", label: "8:00 AM" },
-    { value: "09:00", label: "9:00 AM" },
-    { value: "10:00", label: "10:00 AM" },
-    { value: "11:00", label: "11:00 AM" },
-    { value: "12:00", label: "12:00 PM" },
-    { value: "13:00", label: "1:00 PM" },
-    { value: "14:00", label: "2:00 PM" },
-    { value: "15:00", label: "3:00 PM" },
-    { value: "16:00", label: "4:00 PM" },
-    { value: "17:00", label: "5:00 PM" },
-    { value: "18:00", label: "6:00 PM" },
-    { value: "19:00", label: "7:00 PM" },
-  ];
+  const [availableSlots, setAvailableSlots] = useState<TimeSlotAvailability[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
 
-  const weekendTimeSlots = [
-    { value: "09:00", label: "9:00 AM" },
-    { value: "10:00", label: "10:00 AM" },
-    { value: "11:00", label: "11:00 AM" },
-    { value: "12:00", label: "12:00 PM" },
-    { value: "13:00", label: "1:00 PM" },
-    { value: "14:00", label: "2:00 PM" },
-    { value: "15:00", label: "3:00 PM" },
-    { value: "16:00", label: "4:00 PM" },
-  ];
+  // Fetch available slots when service center or date changes
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      if (!formData.serviceCenterId || !formData.appointmentDate) {
+        setAvailableSlots([]);
+        return;
+      }
 
-  // Determine which time slots to use based on selected date
-  const getTimeSlots = () => {
-    if (!formData.appointmentDate) return weekdayTimeSlots; // Default to weekday slots
-    
-    const selectedDate = new Date(formData.appointmentDate + 'T00:00:00');
-    const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 6=Saturday
-    
-    // Weekend: Saturday (6) or Sunday (0)
-    return (dayOfWeek === 0 || dayOfWeek === 6) ? weekendTimeSlots : weekdayTimeSlots;
-  };
+      setLoadingSlots(true);
+      setSlotsError(null);
 
-  const timeSlots = getTimeSlots();
+      try {
+        const slots = await appointmentService.getAvailableTimeSlots(
+          formData.serviceCenterId,
+          formData.appointmentDate
+        );
+        setAvailableSlots(slots);
+      } catch (error) {
+        console.error("Failed to fetch available slots:", error);
+        setSlotsError("Failed to load available slots");
+        setAvailableSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [formData.serviceCenterId, formData.appointmentDate]);
 
   // Get minimum date - if it's past closing time, set minimum to tomorrow
   const now = new Date();
@@ -95,29 +89,10 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
       : now.toISOString().split("T")[0];
 
   // Get maximum date - 1 month from today
+  // Get maximum date - 1 month from today
   const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
     .toISOString()
     .split("T")[0];
-
-  const today = now.toISOString().split("T")[0];
-
-  // Check if a time slot is available (not in the past)
-  const isTimeSlotAvailable = (timeValue: string) => {
-    if (!formData.appointmentDate) return true; // Allow all if no date selected
-
-    const selectedDate = formData.appointmentDate;
-    const isToday = selectedDate === today;
-
-    if (!isToday) return true; // All times available for future dates
-
-    // For today, check if the time slot has passed
-    const now = new Date();
-    const currentHour = now.getHours();
-    const slotHour = parseInt(timeValue.split(":")[0]);
-
-    // Add 1 hour buffer (must book at least 1 hour ahead)
-    return slotHour > currentHour;
-  };
 
   return (
     <div className="space-y-6">
@@ -188,31 +163,89 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
             })()}
           </p>
         )}
-        <select
-          name="appointmentTime"
-          value={formData.appointmentTime}
-          onChange={onChange}
-          className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
-          <option value="" className="bg-zinc-800 text-gray-400">
-            Select a time slot
-          </option>
-          {timeSlots.map((slot) => {
-            const isAvailable = isTimeSlotAvailable(slot.value);
-            return (
-              <option
-                key={slot.value}
-                value={slot.value}
-                disabled={!isAvailable}
-                className={`bg-zinc-800 ${
-                  isAvailable ? "text-white" : "text-gray-500"
-                }`}
-              >
-                {slot.label} {!isAvailable ? "(Not available)" : ""}
-              </option>
-            );
-          })}
-        </select>
+
+        {/* Show loading state */}
+        {loadingSlots && (
+          <div className="flex items-center justify-center py-8 text-gray-400">
+            <Loader2 className="w-5 h-5 animate-spin mr-2" />
+            <span>Loading available slots...</span>
+          </div>
+        )}
+
+        {/* Show error state */}
+        {slotsError && !loadingSlots && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-3">
+            <p className="text-sm text-red-400">{slotsError}</p>
+          </div>
+        )}
+
+        {/* Show available slots grid when data is loaded */}
+        {!loadingSlots && !slotsError && formData.serviceCenterId && formData.appointmentDate && availableSlots.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-400 mb-3">
+              Click on a time slot to select (showing available slots / total capacity)
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {availableSlots.map((slot) => {
+                const isSelected = formData.appointmentTime === slot.time;
+                return (
+                  <button
+                    key={slot.time}
+                    type="button"
+                    onClick={() => {
+                      const syntheticEvent = {
+                        target: { name: "appointmentTime", value: slot.time },
+                      } as React.ChangeEvent<HTMLSelectElement>;
+                      onChange(syntheticEvent);
+                    }}
+                    className={`
+                      relative p-3 rounded-lg border transition-all
+                      ${isSelected
+                        ? 'bg-orange-500 border-orange-500 text-white'
+                        : 'bg-zinc-800/50 border-zinc-700 text-white hover:border-orange-500 hover:bg-zinc-800'
+                      }
+                    `}
+                  >
+                    <div className="text-sm font-semibold">
+                      {(() => {
+                        const [hour] = slot.time.split(':');
+                        const h = parseInt(hour);
+                        const ampm = h >= 12 ? 'PM' : 'AM';
+                        const displayHour = h > 12 ? h - 12 : h === 0 ? 12 : h;
+                        return `${displayHour}:00 ${ampm}`;
+                      })()}
+                    </div>
+                    <div className={`text-xs mt-1 ${isSelected ? 'text-orange-100' : 'text-gray-400'}`}>
+                      {slot.availableSlots} available
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Show message when no slots available */}
+        {!loadingSlots && !slotsError && formData.serviceCenterId && formData.appointmentDate && availableSlots.length === 0 && (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-3">
+            <p className="text-sm text-yellow-400">
+              No available time slots for the selected date. Please choose a different date.
+            </p>
+          </div>
+        )}
+
+        {/* Fallback dropdown for when slots haven't been fetched yet */}
+        {!formData.serviceCenterId || !formData.appointmentDate ? (
+          <select
+            name="appointmentTime"
+            value={formData.appointmentTime}
+            onChange={onChange}
+            disabled
+            className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-gray-500 cursor-not-allowed"
+          >
+            <option value="">Please select service center and date first</option>
+          </select>
+        ) : null}
       </div>
 
       <div>
