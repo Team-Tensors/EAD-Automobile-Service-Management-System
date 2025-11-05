@@ -20,8 +20,8 @@ const CustomerDashboard = () => {
       <AuthenticatedNavbar />
 
       <div className="bg-black border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+        <div className="max-w-7xl mx-auto px-0 pt-22 pb-4">
+          <h1 className="text-2xl font-bold text-white mb-2 uppercase">Dashboard</h1>
           <p className="text-gray-400">
             Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
           </p>
