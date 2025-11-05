@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, LayoutDashboard, BarChart3, Package, Bell, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { NavSection } from '@/types/admin';
 import { useState, useRef, useEffect } from 'react';
@@ -12,11 +12,11 @@ const AdminNavbar = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const navItems: { id: NavSection; label: string; icon: any }[] = [
-    { id: 'dashboard' as NavSection, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'analytics' as NavSection, label: 'Analytics', icon: BarChart3 },
-    { id: 'inventory' as NavSection, label: 'Inventory', icon: Package },
-    { id: 'notifications' as NavSection, label: 'Notifications', icon: Bell }
+  const navItems: { id: NavSection; label: string }[] = [
+    { id: 'dashboard' as NavSection, label: 'Dashboard' },
+    { id: 'analytics' as NavSection, label: 'Analytics' },
+    { id: 'inventory' as NavSection, label: 'Inventory' },
+    { id: 'notifications' as NavSection, label: 'Notifications' }
   ];
 
   const handleLogout = async () => {
@@ -53,13 +53,12 @@ const AdminNavbar = () => {
             <span className="text-2xl font-bold text-white tracking-wider font-heading">
               DRIVE<span className="text-orange-600">CARE</span>
             </span>
-            <span className="text-xs text-gray-400 ml-2">Admin</span>
+            <span className="text-xs text-gray-400 ml-2">ADMIN</span>
           </Link>
 
           {/* Navigation Sections */}
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
-              const Icon = item.icon;
               return (
                 <Link
                   key={item.id}
@@ -68,7 +67,6 @@ const AdminNavbar = () => {
                     isActive(item.id) ? 'text-orange-600' : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
                   {item.label}
                 </Link>
               );

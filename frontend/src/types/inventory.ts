@@ -29,7 +29,7 @@ export interface InventoryItemUpdateDto {
   quantity?: number;
   unitPrice?: number;
   category?: string;
-  minStock?: number;
+  // Note: minStock is intentionally excluded - it cannot be changed after item creation
 }
 
 export interface InventoryRestockDto {

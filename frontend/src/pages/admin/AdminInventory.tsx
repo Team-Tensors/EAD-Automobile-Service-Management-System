@@ -157,7 +157,7 @@ const AdminInventory = () => {
     <>
       {/* Header */}
       <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-0">
-        <div className="max-w-7xl mx-auto px-6 pt-26 pb-12">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Inventory Management</h1>
@@ -174,7 +174,7 @@ const AdminInventory = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-0 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-card rounded-lg shadow-md p-6 border border-border">
@@ -291,10 +291,7 @@ const AdminInventory = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-muted-foreground" />
-                          <div>
-                            <p className="font-semibold text-card-foreground">{item.itemName}</p>
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
-                          </div>
+                          <p className="font-semibold text-card-foreground">{item.itemName}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
