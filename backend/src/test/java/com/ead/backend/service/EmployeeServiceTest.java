@@ -4,6 +4,7 @@ import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.dto.TimeLogResponseDTO;
 import com.ead.backend.entity.*;
+import com.ead.backend.enums.AppointmentType;
 import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.TimeLogRepository;
 import com.ead.backend.repository.UserRepository;
