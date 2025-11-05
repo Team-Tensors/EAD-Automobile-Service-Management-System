@@ -32,7 +32,7 @@ interface Appointment {
   lastServiceDate: string | null;
   licensePlate: string;
   appointmentType: string;
-  serviceOrModificationId: number;
+  serviceOrModificationId: string; // UUID as string
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
   estimatedTimeMinutes: number;
@@ -70,7 +70,7 @@ const EmployeeDashboard = () => {
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [showStatusUpdate, setShowStatusUpdate] = useState<boolean>(false);
   const [showTimeLog, setShowTimeLog] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -78,15 +78,15 @@ const EmployeeDashboard = () => {
 
   const EMPLOYEE_ID = user?.id || 9;
 
-  const [newStatus, setNewStatus] = useState<string>('');
+  const [newStatus, setNewStatus] = useState<string>("");
   const [completionDescription, setCompletionDescription] =
-    useState<string>('');
+    useState<string>("");
 
   const [timeLogForm, setTimeLogForm] = useState<TimeLogForm>({
-    date: new Date().toISOString().split('T')[0],
-    startTime: '',
-    endTime: '',
-    description: '',
+    date: new Date().toISOString().split("T")[0],
+    startTime: "",
+    endTime: "",
+    description: "",
   });
 
   const [timeLogErrors, setTimeLogErrors] = useState<TimeLogErrors>({});
@@ -101,9 +101,9 @@ const EmployeeDashboard = () => {
     setError(null);
 
     let backendStatus: string | null = null;
-    if (statusFilter === 'NOT STARTED') backendStatus = 'CONFIRMED';
-    else if (statusFilter === 'IN PROGRESS') backendStatus = 'IN_PROGRESS';
-    else if (statusFilter === 'COMPLETED') backendStatus = 'COMPLETED';
+    if (statusFilter === "NOT STARTED") backendStatus = "CONFIRMED";
+    else if (statusFilter === "IN PROGRESS") backendStatus = "IN_PROGRESS";
+    else if (statusFilter === "COMPLETED") backendStatus = "COMPLETED";
 
     let url = `${API_BASE_URL}/appointments/${EMPLOYEE_ID}`;
     if (backendStatus) url += `?status=${backendStatus}`;
@@ -111,27 +111,29 @@ const EmployeeDashboard = () => {
     try {
       const response = await fetch(url, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // <-- use dynamic token
         },
       });
 
-      if (!response.ok) throw new Error('Failed to fetch appointments');
+      if (!response.ok) throw new Error("Failed to fetch appointments");
       const data = await response.json();
-      
+
       // Ensure data is always an array
       const appointmentsArray = Array.isArray(data) ? data : [];
       setAppointments(appointmentsArray);
 
-      setSelectedAppointment(prev => {
+      setSelectedAppointment((prev) => {
         if (prev) {
-          const stillExists = appointmentsArray.find((apt: Appointment) => apt.id === prev.id);
+          const stillExists = appointmentsArray.find(
+            (apt: Appointment) => apt.id === prev.id
+          );
           if (stillExists) return stillExists;
         }
         return appointmentsArray.length > 0 ? appointmentsArray[0] : null;
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -145,17 +147,17 @@ const EmployeeDashboard = () => {
           `${API_BASE_URL}/appointments/${appointmentId}/employees/${EMPLOYEE_ID}/timelogs`,
           {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`, // <-- use dynamic token
             },
           }
         );
 
-        if (!response.ok) throw new Error('Failed to fetch time logs');
+        if (!response.ok) throw new Error("Failed to fetch time logs");
         const data = await response.json();
         setTimeLogs(data);
       } catch (err) {
-        console.error('Error fetching time logs:', err);
+        console.error("Error fetching time logs:", err);
         setTimeLogs([]);
       }
     },
@@ -174,33 +176,33 @@ const EmployeeDashboard = () => {
     }
     setShowTimeLog(false); // Close Log Time panel when switching appointments
     setShowStatusUpdate(false); // Close Update Status panel when switching appointments
-    setNewStatus('');
-    setCompletionDescription('');
+    setNewStatus("");
+    setCompletionDescription("");
     setStatusTouched(false);
   }, [selectedAppointment, fetchTimeLogs]);
 
   // ------------------ Update Appointment Status ------------------
   const updateAppointmentStatus = async () => {
     if (!newStatus || !selectedAppointment) return;
-    if (newStatus === 'COMPLETED' && !completionDescription.trim()) return;
+    if (newStatus === "COMPLETED" && !completionDescription.trim()) return;
 
     setLoading(true);
     try {
       const response = await fetch(
         `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
         {
-          method: 'PUT',
+          method: "PUT",
           headers: { Authorization: `Bearer ${token}` }, // <-- use dynamic token
         }
       );
 
-      if (!response.ok) throw new Error('Failed to update status');
+      if (!response.ok) throw new Error("Failed to update status");
       await fetchAppointments();
       setShowStatusUpdate(false);
-      setNewStatus('');
-      setCompletionDescription('');
+      setNewStatus("");
+      setCompletionDescription("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -212,24 +214,24 @@ const EmployeeDashboard = () => {
       const start = new Date(`${timeLogForm.date}T${timeLogForm.startTime}`);
       const end = new Date(`${timeLogForm.date}T${timeLogForm.endTime}`);
       const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      return diff > 0 ? diff.toFixed(2) : '0.00';
+      return diff > 0 ? diff.toFixed(2) : "0.00";
     }
-    return '0.00';
+    return "0.00";
   };
 
   const validateTimeLog = (): boolean => {
     const errors: TimeLogErrors = {};
     const { date, startTime, endTime, description } = timeLogForm;
 
-    if (!date) errors.date = 'Date is required.';
-    if (!startTime) errors.startTime = 'Start time is required.';
-    if (!endTime) errors.endTime = 'End time is required.';
-    if (!description.trim()) errors.description = 'Description is required.';
+    if (!date) errors.date = "Date is required.";
+    if (!startTime) errors.startTime = "Start time is required.";
+    if (!endTime) errors.endTime = "End time is required.";
+    if (!description.trim()) errors.description = "Description is required.";
 
     if (date && startTime && endTime) {
       const start = new Date(`${date}T${startTime}`);
       const end = new Date(`${date}T${endTime}`);
-      if (end <= start) errors.endTime = 'End time must be after start time.';
+      if (end <= start) errors.endTime = "End time must be after start time.";
     }
 
     setTimeLogErrors(errors);
@@ -252,28 +254,28 @@ const EmployeeDashboard = () => {
       const response = await fetch(
         `${API_BASE_URL}/appointments/${selectedAppointment.id}/timelog`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`, // <-- use dynamic token
           },
           body: JSON.stringify(payload),
         }
       );
 
-      if (!response.ok) throw new Error('Failed to log time');
+      if (!response.ok) throw new Error("Failed to log time");
       await fetchTimeLogs(selectedAppointment.id);
       setShowTimeLog(false);
       setTimeLogForm({
-        date: new Date().toISOString().split('T')[0],
-        startTime: '',
-        endTime: '',
-        description: '',
+        date: new Date().toISOString().split("T")[0],
+        startTime: "",
+        endTime: "",
+        description: "",
       });
       setTimeLogErrors({});
       setTimeLogTouched(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -282,24 +284,24 @@ const EmployeeDashboard = () => {
   // ------------------ Helpers / UI Formatting ------------------
   const getStatusColor = (status: string): string => {
     switch (status) {
-      case 'CONFIRMED':
-        return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'IN_PROGRESS':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-      case 'COMPLETED':
-        return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case "CONFIRMED":
+        return "bg-red-500/10 text-red-500 border-red-500/20";
+      case "IN_PROGRESS":
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+      case "COMPLETED":
+        return "bg-green-500/10 text-green-500 border-green-500/20";
       default:
-        return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+        return "bg-gray-500/10 text-gray-500 border-gray-500/20";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'CONFIRMED':
+      case "CONFIRMED":
         return <AlertCircle className="w-4 h-4" />;
-      case 'IN_PROGRESS':
+      case "IN_PROGRESS":
         return <Clock className="w-4 h-4" />;
-      case 'COMPLETED':
+      case "COMPLETED":
         return <CheckCircle className="w-4 h-4" />;
       default:
         return <XCircle className="w-4 h-4" />;
@@ -307,22 +309,22 @@ const EmployeeDashboard = () => {
   };
 
   const getDisplayStatus = (status: string): string =>
-    status === 'CONFIRMED' ? 'NOT STARTED' : status.replace('_', ' ');
+    status === "CONFIRMED" ? "NOT STARTED" : status.replace("_", " ");
 
   const formatDateTime = (dateTime: string): string =>
-    new Date(dateTime).toLocaleString('en-GB', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    new Date(dateTime).toLocaleString("en-GB", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
   const formatDate = (dateTime: string): string =>
-    new Date(dateTime).toLocaleDateString('en-GB', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    new Date(dateTime).toLocaleDateString("en-GB", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
 
   // ------------------ Render ------------------
@@ -333,7 +335,8 @@ const EmployeeDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
           <p className="text-gray-400 mt-2">
-            Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
+            Welcome back,{" "}
+            {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
           </p>
         </div>
       </div>
@@ -344,7 +347,9 @@ const EmployeeDashboard = () => {
             <AppointmentList
               appointments={appointments}
               selectedAppointmentId={selectedAppointment?.id || null}
-              setSelectedAppointment={apt => setSelectedAppointment(apt as Appointment)}
+              setSelectedAppointment={(apt) =>
+                setSelectedAppointment(apt as Appointment)
+              }
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               loading={loading}
@@ -374,16 +379,16 @@ const EmployeeDashboard = () => {
                     setShowTimeLog(true);
                     setShowStatusUpdate(false);
                   }}
-                  disableTimeLog={selectedAppointment.status === 'CONFIRMED'}
+                  disableTimeLog={selectedAppointment.status === "CONFIRMED"}
                 />
                 {showStatusUpdate && (
                   <StatusUpdateModal
                     newStatus={newStatus}
                     setNewStatus={setNewStatus}
                     completionDescription={completionDescription}
-                    setCompletionDescription={desc => {
+                    setCompletionDescription={(desc) => {
                       setCompletionDescription(desc);
-                      if (newStatus === 'COMPLETED' && desc.trim()) {
+                      if (newStatus === "COMPLETED" && desc.trim()) {
                         setStatusTouched(false);
                       }
                     }}
@@ -392,11 +397,11 @@ const EmployeeDashboard = () => {
                       updateAppointmentStatus();
                     }}
                     loading={loading}
-                    setShowStatusUpdate={show => {
+                    setShowStatusUpdate={(show) => {
                       setShowStatusUpdate(show);
                       if (!show) {
-                        setNewStatus('');
-                        setCompletionDescription('');
+                        setNewStatus("");
+                        setCompletionDescription("");
                         setStatusTouched(false);
                       }
                     }}
@@ -408,7 +413,7 @@ const EmployeeDashboard = () => {
                   <TimeLogForm
                     timeLogForm={timeLogForm}
                     timeLogErrors={timeLogErrors}
-                    setTimeLogForm={form => {
+                    setTimeLogForm={(form) => {
                       setTimeLogForm(form);
                       if (timeLogTouched) validateTimeLog();
                     }}
@@ -439,21 +444,22 @@ const EmployeeDashboard = () => {
   );
 };
 
-
 export default EmployeeDashboard;
 
 // Add white clock icon for time input (works in Chromium browsers)
 // This is injected as a style tag for component-scoped effect
 // You can move this to a global CSS file if you prefer
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.innerHTML = `
   input[type="time"]::-webkit-calendar-picker-indicator,
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
   }
 `;
-if (typeof window !== 'undefined' && !document.getElementById('white-time-icon-style')) {
-  style.id = 'white-time-icon-style';
+if (
+  typeof window !== "undefined" &&
+  !document.getElementById("white-time-icon-style")
+) {
+  style.id = "white-time-icon-style";
   document.head.appendChild(style);
 }
-

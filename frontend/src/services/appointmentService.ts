@@ -5,7 +5,7 @@ const base = "/appointments";
 
 export interface AppointmentBookingRequest {
   vehicleId: string; // UUID as string
-  serviceOrModificationId: number;
+  serviceOrModificationId: string; // UUID as string
   serviceCenterId: string; // UUID as string
   appointmentType: AppointmentType;
   appointmentDate: string; // ISO format: "2025-10-30T14:00:00"

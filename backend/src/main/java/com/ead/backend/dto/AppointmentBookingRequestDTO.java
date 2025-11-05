@@ -15,7 +15,7 @@ public class AppointmentBookingRequestDTO {
     private UUID vehicleId;
 
     @NotNull(message = "Service/Modification ID is required")
-    private Long serviceOrModificationId;
+    private UUID serviceOrModificationId;
 
     @NotNull(message = "Service center ID is required")
     private UUID serviceCenterId;

@@ -2,7 +2,7 @@
 import api from "../util/apiUtils";
 
 export interface ServiceOrModificationDto {
-  id: number;
+  id: string; // UUID as string
   name: string;
   description: string;
   estimatedCost: number;
