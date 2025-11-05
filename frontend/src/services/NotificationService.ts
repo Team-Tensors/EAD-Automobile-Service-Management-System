@@ -27,7 +27,7 @@ class NotificationService {
     onError?: (error: any) => void
   ): EventSource {
     const token = this.getAuthToken();
-    const url = `${API_BASE_URL}/api/notifications/subscribe/${userId}?token=${token}`;
+    const url = `${API_BASE_URL}/notifications/subscribe/${userId}?token=${token}`;
 
     const eventSource = new EventSource(url);
 
@@ -67,7 +67,7 @@ class NotificationService {
   // Get all notifications for user
   async getUserNotifications(userId: number): Promise<Notification[]> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/user/${userId}`,
+      `${API_BASE_URL}/notifications/user/${userId}`,
       {
         method: "GET",
         headers: this.getAuthHeaders(),
@@ -87,7 +87,7 @@ class NotificationService {
   // Get unread notifications
   async getUnreadNotifications(userId: number): Promise<Notification[]> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/user/${userId}/unread`,
+      `${API_BASE_URL}/notifications/user/${userId}/unread`,
       {
         method: "GET",
         headers: this.getAuthHeaders(),
@@ -107,7 +107,7 @@ class NotificationService {
   // Get unread count
   async getUnreadCount(userId: number): Promise<number> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/user/${userId}/unread/count`,
+      `${API_BASE_URL}/notifications/user/${userId}/unread/count`,
       {
         method: "GET",
         headers: this.getAuthHeaders(),
@@ -127,7 +127,7 @@ class NotificationService {
   // Mark notification as read
   async markAsRead(notificationId: number): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/${notificationId}/read`,
+      `${API_BASE_URL}/notifications/${notificationId}/read`,
       {
         method: "PUT",
         headers: this.getAuthHeaders(),
@@ -145,7 +145,7 @@ class NotificationService {
   // Mark all notifications as read
   async markAllAsRead(userId: number): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/user/${userId}/read-all`,
+      `${API_BASE_URL}/notifications/user/${userId}/read-all`,
       {
         method: "PUT",
         headers: this.getAuthHeaders(),
@@ -163,7 +163,7 @@ class NotificationService {
   // Clear all notifications
   async clearAllNotifications(userId: number): Promise<void> {
     const response = await fetch(
-      `${API_BASE_URL}/api/notifications/user/${userId}`,
+      `${API_BASE_URL}/notifications/user/${userId}`,
       {
         method: "DELETE",
         headers: this.getAuthHeaders(),
