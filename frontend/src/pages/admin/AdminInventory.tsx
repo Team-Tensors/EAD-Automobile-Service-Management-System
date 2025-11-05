@@ -78,6 +78,9 @@ const AdminInventory = () => {
       );
     }
 
+    // Sort by quantity (lowest first) - important for low stock alerts
+    filtered = filtered.sort((a, b) => a.quantity - b.quantity);
+
     setFilteredItems(filtered);
     setCurrentPage(1); // Reset to first page when filters change
   }, [items, searchQuery, selectedCategory]);

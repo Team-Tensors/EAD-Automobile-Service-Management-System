@@ -53,30 +53,49 @@ const AuthenticatedNavbar = () => {
 
   // Define navigation tabs
   const navTabs: NavTab[] = [
-    { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    { name: "DASHBOARD", path: "/dashboard", icon: LayoutDashboard },
     {
-      name: "My Appointments",
+      name: "MY APPOINTMENTS",
       path: "/my-appointments",
       icon: Calendar,
       roles: ["CUSTOMER"],
     },
     {
-      name: "My Vehicles",
+      name: "MY VEHICLES",
       path: "/my-vehicles",
       icon: Car,
       roles: ["CUSTOMER"],
     },
     {
-      name: "Service Centers",
+      name: "SERVICE CENTERS",
       path: "/service-centers",
       icon: Navigation,
       roles: ["CUSTOMER"],
     },
     {
-      name: "Employee Inventory",
+      name: "INVENTORY",
       path: "/employee-inventory",
       icon: Navigation,
       roles: ["EMPLOYEE"],
+    },
+    // Admin tabs
+    {
+      name: "ANALYTICS",
+      path: "/admin/analytics",
+      icon: LayoutDashboard,
+      roles: ["ADMIN"],
+    },
+    {
+      name: "INVENTORY",
+      path: "/admin/inventory",
+      icon: Navigation,
+      roles: ["ADMIN"],
+    },
+    {
+      name: "NOTIFICATIONS",
+      path: "/admin/notifications",
+      icon: Calendar,
+      roles: ["ADMIN"],
     },
     // Add more tabs here as needed
   ];
@@ -99,11 +118,16 @@ const AuthenticatedNavbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pointer-events-auto">
         <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/dashboard" className="flex items-center space-x-2">
+          <Link 
+            to={user?.roles?.includes("ADMIN") ? "/admin" : "/dashboard"} 
+            className="flex items-center space-x-2"
+          >
             <span className="text-2xl font-bold text-white tracking-wider font-heading">
               DRIVE<span className="text-orange-600">CARE</span>
             </span>
-            <span className="text-xs text-gray-400 ml-2">{user?.roles.join(", ")}</span>
+            <span className="text-xs text-gray-400 ml-2">
+              {user?.roles?.includes("ADMIN") ? "ADMIN" : user?.roles.join(", ")}
+            </span>
           </Link>
 
           {/* Navigation Tabs */}
@@ -144,7 +168,7 @@ const AuthenticatedNavbar = () => {
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-35 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-50">
                   <Link
-                    to="/profile"
+                    to={user?.roles?.includes("ADMIN") ? "/admin/profile" : "/profile"}
                     onClick={() => setIsProfileDropdownOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
                   >
