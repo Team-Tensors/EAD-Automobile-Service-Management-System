@@ -5,7 +5,6 @@ import {
   Car, 
   AlertCircle, 
   CircleDashed,
-  MapPin,
   Search,
   X,
   UserPlus
@@ -304,6 +303,48 @@ const AdminDashboard = () => {
     setEmployees(mockEmployees);
   }, []);
 
+  useEffect(() => {
+    // Inject custom scrollbar styles
+    const existingStyle = document.getElementById("admin-dashboard-scrollbar-style");
+    if (!existingStyle) {
+      const style = document.createElement("style");
+      style.id = "admin-dashboard-scrollbar-style";
+      style.innerHTML = `
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: linear-gradient(180deg, #1f1f23 0%, #27272a 50%, #1f1f23 100%);
+          border-radius: 6px;
+          margin: 2px;
+          border: 1px solid #3f3f46;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #52525b 0%, #71717a 50%, #52525b 100%);
+          border-radius: 6px;
+          border: 1px solid #3f3f46;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #71717a 0%, #9ca3af 50%, #71717a 100%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar-corner {
+          background: #1f1f23;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Cleanup function to remove styles when component unmounts
+    return () => {
+      const styleElement = document.getElementById("admin-dashboard-scrollbar-style");
+      if (styleElement) {
+        styleElement.remove();
+      }
+    };
+  }, []);
+
   const getOngoingStatusBadge = (status?: string) => {
     switch(status) {
       case 'IN_PROGRESS':
@@ -357,189 +398,99 @@ const AdminDashboard = () => {
   );
 
   return (
-    <>
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <p className="text-primary-foreground/80 mt-1">
+              <p className="text-gray-400 mt-2">
                 Welcome back, {user?.firstName} {user?.lastName}!
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-primary-foreground/10 px-4 py-2 rounded-lg border border-primary-foreground/20">
-              <Calendar className="w-5 h-5" />
-              <span className="font-semibold">October 25, 2025</span>
+            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
+              <Calendar className="w-5 h-5 text-gray-400" />
+              <span className="font-semibold text-white">{new Date().toLocaleDateString()}</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-8">
-          {/* Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            
-            {/* Upcoming Services Section */}
-            <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-card-foreground flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-orange-600" />
-                  Upcoming Services
-                </h2>
-                <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
-                  {upcomingServices.length}
-                </span>
-              </div>
-
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {upcomingServices.map(service => (
-                  <div
-                    key={service.id}
-                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-orange-600/50 transition cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4 text-orange-600" />
-                        <p className="font-semibold text-card-foreground text-sm">{getVehicleDisplayName(service)}</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">{service.vehicleLicensePlate}</p>
-                    <p className="text-xs text-muted-foreground mb-2">{service.serviceTypeName}</p>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Customer: {service.customerName}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Scheduled: {formatDisplayDate(service.appointmentDate)}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-3">
-                      <User className="w-3 h-3 text-chart-2" />
-                      <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <span className="text-xs text-muted-foreground">{service.centerSlot}</span>
-                      <span className="px-2 py-1 bg-blue-500/20 text-blue-500 border border-blue-500/30 rounded-full text-xs font-semibold">
-                        SCHEDULED
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+        {/* Awaiting Assignment Section - Full Width */}
+        <div className="mb-8">
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                Awaiting Assignment
+              </h2>
+              <span className="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-sm font-bold border border-red-500/30 animate-pulse">
+                {unassignedServices.length}
+              </span>
             </div>
 
-            {/* Ongoing Services Section */}
-            <div className="bg-card rounded-lg shadow-md p-6 border border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-card-foreground flex items-center gap-2">
-                  <CircleDashed className="w-5 h-5 text-yellow-500" />
-                  Ongoing Services
-                </h2>
-                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-500 rounded-full text-sm font-bold border border-yellow-500/30">
-                  {ongoingServices.length}
-                </span>
+            {unassignedServices.length === 0 ? (
+              <div className="text-center py-12">
+                <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg">No services awaiting assignment</p>
+                <p className="text-gray-500 text-sm mt-2">All services have been assigned to employees</p>
               </div>
-
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {ongoingServices.map(service => (
-                  <div
-                    key={service.id}
-                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-yellow-500/50 transition cursor-pointer"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4 text-yellow-500" />
-                        <p className="font-semibold text-card-foreground text-sm">{getVehicleDisplayName(service)}</p>
-                      </div>
-                      {getOngoingStatusBadge(service.ongoingStatus)}
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">{service.vehicleLicensePlate}</p>
-                    <p className="text-xs text-muted-foreground mb-2">{service.serviceTypeName}</p>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Customer: {service.customerName}</p>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">Progress</span>
-                        <span className="text-xs font-semibold text-card-foreground">{service.progress}%</span>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2">
-                        <div 
-                          className="bg-yellow-500 h-2 rounded-full transition-all"
-                          style={{ width: `${service.progress}%` }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-3 h-3 text-chart-2" />
-                      <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <span className="text-xs text-muted-foreground">{service.centerSlot}</span>
-                      <span className="text-xs text-muted-foreground">Est: {service.estimatedDuration} min</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Unassigned Services Section */}
-            <div className="rounded-lg shadow-md p-6 border-2 border-red-500/30 bg-red-500/5">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-card-foreground flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-500" />
-                  Awaiting Assignment
-                </h2>
-                <span className="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-sm font-bold border border-red-500/30 animate-pulse">
-                  {unassignedServices.length}
-                </span>
-              </div>
-
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {unassignedServices.map(service => (
                   <div
                     key={service.id}
-                    className="p-4 mr-1 rounded-lg border-2 border-red-500/30 bg-card hover:border-red-500 transition"
+                    className="bg-zinc-800 rounded-lg border border-zinc-700 p-5 hover:border-red-500/50 transition-all duration-200 hover:shadow-lg"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4 text-red-500" />
-                        <p className="font-semibold text-card-foreground text-sm">{getVehicleDisplayName(service)}</p>
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                          <Car className="w-5 h-5 text-red-500" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white text-sm leading-tight">
+                            {getVehicleDisplayName(service)}
+                          </h3>
+                          <p className="text-xs text-gray-400 mt-1">{service.vehicleLicensePlate}</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-1 bg-red-500/20 text-red-500 border border-red-500/30 rounded-full text-xs font-semibold">
+                        PENDING
+                      </span>
+                    </div>
+
+                    {/* Service Info */}
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Service Type</p>
+                        <p className="text-sm text-white font-medium">{service.serviceTypeName}</p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">Customer</p>
+                          <p className="text-sm text-white">{service.customerName}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">Center</p>
+                          <p className="text-sm text-white">{service.serviceCenter}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">Scheduled Date</p>
+                        <p className="text-sm text-white">{formatDisplayDate(service.appointmentDate)}</p>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-1">{service.vehicleLicensePlate}</p>
-                    <p className="text-xs text-muted-foreground mb-2">{service.serviceTypeName}</p>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Customer: {service.customerName}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">Scheduled: {formatDisplayDate(service.appointmentDate)}</p>
-                    </div>
 
-                    <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="w-3 h-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">{service.serviceCenter}</p>
-                    </div>
-
+                    {/* Action Button */}
                     <button
                       onClick={() => handleAssignEmployee(service)}
-                      className="w-full bg-orange-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-700 transition text-sm flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-sm"
                     >
                       <UserPlus className="w-4 h-4" />
                       Assign Employee
@@ -547,59 +498,194 @@ const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
 
+        {/* Dashboard Grid - 2 Columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Upcoming Services Section */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-orange-600" />
+                Upcoming Services
+              </h2>
+              <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
+                {upcomingServices.length}
+              </span>
+            </div>
+
+            <div 
+              className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#71717a #27272a'
+              }}
+            >
+              {upcomingServices.map(service => (
+                <div
+                  key={service.id}
+                  className="p-4 mr-1 rounded-lg border-2 border-zinc-800 bg-zinc-800 hover:border-orange-600/50 transition cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Car className="w-4 h-4 text-orange-600" />
+                      <p className="font-semibold text-white text-sm">{getVehicleDisplayName(service)}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400 mb-1">{service.vehicleLicensePlate}</p>
+                  <p className="text-xs text-gray-400 mb-2">{service.serviceTypeName}</p>
+                  
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-3 h-3 text-gray-400" />
+                    <p className="text-xs text-gray-400">Customer: {service.customerName}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <p className="text-xs text-gray-400">Scheduled: {formatDisplayDate(service.appointmentDate)}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <User className="w-3 h-3 text-chart-2" />
+                    <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-zinc-700">
+                    <span className="text-xs text-gray-400">{service.centerSlot}</span>
+                    <span className="px-2 py-1 bg-blue-500/20 text-blue-500 border border-blue-500/30 rounded-full text-xs font-semibold">
+                      SCHEDULED
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ongoing Services Section */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <CircleDashed className="w-5 h-5 text-yellow-500" />
+                Ongoing Services
+              </h2>
+              <span className="px-3 py-1 bg-yellow-500/20 text-yellow-500 rounded-full text-sm font-bold border border-yellow-500/30">
+                {ongoingServices.length}
+              </span>
+            </div>
+
+            <div 
+              className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#71717a #27272a'
+              }}
+            >
+              {ongoingServices.map(service => (
+                <div
+                  key={service.id}
+                  className="p-4 mr-1 rounded-lg border-2 border-zinc-800 bg-zinc-800 hover:border-yellow-500/50 transition cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Car className="w-4 h-4 text-yellow-500" />
+                      <p className="font-semibold text-white text-sm">{getVehicleDisplayName(service)}</p>
+                    </div>
+                    {getOngoingStatusBadge(service.ongoingStatus)}
+                  </div>
+                  <p className="text-xs text-gray-400 mb-1">{service.vehicleLicensePlate}</p>
+                  <p className="text-xs text-gray-400 mb-2">{service.serviceTypeName}</p>
+                  
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-3 h-3 text-gray-400" />
+                    <p className="text-xs text-gray-400">Customer: {service.customerName}</p>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-gray-400">Progress</span>
+                      <span className="text-xs font-semibold text-white">{service.progress}%</span>
+                    </div>
+                    <div className="w-full bg-zinc-700 rounded-full h-2">
+                      <div 
+                        className="bg-yellow-500 h-2 rounded-full transition-all"
+                        style={{ width: `${service.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-2">
+                    <User className="w-3 h-3 text-chart-2" />
+                    <p className="text-xs text-chart-2 font-semibold">{service.assignedEmployeeName}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-zinc-700">
+                    <span className="text-xs text-gray-400">{service.centerSlot}</span>
+                    <span className="text-xs text-gray-400">Est: {service.estimatedDuration} min</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Employee Assignment Modal */}
       {showAssignModal && selectedService && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-border">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-zinc-800">
             {/* Modal Header */}
-            <div className="bg-primary text-primary-foreground p-6 border-b border-border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">Assign Employee</h3>
-                  <p className="text-sm text-primary-foreground/80">
-                    {getVehicleDisplayName(selectedService)} - {selectedService.serviceTypeName}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAssignModal(false);
-                    setSelectedService(null);
-                    setSearchEmployee('');
-                  }}
-                  className="text-primary-foreground hover:bg-primary-foreground/20 p-2 rounded-lg transition cursor-pointer"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Assign Employee</h3>
+                <p className="text-sm text-gray-400">
+                  {getVehicleDisplayName(selectedService)} - {selectedService.serviceTypeName}
+                </p>
               </div>
+              <button
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedService(null);
+                  setSearchEmployee('');
+                }}
+                className="text-white hover:bg-white/20 p-2 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
 
             {/* Search Bar */}
-            <div className="p-6 border-b border-border">
+            <div className="p-6 border-b border-zinc-800">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search by name or specialization..."
                   value={searchEmployee}
                   onChange={(e) => setSearchEmployee(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-secondary border border-border rounded-lg text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
             </div>
 
             {/* Employee List */}
-            <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto">
+            <div 
+              className="p-6 space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#71717a #27272a'
+              }}
+            >
               {filteredEmployees.map(employee => (
                 <div
                   key={employee.id}
                   className={`p-4 rounded-lg border-2 transition ${
                     employee.availability === 'available'
-                      ? 'border-border bg-secondary hover:border-orange-500'
-                      : 'border-border bg-secondary/50 opacity-60'
+                      ? 'border-zinc-700 bg-zinc-800 hover:border-orange-500'
+                      : 'border-zinc-700 bg-zinc-800/50 opacity-60'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -609,18 +695,18 @@ const AdminDashboard = () => {
                           <User className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold text-card-foreground">{employee.name}</p>
-                          <p className="text-xs text-muted-foreground">{employee.specialization}</p>
+                          <p className="font-semibold text-white">{employee.name}</p>
+                          <p className="text-xs text-gray-400">{employee.specialization}</p>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-4 ml-13">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Workload:</span>
-                          <span className="text-xs font-semibold text-card-foreground">{employee.currentWorkload} tasks</span>
+                          <span className="text-xs text-gray-400">Workload:</span>
+                          <span className="text-xs font-semibold text-white">{employee.currentWorkload} tasks</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">Rating:</span>
+                          <span className="text-xs text-gray-400">Rating:</span>
                           <span className="text-xs font-semibold text-yellow-500">★ {employee.rating}</span>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -650,14 +736,14 @@ const AdminDashboard = () => {
 
               {filteredEmployees.length === 0 && (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No employees found</p>
+                  <p className="text-gray-400">No employees found</p>
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
