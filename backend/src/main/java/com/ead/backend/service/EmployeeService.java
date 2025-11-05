@@ -84,16 +84,13 @@ public class EmployeeService {
             User user = a.getUser();
             UUID userId = user != null ? user.getId() : null;
             String userFullName = user != null ? user.getFullName() : null;
-            String address = user != null ? user.getAddress() : null;
             String phoneNumber = user != null ? user.getPhoneNumber() : null;
-            String email = user != null ? user.getEmail() : null;
 
             // Vehicle details
             Vehicle vehicle = a.getVehicle();
             UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
-            Integer year = vehicle != null ? vehicle.getYear() : null;
             String color = vehicle != null ? vehicle.getColor() : null;
             LocalDateTime lastServiceDate = vehicle != null ? vehicle.getLastServiceDate() : null;
             String licensePlate = vehicle != null ? vehicle.getLicensePlate() : null;
@@ -104,26 +101,16 @@ public class EmployeeService {
             UUID serviceOrModificationId = serviceOrModificationType != null ? serviceOrModificationType.getId() : null;
             String serviceOrModificationName = serviceOrModificationType != null ? serviceOrModificationType.getName() : null;
             String serviceOrModificationDescription = serviceOrModificationType != null ? serviceOrModificationType.getDescription() : null;
-            Double estimatedCost = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedCost() : null;
             Integer estimatedTimeMinutes = serviceOrModificationType != null ? serviceOrModificationType.getEstimatedTimeMinutes() : null;
-
-            // Assigned employee IDs
-            Set<UUID> assignedEmployeeIds = a.getAssignedEmployees()
-                    .stream()
-                    .map(User::getId)
-                    .collect(Collectors.toSet());
 
             return new AppointmentDTO(
                     a.getId(),
                     userId,
                     userFullName,
-                    address,
                     phoneNumber,
-                    email,
                     vehicleId,
                     brand,
                     model,
-                    year,
                     color,
                     lastServiceDate,
                     licensePlate,
@@ -131,12 +118,10 @@ public class EmployeeService {
                     serviceOrModificationId,
                     serviceOrModificationName,
                     serviceOrModificationDescription,
-                    estimatedCost,
                     estimatedTimeMinutes,
                     a.getAppointmentDate(),
                     a.getStatus(),
-                    a.getDescription(),
-                    assignedEmployeeIds
+                    a.getDescription()
             );
         }).toList();
     }

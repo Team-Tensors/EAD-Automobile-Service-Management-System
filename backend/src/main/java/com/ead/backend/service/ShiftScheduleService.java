@@ -12,7 +12,9 @@ import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.ShiftSchedulesRepository;
 import com.ead.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,11 +24,19 @@ public class ShiftScheduleService {
     private final AppointmentRepository appointmentRepository;
     private final ShiftSchedulesRepository shiftSchedulesRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
-    public ShiftScheduleService(AppointmentRepository appointmentRepository, ShiftSchedulesRepository shiftSchedulesRepository, UserRepository userRepository) {
+    public ShiftScheduleService(AppointmentRepository appointmentRepository,
+                                ShiftSchedulesRepository shiftSchedulesRepository,
+                                UserRepository userRepository,
+                                NotificationService notificationService,
+                                EmailService emailService) {
         this.appointmentRepository = appointmentRepository;
         this.shiftSchedulesRepository = shiftSchedulesRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.emailService = emailService;
     }
 
     public List<ShiftScheduleAppointmentsDTO> getPendingAppointments() {
@@ -80,14 +90,14 @@ public class ShiftScheduleService {
                 .collect(Collectors.toList());
     }
 
-    // TODO: Add transactional annotation to make sure ACID properties are maintained
     // TODO: Need to send Notification to Employee when assigned by Admin
-    // TODO: Need to send Notification to Employee when self-assigned by Employee
     /**
      * Assign an employee to an appointment (self-assignment by an employee).
      * Validates caller identity, role, and shift conflicts. Creates a ShiftSchedules record
      * and adds the employee to appointment.assignedEmployees.
+     * Sends notification and email to the employee after successful assignment.
      */
+    @Transactional
     public void selfAssignEmployeeToAppointment(SelfShiftScheduleRequestDTO dto, String callerEmail) {
         if (dto == null) throw new RuntimeException("INVALID_REQUEST");
 
@@ -127,11 +137,58 @@ public class ShiftScheduleService {
         shiftSchedulesRepository.save(shift);
         appointment.setStatus("CONFIRMED");
 
-        // Add employee to appointment assignedEmployees if not already present
         boolean alreadyAssigned = appointment.getAssignedEmployees().stream().anyMatch(u -> u.getId().equals(employee.getId()));
         if (!alreadyAssigned) {
             appointment.getAssignedEmployees().add(employee);
         }
         appointmentRepository.save(appointment);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+        String formattedDate = startTime.format(dateFormatter);
+        String formattedTime = startTime.format(timeFormatter);
+        String serviceName = appointment.getServiceOrModification().getName();
+        String customerName = appointment.getUser().getFullName();
+        String bookingId = appointment.getId().toString();
+        String vehicleInfo = String.format("%s %s (%s)",
+            appointment.getVehicle().getBrand(),
+            appointment.getVehicle().getModel(),
+            appointment.getVehicle().getLicensePlate()
+        );
+
+        String notificationMessage = String.format(
+                "You have successfully self-assigned to appointment on %s at %s for %s (Customer: %s)",
+                formattedDate,
+                formattedTime,
+                serviceName,
+                customerName
+        );
+
+        notificationService.sendNotification(
+                employee.getId(),
+                "APPOINTMENT_SELF_ASSIGNED",
+                notificationMessage,
+                new java.util.HashMap<String, Object>() {{
+                    put("appointmentId", appointmentId.toString());
+                    put("serviceName", serviceName);
+                    put("appointmentDate", formattedDate);
+                    put("appointmentTime", formattedTime);
+                    put("customerName", customerName);
+                    put("estimatedDuration", estimatedDurationMinutes);
+                    put("vehicleInfo", vehicleInfo);
+                    put("bookingId", bookingId);
+                }}
+        );
+
+        emailService.sendEmployeeAssignmentEmail(
+                employee.getEmail(),
+                employee.getFullName(),
+                bookingId,
+                formattedDate,
+                formattedTime,
+                serviceName,
+                vehicleInfo,
+                customerName
+        );
     }
 }

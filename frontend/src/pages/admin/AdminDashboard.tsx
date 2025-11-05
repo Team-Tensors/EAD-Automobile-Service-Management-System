@@ -359,8 +359,8 @@ const AdminDashboard = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <header className="bg-primary text-primary-foreground shadow-lg border-b border-border mt-0">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -377,7 +377,7 @@ const AdminDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-0 py-8">
           {/* Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             
@@ -385,7 +385,7 @@ const AdminDashboard = () => {
             <div className="bg-card rounded-lg shadow-md p-6 border border-border">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-card-foreground flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-orange-500" />
+                  <Calendar className="w-5 h-5 text-orange-600" />
                   Upcoming Services
                 </h2>
                 <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-sm font-bold border border-orange-500/30">
@@ -397,11 +397,11 @@ const AdminDashboard = () => {
                 {upcomingServices.map(service => (
                   <div
                     key={service.id}
-                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-orange-500/50 transition cursor-pointer"
+                    className="p-4 mr-1 rounded-lg border-2 border-border bg-secondary hover:border-orange-600/50 transition cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4 text-orange-500" />
+                        <Car className="w-4 h-4 text-orange-600" />
                         <p className="font-semibold text-card-foreground text-sm">{getVehicleDisplayName(service)}</p>
                       </div>
                     </div>
@@ -539,7 +539,7 @@ const AdminDashboard = () => {
 
                     <button
                       onClick={() => handleAssignEmployee(service)}
-                      className="w-full bg-orange-500 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-600 transition text-sm flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full bg-orange-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-orange-700 transition text-sm flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <UserPlus className="w-4 h-4" />
                       Assign Employee
