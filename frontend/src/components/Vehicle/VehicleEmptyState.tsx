@@ -1,4 +1,3 @@
-// src/components/vehicles/VehicleEmptyState.tsx
 import React from 'react';
 import { Car, Plus } from 'lucide-react';
 

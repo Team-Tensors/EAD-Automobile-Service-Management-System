@@ -2,10 +2,10 @@ import React from "react";
 import { Edit, Trash2 } from "lucide-react";
 
 interface Vehicle {
-  id: string; // UUID as string
+  id: string; 
   brand: string;
   model: string;
-  year: number; // Changed from string to number
+  year: number; 
   color: string;
   licensePlate: string;
   lastServiceDate?: string;
