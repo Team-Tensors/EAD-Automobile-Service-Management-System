@@ -37,7 +37,7 @@ public class ChatbotService {
 
     public String getChatResponse(String userMessage, String userIp) {
         try {
-            String intent = detectIntentFromLLM(userMessage);
+            String intent = detectIntentFromLLM(userMessage, userIp);
 
             String reply = switch (intent) {
                 case "appointment_info" -> handleAppointmentInfo(userMessage);
@@ -55,16 +55,38 @@ public class ChatbotService {
         }
     }
 
-    private String detectIntentFromLLM(String message) {
+    private String detectIntentFromLLM(String message, String userIp) {
+
+        List<Map<String, String>> history = getConversationHistory(userIp);
+
+        StringBuilder contextBuilder = new StringBuilder();
+        for (Map<String, String> msg : history) {
+            contextBuilder.append(msg.get("role")).append(": ").append(msg.get("content")).append("\n");
+        }
+
+        String contextSummary = contextBuilder.length() > 800 ?
+                contextBuilder.substring(contextBuilder.length() - 800) :
+                contextBuilder.toString();
+
         Map<String, Object> body = Map.of(
                 "model", "llama-3.1-8b-instant",
-                "messages", new Object[]{
+                "messages", List.of(
                         Map.of("role", "system", "content",
-                                "You are a classifier that determines the user's intent in an automobile service chatbot. "
-                                        + "Possible intents: 'general', 'appointment_info', 'book_appointment'. "
-                                        + "Respond ONLY with one of these words — nothing else."),
-                        Map.of("role", "user", "content", message)
-                }
+                                """
+                                You are an intent classifier for DriveCare automobile service chatbot.
+                                Use the conversation history and user’s latest message to determine the user's intent.
+                                Possible intents:
+                                1. "general" — small talk, greetings, or unrelated queries.
+                                2. "appointment_info" — when asking for appointment details, available times, or current bookings.
+                                3. "book_appointment" — when trying to book, confirm, or modify an appointment.
+                                Consider context like when the user just says "Friday" or "tomorrow" after discussing booking — 
+                                this still means they are booking or checking availability.
+                                Respond ONLY with one of these words: general, appointment_info, book_appointment.
+                                """),
+                        Map.of("role", "user", "content",
+                                "Conversation so far:\n" + contextSummary +
+                                        "\nUser's latest message: " + message)
+                )
         );
 
         Map<?, ?> response = webClient.post()
@@ -82,10 +104,12 @@ public class ChatbotService {
 
         if (intent == null) return "general";
         intent = intent.trim().toLowerCase();
+
         if (intent.contains("book_appointment")) return "book_appointment";
         if (intent.contains("appointment_info") || intent.contains("available")) return "appointment_info";
         return "general";
     }
+
 
     private String handleGeneralConversation(String userMessage, String userIp) {
         List<Map<String, String>> messages = new ArrayList<>();
