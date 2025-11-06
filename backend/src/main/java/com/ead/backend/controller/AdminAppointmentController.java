@@ -1,10 +1,14 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.dto.AdminAppointmentDTO;
+import com.ead.backend.dto.AdminEmployeeCenterDTO;
 import com.ead.backend.dto.EmployeeDTO;
 import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.entity.User;
+import com.ead.backend.service.AdminService;
 import com.ead.backend.service.AppointmentService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,10 +21,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/appointments")
+@AllArgsConstructor
 public class AdminAppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+    private final AdminService adminService;
 
     // ===================================================================
     // 1. ADMIN: Get all upcoming appointments
@@ -74,11 +80,23 @@ public class AdminAppointmentController {
     // ===================================================================
     @GetMapping("/employees")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
-        List<EmployeeDTO> employees = appointmentService.getAllEmployees();
+    public ResponseEntity<List<AdminEmployeeCenterDTO>> getAllEmployees() {
+        List<AdminEmployeeCenterDTO> employees = adminService.getAllEmployeesWithServiceCenter();
         return ResponseEntity.ok(employees);
     }
 
+    @PostMapping("/assign-employee")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> assignEmployeeToServiceCenter(
+            @RequestParam UUID employeeId,
+            @RequestParam UUID serviceCenterId) {
+        try {
+            adminService.assignEmployeeToServiceCenter(employeeId, serviceCenterId);
+            return ResponseEntity.ok("Employee assigned to Service Center successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     // ===================================================================
     // HELPER: Convert Appointment to AdminAppointmentDTO
     // ===================================================================
