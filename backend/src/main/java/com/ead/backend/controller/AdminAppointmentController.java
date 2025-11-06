@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/appointments")
-@CrossOrigin(origins = "*")
 public class AdminAppointmentController {
 
     @Autowired
