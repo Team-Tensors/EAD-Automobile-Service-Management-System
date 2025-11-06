@@ -62,7 +62,7 @@ export interface Appointment {
 
 // Employee interface (for assignment functionality)
 export interface Employee {
-  id: number;
+  id: string; // UUID from backend
   name: string;
   email: string;
   specialization: string;
@@ -74,7 +74,7 @@ export interface Employee {
 
 // Extended Admin Service view (combines Appointment with Vehicle and ServiceType details)
 export interface AdminService {
-  id: number;
+  id: string; // UUID from backend
   
   // Vehicle information
   vehicleBrand: string;
