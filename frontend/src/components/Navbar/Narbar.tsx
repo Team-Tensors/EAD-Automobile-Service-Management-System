@@ -37,7 +37,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-3 sm:top-6 left-0 right-0 z-50 pointer-events-none">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-0 pointer-events-auto">
+      <div className="max-w-[calc(80rem+12px)] mx-auto px-2 sm:px-4 lg:px-0 pointer-events-auto">
         <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Logo */}
