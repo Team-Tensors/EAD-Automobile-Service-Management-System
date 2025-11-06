@@ -112,6 +112,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["ADMIN"],
     },
+    {
+      name: "EMPLOYEES",
+      path: "/admin/employees",
+      icon: User,
+      roles: ["ADMIN"],
+    },
     // {
     //   name: "NOTIFICATIONS",
     //   path: "/admin/notifications",
