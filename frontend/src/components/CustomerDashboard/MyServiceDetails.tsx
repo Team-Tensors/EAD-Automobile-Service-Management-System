@@ -1,5 +1,6 @@
 import { MapPin, Clock, User, Download } from "lucide-react";
 import type { Service, ServiceStatus } from "../../types/myService";
+import { ServiceLocationMap } from "./ServiceLocationMap";
 
 interface MyServiceDetailsProps {
   service: Service;
@@ -103,7 +104,9 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <MapPin className="w-5 h-5 text-orange-500" />
             <div>
               <p className="text-xs text-gray-400">Service Center</p>
-              <p className="font-semibold text-white">{service.serviceCenter}</p>
+              <p className="font-semibold text-white">
+                {service.serviceCenter}
+              </p>
             </div>
           </div>
 
@@ -112,7 +115,9 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <User className="w-5 h-5 text-orange-500" />
             <div>
               <p className="text-xs text-gray-400">Assigned Employee</p>
-              <p className="font-semibold text-white">{service.assignedEmployee}</p>
+              <p className="font-semibold text-white">
+                {service.assignedEmployee}
+              </p>
             </div>
           </div>
 
@@ -158,8 +163,13 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
         </div>
       </div>
 
-      {/* Map Placeholder */}
-      {showMap && (
+      {/* Map */}
+      {showMap && service.serviceCenterLocation && (
+        <ServiceLocationMap location={service.serviceCenterLocation} />
+      )}
+
+      {/* Fallback if no location data */}
+      {showMap && !service.serviceCenterLocation && (
         <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg p-6 border border-zinc-800">
           <h3 className="text-lg font-bold text-white mb-4">
             Service Center Location
@@ -168,7 +178,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <div className="text-center">
               <MapPin className="w-12 h-12 text-orange-500 mx-auto mb-2" />
               <p className="text-gray-400">
-                Map integration with Google Maps / Leaflet
+                Location information not available
               </p>
               <p className="text-sm text-gray-400 mt-2">
                 {service.serviceCenter}

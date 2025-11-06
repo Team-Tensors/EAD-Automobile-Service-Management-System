@@ -1,5 +1,6 @@
 import type { DetailedAppointment } from "@/services/appointmentService";
 import { vehicleService } from "@/services/vehicleService";
+import { fetchServiceCenters } from "@/services/serviceCenterService";
 
 /* ---------- 4 possible statuses ---------- */
 export type ServiceStatus =
@@ -18,6 +19,13 @@ export interface Service {
   estimatedCompletion: string;
   assignedEmployee: string;
   serviceCenter: string;
+  serviceCenterLocation?: {
+    name: string;
+    address: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 /* ---------- Mapping from the detailed backend response ---------- */
@@ -32,7 +40,7 @@ export const mapDetailedToService = async (
   if (!vehicleName || !licensePlate) {
     try {
       const vehicles = await vehicleService.list(); // all user vehicles
-      const match = vehicles.find(v => v.id === detailed.vehicleId);
+      const match = vehicles.find((v) => v.id === detailed.vehicleId);
       if (match) {
         vehicleName = `${match.brand} ${match.model}`;
         licensePlate = match.licensePlate;
@@ -40,6 +48,26 @@ export const mapDetailedToService = async (
     } catch (err) {
       console.error("Failed to fetch vehicles:", err);
     }
+  }
+
+  // ---- Fetch service center location data ----
+  let serviceCenterLocation;
+  try {
+    const serviceCenters = await fetchServiceCenters();
+    const matchingCenter = serviceCenters.find(
+      (center) => center.name === detailed.serviceCenter
+    );
+    if (matchingCenter) {
+      serviceCenterLocation = {
+        name: matchingCenter.name,
+        address: matchingCenter.address,
+        city: matchingCenter.city,
+        latitude: matchingCenter.latitude,
+        longitude: matchingCenter.longitude,
+      };
+    }
+  } catch (err) {
+    console.error("Failed to fetch service center location:", err);
   }
 
   // ---- Map raw DB status to the UI status ----
@@ -71,5 +99,6 @@ export const mapDetailedToService = async (
     estimatedCompletion: detailed.estimatedCompletion ?? "TBD",
     assignedEmployee: detailed.assignedEmployee ?? "Not Assigned",
     serviceCenter: detailed.serviceCenter ?? "TBD",
+    serviceCenterLocation,
   };
 };
