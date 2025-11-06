@@ -23,6 +23,9 @@ interface EmployeeDTO {
   email: string;
   fullName: string;
   phoneNumber: string;
+  serviceCenterId?: number;
+  serviceCenterName?: string;
+  totalHoursWorked?: number;
 }
 
 /**
@@ -114,9 +117,30 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
       currentWorkload: 0, // Default value - not provided by backend
       rating: 4.5, // Default value - not provided by backend
       phoneNumber: dto.phoneNumber || '',
+      serviceCenterId: dto.serviceCenterId,
+      serviceCenterName: dto.serviceCenterName || 'Unassigned',
+      totalHoursWorked: dto.totalHoursWorked || 0,
     }));
   } catch (error) {
     console.error('Error fetching employees:', error);
+    throw error;
+  }
+};
+
+/**
+ * Assign employee to a service center
+ */
+export const assignEmployeeToCenter = async (
+  employeeId: string,
+  serviceCenterId: number
+): Promise<Employee> => {
+  try {
+    const response = await api.post(`/admin/employees/${employeeId}/assign-center`, {
+      serviceCenterId
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error assigning employee to center:', error);
     throw error;
   }
 };
