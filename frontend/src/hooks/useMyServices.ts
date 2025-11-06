@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { appointmentService } from "@/services/appointmentService";
-import { mapDetailedToService } from "@/types/myService";   // <-- NEW
+import { mapDetailedToService } from "@/types/myService"; // <-- NEW
 import type { Service } from "@/types/myService";
 
 export const useMyServices = () => {
@@ -11,11 +11,16 @@ export const useMyServices = () => {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const detailedAppointments = await appointmentService.getMyDetailedAppointments();
+        const detailedAppointments =
+          await appointmentService.getMyDetailedAppointments();
         const mapped = await Promise.all(
           detailedAppointments.map(mapDetailedToService)
         );
-        setServices(mapped);
+        // Filter out cancelled appointments
+        const activeServices = mapped.filter(
+          (service) => service.status !== "cancelled"
+        );
+        setServices(activeServices);
       } catch (err) {
         console.error("Failed to fetch services:", err);
         setServices([]);
@@ -25,6 +30,26 @@ export const useMyServices = () => {
     };
 
     fetchServices();
+
+    // Poll for updates every 30 seconds
+    const intervalId = setInterval(async () => {
+      try {
+        const detailedAppointments =
+          await appointmentService.getMyDetailedAppointments();
+        const mapped = await Promise.all(
+          detailedAppointments.map(mapDetailedToService)
+        );
+        const activeServices = mapped.filter(
+          (service) => service.status !== "cancelled"
+        );
+        setServices(activeServices);
+      } catch (err) {
+        console.error("Failed to refresh services:", err);
+      }
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   return { services, loading };
