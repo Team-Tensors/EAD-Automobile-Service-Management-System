@@ -393,6 +393,12 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <div className="flex items-center divide-x divide-gray-500 text-gray-400">
               <p className="pr-2">{service.serviceType}</p>
               <p className="pl-2">{formatDate(service.startDate)}</p>
+              <p className="pl-2">
+                {new Date(service.startDate).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
             </div>
           </div>
           <span
