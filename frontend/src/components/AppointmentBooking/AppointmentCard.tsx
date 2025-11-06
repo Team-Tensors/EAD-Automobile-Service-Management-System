@@ -15,9 +15,6 @@ export const AppointmentCard = ({
   onCancel,
   getStatusColor,
 }: Props) => {
-  // Debug logging
-  console.log("AppointmentCard received appointment:", appointment);
-
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -91,12 +88,12 @@ export const AppointmentCard = ({
             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 flex-shrink-0" />
             <span>{formatTime(appointment.date)}</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 flex-shrink-0" />
-            <span className="truncate">
-              {appointment.serviceCenter || "Service Center Not Available"}
-            </span>
-          </div>
+          {appointment.serviceCenter && (
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 flex-shrink-0" />
+              <span className="truncate">{appointment.serviceCenter}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
