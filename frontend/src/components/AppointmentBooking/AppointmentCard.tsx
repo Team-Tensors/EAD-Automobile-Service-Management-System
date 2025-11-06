@@ -1,4 +1,4 @@
-import { Calendar, Car, Clock, Package, Wrench } from "lucide-react";
+import { Calendar, Car, Clock, Package, Wrench, MapPin } from "lucide-react";
 import type { AppointmentSummary } from "@/types/appointment";
 import { AppointmentTypeValues } from "@/types/appointment";
 
@@ -88,6 +88,12 @@ export const AppointmentCard = ({
             <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 flex-shrink-0" />
             <span>{formatTime(appointment.date)}</span>
           </div>
+          {appointment.serviceCenter && (
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 flex-shrink-0" />
+              <span className="truncate">{appointment.serviceCenter}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -93,6 +93,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["EMPLOYEE"],
     },
+    {
+      name: "SHIFT SCHEDULING",
+      path: "/shift-scheduling",
+      icon: Calendar,
+      roles: ["EMPLOYEE"],
+    },
     // Admin tabs
     {
       name: "DASHBOARD",

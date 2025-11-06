@@ -20,6 +20,8 @@ export interface Service {
   estimatedCompletion: string;
   assignedEmployee: string;
   serviceCenter: string;
+  actualStartTime?: string | null; // Actual service start time from database
+  actualEndTime?: string | null;   // Actual service end time from database
   serviceCenterLocation?: {
     name: string;
     address: string;
@@ -104,6 +106,8 @@ export const mapDetailedToService = async (
     estimatedCompletion: detailed.estimatedCompletion ?? "TBD",
     assignedEmployee: detailed.assignedEmployee ?? "Not Assigned",
     serviceCenter: detailed.serviceCenter ?? "TBD",
+    actualStartTime: detailed.startTime ?? null,
+    actualEndTime: detailed.endTime ?? null,
     serviceCenterLocation,
   };
 };

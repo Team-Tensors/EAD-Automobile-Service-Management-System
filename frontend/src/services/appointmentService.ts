@@ -43,6 +43,8 @@ export interface DetailedAppointment {
   serviceCenter: string;
   assignedEmployee: string;
   estimatedCompletion: string;
+  startTime?: string | null; // Actual service start time from database
+  endTime?: string | null;   // Actual service end time from database
 }
 
 // New interface for slot availability
