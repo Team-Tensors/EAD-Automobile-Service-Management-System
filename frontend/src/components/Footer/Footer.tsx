@@ -33,7 +33,7 @@ const Footer = () => {
                 placeholder="ENTER YOUR MAIL"
                 className="flex-1 bg-black/50 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 text-xs uppercase focus:outline-none focus:border-orange-500"
               />
-              <button title="button" className="bg-orange-600 hover:bg-orange-700 transition-colors px-4 py-2 flex items-center justify-center">
+              <button title="send" className="bg-orange-600 hover:bg-orange-700 transition-colors px-4 py-2 flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-white"
                   fill="currentColor"
