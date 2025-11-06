@@ -7,7 +7,7 @@ import { serviceCenterService } from "@/services/serviceCenterService";
 import type { ServiceCenter } from "@/types/serviceCenter";
 
 // Fix Leaflet default icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -91,14 +91,14 @@ export const ServiceCentersMap = () => {
                       <p className="text-gray-600">{center.city}</p>
                     </div>
                   </div>
-                  {center.contactNumber && (
+                  {center.phone && (
                     <div className="flex items-center gap-2">
                       <Phone className="w-4 h-4 text-gray-600" />
                       <a
-                        href={`tel:${center.contactNumber}`}
+                        href={`tel:${center.phone}`}
                         className="text-blue-600 hover:underline"
                       >
-                        {center.contactNumber}
+                        {center.phone}
                       </a>
                     </div>
                   )}
