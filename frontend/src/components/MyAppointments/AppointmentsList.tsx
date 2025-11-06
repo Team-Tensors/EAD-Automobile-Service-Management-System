@@ -19,6 +19,7 @@ export const AppointmentsList = ({
   cancellingId,
   getStatusColor,
 }: Props) => {
+  // Filter by date if selected
   const filtered = selectedDate
     ? appointments.filter((a) => {
         const d = new Date(a.date);
@@ -30,6 +31,15 @@ export const AppointmentsList = ({
       })
     : appointments;
 
+  // Sort appointments by date (today to future)
+  const sorted = [...filtered].sort((a, b) => {
+    // Sort by date (earliest/soonest first - today, tomorrow, future)
+    const aDate = new Date(a.date).getTime();
+    const bDate = new Date(b.date).getTime();
+    
+    return aDate - bDate; // Ascending order: today -> tomorrow -> future
+  });
+
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-US", {
       year: "numeric",
@@ -37,7 +47,7 @@ export const AppointmentsList = ({
       day: "numeric",
     });
 
-  if (filtered.length === 0) {
+  if (sorted.length === 0) {
     return (
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-12 text-center">
         <Calendar className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -73,7 +83,7 @@ export const AppointmentsList = ({
                   Showing appointments for {formatDate(selectedDate)}
                 </p>
                 <p className="text-orange-300 text-xs sm:text-sm">
-                  {filtered.length} appointment(s) found
+                  {sorted.length} appointment(s) found
                 </p>
               </div>
             </div>
@@ -87,7 +97,7 @@ export const AppointmentsList = ({
         </div>
       )}
 
-      {filtered.map((apt) => (
+      {sorted.map((apt) => (
         <AppointmentCard
           key={apt.id}
           appointment={apt}
