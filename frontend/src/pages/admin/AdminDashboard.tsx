@@ -466,48 +466,24 @@ const AdminDashboard = () => {
               {filteredEmployees.map(employee => (
                 <div
                   key={employee.id}
-                  className={`p-4 rounded-lg border transition ${
-                    employee.availability === 'available'
-                      ? 'border-zinc-700 bg-zinc-800 hover:border-orange-500'
-                      : 'border-zinc-700 bg-zinc-800/50 opacity-60'
-                  }`}
+                  className="p-4 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-orange-500 transition"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-orange-500" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white">{employee.name}</p>
-                          <p className="text-xs text-gray-400">{employee.specialization}</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                        <User className="w-5 h-5 text-orange-500" />
                       </div>
-                      
-                      <div className="flex items-center gap-4 ml-13">
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-400">Workload:</span>
-                          <span className="text-xs font-semibold text-white">{employee.currentWorkload} tasks</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-400">Rating:</span>
-                          <span className="text-xs font-semibold text-orange-500">★ {employee.rating}</span>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          employee.availability === 'available'
-                            ? 'bg-green-500/20 text-green-500 border border-green-500/30'
-                            : 'bg-red-500/20 text-red-500 border border-red-500/30'
-                        }`}>
-                          {employee.availability.toUpperCase()}
-                        </span>
+                      <div>
+                        <p className="font-semibold text-white">{employee.name}</p>
+                        <p className="text-xs text-gray-400">{employee.specialization}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => assignEmployeeToService(employee)}
-                      disabled={employee.availability === 'busy' || isAssigning}
+                      disabled={isAssigning}
                       className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
-                        employee.availability === 'available' && !isAssigning
+                        !isAssigning
                           ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
                           : 'bg-zinc-600 text-gray-400 cursor-not-allowed'
                       }`}
