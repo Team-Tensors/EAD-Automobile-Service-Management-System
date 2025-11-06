@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 
 @Data
 public class ChatCenterLocationDTO {
-    private BigDecimal latitude;
-    private BigDecimal longitude;
+    private double latitude;
+    private double longitude;
 }

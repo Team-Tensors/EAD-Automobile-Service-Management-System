@@ -1,7 +1,7 @@
 package com.ead.backend.controller;
 
-import com.ead.backend.service.ChatbotService;
 import com.ead.backend.dto.ChatRequestDTO;
+import com.ead.backend.service.ChatbotService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +22,9 @@ public class ChatBotController {
     public String getChatBotMessage(@RequestBody ChatRequestDTO chatRequest, HttpServletRequest request) {
         String clientIp = getClientIp(request);
         log.info("Client IP: {}", clientIp);
+        log.info("===================================================================================");
+        log.info("Chat Request: {}", chatRequest);
+        log.info("===================================================================================");
         return chatBotService.getChatResponse(chatRequest.getMessage(), clientIp, chatRequest.getLocationDTO());
     }
 }
