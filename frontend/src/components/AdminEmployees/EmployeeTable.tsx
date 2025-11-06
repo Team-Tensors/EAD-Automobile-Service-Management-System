@@ -9,17 +9,17 @@ interface EmployeeTableProps {
   serviceCenters: ServiceCenter[];
   isLoading: boolean;
   searchQuery: string;
-  filterCenter: 'all' | number;
+  filterCenter: 'all' | string;
   sortField: SortField;
   sortOrder: SortOrder;
   editingEmployeeId: string | null;
-  selectedCenterId: number | null;
+  selectedCenterId: string | null;
   isAssigning: boolean;
   onSort: (field: SortField) => void;
-  onEdit: (employeeId: string, currentCenterId?: number) => void;
+  onEdit: (employeeId: string, currentCenterId?: string) => void;
   onSave: (employeeId: string) => void;
   onCancel: () => void;
-  onCenterChange: (centerId: number) => void;
+  onCenterChange: (centerId: string) => void;
 }
 
 const EmployeeTable = ({

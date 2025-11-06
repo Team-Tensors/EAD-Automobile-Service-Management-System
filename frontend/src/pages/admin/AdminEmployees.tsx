@@ -21,11 +21,11 @@ const AdminEmployees = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [filterCenter, setFilterCenter] = useState<'all' | number>('all');
+  const [filterCenter, setFilterCenter] = useState<'all' | string>('all');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(null);
-  const [selectedCenterId, setSelectedCenterId] = useState<number | null>(null);
+  const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null);
   const [isAssigning, setIsAssigning] = useState(false);
 
   // Fetch employees and service centers on component mount
@@ -73,7 +73,9 @@ const AdminEmployees = () => {
     }
 
     // Apply center filter
-    if (filterCenter !== 'all') {
+    if (filterCenter === 'unassigned') {
+      filtered = filtered.filter(emp => !emp.serviceCenterId);
+    } else if (filterCenter !== 'all') {
       filtered = filtered.filter(emp => emp.serviceCenterId === filterCenter);
     }
 
@@ -118,21 +120,21 @@ const AdminEmployees = () => {
   };
 
   // Handle edit employee center
-  const handleEditCenter = (employeeId: string, currentCenterId?: number) => {
+  const handleEditCenter = (employeeId: string, currentCenterId?: string) => {
     setEditingEmployeeId(employeeId);
     setSelectedCenterId(currentCenterId || null);
   };
 
   // Handle save center assignment
   const handleSaveCenter = async (employeeId: string) => {
-    if (selectedCenterId === null) {
+    if (!selectedCenterId) {
       toast.error('Please select a service center');
       return;
     }
 
     try {
       setIsAssigning(true);
-      await assignEmployeeToCenter(employeeId, selectedCenterId);
+      const message = await assignEmployeeToCenter(employeeId, selectedCenterId);
       
       // Update local state
       setEmployees(prev => prev.map(emp => 
@@ -145,12 +147,14 @@ const AdminEmployees = () => {
           : emp
       ));
       
-      toast.success('Employee center updated successfully');
+      // Show success toast with backend message
+      toast.success(message || 'Employee assigned to service center successfully');
       setEditingEmployeeId(null);
       setSelectedCenterId(null);
     } catch (error) {
-      console.error('Error updating employee center:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update employee center');
+      console.error('Error assigning employee to center:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to assign employee to service center';
+      toast.error(errorMsg);
     } finally {
       setIsAssigning(false);
     }

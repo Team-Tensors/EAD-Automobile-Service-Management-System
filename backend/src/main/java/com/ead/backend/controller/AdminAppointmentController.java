@@ -85,6 +85,18 @@ public class AdminAppointmentController {
         return ResponseEntity.ok(employees);
     }
 
+    @PostMapping("/assign-employee")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> assignEmployeeToServiceCenter(
+            @RequestParam UUID employeeId,
+            @RequestParam UUID serviceCenterId) {
+        try {
+            adminService.assignEmployeeToServiceCenter(employeeId, serviceCenterId);
+            return ResponseEntity.ok("Employee assigned to Service Center successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     // ===================================================================
     // HELPER: Convert Appointment to AdminAppointmentDTO
     // ===================================================================

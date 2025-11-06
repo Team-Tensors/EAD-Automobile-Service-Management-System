@@ -6,12 +6,12 @@ interface EmployeeTableRowProps {
   employee: Employee;
   serviceCenters: ServiceCenter[];
   isEditing: boolean;
-  selectedCenterId: number | null;
+  selectedCenterId: string | null;
   isAssigning: boolean;
-  onEdit: (employeeId: string, currentCenterId?: number) => void;
+  onEdit: (employeeId: string, currentCenterId?: string) => void;
   onSave: (employeeId: string) => void;
   onCancel: () => void;
-  onCenterChange: (centerId: number) => void;
+  onCenterChange: (centerId: string) => void;
 }
 
 const EmployeeTableRow = ({
@@ -53,7 +53,7 @@ const EmployeeTableRow = ({
         {isEditing ? (
           <select
             value={selectedCenterId || ''}
-            onChange={(e) => onCenterChange(Number(e.target.value))}
+            onChange={(e) => onCenterChange(e.target.value)}
             className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             disabled={isAssigning}
           >

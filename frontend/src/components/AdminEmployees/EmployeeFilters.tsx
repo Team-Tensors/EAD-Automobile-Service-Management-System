@@ -4,8 +4,8 @@ import type { ServiceCenter } from '@/types/serviceCenter';
 interface EmployeeFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  filterCenter: 'all' | number;
-  setFilterCenter: (center: 'all' | number) => void;
+  filterCenter: 'all' | string;
+  setFilterCenter: (center: 'all' | string) => void;
   serviceCenters: ServiceCenter[];
 }
 
@@ -36,11 +36,11 @@ const EmployeeFilters = ({
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <select
             value={filterCenter}
-            onChange={(e) => setFilterCenter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            onChange={(e) => setFilterCenter(e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none cursor-pointer"
           >
             <option value="all">All Centers</option>
-            <option value="0">Unassigned</option>
+            <option value="unassigned">Unassigned</option>
             {serviceCenters.map(center => (
               <option key={center.id} value={center.id}>{center.name}</option>
             ))}
@@ -62,7 +62,7 @@ const EmployeeFilters = ({
           )}
           {filterCenter !== 'all' && (
             <span className="px-3 py-1 bg-orange-500/20 text-orange-500 rounded-full text-xs font-semibold border border-orange-500/30 flex items-center gap-2">
-              Center: {filterCenter === 0 ? 'Unassigned' : serviceCenters.find(c => c.id === filterCenter)?.name}
+              Center: {filterCenter === 'unassigned' ? 'Unassigned' : serviceCenters.find(c => c.id === filterCenter)?.name}
               <button onClick={() => setFilterCenter('all')}>
                 <X className="w-3 h-3" />
               </button>
