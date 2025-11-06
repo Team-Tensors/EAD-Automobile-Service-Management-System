@@ -14,7 +14,7 @@ interface ScheduleFormData {
 }
 
 interface ServiceCenter {
-  id: number; // Changed from string to number for type consistency
+  id: string; // Changed from string to number for type consistency
   name: string;
   address: string;
   city: string;
