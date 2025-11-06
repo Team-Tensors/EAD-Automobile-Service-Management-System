@@ -89,6 +89,7 @@ const ServiceCenterList = ({
               </div>
 
               <a
+              title={`Get directions to ${center.name}`}
                 href={getDirectionsUrl(center)}
                 target="_blank"
                 rel="noopener noreferrer"
