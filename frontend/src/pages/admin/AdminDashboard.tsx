@@ -7,7 +7,8 @@ import {
   CircleDashed,
   Search,
   X,
-  UserPlus
+  UserPlus,
+  Loader
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { AdminService, Employee } from '@/types/admin';
@@ -461,49 +462,52 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Employee List */}
+            {/* Employee List or Loader */}
             <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto admin-scrollbar pr-2">
-              {filteredEmployees.map(employee => (
-                <div
-                  key={employee.id}
-                  className="p-4 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-orange-500 transition"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-orange-500" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">{employee.name}</p>
-                        <p className="text-xs text-gray-400">{employee.specialization}</p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => assignEmployeeToService(employee)}
-                      disabled={isAssigning}
-                      className={`px-4 py-2 rounded-lg font-semibold transition text-sm ${
-                        !isAssigning
-                          ? 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
-                          : 'bg-zinc-600 text-gray-400 cursor-not-allowed'
-                      }`}
-                    >
-                      {isAssigning ? (
-                        <>
-                          <span className="inline-block mr-2">Loading...</span>
-                        </>
-                      ) : (
-                        'Assign'
-                      )}
-                    </button>
+              {isAssigning ? (
+                // Show loader when assigning
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <Loader className="w-12 h-12 text-orange-500 animate-spin" />
+                  <div className="text-center">
+                    <p className="text-white font-semibold text-lg">Assigning Employee...</p>
+                    <p className="text-gray-400 text-sm mt-2">This may take a few seconds</p>
                   </div>
                 </div>
-              ))}
+              ) : (
+                // Show employee list when not assigning
+                <>
+                  {filteredEmployees.map(employee => (
+                    <div
+                      key={employee.id}
+                      className="p-4 rounded-lg border border-zinc-700 bg-zinc-800 hover:border-orange-500 transition"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
+                            <User className="w-5 h-5 text-orange-500" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{employee.name}</p>
+                            <p className="text-xs text-gray-400">{employee.specialization}</p>
+                          </div>
+                        </div>
 
-              {filteredEmployees.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">No employees found</p>
-                </div>
+                        <button
+                          onClick={() => assignEmployeeToService(employee)}
+                          className="px-4 py-2 rounded-lg font-semibold transition text-sm bg-orange-500 text-white hover:bg-orange-600 cursor-pointer"
+                        >
+                          Assign
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {filteredEmployees.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">No employees found</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
