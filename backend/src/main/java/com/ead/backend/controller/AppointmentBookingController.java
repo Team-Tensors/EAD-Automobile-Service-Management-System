@@ -158,6 +158,7 @@ public class AppointmentBookingController {
         dto.setDate(a.getAppointmentDate());
         dto.setStatus(a.getStatus());
         dto.setCanStart(a.getStatus().equals("CONFIRMED") && a.getAssignedEmployees().size() > 0);
+        dto.setServiceCenter(a.getServiceCenter().getName());
         return dto;
     }
 }
