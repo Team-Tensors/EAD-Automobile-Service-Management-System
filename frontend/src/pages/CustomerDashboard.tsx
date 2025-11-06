@@ -13,7 +13,6 @@ const CustomerDashboard = () => {
   const { user } = useAuth();
   const { services, loading } = useMyServices();
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [filter, setFilter] = useState("all");
   const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
@@ -22,15 +21,32 @@ const CustomerDashboard = () => {
     }
   }, [loading, services, selectedService]);
 
+  // Update selectedService when services data changes (for real-time updates)
+  useEffect(() => {
+    if (selectedService && services.length > 0) {
+      const updatedService = services.find((s) => s.id === selectedService.id);
+      if (
+        updatedService &&
+        JSON.stringify(updatedService) !== JSON.stringify(selectedService)
+      ) {
+        setSelectedService(updatedService);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services]);
+
   return (
     <div className="min-h-screen bg-black pt-5">
       <AuthenticatedNavbar />
 
       <div className="bg-black border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-0 pt-22 pb-4">
-          <h1 className="text-2xl font-bold text-white mb-2 uppercase">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-white mb-2 uppercase">
+            Dashboard
+          </h1>
           <p className="text-gray-400">
-            Welcome back, {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
+            Welcome back,{" "}
+            {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
           </p>
         </div>
       </div>
@@ -47,9 +63,7 @@ const CustomerDashboard = () => {
                   <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
                 </div>
               </div>
-              <p className="text-zinc-400 text-sm">
-                Loading your services...
-              </p>
+              <p className="text-zinc-400 text-sm">Loading your services...</p>
             </div>
           </div>
         ) : services.length === 0 ? (
@@ -64,8 +78,6 @@ const CustomerDashboard = () => {
                   setSelectedService(s);
                   setShowMap(false);
                 }}
-                filter={filter}
-                onFilterChange={setFilter}
               />
             </div>
 

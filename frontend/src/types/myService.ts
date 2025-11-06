@@ -1,9 +1,11 @@
 import type { DetailedAppointment } from "@/services/appointmentService";
 import { vehicleService } from "@/services/vehicleService";
+import { fetchServiceCenters } from "@/services/serviceCenterService";
 
-/* ---------- 4 possible statuses ---------- */
+/* ---------- 5 possible statuses ---------- */
 export type ServiceStatus =
-  | "not_started"
+  | "pending"
+  | "confirmed"
   | "in_progress"
   | "completed"
   | "cancelled";
@@ -18,6 +20,13 @@ export interface Service {
   estimatedCompletion: string;
   assignedEmployee: string;
   serviceCenter: string;
+  serviceCenterLocation?: {
+    name: string;
+    address: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
 }
 
 /* ---------- Mapping from the detailed backend response ---------- */
@@ -32,7 +41,7 @@ export const mapDetailedToService = async (
   if (!vehicleName || !licensePlate) {
     try {
       const vehicles = await vehicleService.list(); // all user vehicles
-      const match = vehicles.find(v => v.id === detailed.vehicleId);
+      const match = vehicles.find((v) => v.id === detailed.vehicleId);
       if (match) {
         vehicleName = `${match.brand} ${match.model}`;
         licensePlate = match.licensePlate;
@@ -42,11 +51,35 @@ export const mapDetailedToService = async (
     }
   }
 
+  // ---- Fetch service center location data ----
+  let serviceCenterLocation;
+  try {
+    const serviceCenters = await fetchServiceCenters();
+    const matchingCenter = serviceCenters.find(
+      (center) => center.name === detailed.serviceCenter
+    );
+    if (matchingCenter) {
+      serviceCenterLocation = {
+        name: matchingCenter.name,
+        address: matchingCenter.address,
+        city: matchingCenter.city,
+        latitude: matchingCenter.latitude,
+        longitude: matchingCenter.longitude,
+      };
+    }
+  } catch (err) {
+    console.error("Failed to fetch service center location:", err);
+  }
+
   // ---- Map raw DB status to the UI status ----
-  let status: ServiceStatus = "not_started";
+  let status: ServiceStatus = "pending";
   switch (detailed.status.toUpperCase()) {
+    case "PENDING":
+      status = "pending";
+      break;
     case "NOT_STARTED":
-      status = "not_started";
+    case "CONFIRMED":
+      status = "confirmed";
       break;
     case "IN_PROGRESS":
       status = "in_progress";
@@ -58,7 +91,7 @@ export const mapDetailedToService = async (
       status = "cancelled";
       break;
     default:
-      status = "not_started";
+      status = "pending";
   }
 
   return {
@@ -71,5 +104,6 @@ export const mapDetailedToService = async (
     estimatedCompletion: detailed.estimatedCompletion ?? "TBD",
     assignedEmployee: detailed.assignedEmployee ?? "Not Assigned",
     serviceCenter: detailed.serviceCenter ?? "TBD",
+    serviceCenterLocation,
   };
 };
