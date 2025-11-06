@@ -112,12 +112,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["ADMIN"],
     },
-    {
-      name: "NOTIFICATIONS",
-      path: "/admin/notifications",
-      icon: Calendar,
-      roles: ["ADMIN"],
-    },
+    // {
+    //   name: "NOTIFICATIONS",
+    //   path: "/admin/notifications",
+    //   icon: Calendar,
+    //   roles: ["ADMIN"],
+    // },
     // Add more tabs here as needed
   ];
 
