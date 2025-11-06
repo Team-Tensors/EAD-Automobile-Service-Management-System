@@ -1,23 +1,17 @@
 // src/pages/EmployeeDashboard.tsx
 
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
-} from 'lucide-react';
-import AppointmentList from '@/components/EmployeeDashboard/AppointmentList';
-import AppointmentDetail from '@/components/EmployeeDashboard/AppointmentDetail';
-import StatusUpdateModal from '@/components/EmployeeDashboard/StatusUpdateModal';
-import TimeLogForm from '@/components/EmployeeDashboard/TimeLogForm';
-import TimeLogList from '@/components/EmployeeDashboard/TimeLogList';
-import { useAuth } from '../hooks/useAuth';
-import Footer from '@/components/Footer/Footer';
-import AuthenticatedNavbar from '@/components/Navbar/AuthenticatedNavbar';
-import ShiftShedule from '@/components/EmployeeDashboard/ShiftShedule';
+import { useState, useEffect, useCallback } from "react";
+import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import AppointmentList from "@/components/EmployeeDashboard/AppointmentList";
+import AppointmentDetail from "@/components/EmployeeDashboard/AppointmentDetail";
+import StatusUpdateModal from "@/components/EmployeeDashboard/StatusUpdateModal";
+import TimeLogForm from "@/components/EmployeeDashboard/TimeLogForm";
+import TimeLogList from "@/components/EmployeeDashboard/TimeLogList";
+import { useAuth } from "../hooks/useAuth";
+import Footer from "@/components/Footer/Footer";
+import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 
-const API_BASE_URL = 'http://localhost:4000/api/employee';
+const API_BASE_URL = "http://localhost:4000/api/employee";
 
 // ------------------ Types ------------------
 interface Appointment {
@@ -194,7 +188,9 @@ const EmployeeDashboard = () => {
     appointmentDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     if (today < appointmentDate) {
-      setError("You can only update the status after the scheduled appointment date.");
+      setError(
+        "You can only update the status after the scheduled appointment date."
+      );
       return;
     }
 
@@ -451,7 +447,6 @@ const EmployeeDashboard = () => {
           </div>
         </div>
       </div>
-      <ShiftShedule />
       <Footer />
     </div>
   );
