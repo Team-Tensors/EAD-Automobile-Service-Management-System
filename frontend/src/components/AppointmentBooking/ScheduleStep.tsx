@@ -89,6 +89,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
           formData.serviceCenterId,
           formData.appointmentDate
         );
+        console.log("Slot availability loaded:", availability);
         setSlotAvailability(availability);
       } catch (error) {
         console.error("Failed to fetch slot availability:", error);
@@ -150,12 +151,17 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
       if (hour <= currentHour) return false;
     }
 
+    // If slots are still loading, consider them potentially available
+    if (isLoadingSlots) return true;
+
     // Check slot availability from backend
     if (slotAvailability && slotAvailability[hour] !== undefined) {
       return slotAvailability[hour] > 0;
     }
 
-    return false; // Default to unavailable if not loaded yet
+    // If no data for this hour, it might be outside business hours
+    // or the backend didn't return it, so assume unavailable
+    return false;
   };
 
   // Handle time slot click

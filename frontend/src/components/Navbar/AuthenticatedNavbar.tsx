@@ -63,7 +63,12 @@ const AuthenticatedNavbar = () => {
 
   // Define navigation tabs
   const navTabs: NavTab[] = [
-    { name: "DASHBOARD", path: "/dashboard", icon: LayoutDashboard },
+    {
+      name: "DASHBOARD",
+      path: "/dashboard",
+      icon: LayoutDashboard,
+      roles: ["CUSTOMER", "EMPLOYEE"],
+    },
     {
       name: "MY APPOINTMENTS",
       path: "/my-appointments",
@@ -90,6 +95,12 @@ const AuthenticatedNavbar = () => {
     },
     // Admin tabs
     {
+      name: "DASHBOARD",
+      path: "/admin/dashboard",
+      icon: LayoutDashboard,
+      roles: ["ADMIN"],
+    },
+    {
       name: "ANALYTICS",
       path: "/admin/analytics",
       icon: LayoutDashboard,
@@ -101,12 +112,12 @@ const AuthenticatedNavbar = () => {
       icon: Navigation,
       roles: ["ADMIN"],
     },
-    {
-      name: "NOTIFICATIONS",
-      path: "/admin/notifications",
-      icon: Calendar,
-      roles: ["ADMIN"],
-    },
+    // {
+    //   name: "NOTIFICATIONS",
+    //   path: "/admin/notifications",
+    //   icon: Calendar,
+    //   roles: ["ADMIN"],
+    // },
     // Add more tabs here as needed
   ];
 
@@ -125,7 +136,7 @@ const AuthenticatedNavbar = () => {
 
   return (
     <nav className="fixed top-3 sm:top-6 left-0 right-0 z-50 pointer-events-none">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-0 pointer-events-auto">
+      <div className="max-w-[calc(80rem+12px)] mx-auto px-2 sm:px-4 lg:px-0 pointer-events-auto">
         <div className="bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl shadow-lg px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between">
           {/* Logo */}
           <Link
@@ -191,29 +202,42 @@ const AuthenticatedNavbar = () => {
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-35 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 mt-3 w-56 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl py-2 z-50">
+                  <div className="px-4 py-3 border-b border-zinc-800">
+                    <p className="text-sm font-semibold text-white">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                  </div>
+                  
                   <Link
-                    to={
-                      user?.roles?.includes("ADMIN")
-                        ? "/admin/profile"
-                        : "/profile"
-                    }
+                    to="/"
                     onClick={() => setIsProfileDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    Website
+                  </Link>
+                  
+                  <Link
+                    to={"/profile"}
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
                   >
                     <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">My Profile</span>
+                    Profile
                   </Link>
-                  <button
-                    onClick={() => {
-                      setIsProfileDropdownOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="text-sm font-medium">Log Out</span>
-                  </button>
+                  
+                  <div className="border-t border-zinc-800 mt-2 pt-2">
+                    <button
+                      onClick={() => {
+                        setIsProfileDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
