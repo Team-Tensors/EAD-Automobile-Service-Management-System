@@ -7,18 +7,12 @@ interface Message {
   text: string;
 }
 
-interface Location {
-  latitude: number;
-  longitude: number;
-}
-
 const Chatbot: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, from: 'bot', text: "Hi! I'm here to help — ask me anything about the service." },
   ]);
   const [input, setInput] = useState('');
-  const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [locationRequested, setLocationRequested] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -28,6 +22,7 @@ const Chatbot: React.FC = () => {
   }, [messages, open]);
 
   // Request user location when chatbot is opened for the first time
+  // This triggers location caching which will be automatically included in all requests
   useEffect(() => {
     if (open && !locationRequested) {
       requestUserLocation();
@@ -39,8 +34,7 @@ const Chatbot: React.FC = () => {
     try {
       const location = await chatBotService.getUserLocation();
       if (location) {
-        setUserLocation(location);
-        console.log('User location obtained:', location);
+        console.log('User location obtained and cached:', location);
       } else {
         console.log('Location access denied or unavailable');
       }
@@ -67,13 +61,8 @@ const Chatbot: React.FC = () => {
     setIsSending(true);
 
     try {
-        // Include location in the request if available
-        const payload: { message: string; location?: Location } = { message: text };
-        if (userLocation) {
-          payload.location = userLocation;
-        }
-        
-        const res: any = await chatBotService.sendMessage(payload);
+        // Location will be automatically attached by the service interceptor
+        const res: any = await chatBotService.sendMessage({ message: text });
         console.log('Chatbot response:', res);
       // axios responses usually have data property; support both shapes
         const data = res?.data ?? res;

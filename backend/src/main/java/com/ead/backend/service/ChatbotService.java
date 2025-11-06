@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -172,8 +174,8 @@ public class ChatbotService {
             }
 
             List<ServiceCenterDTO> centers = serviceCenterService.getNearby(
-                    location.getLatitude(),
-                    location.getLongitude(),
+                    BigDecimal.valueOf(location.getLatitude()),
+                    BigDecimal.valueOf(location.getLongitude()),
                     50.0
             );
 
