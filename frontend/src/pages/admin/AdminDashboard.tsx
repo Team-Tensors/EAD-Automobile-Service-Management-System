@@ -111,7 +111,7 @@ const AdminDashboard = () => {
         setIsAssigning(true);
         setErrorMessage(null);
         
-        // Call the API to assign employee
+        // Call the API to assign employee (may take 15+ seconds due to email sending)
         const updatedService = await assignEmployeeToAppointment(
           selectedService.id,
           [employee.id]
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
         setUnassignedAppointments(prev => prev.filter(s => s.id !== selectedService.id));
         setUpcomingAppointments(prev => [...prev, updatedService]);
         
-        // Close modal and reset
+        // Close modal and reset (only reached if no error was thrown)
         setShowAssignModal(false);
         setSelectedService(null);
         setSearchEmployee('');

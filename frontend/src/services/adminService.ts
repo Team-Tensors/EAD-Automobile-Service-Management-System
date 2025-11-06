@@ -37,7 +37,7 @@ const transformToAdminService = (dto: AdminAppointmentDTO, displayStatus: 'upcom
   const vehicleBrand = vehicleNameParts.slice(0, -2).join(' ') || '';
 
   return {
-    id: parseInt(dto.id as unknown as string) || 0,
+    id: dto.id, // Keep as UUID string
     vehicleBrand,
     vehicleModel,
     vehicleYear,
@@ -106,7 +106,7 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   try {
     const response = await api.get('/admin/appointments/employees');
     return response.data.map((dto: EmployeeDTO) => ({
-      id: parseInt(dto.id as unknown as string) || 0,
+      id: dto.id, // Keep as UUID string
       name: dto.fullName || '',
       email: dto.email,
       specialization: 'General Service', // Default value - not provided by backend
@@ -123,16 +123,26 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
 
 /**
  * Assign employees to an appointment
+ * @param appointmentId - UUID string of the appointment
+ * @param employeeIds - Array of UUID strings for employees to assign
  */
 export const assignEmployeeToAppointment = async (
-  appointmentId: string | number,
-  employeeIds: (string | number)[]
+  appointmentId: string,
+  employeeIds: string[]
 ): Promise<AdminService> => {
   try {
+    console.log('Assigning employees - Request:', { appointmentId, employeeIds });
+    console.log('Request URL:', `/admin/appointments/${appointmentId}/assign-employees`);
+    console.log('Request body:', employeeIds);
+    
+    // Increase timeout for this operation since backend sends emails (can take 15+ seconds)
     const response = await api.post(
       `/admin/appointments/${appointmentId}/assign-employees`,
-      employeeIds
+      employeeIds,
+      { timeout: 20000 } // 20 seconds timeout to allow for email sending
     );
+    
+    console.log('✓ Assignment successful! Status:', response.status);
     
     // Determine display status based on API response
     let displayStatus: 'upcoming' | 'ongoing' | 'unassigned' = 'upcoming';
@@ -140,9 +150,18 @@ export const assignEmployeeToAppointment = async (
       displayStatus = 'unassigned';
     }
     
-    return transformToAdminService(response.data, displayStatus);
+    const transformedData = transformToAdminService(response.data, displayStatus);
+    return transformedData;
   } catch (error) {
-    console.error('Error assigning employee to appointment:', error);
+    console.error('✗ Error in assignEmployeeToAppointment:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    // Check if it's an axios error
+    if (typeof error === 'object' && error !== null && 'response' in error) {
+      console.error('Axios error response:', (error as { response?: unknown }).response);
+    }
     throw error;
   }
 };
