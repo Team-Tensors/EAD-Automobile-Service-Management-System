@@ -232,6 +232,61 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Appointments */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Total Appointments</p>
+                <p className="text-3xl font-bold text-white mt-1">
+                  {upcomingAppointments.length + ongoingAppointments.length + unassignedAppointments.length}
+                </p>
+              </div>
+              <Calendar className="w-12 h-12 text-blue-500" />
+            </div>
+          </div>
+
+          {/* Unassigned Appointments */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Unassigned</p>
+                <p className="text-3xl font-bold text-orange-500 mt-1">
+                  {unassignedAppointments.length}
+                </p>
+              </div>
+              <AlertCircle className="w-12 h-12 text-orange-500" />
+            </div>
+          </div>
+
+          {/* Ongoing Services */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Ongoing Appointments</p>
+                <p className="text-3xl font-bold text-green-500 mt-1">
+                  {ongoingAppointments.length}
+                </p>
+              </div>
+              <CircleDashed className="w-12 h-12 text-green-500" />
+            </div>
+          </div>
+
+          {/* Available Employees */}
+          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-400 text-sm">Total Employees</p>
+                <p className="text-3xl font-bold text-purple-500 mt-1">
+                  {employees.length}
+                </p>
+              </div>
+              <User className="w-12 h-12 text-purple-500" />
+            </div>
+          </div>
+        </div>
+
         {/* Awaiting Assignment Section - Full Width */}
         <div className="mb-6 w-full">
           <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6 w-full">
