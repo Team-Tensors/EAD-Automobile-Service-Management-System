@@ -13,12 +13,35 @@ const Chatbot: React.FC = () => {
     { id: 1, from: 'bot', text: "Hi! I'm here to help — ask me anything about the service." },
   ]);
   const [input, setInput] = useState('');
+  const [locationRequested, setLocationRequested] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
+
+  // Request user location when chatbot is opened for the first time
+  // This triggers location caching which will be automatically included in all requests
+  useEffect(() => {
+    if (open && !locationRequested) {
+      requestUserLocation();
+      setLocationRequested(true);
+    }
+  }, [open, locationRequested]);
+
+  const requestUserLocation = async () => {
+    try {
+      const location = await chatBotService.getUserLocation();
+      if (location) {
+        console.log('User location obtained and cached:', location);
+      } else {
+        console.log('Location access denied or unavailable');
+      }
+    } catch (error) {
+      console.error('Error requesting location:', error);
+    }
+  };
 
   const [isSending, setIsSending] = useState(false);
 
@@ -38,6 +61,7 @@ const Chatbot: React.FC = () => {
     setIsSending(true);
 
     try {
+        // Location will be automatically attached by the service interceptor
         const res: any = await chatBotService.sendMessage({ message: text });
         console.log('Chatbot response:', res);
       // axios responses usually have data property; support both shapes
