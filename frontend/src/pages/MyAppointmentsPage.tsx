@@ -51,6 +51,19 @@ const MyAppointmentsPage = () => {
       }
     };
     load();
+
+    // Poll for updates every 30 seconds
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await appointmentService.getMyAppointments();
+        setAppointments(data);
+      } catch (e) {
+        console.error("Failed to refresh appointments:", e);
+      }
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   // ----- cancel -----
@@ -119,21 +132,9 @@ const MyAppointmentsPage = () => {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* LIST – 2 columns */}
-              <div className="lg:col-span-2">
-                <AppointmentsList
-                  appointments={appointments}
-                  selectedDate={selectedDate}
-                  onClearFilter={() => setSelectedDate(null)}
-                  onCancel={openCancelDialog}
-                  cancellingId={cancellingId}
-                  getStatusColor={getStatusColor}
-                />
-              </div>
-
-              {/* CALENDAR – 1 column */}
-              <div className="lg:col-span-1">
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8">
+              {/* CALENDAR – 1 column (shown first on mobile) */}
+              <div className="lg:col-span-1 lg:order-2">
                 <div className="lg:sticky lg:top-20">
                   <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
@@ -151,6 +152,18 @@ const MyAppointmentsPage = () => {
                     onSelectDate={setSelectedDate}
                   />
                 </div>
+              </div>
+
+              {/* LIST – 2 columns (shown second on mobile) */}
+              <div className="lg:col-span-2 lg:order-1">
+                <AppointmentsList
+                  appointments={appointments}
+                  selectedDate={selectedDate}
+                  onClearFilter={() => setSelectedDate(null)}
+                  onCancel={openCancelDialog}
+                  cancellingId={cancellingId}
+                  getStatusColor={getStatusColor}
+                />
               </div>
             </div>
           )}
