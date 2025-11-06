@@ -8,8 +8,11 @@ import {
   Search,
   X,
   UserPlus,
-  Loader
+  Loader,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import type { AdminService, Employee } from '@/types/admin';
 import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees, assignEmployeeToAppointment } from '../../services/adminService';
@@ -122,13 +125,26 @@ const AdminDashboard = () => {
         setUnassignedAppointments(prev => prev.filter(s => s.id !== selectedService.id));
         setUpcomingAppointments(prev => [...prev, updatedService]);
         
+        // Show success notification
+        toast.success(`Successfully assigned ${employee.name} to the appointment!`, {
+          duration: 4000,
+          icon: <CheckCircle className="w-5 h-5" />,
+        });
+        
         // Close modal and reset (only reached if no error was thrown)
         setShowAssignModal(false);
         setSelectedService(null);
         setSearchEmployee('');
       } catch (error) {
         console.error('Error assigning employee:', error);
-        setErrorMessage(error instanceof Error ? error.message : 'Failed to assign employee');
+        const errorMsg = error instanceof Error ? error.message : 'Failed to assign employee';
+        setErrorMessage(errorMsg);
+        
+        // Show error notification
+        toast.error(errorMsg, {
+          duration: 5000,
+          icon: <XCircle className="w-5 h-5" />,
+        });
       } finally {
         setIsAssigning(false);
       }
