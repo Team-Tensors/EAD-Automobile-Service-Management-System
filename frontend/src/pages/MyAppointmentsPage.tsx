@@ -51,6 +51,19 @@ const MyAppointmentsPage = () => {
       }
     };
     load();
+
+    // Poll for updates every 30 seconds
+    const intervalId = setInterval(async () => {
+      try {
+        const data = await appointmentService.getMyAppointments();
+        setAppointments(data);
+      } catch (e) {
+        console.error("Failed to refresh appointments:", e);
+      }
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   // ----- cancel -----

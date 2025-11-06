@@ -2,9 +2,10 @@ import type { DetailedAppointment } from "@/services/appointmentService";
 import { vehicleService } from "@/services/vehicleService";
 import { fetchServiceCenters } from "@/services/serviceCenterService";
 
-/* ---------- 4 possible statuses ---------- */
+/* ---------- 5 possible statuses ---------- */
 export type ServiceStatus =
-  | "not_started"
+  | "pending"
+  | "confirmed"
   | "in_progress"
   | "completed"
   | "cancelled";
@@ -71,10 +72,14 @@ export const mapDetailedToService = async (
   }
 
   // ---- Map raw DB status to the UI status ----
-  let status: ServiceStatus = "not_started";
+  let status: ServiceStatus = "pending";
   switch (detailed.status.toUpperCase()) {
+    case "PENDING":
+      status = "pending";
+      break;
     case "NOT_STARTED":
-      status = "not_started";
+    case "CONFIRMED":
+      status = "confirmed";
       break;
     case "IN_PROGRESS":
       status = "in_progress";
@@ -86,7 +91,7 @@ export const mapDetailedToService = async (
       status = "cancelled";
       break;
     default:
-      status = "not_started";
+      status = "pending";
   }
 
   return {
