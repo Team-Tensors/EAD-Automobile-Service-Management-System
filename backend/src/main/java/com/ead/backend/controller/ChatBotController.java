@@ -21,11 +21,7 @@ public class ChatBotController {
     @PostMapping("/message")
     public String getChatBotMessage(@RequestBody ChatRequestDTO chatRequest, HttpServletRequest request) {
         String clientIp = getClientIp(request);
-        log.info("Client IP: {}", clientIp);
-        log.info("===================================================================================");
-        log.info("Chat Request: {}", chatRequest);
-        log.info("===================================================================================");
-        return chatBotService.getChatResponse(chatRequest.getMessage(), clientIp, chatRequest.getLocationDTO());
+        return chatBotService.getChatResponse(chatRequest.getMessage(), clientIp, chatRequest.getLocation());
     }
 }
 
