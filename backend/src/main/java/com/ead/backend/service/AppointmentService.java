@@ -1,5 +1,7 @@
 package com.ead.backend.service;
 
+import com.ead.backend.dto.AdminAppointmentDTO;
+import com.ead.backend.dto.EmployeeDTO;
 import com.ead.backend.entity.*;
 import com.ead.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -335,10 +337,11 @@ public class AppointmentService {
     // ===================================================================
     // 4. Get all employees (for dropdown)
     // ===================================================================
-    public List<User> getAllEmployees() {
+    public List<EmployeeDTO> getAllEmployees() {
         return userRepository.findAll().stream()
                 .filter(u -> u.getRoles().stream()
                         .anyMatch(r -> "EMPLOYEE".equals(r.getName())))
+                .map(this::toEmployeeDTO)
                 .toList();
     }
 
@@ -582,11 +585,108 @@ public class AppointmentService {
     }
 
     // ===================================================================
+    // 8. ADMIN: Get all upcoming appointments (PENDING or CONFIRMED, future dates)
+    // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<AdminAppointmentDTO> getAllUpcomingAppointments() {
+        User currentUser = getCurrentUser();
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> "ADMIN".equals(r.getName()));
+        if (!isAdmin) {
+            throw new RuntimeException("Only ADMIN can view all appointments");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        return appointmentRepository.findAll().stream()
+                .filter(a -> (a.getStatus().equals("PENDING") || a.getStatus().equals("CONFIRMED"))
+                        && a.getAppointmentDate().isAfter(now))
+                .sorted((a1, a2) -> a1.getAppointmentDate().compareTo(a2.getAppointmentDate()))
+                .map(this::toAdminAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ===================================================================
+    // 9. ADMIN: Get all ongoing appointments (IN_PROGRESS)
+    // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<AdminAppointmentDTO> getAllOngoingAppointments() {
+        User currentUser = getCurrentUser();
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> "ADMIN".equals(r.getName()));
+        if (!isAdmin) {
+            throw new RuntimeException("Only ADMIN can view all appointments");
+        }
+
+        return appointmentRepository.findAll().stream()
+                .filter(a -> a.getStatus().equals("IN_PROGRESS"))
+                .sorted((a1, a2) -> a1.getAppointmentDate().compareTo(a2.getAppointmentDate()))
+                .map(this::toAdminAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ===================================================================
+    // 10. ADMIN: Get all unassigned appointments (PENDING or CONFIRMED, future dates, no employees assigned)
+    // ===================================================================
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<AdminAppointmentDTO> getAllUnassignedAppointments() {
+        User currentUser = getCurrentUser();
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(r -> "ADMIN".equals(r.getName()));
+        if (!isAdmin) {
+            throw new RuntimeException("Only ADMIN can view all appointments");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        return appointmentRepository.findAll().stream()
+                .filter(a -> (a.getStatus().equals("PENDING") || a.getStatus().equals("CONFIRMED"))
+                        && a.getAppointmentDate().isAfter(now)
+                        && a.getAssignedEmployees().isEmpty())
+                .sorted((a1, a2) -> a1.getAppointmentDate().compareTo(a2.getAppointmentDate()))
+                .map(this::toAdminAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ===================================================================
     // HELPER: Get current authenticated user
     // ===================================================================
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    // ===================================================================
+    // HELPER: Convert Appointment to AdminAppointmentDTO
+    // ===================================================================
+    private AdminAppointmentDTO toAdminAppointmentDTO(Appointment appointment) {
+        AdminAppointmentDTO dto = new AdminAppointmentDTO();
+        dto.setId(appointment.getId());
+        dto.setVehicleId(appointment.getVehicle().getId());
+        dto.setVehicleName(appointment.getVehicle().getBrand() + " " + appointment.getVehicle().getModel());
+        dto.setLicensePlate(appointment.getVehicle().getLicensePlate());
+        dto.setCustomerName(appointment.getUser().getFullName());
+        dto.setCustomerEmail(appointment.getUser().getEmail());
+        dto.setService(appointment.getServiceOrModification().getName());
+        dto.setType(appointment.getAppointmentType());
+        dto.setDate(appointment.getAppointmentDate().toString());
+        dto.setStatus(appointment.getStatus());
+        dto.setServiceCenter(appointment.getServiceCenter().getName());
+        dto.setAssignedEmployees(appointment.getAssignedEmployees().stream()
+                .map(User::getFullName)
+                .collect(Collectors.joining(", ")));
+        dto.setAssignedEmployeeCount(appointment.getAssignedEmployees().size());
+        return dto;
+    }
+
+    // ===================================================================
+    // HELPER: Convert User to EmployeeDTO
+    // ===================================================================
+    private EmployeeDTO toEmployeeDTO(User user) {
+        EmployeeDTO dto = new EmployeeDTO();
+        dto.setId(user.getId());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        return dto;
     }
 }
