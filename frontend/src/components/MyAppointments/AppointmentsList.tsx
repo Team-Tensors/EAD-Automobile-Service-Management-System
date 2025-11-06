@@ -36,7 +36,7 @@ export const AppointmentsList = ({
     // Sort by date (earliest/soonest first - today, tomorrow, future)
     const aDate = new Date(a.date).getTime();
     const bDate = new Date(b.date).getTime();
-    
+
     return aDate - bDate; // Ascending order: today -> tomorrow -> future
   });
 
