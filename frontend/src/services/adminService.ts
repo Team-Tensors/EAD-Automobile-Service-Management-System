@@ -19,11 +19,11 @@ interface AdminAppointmentDTO {
 }
 
 interface EmployeeDTO {
-  id: string;
+  employeeId: string;
   email: string;
   fullName: string;
   phoneNumber: string;
-  serviceCenterId?: number;
+  serviceCenterId?: string;
   serviceCenterName?: string;
   totalHoursWorked?: number;
 }
@@ -109,7 +109,7 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   try {
     const response = await api.get('/admin/appointments/employees');
     return response.data.map((dto: EmployeeDTO) => ({
-      id: dto.id, // Keep as UUID string
+      employeeId: dto.employeeId, // Keep as UUID string
       name: dto.fullName || '',
       email: dto.email,
       specialization: 'General Service', // Default value - not provided by backend
@@ -188,4 +188,5 @@ export const assignEmployeeToAppointment = async (
     }
     throw error;
   }
+  
 };
