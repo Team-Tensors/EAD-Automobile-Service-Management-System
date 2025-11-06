@@ -62,7 +62,6 @@ export const appointmentService = {
   // Get user's appointments
   getMyAppointments: async (): Promise<AppointmentSummary[]> => {
     const res = await api.get(`${base}/my-appointments`);
-    console.log("API Response for my-appointments:", res.data);
     return res.data;
   },
 

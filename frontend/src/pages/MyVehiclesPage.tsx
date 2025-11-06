@@ -189,6 +189,16 @@ const MyVehiclesPage = () => {
       error: (err) => {
         console.error(err);
         setVehicleToDelete(null);
+
+        // Check if the error is due to existing appointments
+        if (
+          err.response?.data?.message?.includes("existing appointments") ||
+          err.response?.data?.includes("existing appointments") ||
+          err.message?.includes("existing appointments")
+        ) {
+          return "Cannot delete vehicle with existing appointments. Please cancel all appointments first.";
+        }
+
         return "Failed to delete vehicle";
       },
     });
@@ -317,7 +327,7 @@ const MyVehiclesPage = () => {
             onClose={() => setIsDeleteDialogOpen(false)}
             onConfirm={confirmDelete}
             title="Delete Vehicle"
-            message="Are you sure you want to delete this vehicle? This action cannot be undone."
+            message="Are you sure you want to delete this vehicle? This action cannot be undone. Note: Vehicles with existing appointments cannot be deleted."
             confirmText="Delete"
             cancelText="Cancel"
             isDestructive={true}
