@@ -6,7 +6,7 @@ import com.ead.backend.entity.User;
 import com.ead.backend.entity.Vehicle;
 import com.ead.backend.repository.UserRepository;
 import com.ead.backend.repository.VehicleRepository;
-import com.ead.backend.service.VehicleService;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

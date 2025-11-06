@@ -1,12 +1,8 @@
 package com.ead.backend.dto;
 
-import com.ead.backend.entity.*;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 public class ShiftScheduleAppointmentsDTO {

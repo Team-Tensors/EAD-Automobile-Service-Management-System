@@ -69,6 +69,9 @@ export interface AppointmentSummary {
 
   /** Current status */
   status: AppointmentStatus;
+
+  /** Service center name */
+  serviceCenter?: string;
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -76,7 +79,7 @@ export interface AppointmentSummary {
 /** Combines `appointmentDate` + `appointmentTime` → ISO-8601 */
 export const combineDateTime = (
   date: string, // "2025-12-01"
-  time: string  // "14:30"
+  time: string // "14:30"
 ): string => {
   // Append seconds and UTC "Z" – backend expects full ISO
   return `${date}T${time}:00Z`;

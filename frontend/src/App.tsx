@@ -1,23 +1,24 @@
-import { Routes, Route, Link } from 'react-router-dom'
-import LoginPage from './pages/loginPage'
-import RegisterPage from './pages/registerPage'
-import EmployeeRegisterPage from './pages/EmployeeRegisterPage'
-import HomePage from './pages/HomePage'
-import DashboardRouter from './pages/DashboardRouter'
-import AdminRouter from './pages/admin/AdminRouter'
-import OAuthCallback from './pages/OAuthCallback'
-import CompleteProfilePage from './pages/CompleteProfilePage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import ProfilePage from './pages/ProfilePage'
-import { ProtectedRoute, PublicRoute } from './guards/ProtectedRoute'
-import { UserRole } from './types/auth'
+import { Routes, Route, Link } from "react-router-dom";
+import LoginPage from "./pages/loginPage";
+import RegisterPage from "./pages/registerPage";
+import EmployeeRegisterPage from "./pages/EmployeeRegisterPage";
+import HomePage from "./pages/HomePage";
+import DashboardRouter from "./pages/DashboardRouter";
+import AdminRouter from "./pages/admin/AdminRouter";
+import OAuthCallback from "./pages/OAuthCallback";
+import CompleteProfilePage from "./pages/CompleteProfilePage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProfilePage from "./pages/ProfilePage";
+import { ProtectedRoute, PublicRoute } from "./guards/ProtectedRoute";
+import { UserRole } from "./types/auth";
 import AppointmentBookingPage from "./pages/AppoinmentBookingPage";
-import ServiceCenters from './pages/ServiceCenters'
-import AddVehiclePage from './pages/MyVehiclesPage'
+import ServiceCenters from "./pages/ServiceCenters";
+import AddVehiclePage from "./pages/MyVehiclesPage";
 import MyAppointmentsPage from "./pages/MyAppointmentsPage";
-import NotificationsPage from './pages/NotificationsPage';
-import EmployeeInventory from './pages/EmployeeInventory'
+import NotificationsPage from "./pages/NotificationsPage";
+import EmployeeInventory from "./pages/EmployeeInventory";
+import ShiftSchedulingPage from "./pages/ShiftSchedulingPage";
 
 function App() {
   return (
@@ -50,7 +51,7 @@ function App() {
           </PublicRoute>
         }
       />
-      
+
       {/* Forgot Password Routes */}
       <Route
         path="/forgot-password"
@@ -60,7 +61,7 @@ function App() {
           </PublicRoute>
         }
       />
-      
+
       <Route
         path="/reset-password"
         element={
@@ -69,10 +70,10 @@ function App() {
           </PublicRoute>
         }
       />
-      
+
       {/* OAuth callback route - accessible to everyone */}
       <Route path="/oauth/callback" element={<OAuthCallback />} />
-      
+
       {/* Complete profile route - for OAuth users who need to add missing info */}
       <Route
         path="/complete-profile"
@@ -82,7 +83,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      
+
       {/* Protected routes (require authentication) */}
       <Route
         path="/dashboard"
@@ -121,7 +122,6 @@ function App() {
         }
       />
 
-
       {/* Customer Appointment Route */}
       <Route
         path="/my-appointments/appointment-booking"
@@ -141,7 +141,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-     
+
       {/* Admin routes with nested routing */}
       <Route
         path="/admin/*"
@@ -153,7 +153,7 @@ function App() {
       />
 
       {/* Customer My Vehicles Route */}
-        <Route
+      <Route
         path="/my-vehicles"
         element={
           <ProtectedRoute requiredRole={UserRole.CUSTOMER}>
@@ -161,8 +161,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
-
 
       {/* Employee Inventory Route */}
       <Route
@@ -174,8 +172,15 @@ function App() {
         }
       />
 
-
-
+      {/* Employee Shift Scheduling Route */}
+      <Route
+        path="/shift-scheduling"
+        element={
+          <ProtectedRoute requiredRole={UserRole.EMPLOYEE}>
+            <ShiftSchedulingPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Example: Permission-based route */}
       <Route

@@ -35,6 +35,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     );
     List<Appointment> findByStatus(String pending);
 
+    // Check if vehicle has any active appointments (non-cancelled)
+    boolean existsByVehicleIdAndStatusNot(UUID vehicleId, String status);
+
     // Find all appointments for a service center on a specific date (for slot availability display)
     @Query("SELECT a FROM Appointment a WHERE a.serviceCenter.id = :serviceCenterId " +
             "AND DATE(a.appointmentDate) = DATE(:date) " +

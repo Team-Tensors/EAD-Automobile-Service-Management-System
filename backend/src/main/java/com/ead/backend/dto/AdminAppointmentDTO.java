@@ -2,7 +2,6 @@ package com.ead.backend.dto;
 
 import com.ead.backend.enums.AppointmentType;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class AdminAppointmentDTO {
