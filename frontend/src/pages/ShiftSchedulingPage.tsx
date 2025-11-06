@@ -100,7 +100,7 @@ const ShiftSchedulingPage: React.FC = () => {
                         <Calendar className="h-5 w-5 text-orange-400 shrink-0 mt-0.5" />
                         <div>
                           <p className="text-xs text-gray-400 uppercase tracking-wide">
-                            Date
+                            Date & Time
                           </p>
                           <p className="text-white font-medium">
                             {new Date(a.appointmentDate).toLocaleDateString(
@@ -110,6 +110,15 @@ const ShiftSchedulingPage: React.FC = () => {
                                 month: "short",
                                 day: "numeric",
                                 year: "numeric",
+                              }
+                            )}
+                          </p>
+                          <p className="text-sm text-orange-300">
+                            {new Date(a.appointmentDate).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
                               }
                             )}
                           </p>
