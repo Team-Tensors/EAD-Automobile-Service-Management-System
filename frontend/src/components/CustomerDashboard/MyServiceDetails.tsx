@@ -55,26 +55,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-/* ---------- NEW: Human-readable estimated completion ---------- */
-const formatEstimatedCompletion = (isoOrTbd: string): string => {
-  if (isoOrTbd === "TBD") return "TBD";
-
-  const d = new Date(isoOrTbd);
-  if (Number.isNaN(d.getTime())) return "TBD";
-
-  const date = d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const time = d.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  return `${date} at ${time}`; // e.g. "Nov 10, 2025 at 04:00 PM"
-};
-
 /* ---------- Component ---------- */
 export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
   service,
@@ -240,7 +220,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
       doc.setFontSize(11);
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "bold");
-      doc.text("Service Start:", 15, yPosition);
+      doc.text("Scheduled Date:", 15, yPosition);
       doc.setFont("helvetica", "normal");
       doc.text(
         `${formatDate(service.startDate)} at ${new Date(
@@ -255,10 +235,17 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
       yPosition += 7;
 
       doc.setFont("helvetica", "bold");
-      doc.text("Est. Completion:", 15, yPosition);
+      doc.text("Actual Start:", 15, yPosition);
       doc.setFont("helvetica", "normal");
       doc.text(
-        formatEstimatedCompletion(service.estimatedCompletion),
+        service.actualStartTime
+          ? `${formatDate(service.actualStartTime)} at ${new Date(
+              service.actualStartTime
+            ).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}`
+          : "Not Started",
         60,
         yPosition
       );
@@ -268,16 +255,13 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
       doc.text("Actual Completion:", 15, yPosition);
       doc.setFont("helvetica", "normal");
       doc.text(
-        service.estimatedCompletion !== "TBD"
-          ? formatDate(service.estimatedCompletion) +
-              " at " +
-              new Date(service.estimatedCompletion).toLocaleTimeString(
-                "en-US",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )
+        service.actualEndTime
+          ? `${formatDate(service.actualEndTime)} at ${new Date(
+              service.actualEndTime
+            ).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}`
           : "Completed",
         60,
         yPosition
@@ -390,6 +374,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <h2 className="text-2xl font-bold text-white mb-2">
               {service.vehicleName}
             </h2>
+            {/* Start Date */}
             <div className="flex items-center divide-x divide-gray-500 text-gray-400">
               <p className="pr-2">{service.serviceType}</p>
               <p className="pl-2">{formatDate(service.startDate)}</p>
@@ -440,24 +425,33 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <div>
               <p className="text-xs text-gray-400">Start Time</p>
               <p className="font-semibold text-white">
-                {new Date(service.startDate).toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {service.actualStartTime
+                  ? new Date(service.actualStartTime).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "Not Started"}
               </p>
             </div>
           </div>
 
-          {/* Estimated Completion – User Friendly */}
-          <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <Clock className="w-5 h-5 text-orange-500" />
-            <div>
-              <p className="text-xs text-gray-400">Est. Completion</p>
-              <p className="font-semibold text-white">
-                {formatEstimatedCompletion(service.estimatedCompletion)}
-              </p>
+          {/* End Time - Show when service is completed */}
+          {service.status === "completed" && (
+            <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
+              <Clock className="w-5 h-5 text-orange-500" />
+              <div>
+                <p className="text-xs text-gray-400">End Time</p>
+                <p className="font-semibold text-white">
+                  {service.actualEndTime
+                    ? new Date(service.actualEndTime).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Not Available"}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Action Buttons */}
