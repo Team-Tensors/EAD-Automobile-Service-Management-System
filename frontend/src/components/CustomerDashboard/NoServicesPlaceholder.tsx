@@ -36,7 +36,7 @@ const NoServicesPlaceholder = () => {
   ];
 
   return (
-    <div className="py-16 px-0">
+    <div className="py-4 px-0">
       {/* Hero Section */}
       <div className="text-center mb-12">
         <h2 className="text-3xl font-extrabold bg-orange-500 bg-clip-text text-transparent animate-pulse">
@@ -83,7 +83,7 @@ const NoServicesPlaceholder = () => {
       {/* Call to Action */}
       <div className="text-center">
         <Link
-          to="/my-appointments"
+          to="/services"
           className="inline-block bg-orange-500 rounded-lg text-white font-semibold py-3 px-6"
         >
           Explore All Services
