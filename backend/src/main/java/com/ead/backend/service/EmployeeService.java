@@ -58,7 +58,6 @@ public class EmployeeService {
 
     /**
      * Retrieves all appointments assigned to an employee.
-     *
      * @return list of appointments
      */
     @Transactional(readOnly = true)
@@ -68,7 +67,7 @@ public class EmployeeService {
         if (employeeOpt.isEmpty()) {
             return List.of();
         }
-        
+
         Set<User> employees = Set.of(employeeOpt.get());
         List<Appointment> appointments = appointmentRepository.findByAssignedEmployees(employees);
 
