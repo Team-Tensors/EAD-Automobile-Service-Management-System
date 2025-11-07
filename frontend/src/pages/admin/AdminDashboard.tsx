@@ -455,7 +455,7 @@ const AdminDashboard = () => {
                       <span className="text-xs text-gray-400">Progress</span>
                       <span className="text-xs font-semibold text-white">{service.progress}%</span>
                     </div>
-                    <div className="w-full bg-zinc-700 rounded-full h-2">
+                    <div className="w-full bg-zinc-900 rounded-full h-2">
                       <div 
                         className="bg-orange-500 h-2 rounded-full transition-all"
                         style={{ width: `${service.progress}%` }}
