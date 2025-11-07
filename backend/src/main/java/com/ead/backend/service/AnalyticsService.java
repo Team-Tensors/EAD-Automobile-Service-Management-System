@@ -103,7 +103,16 @@ public class AnalyticsService {
         Map<LocalDate, RevenueTrendDTO> trendMap = new HashMap<>();
 
         for (Object[] row : rawData) {
-            LocalDate date = (LocalDate) row[0];
+            // Convert java.sql.Date to LocalDate
+            LocalDate date;
+            if (row[0] instanceof java.sql.Date) {
+                date = ((java.sql.Date) row[0]).toLocalDate();
+            } else if (row[0] instanceof LocalDate) {
+                date = (LocalDate) row[0];
+            } else {
+                continue; // Skip invalid data
+            }
+
             Double revenue = AnalyticsHelper.toSafeDouble(row[1]);
             Long count = AnalyticsHelper.toSafeLong(row[2]);
             Double serviceRevenue = AnalyticsHelper.toSafeDouble(row[3]);
