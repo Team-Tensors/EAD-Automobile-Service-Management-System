@@ -10,11 +10,13 @@ import {
   Filter,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import { inventoryService } from '../services/inventoryService';
+import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
 
 const CATEGORIES = [
@@ -41,6 +43,7 @@ const EmployeeInventory = () => {
   const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [getQuantity, setGetQuantity] = useState(0);
+  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,6 +52,19 @@ const EmployeeInventory = () => {
   // Load inventory items
   useEffect(() => {
     loadInventory();
+  }, []);
+
+  // Fetch employee details
+  useEffect(() => {
+    const fetchEmployeeDetails = async () => {
+      try {
+        const details = await employeeService.getEmployeeDetails();
+        setEmployeeDetails(details);
+      } catch (err) {
+        console.error("Error fetching employee details:", err);
+      }
+    };
+    fetchEmployeeDetails();
   }, []);
 
   // Filter items based on search and category
@@ -119,7 +135,7 @@ const EmployeeInventory = () => {
     <div className="min-h-screen bg-black">
       <AuthenticatedNavbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -128,9 +144,26 @@ const EmployeeInventory = () => {
                 Welcome back, {user?.firstName} {user?.lastName}!
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
-              <Calendar className="w-5 h-5 text-gray-300" />
-              <span className="font-semibold">{new Date().toLocaleDateString()}</span>
+            <div className="flex items-center gap-4">
+              {employeeDetails && (
+                <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
+                  <MapPin className="w-5 h-5 text-blue-400" />
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Service Center</p>
+                    <p className={`text-sm font-semibold ${
+                      employeeDetails.serviceCenter 
+                        ? "text-white" 
+                        : "text-gray-500 italic"
+                    }`}>
+                      {employeeDetails.serviceCenter || "Unassigned"}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
+                <Calendar className="w-5 h-5 text-gray-300" />
+                <span className="font-semibold">{new Date().toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -325,7 +358,7 @@ const EmployeeInventory = () => {
       {showGetModal && selectedItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-700">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
+            <div className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
               <h3 className="text-2xl font-bold">Get Item</h3>
               <button
                 onClick={() => {
