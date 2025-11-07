@@ -23,4 +23,20 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
 
     // Check if item name already exists
     boolean existsByItemNameIgnoreCase(String itemName);
+
+    // Check if item name already exists in a specific service center
+    boolean existsByItemNameIgnoreCaseAndServiceCenterId(String itemName, UUID serviceCenterId);
+
+    // Find all items by service center ID
+    List<InventoryItem> findByServiceCenterId(UUID serviceCenterId);
+
+    // Find low stock items by service center ID
+    @Query("SELECT i FROM InventoryItem i WHERE i.quantity <= i.minStock AND i.serviceCenter.id = :serviceCenterId")
+    List<InventoryItem> findLowStockItemsByServiceCenterId(UUID serviceCenterId);
+
+    // Find items by category and service center ID
+    List<InventoryItem> findByCategoryAndServiceCenterId(String category, UUID serviceCenterId);
+
+    // Find items by name and service center ID (case-insensitive search)
+    List<InventoryItem> findByItemNameContainingIgnoreCaseAndServiceCenterId(String itemName, UUID serviceCenterId);
 }
