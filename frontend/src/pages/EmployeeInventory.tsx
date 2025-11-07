@@ -170,17 +170,17 @@ const EmployeeInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700 mb-6">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
             {/* Category Filter */}
@@ -189,7 +189,7 @@ const EmployeeInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
