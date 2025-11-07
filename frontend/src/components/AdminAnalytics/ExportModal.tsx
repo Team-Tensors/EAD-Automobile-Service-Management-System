@@ -12,7 +12,7 @@ import type { AnalyticsParams } from '@/types/analytics';
 import {
   convertToCSV,
   downloadCSV,
-  downloadExcel,
+  downloadJSON,
   formatDashboardSummary,
   formatServiceDistribution,
   formatRevenueTrend,
@@ -75,12 +75,14 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
       };
 
       let csvContent = '';
+      let rawData: unknown = null;
       const fileName = `${reportType}_${startDate}_to_${endDate}`;
 
       // Fetch data from appropriate API and format for export
       switch (reportType) {
         case 'dashboard-summary': {
           const data = await getDashboardSummary(params);
+          rawData = data;
           const formatted = formatDashboardSummary(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -88,6 +90,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
         case 'service-distribution': {
           const data = await getServiceDistribution(params);
+          rawData = data;
           const formatted = formatServiceDistribution(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -95,6 +98,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
         case 'revenue-report': {
           const data = await getRevenueTrend(params);
+          rawData = data;
           const formatted = formatRevenueTrend(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -102,6 +106,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
         case 'employee-performance': {
           const data = await getEmployeePerformance(params);
+          rawData = data;
           const formatted = formatEmployeePerformance(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -109,6 +114,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
         case 'customer-insights': {
           const data = await getCustomerInsights(params);
+          rawData = data;
           const formatted = formatCustomerInsights(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -118,6 +124,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
           // For appointments detail, use dashboard summary as base
           // In production, you might want a dedicated appointments API
           const data = await getDashboardSummary(params);
+          rawData = data;
           const formatted = formatAppointmentsDetail(data);
           csvContent = convertToCSV(formatted.rows, formatted.headers);
           break;
@@ -130,12 +137,12 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
       // Download the file in the appropriate format
       if (exportFormat === 'csv') {
         downloadCSV(csvContent, `${fileName}.csv`);
+        toast.success(`Report downloaded: ${fileName}.csv`);
       } else {
-        downloadExcel(csvContent, `${fileName}.xlsx`);
+        // JSON format
+        downloadJSON(rawData, `${fileName}.json`);
+        toast.success(`Report downloaded: ${fileName}.json`);
       }
-
-      // Show success message
-      toast.success(`Report downloaded: ${fileName}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`);
 
       // Close modal after successful export
       setTimeout(() => {
@@ -193,7 +200,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Export Report</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Download analytics data in CSV or Excel format</p>
+              <p className="text-xs text-gray-400 mt-0.5">Download analytics data in CSV or JSON format</p>
             </div>
           </div>
           <button
@@ -341,7 +348,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-white">CSV</p>
-                  <p className="text-xs text-gray-400">.csv file</p>
+                  <p className="text-xs text-gray-400">Spreadsheet format</p>
                 </div>
               </label>
               <label
@@ -371,8 +378,8 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-white">Excel</p>
-                  <p className="text-xs text-gray-400">.xlsx file</p>
+                  <p className="text-sm font-medium text-white">JSON</p>
+                  <p className="text-xs text-gray-400">Structured data</p>
                 </div>
               </label>
             </div>
