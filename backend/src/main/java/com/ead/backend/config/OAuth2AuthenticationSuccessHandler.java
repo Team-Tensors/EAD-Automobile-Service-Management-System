@@ -5,6 +5,7 @@ import com.ead.backend.entity.User;
 import com.ead.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -22,6 +23,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationSuccessHandler.class);
     private final AuthService authService;
+
+    @Value("${oauth.frontend.redirect.url}")
+    private String frontendRedirectUrl;
 
     public OAuth2AuthenticationSuccessHandler(@Lazy AuthService authService) {
         this.authService = authService;
@@ -63,15 +67,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             logger.error("OAuth2 authentication failed - Error: {}", e.getMessage(), e);
 
             // Redirect to frontend with error
-            String errorUrl = "http://localhost:5173/login?error=oauth_failed&message=" +
+            String errorUrl = frontendRedirectUrl + "/login?error=oauth_failed&message=" +
                             URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             getRedirectStrategy().sendRedirect(request, response, errorUrl);
         }
     }
 
-    private String buildFrontendRedirectUrl(AuthResponseDTO authResponseDTO, User user) throws Exception {
+    private String buildFrontendRedirectUrl(AuthResponseDTO authResponseDTO, User user) {
         return String.format(
-            "http://localhost:5173/oauth/callback?token=%s&refreshToken=%s&id=%s&email=%s&fullName=%s",
+            "%s/oauth/callback?token=%s&refreshToken=%s&id=%s&email=%s&fullName=%s",
+            frontendRedirectUrl,
             authResponseDTO.getToken(),
             authResponseDTO.getRefreshToken(),
             user.getId(),
