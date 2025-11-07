@@ -2,6 +2,7 @@ package com.ead.backend.config;
 
 import com.ead.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WebSocketAuthInterceptor implements ChannelInterceptor {
@@ -27,12 +29,15 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+            log.debug("WebSocket CONNECT command received");
+
             // Extract token from headers
             List<String> authHeaders = accessor.getNativeHeader("Authorization");
             
             if (authHeaders != null && !authHeaders.isEmpty()) {
                 String authHeader = authHeaders.get(0);
-                
+                log.debug("Authorization header found: {}", authHeader != null ? "Bearer ***" : "null");
+
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     String token = authHeader.substring(7);
                     
@@ -41,10 +46,12 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                         String username = jwtUtil.extractUsername(token);
                         
                         if (username != null) {
+                            log.debug("JWT username extracted: {}", username);
                             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                             
                             if (jwtUtil.validateToken(token, userDetails)) {
-                                UsernamePasswordAuthenticationToken authentication = 
+                                log.info("WebSocket authentication successful for user: {}", username);
+                                UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(
                                         userDetails, 
                                         null, 
@@ -52,12 +59,20 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                                     );
                                 
                                 accessor.setUser(authentication);
+                            } else {
+                                log.warn("WebSocket JWT token validation failed for user: {}", username);
                             }
+                        } else {
+                            log.warn("WebSocket JWT username extraction failed");
                         }
                     } catch (Exception e) {
-                        System.err.println("WebSocket authentication failed: " + e.getMessage());
+                        log.error("WebSocket authentication failed: {}", e.getMessage(), e);
                     }
+                } else {
+                    log.warn("WebSocket Authorization header does not start with 'Bearer '");
                 }
+            } else {
+                log.warn("WebSocket CONNECT without Authorization header");
             }
         }
 
