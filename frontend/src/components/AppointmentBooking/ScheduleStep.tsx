@@ -5,6 +5,8 @@ import {
   type SlotAvailability,
 } from "../../services/appointmentService";
 import toast from "react-hot-toast";
+import type { AppointmentType } from "../../types/appointment";
+import { AppointmentTypeValues } from "../../types/appointment";
 
 interface ScheduleFormData {
   serviceCenterId: string;
@@ -14,7 +16,7 @@ interface ScheduleFormData {
 }
 
 interface ServiceCenter {
-  id: number; // Changed from string to number for type consistency
+  id: string;
   name: string;
   address: string;
   city: string;
@@ -22,6 +24,7 @@ interface ServiceCenter {
 
 interface ScheduleStepProps {
   formData: ScheduleFormData;
+  appointmentType: AppointmentType | "";
   serviceCenters: ServiceCenter[];
   isLoadingServiceCenters?: boolean;
   onChange: (
@@ -36,6 +39,7 @@ interface ScheduleStepProps {
 
 const ScheduleStep: React.FC<ScheduleStepProps> = ({
   formData,
+  appointmentType,
   serviceCenters,
   isLoadingServiceCenters = false,
   onChange,
@@ -117,19 +121,32 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
 
   const timeSlots = getTimeSlots();
 
-  // Get minimum date
+  // Get minimum date based on appointment type
   const now = new Date();
   const currentHour = now.getHours();
   const dayOfWeek = now.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
   const closingHour = isWeekend ? 16 : 19;
 
-  const minDate =
-    currentHour >= closingHour
-      ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0]
-      : now.toISOString().split("T")[0];
+  // For MODIFICATION appointments, require at least 2 days advance booking
+  const minDaysAdvance =
+    appointmentType === AppointmentTypeValues.MODIFICATION ? 2 : 0;
+
+  let minDate: string;
+  if (minDaysAdvance > 0) {
+    // Add the required days advance
+    minDate = new Date(now.getTime() + minDaysAdvance * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+  } else {
+    // For SERVICE appointments, use existing logic
+    minDate =
+      currentHour >= closingHour
+        ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0]
+        : now.toISOString().split("T")[0];
+  }
 
   // Get maximum date - 1 month from today
   const maxDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
@@ -224,6 +241,14 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({
             Appointment Date *
           </span>
         </label>
+        {appointmentType === AppointmentTypeValues.MODIFICATION && (
+          <p className="text-sm text-orange-400 mb-2 flex items-center space-x-1">
+            
+            <span>
+              Modification appointments require at least 2 days advance booking
+            </span>
+          </p>
+        )}
         <input
           type="date"
           name="appointmentDate"

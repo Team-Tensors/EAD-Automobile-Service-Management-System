@@ -1,7 +1,7 @@
 import type { LatLngExpression } from "leaflet";
 
 export interface ServiceCenter {
-  id: number;
+  id: string; // UUID from backend
   name: string;
   address: string;
   city: string;

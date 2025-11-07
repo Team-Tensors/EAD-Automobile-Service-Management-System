@@ -1,7 +1,9 @@
 package com.ead.backend.dto;
 
 import com.ead.backend.enums.AppointmentType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class DetailedAppointmentDTO {
     private java.util.UUID id;
     private java.util.UUID vehicleId;
@@ -16,44 +18,127 @@ public class DetailedAppointmentDTO {
     private String assignedEmployee;
     private String estimatedCompletion;
     private String centerSlot;
+    private String startTime; // Actual service start time (ISO format)
+    private String endTime; // Actual service end time (ISO format)
 
     // Getters and Setters
-    public java.util.UUID getId() { return id; }
-    public void setId(java.util.UUID id) { this.id = id; }
+    public java.util.UUID getId() {
+        return id;
+    }
 
-    public java.util.UUID getVehicleId() { return vehicleId; }
-    public void setVehicleId(java.util.UUID vehicleId) { this.vehicleId = vehicleId; }
+    public void setId(java.util.UUID id) {
+        this.id = id;
+    }
 
-    public String getVehicleName() { return vehicleName; }
-    public void setVehicleName(String vehicleName) { this.vehicleName = vehicleName; }
+    public java.util.UUID getVehicleId() {
+        return vehicleId;
+    }
 
-    public String getLicensePlate() { return licensePlate; }
-    public void setLicensePlate(String licensePlate) { this.licensePlate = licensePlate; }
+    public void setVehicleId(java.util.UUID vehicleId) {
+        this.vehicleId = vehicleId;
+    }
 
-    public String getService() { return service; }
-    public void setService(String service) { this.service = service; }
+    public String getVehicleName() {
+        return vehicleName;
+    }
 
-    public AppointmentType getType() { return type; }
-    public void setType(AppointmentType type) { this.type = type; }
+    public void setVehicleName(String vehicleName) {
+        this.vehicleName = vehicleName;
+    }
 
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    public String getLicensePlate() {
+        return licensePlate;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
+    }
 
-    public boolean isCanStart() { return canStart; }
-    public void setCanStart(boolean canStart) { this.canStart = canStart; }
+    public String getService() {
+        return service;
+    }
 
-    public String getServiceCenter() { return serviceCenter; }
-    public void setServiceCenter(String serviceCenter) { this.serviceCenter = serviceCenter; }
+    public void setService(String service) {
+        this.service = service;
+    }
 
-    public String getAssignedEmployee() { return assignedEmployee; }
-    public void setAssignedEmployee(String assignedEmployee) { this.assignedEmployee = assignedEmployee; }
+    public AppointmentType getType() {
+        return type;
+    }
 
-    public String getEstimatedCompletion() { return estimatedCompletion; }
-    public void setEstimatedCompletion(String estimatedCompletion) { this.estimatedCompletion = estimatedCompletion; }
+    public void setType(AppointmentType type) {
+        this.type = type;
+    }
 
-    public String getCenterSlot() { return centerSlot; }
-    public void setCenterSlot(String centerSlot) { this.centerSlot = centerSlot; }
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public boolean isCanStart() {
+        return canStart;
+    }
+
+    public void setCanStart(boolean canStart) {
+        this.canStart = canStart;
+    }
+
+    public String getServiceCenter() {
+        return serviceCenter;
+    }
+
+    public void setServiceCenter(String serviceCenter) {
+        this.serviceCenter = serviceCenter;
+    }
+
+    public String getAssignedEmployee() {
+        return assignedEmployee;
+    }
+
+    public void setAssignedEmployee(String assignedEmployee) {
+        this.assignedEmployee = assignedEmployee;
+    }
+
+    public String getEstimatedCompletion() {
+        return estimatedCompletion;
+    }
+
+    public void setEstimatedCompletion(String estimatedCompletion) {
+        this.estimatedCompletion = estimatedCompletion;
+    }
+
+    public String getCenterSlot() {
+        return centerSlot;
+    }
+
+    public void setCenterSlot(String centerSlot) {
+        this.centerSlot = centerSlot;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 }
