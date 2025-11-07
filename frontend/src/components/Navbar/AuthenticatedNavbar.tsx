@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   Home,
+  Wrench,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
@@ -130,6 +131,12 @@ const AuthenticatedNavbar = () => {
       name: "EMPLOYEES",
       path: "/admin/employees",
       icon: User,
+      roles: ["ADMIN"],
+    },
+    {
+      name: "SERVICE TYPES",
+      path: "/admin/service-types",
+      icon: Wrench,
       roles: ["ADMIN"],
     },
   ];
