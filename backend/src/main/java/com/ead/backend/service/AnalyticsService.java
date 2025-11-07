@@ -34,12 +34,20 @@ public class AnalyticsService {
      * Get service type distribution analytics
      */
     public ServiceDistributionResponseDTO getServiceTypeDistribution(AnalyticsFilterRequestDTO filter) {
-        List<Object[]> rawData = appointmentRepository.getServiceTypeDistribution(
-                filter.getStartDate(),
-                filter.getEndDate(),
-                filter.getServiceCenterId(),
-                filter.getStatus()
-        );
+        List<Object[]> rawData;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            rawData = appointmentRepository.getServiceTypeDistributionAllTime(
+                    filter.getServiceCenterId(),
+                    filter.getStatus()
+            );
+        } else {
+            rawData = appointmentRepository.getServiceTypeDistribution(
+                    filter.getStartDate(),
+                    filter.getEndDate(),
+                    filter.getServiceCenterId(),
+                    filter.getStatus()
+            );
+        }
 
         List<ServiceTypeDistributionDTO> distributions = new ArrayList<>();
         long totalAppointments = 0;
@@ -94,11 +102,18 @@ public class AnalyticsService {
      * Get revenue trend analytics
      */
     public RevenueTrendResponseDTO getRevenueTrend(AnalyticsFilterRequestDTO filter) {
-        List<Object[]> rawData = appointmentRepository.getRevenueByDateRange(
-                filter.getStartDate(),
-                filter.getEndDate(),
-                filter.getServiceCenterId()
-        );
+        List<Object[]> rawData;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            rawData = appointmentRepository.getRevenueByDateRangeAllTime(
+                    filter.getServiceCenterId()
+            );
+        } else {
+            rawData = appointmentRepository.getRevenueByDateRange(
+                    filter.getStartDate(),
+                    filter.getEndDate(),
+                    filter.getServiceCenterId()
+            );
+        }
 
         Map<LocalDate, RevenueTrendDTO> trendMap = new HashMap<>();
 
@@ -174,17 +189,29 @@ public class AnalyticsService {
      */
     public EmployeePerformanceResponseDTO getEmployeePerformance(AnalyticsFilterRequestDTO filter) {
         // Get appointment metrics
-        List<Object[]> appointmentMetrics = appointmentRepository.getEmployeeAppointmentMetrics(
-                filter.getStartDate(),
-                filter.getEndDate(),
-                filter.getServiceCenterId()
-        );
+        List<Object[]> appointmentMetrics;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            appointmentMetrics = appointmentRepository.getEmployeeAppointmentMetricsAllTime(
+                    filter.getServiceCenterId()
+            );
+        } else {
+            appointmentMetrics = appointmentRepository.getEmployeeAppointmentMetrics(
+                    filter.getStartDate(),
+                    filter.getEndDate(),
+                    filter.getServiceCenterId()
+            );
+        }
 
         // Get time log metrics
-        List<Object[]> timeMetrics = timeLogRepository.getEmployeeTimeMetrics(
-                filter.getStartDate(),
-                filter.getEndDate()
-        );
+        List<Object[]> timeMetrics;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            timeMetrics = timeLogRepository.getEmployeeTimeMetricsAllTime();
+        } else {
+            timeMetrics = timeLogRepository.getEmployeeTimeMetrics(
+                    filter.getStartDate(),
+                    filter.getEndDate()
+            );
+        }
 
         Map<UUID, Double> hoursMap = new HashMap<>();
         for (Object[] row : timeMetrics) {
@@ -261,10 +288,15 @@ public class AnalyticsService {
      * Get customer insights analytics
      */
     public CustomerInsightsResponseDTO getCustomerInsights(AnalyticsFilterRequestDTO filter) {
-        List<Object[]> rawData = userRepository.getCustomerInsights(
-                filter.getStartDate(),
-                filter.getEndDate()
-        );
+        List<Object[]> rawData;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            rawData = userRepository.getCustomerInsightsAllTime();
+        } else {
+            rawData = userRepository.getCustomerInsights(
+                    filter.getStartDate(),
+                    filter.getEndDate()
+            );
+        }
 
         List<CustomerInsightDTO> insights = new ArrayList<>();
         List<UUID> customerIds = new ArrayList<>();
@@ -356,11 +388,18 @@ public class AnalyticsService {
      * Get dashboard summary analytics
      */
     public AnalyticsDashboardDTO getDashboardSummary(AnalyticsFilterRequestDTO filter) {
-        // Get all appointments in range
-        List<Appointment> appointments = appointmentRepository.findByAppointmentDateBetween(
-                filter.getStartDate(),
-                filter.getEndDate()
-        );
+        // Get all appointments in range (or all appointments if allTime mode)
+        List<Appointment> appointments;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            // Get ALL appointments regardless of date
+            appointments = appointmentRepository.findAll();
+        } else {
+            // Get appointments within date range
+            appointments = appointmentRepository.findByAppointmentDateBetween(
+                    filter.getStartDate(),
+                    filter.getEndDate()
+            );
+        }
 
         // Calculate metrics
         Long totalAppointments = (long) appointments.size();
@@ -382,10 +421,15 @@ public class AnalyticsService {
         Double avgServiceCost = AnalyticsHelper.safeDivide(totalRevenue, completed.doubleValue());
 
         // Get customer count
-        Long totalCustomers = appointmentRepository.countDistinctCustomers(
-                filter.getStartDate(),
-                filter.getEndDate()
-        );
+        Long totalCustomers;
+        if (filter.getAllTime() != null && filter.getAllTime()) {
+            totalCustomers = appointmentRepository.countDistinctCustomersAllTime();
+        } else {
+            totalCustomers = appointmentRepository.countDistinctCustomers(
+                    filter.getStartDate(),
+                    filter.getEndDate()
+            );
+        }
 
         // Get employee count
         Long totalEmployees = (long) userRepository.findByRoleName("EMPLOYEE").size();
@@ -449,6 +493,7 @@ public class AnalyticsService {
         }
 
         List<RevenueTrendDTO> result = new ArrayList<>();
+
         for (Map.Entry<LocalDate, List<RevenueTrendDTO>> entry : grouped.entrySet()) {
             LocalDate period = entry.getKey();
             List<RevenueTrendDTO> trends = entry.getValue();
@@ -494,13 +539,24 @@ public class AnalyticsService {
      */
     private Double calculateCustomerSpending(UUID customerId, LocalDateTime startDate, LocalDateTime endDate) {
         List<Appointment> appointments = appointmentRepository.findByUserId(customerId);
-        return appointments.stream()
-                .filter(a -> a.getAppointmentDate().isAfter(startDate) &&
-                        a.getAppointmentDate().isBefore(endDate) &&
-                        "COMPLETED".equals(a.getStatus()))
-                .mapToDouble(a -> a.getServiceOrModification().getEstimatedCost() != null ?
-                        a.getServiceOrModification().getEstimatedCost() : 0.0)
-                .sum();
+
+        if (startDate == null || endDate == null) {
+            // All time - no date filtering
+            return appointments.stream()
+                    .filter(a -> "COMPLETED".equals(a.getStatus()))
+                    .mapToDouble(a -> a.getServiceOrModification().getEstimatedCost() != null ?
+                            a.getServiceOrModification().getEstimatedCost() : 0.0)
+                    .sum();
+        } else {
+            // Filter by date range
+            return appointments.stream()
+                    .filter(a -> a.getAppointmentDate().isAfter(startDate) &&
+                            a.getAppointmentDate().isBefore(endDate) &&
+                            "COMPLETED".equals(a.getStatus()))
+                    .mapToDouble(a -> a.getServiceOrModification().getEstimatedCost() != null ?
+                            a.getServiceOrModification().getEstimatedCost() : 0.0)
+                    .sum();
+        }
     }
 }
 

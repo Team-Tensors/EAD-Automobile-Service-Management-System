@@ -43,6 +43,21 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     );
 
     /**
+     * Get customer insights (all time)
+     */
+    @Query("SELECT u.id, u.fullName, u.email, u.phoneNumber, " +
+            "COUNT(a), " +
+            "COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'CANCELLED' THEN 1 END), " +
+            "MIN(a.appointmentDate), " +
+            "MAX(a.appointmentDate) " +
+            "FROM User u " +
+            "JOIN Appointment a ON a.user.id = u.id " +
+            "GROUP BY u.id, u.fullName, u.email, u.phoneNumber " +
+            "ORDER BY COUNT(a) DESC")
+    List<Object[]> getCustomerInsightsAllTime();
+
+    /**
      * Count customers with multiple appointments (repeat customers)
      */
     @Query("SELECT COUNT(DISTINCT u.id) " +

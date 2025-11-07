@@ -40,4 +40,12 @@ public interface TimeLogRepository extends JpaRepository<TimeLog, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    /**
+     * Get detailed employee performance from time logs (all time)
+     */
+    @Query("SELECT tl.user.id, COUNT(DISTINCT tl.appointment.id), SUM(tl.hoursLogged), AVG(tl.hoursLogged) " +
+            "FROM TimeLog tl " +
+            "GROUP BY tl.user.id")
+    List<Object[]> getEmployeeTimeMetricsAllTime();
 }

@@ -2,7 +2,6 @@ package com.ead.backend.dto;
 
 import com.ead.backend.enums.AppointmentType;
 import com.ead.backend.enums.PeriodType;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,16 +13,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnalyticsFilterRequestDTO {
-    @NotNull(message = "Start date is required")
     private LocalDateTime startDate;
-
-    @NotNull(message = "End date is required")
     private LocalDateTime endDate;
-
     private UUID serviceCenterId;
     private AppointmentType appointmentType;
     private String status;
     private PeriodType periodType = PeriodType.DAILY;
+    private Boolean allTime = false;
 
     // Default constructor with last 30 days
     public static AnalyticsFilterRequestDTO defaultLast30Days() {
