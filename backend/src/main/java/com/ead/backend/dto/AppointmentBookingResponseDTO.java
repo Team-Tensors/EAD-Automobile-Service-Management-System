@@ -10,7 +10,7 @@ import java.util.UUID;
 public class AppointmentBookingResponseDTO {
     private UUID id;
     private UUID vehicleId;
-    private String vehicleInfo; // e.g., "Toyota Camry 2020"
+    private String vehicleInfo;
     private String serviceName;
     private AppointmentType appointmentType;
     private LocalDateTime appointmentDate;
