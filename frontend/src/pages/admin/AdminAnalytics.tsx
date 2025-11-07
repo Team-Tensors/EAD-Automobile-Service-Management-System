@@ -4,7 +4,7 @@ import {
   TrendingUp, 
   Users, 
   Clock, 
-  DollarSign,
+  Wallet,
   AlertCircle,
   CheckCircle,
   Activity
@@ -209,11 +209,11 @@ const AdminAnalytics = () => {
                     <p className="text-gray-400 text-sm">Total Appointments</p>
                     <p className="text-3xl font-bold text-white mt-1">{dashboardData?.totalAppointments || 0}</p>
                   </div>
-                  <Calendar className="w-12 h-12 text-blue-500" />
+                  <Calendar className="w-12 h-12 text-orange-500" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">
+                  <TrendingUp className="w-4 h-4 text-orange-500" />
+                  <span className="text-orange-500">
                     {dashboardData?.completedAppointments || 0} completed
                   </span>
                 </div>
@@ -228,11 +228,11 @@ const AdminAnalytics = () => {
                       {formatCurrency(dashboardData?.totalRevenue || 0)}
                     </p>
                   </div>
-                  <DollarSign className="w-12 h-12 text-green-500" />
+                  <Wallet className="w-12 h-12 text-orange-600" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">
+                  <TrendingUp className="w-4 h-4 text-orange-600" />
+                  <span className="text-orange-600">
                     Avg: {formatCurrency(dashboardData?.averageServiceCost || 0)}
                   </span>
                 </div>
@@ -247,11 +247,11 @@ const AdminAnalytics = () => {
                       {dashboardData?.completionRate.toFixed(1) || 0}%
                     </p>
                   </div>
-                  <CheckCircle className="w-12 h-12 text-purple-500" />
+                  <CheckCircle className="w-12 h-12 text-orange-400" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Activity className="w-4 h-4 text-purple-500" />
-                  <span className="text-purple-500">Performance</span>
+                  <Activity className="w-4 h-4 text-orange-400" />
+                  <span className="text-orange-400">Performance</span>
                 </div>
               </div>
 
@@ -280,7 +280,7 @@ const AdminAnalytics = () => {
               {/* Pending */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <Clock className="w-8 h-8 text-yellow-500" />
+                  <Clock className="w-8 h-8 text-amber-500" />
                   <div>
                     <p className="text-sm text-gray-400">Pending</p>
                     <p className="text-2xl font-bold text-white">{dashboardData?.pendingAppointments || 0}</p>
@@ -288,7 +288,7 @@ const AdminAnalytics = () => {
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
-                    className="bg-yellow-500 h-2 rounded-full transition-all"
+                    className="bg-amber-500 h-2 rounded-full transition-all"
                     style={{ 
                       width: `${dashboardData && dashboardData.totalAppointments > 0 
                         ? (dashboardData.pendingAppointments / dashboardData.totalAppointments * 100) 
@@ -301,7 +301,7 @@ const AdminAnalytics = () => {
               {/* Confirmed */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <CheckCircle className="w-8 h-8 text-cyan-500" />
+                  <CheckCircle className="w-8 h-8 text-orange-500" />
                   <div>
                     <p className="text-sm text-gray-400">Confirmed</p>
                     <p className="text-2xl font-bold text-white">{dashboardData?.confirmedAppointments || 0}</p>
@@ -309,7 +309,7 @@ const AdminAnalytics = () => {
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
-                    className="bg-cyan-500 h-2 rounded-full transition-all"
+                    className="bg-orange-500 h-2 rounded-full transition-all"
                     style={{ 
                       width: `${dashboardData && dashboardData.totalAppointments > 0 
                         ? (dashboardData.confirmedAppointments / dashboardData.totalAppointments * 100) 
@@ -322,7 +322,7 @@ const AdminAnalytics = () => {
               {/* In Progress */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <Activity className="w-8 h-8 text-blue-500" />
+                  <Activity className="w-8 h-8 text-orange-600" />
                   <div>
                     <p className="text-sm text-gray-400">In Progress</p>
                     <p className="text-2xl font-bold text-white">{dashboardData?.inProgressAppointments || 0}</p>
@@ -330,7 +330,7 @@ const AdminAnalytics = () => {
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all"
+                    className="bg-orange-600 h-2 rounded-full transition-all"
                     style={{ 
                       width: `${dashboardData && dashboardData.totalAppointments > 0 
                         ? (dashboardData.inProgressAppointments / dashboardData.totalAppointments * 100) 
