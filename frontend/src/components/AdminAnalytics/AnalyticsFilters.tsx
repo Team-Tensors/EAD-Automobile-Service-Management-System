@@ -98,7 +98,7 @@ const AnalyticsFilters = ({
           <div className="relative group">
             <button
               onClick={() => {}}
-              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 rounded-full px-4 py-2.5 text-sm text-white transition-all hover:border-orange-500/50 group"
+              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 rounded-full px-4 py-2.5 text-sm text-white transition-all hover:border-orange-500/50 group cursor-pointer"
             >
               <Calendar className="w-4 h-4 text-orange-500" />
               <span className="font-medium">{getDateRangeLabel()}</span>
@@ -115,7 +115,7 @@ const AnalyticsFilters = ({
                     className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
                       pendingDateRange === option.value
                         ? 'bg-orange-600 text-white font-medium'
-                        : 'text-gray-300 hover:bg-zinc-700 hover:text-white'
+                        : 'text-gray-300 hover:bg-zinc-600 hover:text-white cursor-pointer'
                     }`}
                   >
                     {option.label}
@@ -129,7 +129,7 @@ const AnalyticsFilters = ({
           <div className="relative group">
             <button
               onClick={() => {}}
-              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 rounded-full px-4 py-2.5 text-sm text-white transition-all hover:border-orange-500/50"
+              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-750 border border-zinc-700 rounded-full px-4 py-2.5 text-sm text-white transition-all hover:border-orange-500/50 cursor-pointer"
             >
               <Building2 className="w-4 h-4 text-orange-500" />
               <span className="font-medium">{getServiceCenterLabel()}</span>
@@ -144,7 +144,7 @@ const AnalyticsFilters = ({
                   className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
                     pendingServiceCenterId === 'all'
                       ? 'bg-orange-600 text-white font-medium'
-                      : 'text-gray-300 hover:bg-zinc-700 hover:text-white'
+                      : 'text-gray-300 hover:bg-zinc-600 hover:text-white cursor-pointer'
                   }`}
                 >
                   All Service Centers
@@ -153,10 +153,10 @@ const AnalyticsFilters = ({
                   <button
                     key={center.id}
                     onClick={() => handleServiceCenterChange(center.id)}
-                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors cursor-pointer ${
                       pendingServiceCenterId === center.id
                         ? 'bg-orange-600 text-white font-medium'
-                        : 'text-gray-300 hover:bg-zinc-700 hover:text-white'
+                        : 'text-gray-300 hover:bg-zinc-600 hover:text-white'
                     }`}
                   >
                     {center.name}
@@ -246,7 +246,7 @@ const AnalyticsFilters = ({
                       onCustomStartDateChange(lastWeek.toISOString().split('T')[0]);
                       onCustomEndDateChange(today.toISOString().split('T')[0]);
                     }}
-                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Last 7 Days
                   </button>
@@ -258,7 +258,7 @@ const AnalyticsFilters = ({
                       onCustomStartDateChange(lastMonth.toISOString().split('T')[0]);
                       onCustomEndDateChange(today.toISOString().split('T')[0]);
                     }}
-                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Last 30 Days
                   </button>
@@ -269,7 +269,7 @@ const AnalyticsFilters = ({
                       onCustomStartDateChange(firstDay.toISOString().split('T')[0]);
                       onCustomEndDateChange(today.toISOString().split('T')[0]);
                     }}
-                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
                     This Month
                   </button>
@@ -280,7 +280,7 @@ const AnalyticsFilters = ({
                       onCustomStartDateChange(firstDay.toISOString().split('T')[0]);
                       onCustomEndDateChange(today.toISOString().split('T')[0]);
                     }}
-                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
                     Year to Date
                   </button>
