@@ -4,69 +4,169 @@ import {
   TrendingUp, 
   Users, 
   Clock, 
-  DollarSign,
-  Package,
+  Wallet,
   AlertCircle,
   CheckCircle,
-  BarChart3,
-  PieChart,
   Activity
 } from 'lucide-react';
-import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees } from '../../services/adminService';
-import type { AdminService, Employee } from '@/types/admin';
+import { 
+  getDashboardSummary,
+  getServiceDistribution,
+  getRevenueTrend,
+  getEmployeePerformance,
+  getCustomerInsights,
+  getTodayRange,
+  getLastNDaysRange,
+  getNextNDaysRange,
+  getCurrentMonthRange,
+  getYearToDateRange
+} from '../../services/analyticsService';
+import { fetchServiceCenters } from '../../services/serviceCenterService';
+import type { 
+  DashboardSummary,
+  ServiceDistribution,
+  RevenueTrend,
+  EmployeePerformance,
+  CustomerInsights,
+  AnalyticsParams
+} from '@/types/analytics';
+import type { ServiceCenter } from '@/types/serviceCenter';
 import AdminHeader from '../../components/AdminDashboard/AdminHeader';
+import ServiceTypeChart from '../../components/AdminAnalytics/ServiceTypeChart';
+import RevenueTrendChart from '../../components/AdminAnalytics/RevenueTrendChart';
+import EmployeePerformanceChart from '../../components/AdminAnalytics/EmployeePerformanceChart';
+import CustomerInsightsChart from '../../components/AdminAnalytics/CustomerInsightsChart';
+import AnalyticsFilters from '../../components/AdminAnalytics/AnalyticsFilters';
 
 const AdminAnalytics = () => {
-  const [upcomingAppointments, setUpcomingAppointments] = useState<AdminService[]>([]);
-  const [ongoingAppointments, setOngoingAppointments] = useState<AdminService[]>([]);
-  const [unassignedAppointments, setUnassignedAppointments] = useState<AdminService[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
+  const [serviceDistribution, setServiceDistribution] = useState<ServiceDistribution | null>(null);
+  const [revenueTrend, setRevenueTrend] = useState<RevenueTrend | null>(null);
+  const [employeePerformance, setEmployeePerformance] = useState<EmployeePerformance | null>(null);
+  const [customerInsights, setCustomerInsights] = useState<CustomerInsights | null>(null);
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filter states
+  const [dateRange, setDateRange] = useState<string>('today');
+  const [serviceCenterId, setServiceCenterId] = useState<string>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
-  // Fetch all data on component mount
+  // Fetch service centers on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const loadServiceCenters = async () => {
       try {
-        setIsLoading(true);
-        const [unassigned, upcoming, ongoing, employeeList] = await Promise.all([
-          getUnassignedAppointments(),
-          getUpcomingAppointments(),
-          getOngoingAppointments(),
-          getAllEmployees(),
-        ]);
-
-        setUnassignedAppointments(unassigned);
-        setUpcomingAppointments(upcoming);
-        setOngoingAppointments(ongoing);
-        setEmployees(employeeList);
+        const centers = await fetchServiceCenters();
+        setServiceCenters(centers);
       } catch (error) {
-        console.error('Failed to load analytics data:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to load service centers:', error);
       }
     };
-
-    fetchData();
+    loadServiceCenters();
   }, []);
 
-  // Calculate metrics
-  const totalAppointments = upcomingAppointments.length + ongoingAppointments.length + unassignedAppointments.length;
-  const totalRevenue = [...upcomingAppointments, ...ongoingAppointments, ...unassignedAppointments]
-    .reduce((sum, apt) => sum + (apt.estimatedCost || 0), 0);
-  const avgServiceDuration = [...upcomingAppointments, ...ongoingAppointments, ...unassignedAppointments]
-    .reduce((sum, apt) => sum + (apt.estimatedDuration || 0), 0) / (totalAppointments || 1);
-  const assignmentRate = totalAppointments > 0 
-    ? ((totalAppointments - unassignedAppointments.length) / totalAppointments * 100).toFixed(1)
-    : 0;
+  // Helper to build filter params
+  const buildFilterParams = (): AnalyticsParams => {
+    const params: AnalyticsParams = {};
 
-  // Service type breakdown (mock data for now - would come from backend)
-  const serviceBreakdown = [
-    { name: 'Oil Change', count: 12, percentage: 30 },
-    { name: 'Brake Service', count: 8, percentage: 20 },
-    { name: 'Tire Rotation', count: 10, percentage: 25 },
-    { name: 'Engine Diagnostic', count: 6, percentage: 15 },
-    { name: 'Others', count: 4, percentage: 10 },
-  ];
+    // Apply date range
+    switch (dateRange) {
+      case 'today': {
+        const today = getTodayRange();
+        params.startDate = today.startDate;
+        params.endDate = today.endDate;
+        break;
+      }
+      case 'last7days': {
+        const last7 = getLastNDaysRange(7);
+        params.startDate = last7.startDate;
+        params.endDate = last7.endDate;
+        break;
+      }
+      case 'next7days': {
+        const next7 = getNextNDaysRange(7);
+        params.startDate = next7.startDate;
+        params.endDate = next7.endDate;
+        break;
+      }
+      case 'last30days': {
+        const last30 = getLastNDaysRange(30);
+        params.startDate = last30.startDate;
+        params.endDate = last30.endDate;
+        break;
+      }
+      case 'thisMonth': {
+        const thisMonth = getCurrentMonthRange();
+        params.startDate = thisMonth.startDate;
+        params.endDate = thisMonth.endDate;
+        break;
+      }
+      case 'yearToDate': {
+        const ytd = getYearToDateRange();
+        params.startDate = ytd.startDate;
+        params.endDate = ytd.endDate;
+        break;
+      }
+      case 'custom': {
+        // Use custom date range if provided
+        if (customStartDate && customEndDate) {
+          // Convert YYYY-MM-DD to ISO with time
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          
+          params.startDate = start.toISOString();
+          params.endDate = end.toISOString();
+        }
+        break;
+      }
+      case 'all':
+        // Use allTime parameter for all historical data
+        params.allTime = true;
+        break;
+    }
+
+    // Apply service center filter
+    if (serviceCenterId !== 'all') {
+      params.serviceCenterId = serviceCenterId;
+    }
+
+    return params;
+  };
+
+  // Fetch all data with current filters
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const params = buildFilterParams();
+      
+      const [dashboard, serviceData, revenueData, employeeData, customerData] = await Promise.all([
+        getDashboardSummary(params),
+        getServiceDistribution(params),
+        getRevenueTrend({ ...params, periodType: 'DAILY' }),
+        getEmployeePerformance(params),
+        getCustomerInsights(params),
+      ]);
+
+      setDashboardData(dashboard);
+      setServiceDistribution(serviceData);
+      setRevenueTrend(revenueData);
+      setEmployeePerformance(employeeData);
+      setCustomerInsights(customerData);
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data on component mount with default filters (today)
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return `Rs. ${amount.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -79,6 +179,20 @@ const AdminAnalytics = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+        {/* Filters */}
+        <AnalyticsFilters
+          dateRange={dateRange}
+          serviceCenterId={serviceCenterId}
+          serviceCenters={serviceCenters}
+          customStartDate={customStartDate}
+          customEndDate={customEndDate}
+          onDateRangeChange={setDateRange}
+          onServiceCenterChange={setServiceCenterId}
+          onCustomStartDateChange={setCustomStartDate}
+          onCustomEndDateChange={setCustomEndDate}
+          onApplyFilters={fetchData}
+        />
+
         {isLoading ? (
           <div className="py-12 text-center text-gray-400">
             <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
@@ -93,13 +207,15 @@ const AdminAnalytics = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-gray-400 text-sm">Total Appointments</p>
-                    <p className="text-3xl font-bold text-white mt-1">{totalAppointments}</p>
+                    <p className="text-3xl font-bold text-white mt-1">{dashboardData?.totalAppointments || 0}</p>
                   </div>
-                  <Calendar className="w-12 h-12 text-blue-500" />
+                  <Calendar className="w-12 h-12 text-orange-500" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">Active services</span>
+                  <TrendingUp className="w-4 h-4 text-orange-500" />
+                  <span className="text-orange-500">
+                    {dashboardData?.completedAppointments || 0} completed
+                  </span>
                 </div>
               </div>
 
@@ -107,187 +223,176 @@ const AdminAnalytics = () => {
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Estimated Revenue</p>
-                    <p className="text-2xl font-bold text-white mt-1">{formatCurrency(totalRevenue)}</p>
+                    <p className="text-gray-400 text-sm">Total Revenue</p>
+                    <p className="text-2xl font-bold text-white mt-1">
+                      {formatCurrency(dashboardData?.totalRevenue || 0)}
+                    </p>
                   </div>
-                  <DollarSign className="w-12 h-12 text-green-500" />
+                  <Wallet className="w-12 h-12 text-orange-600" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">From active bookings</span>
+                  <TrendingUp className="w-4 h-4 text-orange-600" />
+                  <span className="text-orange-600">
+                    Avg: {formatCurrency(dashboardData?.averageServiceCost || 0)}
+                  </span>
                 </div>
               </div>
 
-              {/* Average Service Time */}
+              {/* Completion Rate */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Avg. Service Time</p>
-                    <p className="text-3xl font-bold text-white mt-1">{Math.round(avgServiceDuration)}m</p>
+                    <p className="text-gray-400 text-sm">Completion Rate</p>
+                    <p className="text-3xl font-bold text-white mt-1">
+                      {dashboardData?.completionRate.toFixed(1) || 0}%
+                    </p>
                   </div>
-                  <Clock className="w-12 h-12 text-purple-500" />
+                  <CheckCircle className="w-12 h-12 text-orange-400" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Activity className="w-4 h-4 text-purple-500" />
-                  <span className="text-purple-500">Per appointment</span>
+                  <Activity className="w-4 h-4 text-orange-400" />
+                  <span className="text-orange-400">Performance</span>
                 </div>
               </div>
 
-              {/* Assignment Rate */}
+              {/* Total Customers */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Assignment Rate</p>
-                    <p className="text-3xl font-bold text-white mt-1">{assignmentRate}%</p>
+                    <p className="text-gray-400 text-sm">Total Customers</p>
+                    <p className="text-3xl font-bold text-white mt-1">
+                      {dashboardData?.totalCustomers || 0}
+                    </p>
                   </div>
-                  <CheckCircle className="w-12 h-12 text-orange-500" />
+                  <Users className="w-12 h-12 text-orange-500" />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Users className="w-4 h-4 text-orange-500" />
-                  <span className="text-orange-500">{employees.length} employees</span>
+                  <TrendingUp className="w-4 h-4 text-orange-500" />
+                  <span className="text-orange-500">
+                    {dashboardData?.repeatCustomerRate.toFixed(1) || 0}% repeat
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Status Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Unassigned */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+              {/* Pending */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <AlertCircle className="w-8 h-8 text-orange-500" />
+                  <Clock className="w-8 h-8 text-amber-500" />
                   <div>
-                    <p className="text-sm text-gray-400">Unassigned</p>
-                    <p className="text-2xl font-bold text-white">{unassignedAppointments.length}</p>
+                    <p className="text-sm text-gray-400">Pending</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.pendingAppointments || 0}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-zinc-800 rounded-full h-2">
+                  <div 
+                    className="bg-amber-500 h-2 rounded-full transition-all"
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.pendingAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Confirmed */}
+              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-8 h-8 text-orange-500" />
+                  <div>
+                    <p className="text-sm text-gray-400">Confirmed</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.confirmedAppointments || 0}</p>
                   </div>
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
                     className="bg-orange-500 h-2 rounded-full transition-all"
-                    style={{ width: `${totalAppointments > 0 ? (unassignedAppointments.length / totalAppointments * 100) : 0}%` }}
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.confirmedAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
                   ></div>
                 </div>
               </div>
 
-              {/* Upcoming */}
+              {/* In Progress */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <Calendar className="w-8 h-8 text-blue-500" />
+                  <Activity className="w-8 h-8 text-orange-600" />
                   <div>
-                    <p className="text-sm text-gray-400">Upcoming</p>
-                    <p className="text-2xl font-bold text-white">{upcomingAppointments.length}</p>
+                    <p className="text-sm text-gray-400">In Progress</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.inProgressAppointments || 0}</p>
                   </div>
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all"
-                    style={{ width: `${totalAppointments > 0 ? (upcomingAppointments.length / totalAppointments * 100) : 0}%` }}
+                    className="bg-orange-600 h-2 rounded-full transition-all"
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.inProgressAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
                   ></div>
                 </div>
               </div>
 
-              {/* Ongoing */}
+              {/* Completed */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
-                  <Activity className="w-8 h-8 text-green-500" />
+                  <CheckCircle className="w-8 h-8 text-green-500" />
                   <div>
-                    <p className="text-sm text-gray-400">Ongoing</p>
-                    <p className="text-2xl font-bold text-white">{ongoingAppointments.length}</p>
+                    <p className="text-sm text-gray-400">Completed</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.completedAppointments || 0}</p>
                   </div>
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2">
                   <div 
                     className="bg-green-500 h-2 rounded-full transition-all"
-                    style={{ width: `${totalAppointments > 0 ? (ongoingAppointments.length / totalAppointments * 100) : 0}%` }}
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.completedAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Cancelled */}
+              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertCircle className="w-8 h-8 text-red-500" />
+                  <div>
+                    <p className="text-sm text-gray-400">Cancelled</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.cancelledAppointments || 0}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-zinc-800 rounded-full h-2">
+                  <div 
+                    className="bg-red-500 h-2 rounded-full transition-all"
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.cancelledAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
                   ></div>
                 </div>
               </div>
             </div>
 
-            {/* Charts Row - Placeholders */}
+            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Service Type Distribution - Placeholder */}
-              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <PieChart className="w-5 h-5 text-blue-500" />
-                    Service Type Distribution
-                  </h3>
-                  <span className="text-xs text-gray-400 bg-zinc-800 px-3 py-1 rounded-full">Mock Data</span>
-                </div>
-                <div className="space-y-4">
-                  {serviceBreakdown.map((service, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-300">{service.name}</span>
-                        <span className="text-sm font-semibold text-white">{service.count} ({service.percentage}%)</span>
-                      </div>
-                      <div className="w-full bg-zinc-800 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full transition-all"
-                          style={{ width: `${service.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Revenue Trend - Placeholder */}
-              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-green-500" />
-                    Revenue Trend
-                  </h3>
-                  <span className="text-xs text-gray-400 bg-zinc-800 px-3 py-1 rounded-full">Coming Soon</span>
-                </div>
-                <div className="flex items-center justify-center h-64 border-2 border-dashed border-zinc-800 rounded-lg">
-                  <div className="text-center">
-                    <TrendingUp className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">Revenue chart will be displayed here</p>
-                    <p className="text-gray-600 text-xs mt-1">Historical data required</p>
-                  </div>
-                </div>
-              </div>
+              <ServiceTypeChart data={serviceDistribution} isLoading={false} />
+              <RevenueTrendChart data={revenueTrend} isLoading={false} />
             </div>
 
-            {/* Bottom Row - More Placeholders */}
+            {/* Bottom Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Employee Performance - Placeholder */}
-              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Users className="w-5 h-5 text-purple-500" />
-                    Employee Performance
-                  </h3>
-                  <span className="text-xs text-gray-400 bg-zinc-800 px-3 py-1 rounded-full">Coming Soon</span>
-                </div>
-                <div className="flex items-center justify-center h-48 border-2 border-dashed border-zinc-800 rounded-lg">
-                  <div className="text-center">
-                    <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">Employee metrics will be displayed here</p>
-                    <p className="text-gray-600 text-xs mt-1">Task completion, ratings, etc.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Insights - Placeholder */}
-              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <Package className="w-5 h-5 text-orange-500" />
-                    Customer Insights
-                  </h3>
-                  <span className="text-xs text-gray-400 bg-zinc-800 px-3 py-1 rounded-full">Coming Soon</span>
-                </div>
-                <div className="flex items-center justify-center h-48 border-2 border-dashed border-zinc-800 rounded-lg">
-                  <div className="text-center">
-                    <Package className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">Customer analytics will be displayed here</p>
-                    <p className="text-gray-600 text-xs mt-1">Repeat customers, satisfaction, etc.</p>
-                  </div>
-                </div>
-              </div>
+              <EmployeePerformanceChart data={employeePerformance} isLoading={false} />
+              <CustomerInsightsChart data={customerInsights} isLoading={false} />
             </div>
           </>
         )}
