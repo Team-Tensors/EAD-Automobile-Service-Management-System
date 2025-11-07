@@ -345,7 +345,6 @@ const EmployeeDashboard = () => {
               getStatusIcon={getStatusIcon}
               getDisplayStatus={getDisplayStatus}
               formatDate={formatDate}
-              formatDateTime={formatDateTime}
             />
           </div>
           {/* Right Panel - Job Detail */}
@@ -358,7 +357,6 @@ const EmployeeDashboard = () => {
                   getStatusIcon={getStatusIcon}
                   getDisplayStatus={getDisplayStatus}
                   formatDate={formatDate}
-                  formatDateTime={formatDateTime}
                   onShowStatusUpdate={() => {
                     setShowStatusUpdate(true);
                     setShowTimeLog(false);
