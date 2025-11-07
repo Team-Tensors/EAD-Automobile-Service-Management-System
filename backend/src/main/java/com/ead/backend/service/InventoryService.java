@@ -1,11 +1,13 @@
 package com.ead.backend.service;
 
 import com.ead.backend.dto.*;
+import com.ead.backend.entity.EmployeeCenter;
 import com.ead.backend.entity.InventoryItem;
 import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.entity.User;
 import com.ead.backend.exception.ResourceNotFoundException;
 import com.ead.backend.mappers.InventoryItemMapper;
+import com.ead.backend.repository.EmployeeCenterRepository;
 import com.ead.backend.repository.InventoryItemRepository;
 import com.ead.backend.repository.ServiceCenterRepository;
 import com.ead.backend.repository.UserRepository;
@@ -28,15 +30,31 @@ public class InventoryService {
     private final InventoryItemRepository inventoryItemRepository;
     private final UserRepository userRepository;
     private final ServiceCenterRepository serviceCenterRepository;
+    private final EmployeeCenterRepository employeeCenterRepository;
     private final InventoryItemMapper inventoryItemMapper;
     private final EmailService emailService;
 
     /**
      * Get all inventory items
+     * For EMPLOYEE role: return only items from their assigned service center
+     * For ADMIN role: return all items
      */
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> getAllItems() {
         log.info("Fetching all inventory items");
+
+        User currentUser = getCurrentUser();
+
+        // If user is an employee, filter by their service center
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            log.info("Employee detected. Filtering items for service center ID: {}", serviceCenterId);
+            return inventoryItemRepository.findByServiceCenterId(serviceCenterId).stream()
+                    .map(inventoryItemMapper::toDTO)
+                    .collect(Collectors.toList());
+        }
+
+        // Admin gets all items
         return inventoryItemRepository.findAll().stream()
                 .map(inventoryItemMapper::toDTO)
                 .collect(Collectors.toList());
@@ -44,21 +62,47 @@ public class InventoryService {
 
     /**
      * Get inventory item by ID
+     * For EMPLOYEE role: only if item belongs to their service center
+     * For ADMIN role: any item
      */
     @Transactional(readOnly = true)
     public InventoryItemDTO getItemById(UUID id) {
         log.info("Fetching inventory item with id: {}", id);
         InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with id: " + id));
+
+        // If employee, verify item belongs to their service center
+        User currentUser = getCurrentUser();
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            if (!item.getServiceCenter().getId().equals(serviceCenterId)) {
+                throw new ResourceNotFoundException("Inventory item not found with id: " + id);
+            }
+        }
+
         return inventoryItemMapper.toDTO(item);
     }
 
     /**
      * Get all low stock items
+     * For EMPLOYEE role: only from their service center
+     * For ADMIN role: all low stock items
      */
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> getLowStockItems() {
         log.info("Fetching low stock items");
+
+        User currentUser = getCurrentUser();
+
+        // If employee, filter by their service center
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            log.info("Employee detected. Filtering low stock items for service center ID: {}", serviceCenterId);
+            return inventoryItemRepository.findLowStockItemsByServiceCenterId(serviceCenterId).stream()
+                    .map(inventoryItemMapper::toDTO)
+                    .collect(Collectors.toList());
+        }
+
         return inventoryItemRepository.findLowStockItems().stream()
                 .map(inventoryItemMapper::toDTO)
                 .collect(Collectors.toList());
@@ -66,10 +110,24 @@ public class InventoryService {
 
     /**
      * Get items by category
+     * For EMPLOYEE role: only from their service center
+     * For ADMIN role: all items in category
      */
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> getItemsByCategory(String category) {
         log.info("Fetching items by category: {}", category);
+
+        User currentUser = getCurrentUser();
+
+        // If employee, filter by their service center
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            log.info("Employee detected. Filtering category items for service center ID: {}", serviceCenterId);
+            return inventoryItemRepository.findByCategoryAndServiceCenterId(category, serviceCenterId).stream()
+                    .map(inventoryItemMapper::toDTO)
+                    .collect(Collectors.toList());
+        }
+
         return inventoryItemRepository.findByCategory(category).stream()
                 .map(inventoryItemMapper::toDTO)
                 .collect(Collectors.toList());
@@ -77,10 +135,25 @@ public class InventoryService {
 
     /**
      * Search items by name
+     * For EMPLOYEE role: only from their service center
+     * For ADMIN role: all matching items
      */
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> searchItemsByName(String name) {
         log.info("Searching items with name containing: {}", name);
+
+        User currentUser = getCurrentUser();
+
+        // If employee, filter by their service center
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            log.info("Employee detected. Searching items for service center ID: {}", serviceCenterId);
+            return inventoryItemRepository.findByItemNameContainingIgnoreCaseAndServiceCenterId(name, serviceCenterId)
+                    .stream()
+                    .map(inventoryItemMapper::toDTO)
+                    .collect(Collectors.toList());
+        }
+
         return inventoryItemRepository.findByItemNameContainingIgnoreCase(name).stream()
                 .map(inventoryItemMapper::toDTO)
                 .collect(Collectors.toList());
@@ -192,12 +265,22 @@ public class InventoryService {
 
     /**
      * Buy/Use inventory item (Employee) - Reduce quantity
+     * Employees can only buy from their assigned service center
      */
     public InventoryItemDTO buyItem(UUID id, InventoryBuyDTO dto) {
         log.info("Employee buying inventory item with id: {} with quantity: {}", id, dto.getQuantity());
 
         InventoryItem item = inventoryItemRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with id: " + id));
+
+        // Verify employee has access to this item (from their service center)
+        User currentUser = getCurrentUser();
+        if (isEmployee(currentUser)) {
+            UUID serviceCenterId = getEmployeeServiceCenterId(currentUser.getId());
+            if (!item.getServiceCenter().getId().equals(serviceCenterId)) {
+                throw new ResourceNotFoundException("Inventory item not found with id: " + id);
+            }
+        }
 
         // Check if sufficient quantity available
         if (item.getQuantity() < dto.getQuantity()) {
@@ -239,6 +322,30 @@ public class InventoryService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    /**
+     * Check if user has EMPLOYEE role
+     */
+    private boolean isEmployee(User user) {
+        return user.getRoles().stream()
+                .anyMatch(role -> "EMPLOYEE".equals(role.getName()));
+    }
+
+    /**
+     * Get the service center ID for an employee
+     */
+    private UUID getEmployeeServiceCenterId(UUID employeeId) {
+        EmployeeCenter employeeCenter = employeeCenterRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Employee is not assigned to any service center. Please contact administrator."));
+
+        if (employeeCenter.getServiceCenter() == null) {
+            throw new ResourceNotFoundException(
+                    "Employee is not assigned to any service center. Please contact administrator.");
+        }
+
+        return employeeCenter.getServiceCenter().getId();
     }
 
     /**
