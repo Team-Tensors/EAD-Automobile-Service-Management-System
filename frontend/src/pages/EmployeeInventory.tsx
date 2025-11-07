@@ -8,7 +8,6 @@ import {
   ListChecks,
   X,
   Filter,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   MapPin
