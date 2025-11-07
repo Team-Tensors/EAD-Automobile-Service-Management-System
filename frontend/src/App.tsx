@@ -19,6 +19,8 @@ import MyAppointmentsPage from "./pages/MyAppointmentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import EmployeeInventory from "./pages/EmployeeInventory";
 import ShiftSchedulingPage from "./pages/ShiftSchedulingPage";
+import ChatPage from '@/pages/ChatPage';
+
 
 function App() {
   return (
@@ -118,6 +120,16 @@ function App() {
         element={
           <ProtectedRoute>
             <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Chat Page */}
+      <Route
+        path="/chat/:appointmentId"
+        element={
+          <ProtectedRoute>
+            <ChatPage />
           </ProtectedRoute>
         }
       />
