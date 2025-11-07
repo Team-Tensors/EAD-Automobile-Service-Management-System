@@ -5,6 +5,7 @@ import AdminAnalytics from './AdminAnalytics';
 import AdminInventory from './AdminInventory';
 import AdminNotifications from './AdminNotifications';
 import AdminEmployees from './AdminEmployees';
+import AdminServiceTypes from './AdminServiceTypes';
 
 const AdminRouter = () => {
   return (
@@ -18,6 +19,7 @@ const AdminRouter = () => {
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="inventory" element={<AdminInventory />} />
         <Route path="employees" element={<AdminEmployees />} />
+        <Route path="service-types" element={<AdminServiceTypes />} />
         <Route path="notifications" element={<AdminNotifications />} />
         
         {/* Fallback for unknown admin routes */}
