@@ -40,7 +40,11 @@ class WebSocketService {
   connect(token: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const wsUrl = `${api.defaults.baseURL}/ws-chat`;
+        // Build WebSocket URL - remove /api suffix if present since WebSocket endpoint is at root
+        const baseUrl = api.defaults.baseURL || '';
+        const wsUrl = baseUrl.replace(/\/api$/, '') + '/api/ws-chat';
+        
+        console.log('Connecting to WebSocket URL:', wsUrl);
         
         // Create SockJS connection
         const socket = new SockJS(wsUrl);
@@ -53,11 +57,17 @@ class WebSocketService {
           Authorization: `Bearer ${token}`
         };
 
+        // Enable STOMP debug to see what's happening
+        this.client.debug = (msg: string) => {
+          console.log('[STOMP Debug]', msg);
+        };
+
         // Connection success
         this.client.connect(
           headers,
           (frame?: Stomp.Frame) => {
-            console.log('WebSocket connected:', frame);
+            console.log('WebSocket connected successfully');
+            console.log('Connection frame:', frame);
             this.connected = true;
             this.reconnectAttempts = 0;
             resolve();
@@ -113,17 +123,28 @@ class WebSocketService {
     onMessage: (message: WebSocketMessage) => void
   ) {
     if (!this.client || !this.connected) {
-      console.error('WebSocket not connected');
+      console.error('Cannot subscribe - WebSocket not connected');
       return null;
     }
 
-    return this.client.subscribe(
-      `/topic/chat/${chatRoomId}`,
-      (message: Stomp.Message) => {
-        const data: WebSocketMessage = JSON.parse(message.body);
-        onMessage(data);
-      }
-    );
+    const destination = `/topic/chat/${chatRoomId}`;
+    console.log('Subscribing to chat destination:', destination);
+    
+    try {
+      const subscription = this.client.subscribe(
+        destination,
+        (message: Stomp.Message) => {
+          console.log('Received message from WebSocket:', message.body);
+          const data: WebSocketMessage = JSON.parse(message.body);
+          onMessage(data);
+        }
+      );
+      console.log('Successfully subscribed to:', destination);
+      return subscription;
+    } catch (error) {
+      console.error('Error subscribing to chat:', error);
+      return null;
+    }
   }
 
   /**
@@ -194,14 +215,23 @@ class WebSocketService {
    */
   sendMessage(chatRoomId: string, message: string) {
     if (!this.client || !this.connected) {
+      console.error('Cannot send message - WebSocket not connected');
       throw new Error('WebSocket not connected');
     }
 
-    this.client.send(
-      '/app/chat.send',
-      {},
-      JSON.stringify({ chatRoomId, message })
-    );
+    console.log('Sending message:', { chatRoomId, message });
+    
+    try {
+      this.client.send(
+        '/app/chat.send',
+        {},
+        JSON.stringify({ chatRoomId, message })
+      );
+      console.log('Message sent successfully');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
   }
 
   /**
@@ -239,14 +269,22 @@ class WebSocketService {
    */
   joinChatRoom(chatRoomId: string) {
     if (!this.client || !this.connected) {
+      console.error('Cannot join chat room - WebSocket not connected');
       return;
     }
 
-    this.client.send(
-      '/app/chat.join',
-      {},
-      chatRoomId  // Send as plain string (UUID)
-    );
+    console.log('Joining chat room:', chatRoomId);
+    
+    try {
+      this.client.send(
+        '/app/chat.join',
+        {},
+        chatRoomId  // Send as plain string (UUID)
+      );
+      console.log('Join room request sent successfully');
+    } catch (error) {
+      console.error('Error joining chat room:', error);
+    }
   }
 }
 

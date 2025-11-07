@@ -4,6 +4,7 @@ import com.ead.backend.dto.*;
 import com.ead.backend.entity.*;
 import com.ead.backend.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -81,6 +83,9 @@ public class ChatService {
      */
     @Transactional
     public SendMessageResponseDTO sendMessage(UUID chatRoomId, String messageText, User sender) {
+        log.info("Sending message - ChatRoom: {}, Sender: {}, Message: {}", 
+            chatRoomId, sender.getEmail(), messageText);
+        
         // Get chat room
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("Chat room not found"));
@@ -93,6 +98,7 @@ public class ChatService {
         message.setIsRead(false);
 
         ChatMessage savedMessage = chatMessageRepository.save(message);
+        log.info("Message saved to database - MessageId: {}", savedMessage.getMessageId());
 
         // Update chat room's last message
         chatRoom.setLastMessage(messageText);
@@ -110,7 +116,16 @@ public class ChatService {
         wsMessage.setIsRead(false);
 
         // Broadcast to chat room
-        messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, wsMessage);
+        String destination = "/topic/chat/" + chatRoomId;
+        log.info("Broadcasting message to destination: {}", destination);
+        
+        try {
+            messagingTemplate.convertAndSend(destination, wsMessage);
+            log.info("Message broadcast successful to: {}", destination);
+        } catch (Exception e) {
+            log.error("Failed to broadcast message to {}: {}", destination, e.getMessage(), e);
+            throw e;
+        }
 
         // Send notification if customer sent the message
         sendNewMessageNotification(chatRoom, sender, messageText);
@@ -154,7 +169,10 @@ public class ChatService {
      */
     public void sendTypingIndicator(UUID chatRoomId, String userName, Boolean isTyping) {
         TypingIndicatorDTO indicator = new TypingIndicatorDTO(chatRoomId, userName, isTyping);
-        messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId + "/typing", indicator);
+        String destination = "/topic/chat/" + chatRoomId + "/typing";
+        log.debug("Sending typing indicator to: {} - User: {}, isTyping: {}", 
+            destination, userName, isTyping);
+        messagingTemplate.convertAndSend(destination, indicator);
     }
 
     /**
@@ -168,7 +186,10 @@ public class ChatService {
                 status,
                 LocalDateTime.now()
         );
-        messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId + "/status", statusDTO);
+        String destination = "/topic/chat/" + chatRoomId + "/status";
+        log.info("Sending user status to: {} - User: {}, Status: {}", 
+            destination, userName, status);
+        messagingTemplate.convertAndSend(destination, statusDTO);
     }
 
     // Helper methods

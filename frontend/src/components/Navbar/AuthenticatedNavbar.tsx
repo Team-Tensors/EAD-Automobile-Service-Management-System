@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   Home,
+  Wrench,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
@@ -102,6 +103,12 @@ const AuthenticatedNavbar = () => {
       roles: ["EMPLOYEE"],
     },
     {
+      name: "MY SCHEDULE",
+      path: "/my-schedule",
+      icon: Calendar,
+      roles: ["EMPLOYEE"],
+    },
+    {
       name: "SHIFT SCHEDULING",
       path: "/shift-scheduling",
       icon: Calendar,
@@ -130,6 +137,12 @@ const AuthenticatedNavbar = () => {
       name: "EMPLOYEES",
       path: "/admin/employees",
       icon: User,
+      roles: ["ADMIN"],
+    },
+    {
+      name: "SERVICE TYPES",
+      path: "/admin/service-types",
+      icon: Wrench,
       roles: ["ADMIN"],
     },
   ];
@@ -231,7 +244,7 @@ const AuthenticatedNavbar = () => {
                   <Link
                     to="/"
                     onClick={() => setIsProfileDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800  hover:text-white transition-colors cursor-pointer"
                   >
                     <Home className="w-4 h-4" />
                     Home
@@ -240,7 +253,7 @@ const AuthenticatedNavbar = () => {
                   <Link
                     to={"/profile"}
                     onClick={() => setIsProfileDropdownOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
                   >
                     <User className="w-4 h-4" />
                     Profile
@@ -252,7 +265,7 @@ const AuthenticatedNavbar = () => {
                         setIsProfileDropdownOpen(false);
                         handleLogout();
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-500 transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Logout

@@ -8,16 +8,15 @@ import {
   ListChecks,
   X,
   Filter,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  MapPin
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
+import DashboardHeader from "@/components/DashboardHeader";
 import { inventoryService } from '../services/inventoryService';
-import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
+import toast, { Toaster } from 'react-hot-toast';
 
 const CATEGORIES = [
   'Lubricant',
@@ -34,7 +33,6 @@ const CATEGORIES = [
 ];
 
 const EmployeeInventory = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +41,6 @@ const EmployeeInventory = () => {
   const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [getQuantity, setGetQuantity] = useState(0);
-  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,19 +49,6 @@ const EmployeeInventory = () => {
   // Load inventory items
   useEffect(() => {
     loadInventory();
-  }, []);
-
-  // Fetch employee details
-  useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const details = await employeeService.getEmployeeDetails();
-        setEmployeeDetails(details);
-      } catch (err) {
-        console.error("Error fetching employee details:", err);
-      }
-    };
-    fetchEmployeeDetails();
   }, []);
 
   // Filter items based on search and category
@@ -98,15 +82,49 @@ const EmployeeInventory = () => {
   const handleGetItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem || getQuantity <= 0) return;
+    
     try {
       await inventoryService.buy(selectedItem.id, { quantity: getQuantity });
       setShowGetModal(false);
       setSelectedItem(null);
       setGetQuantity(0);
       loadInventory();
-    } catch (error: any) {
+      
+      // Show success toast
+      toast.success(
+        `Successfully obtained ${getQuantity} unit(s) of ${selectedItem.itemName}!`,
+        {
+          duration: 4000,
+          position: 'top-right',
+          style: {
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid #27272a',
+          },
+          iconTheme: {
+            primary: '#22c55e',
+            secondary: '#fff',
+          },
+        }
+      );
+    } catch (error: unknown) {
       console.error('Failed to get item:', error);
-      alert(error.response?.data?.message || 'Failed to get item');
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to get item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
@@ -132,45 +150,21 @@ const EmployeeInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
+      {/* Toast Notifications */}
+      <Toaster />
+      
       <AuthenticatedNavbar />
+      
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Employee Inventory</h1>
-              <p className="text-gray-300 mt-1">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {employeeDetails && (
-                <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
-                  <MapPin className="w-5 h-5 text-blue-400" />
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400">Service Center</p>
-                    <p className={`text-sm font-semibold ${
-                      employeeDetails.serviceCenter 
-                        ? "text-white" 
-                        : "text-gray-500 italic"
-                    }`}>
-                      {employeeDetails.serviceCenter || "Unassigned"}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
-                <Calendar className="w-5 h-5 text-gray-300" />
-                <span className="font-semibold">{new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        title="Inventory"
+        subtitle="Manage service center inventory items effectively."
+        showWelcomeMessage={false}
+      />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700">
@@ -441,6 +435,7 @@ const EmployeeInventory = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };
