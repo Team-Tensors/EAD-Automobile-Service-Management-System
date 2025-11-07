@@ -8,7 +8,6 @@ import {
   Facebook,
   Twitter,
   Linkedin,
-  DollarSign,
   Settings,
 } from "lucide-react";
 import { ServiceCentersMap } from "../HomePage/ServiceCentersMap";
@@ -17,7 +16,6 @@ const FooterTop = () => {
   const offerings = [
     { icon: Car, label: "DISCOVER DRIVECARE" },
     { icon: Settings, label: "OUR SERVICES" },
-    { icon: DollarSign, label: "PRICING PLANS" },
     { icon: Users, label: "JOIN OUR TEAM" },
     { icon: Megaphone, label: "LATEST NEWS" },
   ];
@@ -25,9 +23,8 @@ const FooterTop = () => {
   const contactInfo = [
     { icon: Phone, text: "+1-800-123-4567" },
     { icon: Phone, text: "+1-630-753-8513" },
-    { icon: Twitter, text: "TWEET US @CARSUPPORT" },
-    { icon: Mail, text: "SUPPORT@EXAMPLE.COM" },
-    { icon: Mail, text: "CONTACT@EXAMPLE.COM" },
+    { icon: Mail, text: "SUPPORT@DRIVECARE.COM" },
+    { icon: Mail, text: "CONTACT@DRIVECARE.COM" },
   ];
 
   const socialLinks = [
@@ -38,7 +35,7 @@ const FooterTop = () => {
   ];
 
   return (
-    <div className="bg-[#1d1c1c] text-white pt-16 pb-1 px-6 md:px-12">
+    <div className="bg-[#1d1c1c] text-white pt-16 pb-16 px-6 md:px-12 ">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-1">
           <div className="lg:col-span-2">
@@ -118,7 +115,7 @@ const FooterTop = () => {
         </div>
       </div>
       {/* Divider (top border for the bottom/footer area) */}
-      <div className="border-t border-orange-500/30 mt-16"></div>
+      {/* <div className="border-t border-orange-500/30 mt-16 mx-18"></div> */}
     </div>
   );
 };
