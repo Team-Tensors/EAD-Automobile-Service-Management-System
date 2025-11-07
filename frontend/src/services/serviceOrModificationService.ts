@@ -1,8 +1,10 @@
 // src/services/serviceOrModificationService.ts
 import api from "../util/apiUtils";
+import type { AppointmentType } from "../types/appointment";
 
 export interface ServiceOrModificationDto {
   id: string; // UUID as string
+  type: AppointmentType; // 'SERVICE' | 'MODIFICATION'
   name: string;
   description: string;
   estimatedCost: number;
