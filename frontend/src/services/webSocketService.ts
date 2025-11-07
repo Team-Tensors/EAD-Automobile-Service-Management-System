@@ -1,7 +1,7 @@
-// Create this file: src/services/webSocketService.ts
-
 import SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
+import api from '../util/apiUtils';
+
 
 export interface WebSocketMessage {
   messageId: string;
@@ -40,12 +40,7 @@ class WebSocketService {
   connect(token: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        // Get API URL from environment variable
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-        
-        // Build WebSocket URL - ensure it uses the correct protocol
-        // If the page is loaded over HTTPS, use HTTPS for the WebSocket too
-        const wsUrl = `${API_URL}/ws-chat`;
+        const wsUrl = `${api.defaults.baseURL}/ws-chat`;
         
         // Create SockJS connection
         const socket = new SockJS(wsUrl);
