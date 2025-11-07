@@ -48,13 +48,35 @@ export const downloadCSV = (csvContent: string, filename: string): void => {
 };
 
 /**
- * Download Excel file (using CSV format with .xlsx extension for simplicity)
- * For true Excel format, you would need a library like xlsx or exceljs
+ * Download Excel file (CSV format compatible with Excel)
+ * Excel can natively open CSV files, so we use CSV format with .csv extension
+ * For true XLSX format, consider using a library like 'xlsx' or 'exceljs'
  */
 export const downloadExcel = (csvContent: string, filename: string): void => {
-  // For now, we'll use CSV format with .xlsx extension
-  // In production, consider using a library like 'xlsx' for proper Excel format
-  const blob = new Blob([csvContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  // Use CSV format which Excel can open directly
+  // Change extension to .csv so Excel recognizes it
+  const csvFilename = filename.replace('.xlsx', '.csv');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', csvFilename);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  URL.revokeObjectURL(url);
+};
+
+/**
+ * Download JSON file
+ */
+export const downloadJSON = (data: unknown, filename: string): void => {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
   
