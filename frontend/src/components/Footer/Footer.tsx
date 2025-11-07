@@ -12,17 +12,17 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1d1c1c] text-white py-8 px-6 md:px-8">
+    <footer className="bg-[#1d1c1c] dark:bg-[#1d1c1c] light:bg-gray-100 text-white dark:text-white light:text-gray-900 py-8 px-6 md:px-8">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto">
         {/* Bottom Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Newsletter Section */}
           <div>
-            <h3 className="text-2xl font-bold mb-4 text-white uppercase tracking-wide font-heading">
+            <h3 className="text-2xl font-bold mb-4 text-white dark:text-white light:text-gray-900 uppercase tracking-wide font-heading">
               Stay Updated with DRIVECARE!
             </h3>
-            <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+            <p className="text-gray-400 dark:text-gray-400 light:text-gray-600 text-sm mb-4 leading-relaxed">
               Subscribe to our newsletter for the latest news, exclusive offers,
               and expert tips on car care. Join our community of car enthusiasts
               and never miss out on important updates.
@@ -31,9 +31,12 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="ENTER YOUR MAIL"
-                className="flex-1 bg-black/50 border border-gray-700 px-3 py-2 text-white placeholder-gray-500 text-xs uppercase focus:outline-none focus:border-orange-500"
+                className="flex-1 bg-black/50 dark:bg-black/50 light:bg-white border border-gray-700 dark:border-gray-700 light:border-gray-300 px-3 py-2 text-white dark:text-white light:text-gray-900 placeholder-gray-500 dark:placeholder-gray-500 light:placeholder-gray-400 text-xs uppercase focus:outline-none focus:border-orange-500"
               />
-              <button title="send" className="bg-orange-600 hover:bg-orange-700 transition-colors px-4 py-2 flex items-center justify-center">
+              <button
+                title="send"
+                className="bg-orange-600 hover:bg-orange-700 transition-colors px-4 py-2 flex items-center justify-center"
+              >
                 <svg
                   className="w-4 h-4 text-white"
                   fill="currentColor"
@@ -47,17 +50,17 @@ const Footer = () => {
 
           {/* Office Address Section */}
           <div>
-            <h3 className="text-2xl font-bold mb-4 text-white uppercase tracking-wide font-heading">
+            <h3 className="text-2xl font-bold mb-4 text-white dark:text-white light:text-gray-900 uppercase tracking-wide font-heading">
               Office Address
             </h3>
             <div className="space-y-4 mb-4">
               {officeLocations.map((location, index) => (
                 <div key={index}>
                   <p className="text-sm">
-                    <span className="text-gray-300 font-semibold">
+                    <span className="text-gray-300 dark:text-gray-300 light:text-gray-700 font-semibold">
                       {location.label}
                     </span>
-                    <span className="text-gray-400 ml-2">
+                    <span className="text-gray-400 dark:text-gray-400 light:text-gray-600 ml-2">
                       {location.address}
                     </span>
                   </p>
@@ -65,18 +68,23 @@ const Footer = () => {
               ))}
               {businessHours.map((hour, index) => (
                 <div key={index} className="text-sm">
-                  <span className="text-gray-300 font-semibold">
+                  <span className="text-gray-300 dark:text-gray-300 light:text-gray-700 font-semibold">
                     {hour.day}
                   </span>
-                  <span className="text-gray-400 ml-2">{hour.time}</span>
+                  <span className="text-gray-400 dark:text-gray-400 light:text-gray-600 ml-2">
+                    {hour.time}
+                  </span>
                 </div>
               ))}
             </div>
             {/* Copyright */}
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-500 light:text-gray-600 text-sm">
               © DRIVECARE 2025. All rights reserved. Designed by{" "}
               <span className="text-orange-600 font-semibold font-heading text-xs">
-                Drive <span className="text-white">Care</span>
+                Drive{" "}
+                <span className="text-white dark:text-white light:text-gray-900">
+                  Care
+                </span>
               </span>
             </p>
           </div>
