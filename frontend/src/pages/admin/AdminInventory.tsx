@@ -47,7 +47,6 @@ const AdminInventory = () => {
   
   // Service centers state
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
-  const [loadingServiceCenters, setLoadingServiceCenters] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,13 +112,10 @@ const AdminInventory = () => {
 
   const loadServiceCenters = async () => {
     try {
-      setLoadingServiceCenters(true);
       const data = await serviceCenterService.fetchServiceCenters();
       setServiceCenters(data);
     } catch (error) {
       console.error('Failed to load service centers:', error);
-    } finally {
-      setLoadingServiceCenters(false);
     }
   };
 
@@ -207,7 +203,7 @@ const AdminInventory = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -280,7 +276,7 @@ const AdminInventory = () => {
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
 
@@ -464,7 +460,7 @@ const AdminInventory = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-zinc-800">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
+            <div className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
               <h3 className="text-2xl font-bold">Add New Item</h3>
               <button
                 onClick={() => {
@@ -612,7 +608,7 @@ const AdminInventory = () => {
       {showRestockModal && selectedItem && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-800">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
+            <div className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-700 flex items-center justify-between">
               <h3 className="text-2xl font-bold">Restock Item</h3>
               <button
                 onClick={() => {
