@@ -18,13 +18,13 @@ Authorization: {{token}}
 ### ====================================================================
 ### 2. Get Dashboard Summary with Date Range
 ### ====================================================================
-GET {{baseUrl}}/dashboard?startDate=2025-10-01T00:00:00&endDate=2025-11-07T23:59:59
+GET {{baseUrl}}/dashboard?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
 Authorization: {{token}}
 
 ### ====================================================================
 ### 3. Get Dashboard Summary for Specific Service Center
 ### ====================================================================
-GET {{baseUrl}}/dashboard?serviceCenterId=YOUR_SERVICE_CENTER_UUID&startDate=2025-10-01T00:00:00&endDate=2025-11-07T23:59:59
+GET {{baseUrl}}/dashboard?serviceCenterId=YOUR_SERVICE_CENTER_UUID&startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
 Authorization: {{token}}
 
 ### ====================================================================
@@ -36,7 +36,7 @@ Authorization: {{token}}
 ### ====================================================================
 ### 5. Get Service Distribution with Filters
 ### ====================================================================
-GET {{baseUrl}}/service-distribution?startDate=2025-10-01T00:00:00&endDate=2025-11-07T23:59:59&status=COMPLETED
+GET {{baseUrl}}/service-distribution?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59&status=COMPLETED
 Authorization: {{token}}
 
 ### ====================================================================
@@ -54,13 +54,13 @@ Authorization: {{token}}
 ### ====================================================================
 ### 8. Get Revenue Trend (Weekly)
 ### ====================================================================
-GET {{baseUrl}}/revenue-trend?startDate=2025-09-01T00:00:00&endDate=2025-11-07T23:59:59&periodType=WEEKLY
+GET {{baseUrl}}/revenue-trend?startDate=2025-09-01T00:00:00&endDate=2025-11-08T23:59:59&periodType=WEEKLY
 Authorization: {{token}}
 
 ### ====================================================================
 ### 9. Get Revenue Trend (Monthly)
 ### ====================================================================
-GET {{baseUrl}}/revenue-trend?startDate=2025-01-01T00:00:00&endDate=2025-11-07T23:59:59&periodType=MONTHLY
+GET {{baseUrl}}/revenue-trend?startDate=2025-01-01T00:00:00&endDate=2025-11-08T23:59:59&periodType=MONTHLY
 Authorization: {{token}}
 
 ### ====================================================================
@@ -78,7 +78,7 @@ Authorization: {{token}}
 ### ====================================================================
 ### 12. Get Employee Performance with Date Range
 ### ====================================================================
-GET {{baseUrl}}/employee-performance?startDate=2025-10-01T00:00:00&endDate=2025-11-07T23:59:59
+GET {{baseUrl}}/employee-performance?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
 Authorization: {{token}}
 
 ### ====================================================================
@@ -96,7 +96,7 @@ Authorization: {{token}}
 ### ====================================================================
 ### 15. Get Customer Insights with Date Range
 ### ====================================================================
-GET {{baseUrl}}/customer-insights?startDate=2025-10-01T00:00:00&endDate=2025-11-07T23:59:59
+GET {{baseUrl}}/customer-insights?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
 Authorization: {{token}}
 
 ### ====================================================================
@@ -108,7 +108,7 @@ Content-Type: application/json
 
 {
   "startDate": "2025-10-01T00:00:00",
-  "endDate": "2025-11-07T23:59:59",
+  "endDate": "2025-11-08T23:59:59",
   "serviceCenterId": null,
   "appointmentType": "SERVICE",
   "status": "COMPLETED",
@@ -123,8 +123,8 @@ Authorization: {{token}}
 Content-Type: application/json
 
 {
-  "startDate": "2025-10-31T00:00:00",
-  "endDate": "2025-11-07T23:59:59",
+  "startDate": "2025-11-01T00:00:00",
+  "endDate": "2025-11-08T23:59:59",
   "periodType": "DAILY"
 }
 
@@ -137,7 +137,7 @@ Content-Type: application/json
 
 {
   "startDate": "2025-10-01T00:00:00",
-  "endDate": "2025-11-07T23:59:59",
+  "endDate": "2025-11-08T23:59:59",
   "appointmentType": "MODIFICATION",
   "status": "COMPLETED",
   "periodType": "MONTHLY"
@@ -155,22 +155,31 @@ Content-Type: application/json
 ###   "data": {
 ###     "totalRevenue": 25000.50,
 ###     "totalAppointments": 150,
-###     "completedAppointments": 120,
-###     "pendingAppointments": 20,
-###     "inProgressAppointments": 8,
+###     "completedAppointments": 100,
+###     "confirmedAppointments": 30,
+###     "pendingAppointments": 12,
+###     "inProgressAppointments": 6,
 ###     "cancelledAppointments": 2,
 ###     "totalCustomers": 75,
 ###     "totalEmployees": 12,
-###     "completionRate": 80.0,
-###     "averageServiceCost": 208.33,
+###     "completionRate": 66.67,
+###     "averageServiceCost": 250.00,
 ###     "repeatCustomerRate": 45.5,
 ###     "popularServices": [...],
 ###     "topEmployees": [...],
 ###     "periodStart": "2025-10-08T00:00:00",
-###     "periodEnd": "2025-11-07T23:59:59"
+###     "periodEnd": "2025-11-08T23:59:59"
 ###   },
-###   "timestamp": "2025-11-07T10:30:00"
+###   "timestamp": "2025-11-08T00:30:00"
 ### }
+###
+### NOTE: All 5 appointment statuses are now tracked:
+### - COMPLETED: Finished services
+### - CONFIRMED: Bookings confirmed by customer/admin
+### - PENDING: Initial booking requests
+### - IN_PROGRESS: Currently being serviced
+### - CANCELLED: Cancelled appointments
+### Total should equal: completed + confirmed + pending + inProgress + cancelled
 
 ###
 ### Service Distribution Response:
@@ -196,7 +205,7 @@ Content-Type: application/json
 ###       ...
 ###     ]
 ###   },
-###   "timestamp": "2025-11-07T10:30:00"
+###   "timestamp": "2025-11-08T10:30:00"
 ### }
 
 ###
@@ -225,7 +234,7 @@ Content-Type: application/json
 ###       ...
 ###     ]
 ###   },
-###   "timestamp": "2025-11-07T10:30:00"
+###   "timestamp": "2025-11-08T10:30:00"
 ### }
 
 ###
@@ -256,7 +265,7 @@ Content-Type: application/json
 ###       ...
 ###     ]
 ###   },
-###   "timestamp": "2025-11-07T10:30:00"
+###   "timestamp": "2025-11-08T10:30:00"
 ### }
 
 ###
@@ -287,11 +296,11 @@ Content-Type: application/json
 ###         "lastAppointmentDate": "2025-11-05T14:30:00",
 ###         "isRepeatCustomer": true,
 ###         "vehicleCount": 2,
-###         "daysSinceLastAppointment": 2
+###         "daysSinceLastAppointment": 3
 ###       },
 ###       ...
 ###     ]
 ###   },
-###   "timestamp": "2025-11-07T10:30:00"
+###   "timestamp": "2025-11-08T10:30:00"
 ### }
 
