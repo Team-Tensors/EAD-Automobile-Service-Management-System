@@ -14,20 +14,28 @@ import {
   getServiceDistribution,
   getRevenueTrend,
   getEmployeePerformance,
-  getCustomerInsights
+  getCustomerInsights,
+  getTodayRange,
+  getLastNDaysRange,
+  getCurrentMonthRange,
+  getYearToDateRange
 } from '../../services/analyticsService';
+import { fetchServiceCenters } from '../../services/serviceCenterService';
 import type { 
   DashboardSummary,
   ServiceDistribution,
   RevenueTrend,
   EmployeePerformance,
-  CustomerInsights
+  CustomerInsights,
+  AnalyticsParams
 } from '@/types/analytics';
+import type { ServiceCenter } from '@/types/serviceCenter';
 import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 import ServiceTypeChart from '../../components/AdminAnalytics/ServiceTypeChart';
 import RevenueTrendChart from '../../components/AdminAnalytics/RevenueTrendChart';
 import EmployeePerformanceChart from '../../components/AdminAnalytics/EmployeePerformanceChart';
 import CustomerInsightsChart from '../../components/AdminAnalytics/CustomerInsightsChart';
+import AnalyticsFilters from '../../components/AdminAnalytics/AnalyticsFilters';
 
 const AdminAnalytics = () => {
   const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(null);
@@ -35,34 +43,122 @@ const AdminAnalytics = () => {
   const [revenueTrend, setRevenueTrend] = useState<RevenueTrend | null>(null);
   const [employeePerformance, setEmployeePerformance] = useState<EmployeePerformance | null>(null);
   const [customerInsights, setCustomerInsights] = useState<CustomerInsights | null>(null);
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Filter states
+  const [dateRange, setDateRange] = useState<string>('today');
+  const [serviceCenterId, setServiceCenterId] = useState<string>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
-  // Fetch all data on component mount
+  // Fetch service centers on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const loadServiceCenters = async () => {
       try {
-        setIsLoading(true);
-        const [dashboard, serviceData, revenueData, employeeData, customerData] = await Promise.all([
-          getDashboardSummary(),
-          getServiceDistribution(),
-          getRevenueTrend({ periodType: 'DAILY' }),
-          getEmployeePerformance(),
-          getCustomerInsights(),
-        ]);
-
-        setDashboardData(dashboard);
-        setServiceDistribution(serviceData);
-        setRevenueTrend(revenueData);
-        setEmployeePerformance(employeeData);
-        setCustomerInsights(customerData);
+        const centers = await fetchServiceCenters();
+        setServiceCenters(centers);
       } catch (error) {
-        console.error('Failed to load analytics data:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to load service centers:', error);
       }
     };
+    loadServiceCenters();
+  }, []);
 
+  // Helper to build filter params
+  const buildFilterParams = (): AnalyticsParams => {
+    const params: AnalyticsParams = {};
+
+    // Apply date range
+    switch (dateRange) {
+      case 'today': {
+        const today = getTodayRange();
+        params.startDate = today.startDate;
+        params.endDate = today.endDate;
+        break;
+      }
+      case 'last7days': {
+        const last7 = getLastNDaysRange(7);
+        params.startDate = last7.startDate;
+        params.endDate = last7.endDate;
+        break;
+      }
+      case 'last30days': {
+        const last30 = getLastNDaysRange(30);
+        params.startDate = last30.startDate;
+        params.endDate = last30.endDate;
+        break;
+      }
+      case 'thisMonth': {
+        const thisMonth = getCurrentMonthRange();
+        params.startDate = thisMonth.startDate;
+        params.endDate = thisMonth.endDate;
+        break;
+      }
+      case 'yearToDate': {
+        const ytd = getYearToDateRange();
+        params.startDate = ytd.startDate;
+        params.endDate = ytd.endDate;
+        break;
+      }
+      case 'custom': {
+        // Use custom date range if provided
+        if (customStartDate && customEndDate) {
+          // Convert YYYY-MM-DD to ISO with time
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          
+          params.startDate = start.toISOString();
+          params.endDate = end.toISOString();
+        }
+        break;
+      }
+      case 'all':
+        // Use allTime parameter for all historical data
+        params.allTime = true;
+        break;
+    }
+
+    // Apply service center filter
+    if (serviceCenterId !== 'all') {
+      params.serviceCenterId = serviceCenterId;
+    }
+
+    return params;
+  };
+
+  // Fetch all data with current filters
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const params = buildFilterParams();
+      
+      const [dashboard, serviceData, revenueData, employeeData, customerData] = await Promise.all([
+        getDashboardSummary(params),
+        getServiceDistribution(params),
+        getRevenueTrend({ ...params, periodType: 'DAILY' }),
+        getEmployeePerformance(params),
+        getCustomerInsights(params),
+      ]);
+
+      setDashboardData(dashboard);
+      setServiceDistribution(serviceData);
+      setRevenueTrend(revenueData);
+      setEmployeePerformance(employeeData);
+      setCustomerInsights(customerData);
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data on component mount with default filters (today)
+  useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatCurrency = (amount: number) => {
@@ -76,6 +172,20 @@ const AdminAnalytics = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+        {/* Filters */}
+        <AnalyticsFilters
+          dateRange={dateRange}
+          serviceCenterId={serviceCenterId}
+          serviceCenters={serviceCenters}
+          customStartDate={customStartDate}
+          customEndDate={customEndDate}
+          onDateRangeChange={setDateRange}
+          onServiceCenterChange={setServiceCenterId}
+          onCustomStartDateChange={setCustomStartDate}
+          onCustomEndDateChange={setCustomEndDate}
+          onApplyFilters={fetchData}
+        />
+
         {isLoading ? (
           <div className="py-12 text-center text-gray-400">
             <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>

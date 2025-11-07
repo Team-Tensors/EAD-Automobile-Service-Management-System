@@ -138,4 +138,5 @@ export interface AnalyticsParams {
   appointmentType?: 'SERVICE' | 'MODIFICATION';
   status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   periodType?: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  allTime?: boolean; // Use true for all historical data (recommended)
 }
