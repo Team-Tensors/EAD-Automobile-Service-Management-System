@@ -99,6 +99,14 @@ public class AppointmentService {
             throw new RuntimeException("Appointment must be scheduled at least 1 hour from now");
         }
 
+        // For MODIFICATION appointments, require at least 2 days advance booking
+        if (appointment.getAppointmentType() == AppointmentType.MODIFICATION) {
+            LocalDateTime twoDaysFromNow = now.plusDays(2);
+            if (appointment.getAppointmentDate().isBefore(twoDaysFromNow)) {
+                throw new RuntimeException("Modification appointments must be scheduled at least 2 days in advance");
+            }
+        }
+
         // Check if appointment is not more than 1 month from now
         if (appointment.getAppointmentDate().isAfter(now.plusDays(30))) {
             throw new RuntimeException("Appointment cannot be scheduled more than 1 month in advance");
