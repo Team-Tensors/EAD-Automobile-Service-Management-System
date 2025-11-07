@@ -23,4 +23,7 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
 
     // Check if item name already exists
     boolean existsByItemNameIgnoreCase(String itemName);
+
+    // Check if item name already exists in a specific service center
+    boolean existsByItemNameIgnoreCaseAndServiceCenterId(String itemName, UUID serviceCenterId);
 }

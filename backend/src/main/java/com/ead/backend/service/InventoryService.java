@@ -92,18 +92,20 @@ public class InventoryService {
     public InventoryItemDTO createItem(InventoryItemCreateDTO dto) {
         log.info("Creating new inventory item: {}", dto.getItemName());
 
-        // Check if item name already exists
-        if (inventoryItemRepository.existsByItemNameIgnoreCase(dto.getItemName())) {
-            throw new IllegalArgumentException("An item with this name already exists");
+        // Get service center first
+        ServiceCenter serviceCenter = serviceCenterRepository.findById(dto.getServiceCenterId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Service center not found with id: " + dto.getServiceCenterId()));
+
+        // Check if item name already exists in this service center
+        if (inventoryItemRepository.existsByItemNameIgnoreCaseAndServiceCenterId(
+                dto.getItemName(), dto.getServiceCenterId())) {
+            throw new IllegalArgumentException(
+                    "An item with this name already exists in " + serviceCenter.getName());
         }
 
         // Get current authenticated user
         User currentUser = getCurrentUser();
-
-        // Get service center
-        ServiceCenter serviceCenter = serviceCenterRepository.findById(dto.getServiceCenterId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Service center not found with id: " + dto.getServiceCenterId()));
 
         // Create new inventory item
         InventoryItem item = new InventoryItem();
@@ -133,10 +135,12 @@ public class InventoryService {
 
         // Update only provided fields
         if (dto.getItemName() != null && !dto.getItemName().isBlank()) {
-            // Check if new name conflicts with another item
+            // Check if new name conflicts with another item in the same service center
             if (!item.getItemName().equalsIgnoreCase(dto.getItemName())
-                    && inventoryItemRepository.existsByItemNameIgnoreCase(dto.getItemName())) {
-                throw new IllegalArgumentException("An item with this name already exists");
+                    && inventoryItemRepository.existsByItemNameIgnoreCaseAndServiceCenterId(
+                            dto.getItemName(), item.getServiceCenter().getId())) {
+                throw new IllegalArgumentException(
+                        "An item with this name already exists in " + item.getServiceCenter().getName());
             }
             item.setItemName(dto.getItemName());
         }
