@@ -1,7 +1,5 @@
-// src/pages/EmployeeDashboard.tsx
-
 import { useState, useEffect, useCallback } from "react";
-import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { Clock, CheckCircle, AlertCircle, XCircle, MapPin } from "lucide-react";
 import AppointmentList from "@/components/EmployeeDashboard/AppointmentList";
 import AppointmentDetail from "@/components/EmployeeDashboard/AppointmentDetail";
 import StatusUpdateModal from "@/components/EmployeeDashboard/StatusUpdateModal";
@@ -13,6 +11,7 @@ import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import employeeService, {
   type EmployeeAppointmentDTO,
   type TimeLogDTO,
+  type EmployeeCenterDTO,
 } from "@/services/employeeService";
 
 // ------------------ Types ------------------
@@ -46,6 +45,7 @@ const EmployeeDashboard = () => {
   const [showTimeLog, setShowTimeLog] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
 
   const EMPLOYEE_ID = user?.id || 9;
 
@@ -100,6 +100,16 @@ const EmployeeDashboard = () => {
     }
   }, [EMPLOYEE_ID, statusFilter]);
 
+  // ------------------ Fetch Employee Details ------------------
+  const fetchEmployeeDetails = useCallback(async () => {
+    try {
+      const details = await employeeService.getEmployeeDetails();
+      setEmployeeDetails(details);
+    } catch (err) {
+      console.error("Error fetching employee details:", err);
+    }
+  }, []);
+
   // ------------------ Fetch Time Logs ------------------
   const fetchTimeLogs = useCallback(
     async (appointmentId: string) => {
@@ -120,6 +130,10 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  useEffect(() => {
+    fetchEmployeeDetails();
+  }, [fetchEmployeeDetails]);
 
   useEffect(() => {
     if (selectedAppointment) {
@@ -285,11 +299,30 @@ const EmployeeDashboard = () => {
       <AuthenticatedNavbar />
       <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
-          <p className="text-gray-400 mt-2">
-            Welcome back,{" "}
-            {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
+              <p className="text-gray-400 mt-2">
+                Welcome back,{" "}
+                {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
+              </p>
+            </div>
+            {employeeDetails && (
+              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
+                <MapPin className="w-5 h-5 text-blue-400" />
+                <div className="text-right">
+                  <p className="text-xs text-gray-400">Service Center</p>
+                  <p className={`text-sm font-semibold ${
+                    employeeDetails.serviceCenter 
+                      ? "text-white" 
+                      : "text-gray-500 italic"
+                  }`}>
+                    {employeeDetails.serviceCenter || "Unassigned"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
