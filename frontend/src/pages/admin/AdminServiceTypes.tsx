@@ -10,7 +10,6 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
   Clock
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -361,7 +360,6 @@ const AdminServiceTypes = () => {
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1 text-white">
-                              <DollarSign className="w-4 h-4 text-green-500" />
                               <span className="font-semibold">{formatCurrency(item.estimatedCost)}</span>
                             </div>
                           </td>
