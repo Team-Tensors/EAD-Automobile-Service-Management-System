@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import { inventoryService } from '../services/inventoryService';
-import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
+import toast, { Toaster } from 'react-hot-toast';
 
 const CATEGORIES = [
   'Lubricant',
@@ -39,7 +39,6 @@ const EmployeeInventory = () => {
   const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [getQuantity, setGetQuantity] = useState(0);
-  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,19 +47,6 @@ const EmployeeInventory = () => {
   // Load inventory items
   useEffect(() => {
     loadInventory();
-  }, []);
-
-  // Fetch employee details
-  useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const details = await employeeService.getEmployeeDetails();
-        setEmployeeDetails(details);
-      } catch (err) {
-        console.error("Error fetching employee details:", err);
-      }
-    };
-    fetchEmployeeDetails();
   }, []);
 
   // Filter items based on search and category
@@ -119,9 +105,9 @@ const EmployeeInventory = () => {
           },
         }
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to get item:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to get item';
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to get item';
       
       // Show error toast
       toast.error(errorMessage, {
