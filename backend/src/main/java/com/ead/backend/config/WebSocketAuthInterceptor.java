@@ -28,51 +28,69 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            log.debug("WebSocket CONNECT command received");
-
-            // Extract token from headers
-            List<String> authHeaders = accessor.getNativeHeader("Authorization");
+        if (accessor != null) {
+            StompCommand command = accessor.getCommand();
+            log.debug("WebSocket command received: {}", command);
             
-            if (authHeaders != null && !authHeaders.isEmpty()) {
-                String authHeader = authHeaders.get(0);
-                log.debug("Authorization header found: {}", authHeader != null ? "Bearer ***" : "null");
+            if (StompCommand.CONNECT.equals(command)) {
+                log.info("WebSocket CONNECT command - attempting authentication");
 
-                if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                    String token = authHeader.substring(7);
-                    
-                    try {
-                        // Validate token and set authentication
-                        String username = jwtUtil.extractUsername(token);
+                // Extract token from headers
+                List<String> authHeaders = accessor.getNativeHeader("Authorization");
+                
+                if (authHeaders != null && !authHeaders.isEmpty()) {
+                    String authHeader = authHeaders.get(0);
+                    log.debug("Authorization header present");
+
+                    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                        String token = authHeader.substring(7);
                         
-                        if (username != null) {
-                            log.debug("JWT username extracted: {}", username);
-                            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                        try {
+                            // Validate token and set authentication
+                            String username = jwtUtil.extractUsername(token);
                             
-                            if (jwtUtil.validateToken(token, userDetails)) {
-                                log.info("WebSocket authentication successful for user: {}", username);
-                                UsernamePasswordAuthenticationToken authentication =
-                                    new UsernamePasswordAuthenticationToken(
-                                        userDetails, 
-                                        null, 
-                                        userDetails.getAuthorities()
-                                    );
-                                
-                                accessor.setUser(authentication);
+                            if (username != null) {
+                                log.info("JWT username extracted: {}", username);
+                                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                            
+                                if (jwtUtil.validateToken(token, userDetails)) {
+                                    log.info("WebSocket authentication successful for user: {}", username);
+                                    UsernamePasswordAuthenticationToken authentication =
+                                        new UsernamePasswordAuthenticationToken(
+                                            userDetails, 
+                                            null, 
+                                            userDetails.getAuthorities()
+                                        );
+                                    
+                                    accessor.setUser(authentication);
+                                    log.info("Principal set for user: {}", username);
+                                } else {
+                                    log.warn("WebSocket JWT token validation failed for user: {}", username);
+                                }
                             } else {
-                                log.warn("WebSocket JWT token validation failed for user: {}", username);
+                                log.warn("WebSocket JWT username extraction failed");
                             }
-                        } else {
-                            log.warn("WebSocket JWT username extraction failed");
+                        } catch (Exception e) {
+                            log.error("WebSocket authentication failed: {}", e.getMessage(), e);
                         }
-                    } catch (Exception e) {
-                        log.error("WebSocket authentication failed: {}", e.getMessage(), e);
+                    } else {
+                        log.warn("WebSocket Authorization header does not start with 'Bearer '");
                     }
                 } else {
-                    log.warn("WebSocket Authorization header does not start with 'Bearer '");
+                    log.warn("WebSocket CONNECT without Authorization header");
                 }
-            } else {
-                log.warn("WebSocket CONNECT without Authorization header");
+            } else if (StompCommand.SEND.equals(command)) {
+                // Log SEND commands for debugging
+                String destination = accessor.getDestination();
+                log.debug("WebSocket SEND to destination: {}", destination);
+                
+                // Check if user is authenticated
+                if (accessor.getUser() == null) {
+                    log.error("User not authenticated for SEND command to: {}", destination);
+                } else {
+                    log.debug("Authenticated user {} sending to: {}", 
+                        accessor.getUser().getName(), destination);
+                }
             }
         }
 
