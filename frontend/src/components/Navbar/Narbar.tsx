@@ -90,7 +90,7 @@ const Navbar = () => {
               <button
                 key={link.name}
                 onClick={() => navigateToSection(link.targetId)}
-                className="text-sm font-medium text-gray-400 dark:text-gray-400 light:text-gray-600 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-400 dark:text-gray-400 light:text-gray-600 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors cursor-pointer"
               >
                 {link.name}
               </button>
