@@ -28,8 +28,10 @@ public class AnalyticsFilterRequestDTO {
     // Default constructor with last 30 days
     public static AnalyticsFilterRequestDTO defaultLast30Days() {
         AnalyticsFilterRequestDTO dto = new AnalyticsFilterRequestDTO();
-        dto.setEndDate(LocalDateTime.now());
-        dto.setStartDate(LocalDateTime.now().minusDays(30));
+        // Set to end of current day
+        dto.setEndDate(LocalDateTime.now().toLocalDate().atTime(23, 59, 59, 999999999));
+        // Set to start of day 30 days ago
+        dto.setStartDate(LocalDateTime.now().minusDays(30).toLocalDate().atStartOfDay());
         dto.setPeriodType(PeriodType.DAILY);
         return dto;
     }
