@@ -12,9 +12,11 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
+import DashboardHeader from "@/components/DashboardHeader";
 import { inventoryService } from '../services/inventoryService';
-import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
+import toast, { Toaster } from 'react-hot-toast';
 
 const CATEGORIES = [
   'Lubricant',
@@ -39,7 +41,6 @@ const EmployeeInventory = () => {
   const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [getQuantity, setGetQuantity] = useState(0);
-  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,19 +49,6 @@ const EmployeeInventory = () => {
   // Load inventory items
   useEffect(() => {
     loadInventory();
-  }, []);
-
-  // Fetch employee details
-  useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const details = await employeeService.getEmployeeDetails();
-        setEmployeeDetails(details);
-      } catch (err) {
-        console.error("Error fetching employee details:", err);
-      }
-    };
-    fetchEmployeeDetails();
   }, []);
 
   // Filter items based on search and category
@@ -119,9 +107,9 @@ const EmployeeInventory = () => {
           },
         }
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to get item:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to get item';
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to get item';
       
       // Show error toast
       toast.error(errorMessage, {
@@ -162,26 +150,21 @@ const EmployeeInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
       {/* Toast Notifications */}
       <Toaster />
       
       <AuthenticatedNavbar />
+      
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold uppercase">Inventory</h1>
-              <p className="text-gray-400">Manage service center inventory items effectively.</p>
-            </div>
-            
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        title="Inventory"
+        subtitle="Manage service center inventory items effectively."
+        showWelcomeMessage={false}
+      />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700">
@@ -452,6 +435,7 @@ const EmployeeInventory = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };

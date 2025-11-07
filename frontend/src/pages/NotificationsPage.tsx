@@ -89,7 +89,7 @@ const NotificationsPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col pt-12 ${
+    <div className={`min-h-screen flex flex-col ${
       theme === "light" ? "bg-gray-50" : "bg-black"
     }`}>
       <AuthenticatedNavbar />
@@ -100,7 +100,7 @@ const NotificationsPage: React.FC = () => {
           ? "bg-gradient-to-r from-gray-100 to-gray-50 border-gray-200" 
           : "bg-linear-to-r from-zinc-900 to-zinc-800 border-zinc-700"
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-6 pt-28">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-500/10 rounded-lg">
@@ -126,7 +126,7 @@ const NotificationsPage: React.FC = () => {
 
       {/* Main Content */}
       <div className={`flex-1 ${theme === "light" ? "bg-gray-50" : "bg-black"}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
           <div className="flex items-center justify-between mb-6">
             {/* Filter Tabs */}
             <div className={`inline-flex rounded-lg p-1 border ${

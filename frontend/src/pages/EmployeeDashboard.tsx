@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Clock, CheckCircle, AlertCircle, XCircle, MapPin } from "lucide-react";
+import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import AppointmentList from "@/components/EmployeeDashboard/AppointmentList";
 import AppointmentDetail from "@/components/EmployeeDashboard/AppointmentDetail";
 import StatusUpdateModal from "@/components/EmployeeDashboard/StatusUpdateModal";
@@ -8,6 +8,7 @@ import TimeLogList from "@/components/EmployeeDashboard/TimeLogList";
 import { useAuth } from "../hooks/useAuth";
 import Footer from "@/components/Footer/Footer";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import DashboardHeader from "@/components/DashboardHeader";
 import employeeService, {
   type EmployeeAppointmentDTO,
   type TimeLogDTO,
@@ -300,35 +301,11 @@ const EmployeeDashboard = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col pt-12">
       <AuthenticatedNavbar />
-      <div className="bg-black border-b border-zinc-700 pt-8">
-        <div className="max-w-7xl mx-auto px-0 py-8 pt-6 pb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white uppercase">Dashboard</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome back,{" "}
-                {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
-              </p>
-            </div>
-            {employeeDetails && (
-              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
-                <MapPin className="w-5 h-5 text-blue-400" />
-                <div className="text-right">
-                  <p className="text-xs text-gray-400">Service Center</p>
-                  <p className={`text-sm font-semibold ${
-                    employeeDetails.serviceCenter 
-                      ? "text-white" 
-                      : "text-gray-500 italic"
-                  }`}>
-                    {employeeDetails.serviceCenter || "Unassigned"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <DashboardHeader
+        showServiceCenter={true}
+        serviceCenter={employeeDetails?.serviceCenter}
+      />
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Assigned Services */}
           <div className="lg:col-span-1">
