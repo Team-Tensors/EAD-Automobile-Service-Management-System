@@ -40,36 +40,36 @@ const CustomerDashboard = () => {
       <AuthenticatedNavbar />
 
       <div className="bg-black border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-0 pt-22 pb-4">
-          <h1 className="text-2xl font-bold text-white mb-2 uppercase">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pt-22 pb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2 uppercase">
             Dashboard
           </h1>
-          <p className="text-gray-400">
+          <p className="text-sm sm:text-base text-gray-400">
             Welcome back,{" "}
             {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-6 sm:py-8">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-12 sm:py-20">
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
-                <LayoutDashboard className="w-16 h-16 text-orange-500 animate-bounce" />
+                <LayoutDashboard className="w-12 h-12 sm:w-16 sm:h-16 text-orange-500 animate-bounce" />
                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
-                  <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full animate-pulse delay-75"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-orange-500 rounded-full animate-pulse delay-150"></div>
                 </div>
               </div>
-              <p className="text-zinc-400 text-sm">Loading your services...</p>
+              <p className="text-zinc-400 text-xs sm:text-sm">Loading your services...</p>
             </div>
           </div>
         ) : services.length === 0 ? (
           <NoServicesPlaceholder />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             <div className="lg:col-span-1">
               <MyServicesList
                 services={services}

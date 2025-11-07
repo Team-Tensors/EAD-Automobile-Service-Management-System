@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { inventoryService } from '../../services/inventoryService';
+import { serviceCenterService } from '../../services/serviceCenterService';
 import type { InventoryItem, InventoryItemCreateDto } from '../../types/inventory';
+import type { ServiceCenter } from '../../types/serviceCenter';
 
 const CATEGORIES = [
   'Lubricant',
@@ -37,10 +39,15 @@ const AdminInventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedServiceCenter, setSelectedServiceCenter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [restockQuantity, setRestockQuantity] = useState(0);
+  
+  // Service centers state
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
+  const [loadingServiceCenters, setLoadingServiceCenters] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -53,21 +60,28 @@ const AdminInventory = () => {
     quantity: 0,
     unitPrice: 0,
     category: 'Spare Part',
-    minStock: 10
+    minStock: 10,
+    serviceCenterId: ''
   });
 
-  // Load inventory items
+  // Load inventory items and service centers
   useEffect(() => {
     loadInventory();
+    loadServiceCenters();
   }, []);
 
-  // Filter items based on search and category
+  // Filter items based on search, category, and service center
   useEffect(() => {
     let filtered = items;
 
     // Filter by category
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
+    // Filter by service center
+    if (selectedServiceCenter !== 'All') {
+      filtered = filtered.filter(item => item.serviceCenterName === selectedServiceCenter);
     }
 
     // Filter by search query
@@ -83,7 +97,7 @@ const AdminInventory = () => {
 
     setFilteredItems(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [items, searchQuery, selectedCategory]);
+  }, [items, searchQuery, selectedCategory, selectedServiceCenter]);
 
   const loadInventory = async () => {
     try {
@@ -94,6 +108,18 @@ const AdminInventory = () => {
       console.error('Failed to load inventory:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadServiceCenters = async () => {
+    try {
+      setLoadingServiceCenters(true);
+      const data = await serviceCenterService.fetchServiceCenters();
+      setServiceCenters(data);
+    } catch (error) {
+      console.error('Failed to load service centers:', error);
+    } finally {
+      setLoadingServiceCenters(false);
     }
   };
 
@@ -145,7 +171,8 @@ const AdminInventory = () => {
       quantity: 0,
       unitPrice: 0,
       category: 'Spare Part',
-      minStock: 10
+      minStock: 10,
+      serviceCenterId: ''
     });
   };
 
@@ -180,7 +207,7 @@ const AdminInventory = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -197,8 +224,16 @@ const AdminInventory = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+      {/* Loading State */}
+      {loading ? (
+        <div className="py-20 text-center text-gray-400">
+          <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+          <p className="text-sm">Loading inventory data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
@@ -235,17 +270,17 @@ const AdminInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800 mb-6">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
 
@@ -255,7 +290,7 @@ const AdminInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -264,12 +299,27 @@ const AdminInventory = () => {
               </select>
             </div>
 
+            {/* Service Center Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <select
+                value={selectedServiceCenter}
+                onChange={(e) => setSelectedServiceCenter(e.target.value)}
+                className="pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+              >
+                <option value="All">All Service Centers</option>
+                {Array.from(new Set(items.map(item => item.serviceCenterName).filter(Boolean))).map(center => (
+                  <option key={center} value={center}>{center}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Add Item Button */}
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               Add Item
             </button>
           </div>
@@ -282,6 +332,7 @@ const AdminInventory = () => {
               <thead className="bg-zinc-800 border-b border-zinc-700">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-white">Item Name</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Service Center</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-white">Category</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Quantity</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Min Stock</th>
@@ -294,13 +345,13 @@ const AdminInventory = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-400">
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
                       Loading inventory...
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-400">
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
                       No items found
                     </td>
                   </tr>
@@ -316,6 +367,11 @@ const AdminInventory = () => {
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-white">{item.itemName}</p>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-300 text-sm">
+                          {item.serviceCenterName || 'N/A'}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold">
@@ -447,6 +503,23 @@ const AdminInventory = () => {
                   placeholder="Item description..."
                   rows={3}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Service Center *
+                </label>
+                <select
+                  required
+                  value={formData.serviceCenterId}
+                  onChange={(e) => setFormData({ ...formData, serviceCenterId: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="">Select a service center</option>
+                  {serviceCenters.map(center => (
+                    <option key={center.id} value={center.id}>{center.name} - {center.city}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -607,6 +680,8 @@ const AdminInventory = () => {
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

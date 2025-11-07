@@ -7,10 +7,12 @@ import {
   LogOut,
   Menu,
   X,
+  Home,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
 import NotificationBell from "@/components/Notification/NotificationBell";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import { useState, useRef, useEffect } from "react";
 
 interface NavTab {
@@ -78,6 +80,12 @@ const AuthenticatedNavbar = () => {
     {
       name: "MY VEHICLES",
       path: "/my-vehicles",
+      icon: Car,
+      roles: ["CUSTOMER"],
+    },
+    {
+      name: "SERVICES",
+      path: "/services",
       icon: Car,
       roles: ["CUSTOMER"],
     },
@@ -186,6 +194,9 @@ const AuthenticatedNavbar = () => {
 
           {/* User Info & Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Notification Bell */}
             <NotificationBell userId={user?.id} />
 
@@ -216,19 +227,23 @@ const AuthenticatedNavbar = () => {
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl py-2 z-50">
                   <div className="px-4 py-3 border-b border-zinc-800">
-                    <p className="text-sm font-semibold text-white">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                    <p className="text-sm font-semibold text-white">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {user?.email}
+                    </p>
                   </div>
-                  
+
                   <Link
                     to="/"
                     onClick={() => setIsProfileDropdownOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
                   >
-                    <Navigation className="w-4 h-4" />
-                    Website
+                    <Home className="w-4 h-4" />
+                    Home
                   </Link>
-                  
+
                   <Link
                     to={"/profile"}
                     onClick={() => setIsProfileDropdownOpen(false)}
@@ -237,7 +252,7 @@ const AuthenticatedNavbar = () => {
                     <User className="w-4 h-4" />
                     Profile
                   </Link>
-                  
+
                   <div className="border-t border-zinc-800 mt-2 pt-2">
                     <button
                       onClick={() => {

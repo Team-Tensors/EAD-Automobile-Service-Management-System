@@ -2,10 +2,12 @@ package com.ead.backend.service;
 
 import com.ead.backend.dto.*;
 import com.ead.backend.entity.InventoryItem;
+import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.entity.User;
 import com.ead.backend.exception.ResourceNotFoundException;
 import com.ead.backend.mappers.InventoryItemMapper;
 import com.ead.backend.repository.InventoryItemRepository;
+import com.ead.backend.repository.ServiceCenterRepository;
 import com.ead.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class InventoryService {
 
     private final InventoryItemRepository inventoryItemRepository;
     private final UserRepository userRepository;
+    private final ServiceCenterRepository serviceCenterRepository;
     private final InventoryItemMapper inventoryItemMapper;
     private final EmailService emailService;
 
@@ -97,6 +100,11 @@ public class InventoryService {
         // Get current authenticated user
         User currentUser = getCurrentUser();
 
+        // Get service center
+        ServiceCenter serviceCenter = serviceCenterRepository.findById(dto.getServiceCenterId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Service center not found with id: " + dto.getServiceCenterId()));
+
         // Create new inventory item
         InventoryItem item = new InventoryItem();
         item.setItemName(dto.getItemName());
@@ -105,6 +113,7 @@ public class InventoryService {
         item.setUnitPrice(dto.getUnitPrice());
         item.setCategory(dto.getCategory());
         item.setMinStock(dto.getMinStock());
+        item.setServiceCenter(serviceCenter);
         item.setCreatedBy(currentUser);
 
         InventoryItem savedItem = inventoryItemRepository.save(item);

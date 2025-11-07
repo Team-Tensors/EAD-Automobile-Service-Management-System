@@ -338,10 +338,10 @@ const EmployeeDashboard = () => {
 
   // ------------------ Render ------------------
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
+    <div className="min-h-screen bg-black flex flex-col">
       <AuthenticatedNavbar />
-      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-linear-to-r from-black to-zinc-950 border-b border-zinc-700 pt-4">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
           <p className="text-gray-400 mt-2">
             Welcome back,{" "}
@@ -349,7 +349,7 @@ const EmployeeDashboard = () => {
           </p>
         </div>
       </div>
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Assigned Services */}
           <div className="lg:col-span-1">

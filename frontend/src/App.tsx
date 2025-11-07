@@ -21,6 +21,7 @@ import EmployeeInventory from "./pages/EmployeeInventory";
 import ShiftSchedulingPage from "./pages/ShiftSchedulingPage";
 import ChatPage from '@/pages/ChatPage';
 
+import ServicesPage from "./pages/ServicesPage";
 
 function App() {
   return (
@@ -172,6 +173,12 @@ function App() {
             <AddVehiclePage />
           </ProtectedRoute>
         }
+      />
+
+      {/* Customer Services Route */}
+      <Route
+        path="/services"
+        element={<ServicesPage />}
       />
 
       {/* Employee Inventory Route */}

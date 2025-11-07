@@ -55,10 +55,10 @@ const ShiftSchedulingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
+    <div className="min-h-screen bg-black flex flex-col">
       <AuthenticatedNavbar />
-      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-linear-to-r from-black to-zinc-950 border-b border-zinc-700 pt-4">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <h1 className="text-3xl font-bold text-white">Shift Scheduling</h1>
           <p className="text-gray-400 mt-2">
             Welcome {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
@@ -67,11 +67,11 @@ const ShiftSchedulingPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="bg-zinc-900/50 rounded-lg p-6 border border-zinc-800">
           {loading ? (
             <div className="py-8 text-center text-gray-400">
-              <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-400 mb-3 mx-auto"></div>
+              <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
               <p className="text-sm">Loading available appointments…</p>
             </div>
           ) : error ? (
