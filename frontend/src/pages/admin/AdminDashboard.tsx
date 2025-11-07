@@ -163,21 +163,41 @@ const AdminDashboard = () => {
       .admin-scrollbar::-webkit-scrollbar {
         width: 8px;
       }
-      .admin-scrollbar::-webkit-scrollbar-track {
+      
+      /* Dark theme scrollbar */
+      .dark .admin-scrollbar::-webkit-scrollbar-track {
         background: #18181b;
         border-radius: 4px;
       }
-      .admin-scrollbar::-webkit-scrollbar-thumb {
+      .dark .admin-scrollbar::-webkit-scrollbar-thumb {
         background: #3f3f46;
         border-radius: 4px;
         transition: background 0.2s;
       }
-      .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+      .dark .admin-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #f97316;
       }
-      .admin-scrollbar {
+      .dark .admin-scrollbar {
         scrollbar-width: thin;
         scrollbar-color: #3f3f46 #18181b;
+      }
+      
+      /* Light theme scrollbar */
+      .light .admin-scrollbar::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 4px;
+      }
+      .light .admin-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .light .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #f97316;
+      }
+      .light .admin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db #f3f4f6;
       }
     `;
     
