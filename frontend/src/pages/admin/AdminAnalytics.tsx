@@ -159,7 +159,7 @@ const AdminAnalytics = () => {
             </div>
 
             {/* Status Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
               {/* Pending */}
               <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
                 <div className="flex items-center gap-3 mb-4">
@@ -175,6 +175,27 @@ const AdminAnalytics = () => {
                     style={{ 
                       width: `${dashboardData && dashboardData.totalAppointments > 0 
                         ? (dashboardData.pendingAppointments / dashboardData.totalAppointments * 100) 
+                        : 0}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Confirmed */}
+              <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-8 h-8 text-cyan-500" />
+                  <div>
+                    <p className="text-sm text-gray-400">Confirmed</p>
+                    <p className="text-2xl font-bold text-white">{dashboardData?.confirmedAppointments || 0}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-zinc-800 rounded-full h-2">
+                  <div 
+                    className="bg-cyan-500 h-2 rounded-full transition-all"
+                    style={{ 
+                      width: `${dashboardData && dashboardData.totalAppointments > 0 
+                        ? (dashboardData.confirmedAppointments / dashboardData.totalAppointments * 100) 
                         : 0}%` 
                     }}
                   ></div>
