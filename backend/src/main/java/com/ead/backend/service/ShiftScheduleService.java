@@ -1,43 +1,42 @@
 package com.ead.backend.service;
 
-import com.ead.backend.dto.EmployeeOptionDTO;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.ead.backend.dto.EmployeeCenterDTO;
 import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.EmployeeCenter;
+import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.entity.ShiftSchedules;
 import com.ead.backend.entity.User;
 import com.ead.backend.enums.ShiftAssignmentType;
 import com.ead.backend.mappers.ShiftScheduleMapper;
 import com.ead.backend.repository.AppointmentRepository;
+import com.ead.backend.repository.EmployeeCenterRepository;
 import com.ead.backend.repository.ShiftSchedulesRepository;
 import com.ead.backend.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class ShiftScheduleService {
     private final AppointmentRepository appointmentRepository;
     private final ShiftSchedulesRepository shiftSchedulesRepository;
     private final UserRepository userRepository;
+    private final EmployeeCenterRepository employeeCenterRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
 
-    public ShiftScheduleService(AppointmentRepository appointmentRepository,
-                                ShiftSchedulesRepository shiftSchedulesRepository,
-                                UserRepository userRepository,
-                                NotificationService notificationService,
-                                EmailService emailService) {
-        this.appointmentRepository = appointmentRepository;
-        this.shiftSchedulesRepository = shiftSchedulesRepository;
-        this.userRepository = userRepository;
-        this.notificationService = notificationService;
-        this.emailService = emailService;
-    }
 
     public List<ShiftScheduleAppointmentsDTO> getPendingAppointments() {
 
@@ -50,7 +49,9 @@ public class ShiftScheduleService {
         User employee = userRepository.findByEmail(employeeEmail)
                 .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
         UUID employeeId = employee.getId();
-        List<Appointment> pendingAppointments = appointmentRepository.findByStatus("PENDING");
+        Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(employeeId);
+        ServiceCenter serviceCenter = employeeCenter.map(EmployeeCenter::getServiceCenter).orElse(null);
+        List<Appointment> pendingAppointments = appointmentRepository.findByStatusAndServiceCenter("PENDING", serviceCenter);
         return pendingAppointments.stream()
                 .filter(apt -> canEmployeeTakeAppointment(employeeId, apt))
                 .map(ShiftScheduleMapper::toDTO)
@@ -72,7 +73,7 @@ public class ShiftScheduleService {
      * Returns employees who can be assigned to the given appointment (no conflicting shifts,
      * has EMPLOYEE role and is active, and not already assigned to the appointment).
      */
-    public List<EmployeeOptionDTO> getPossibleEmployeesForAppointment(UUID appointmentId) {
+    public List<EmployeeCenterDTO> getPossibleEmployeesForAppointment(UUID appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("APPOINTMENT_NOT_FOUND"));
 
@@ -86,7 +87,11 @@ public class ShiftScheduleService {
                 .filter(user -> Boolean.TRUE.equals(user.getActive()))
                 .filter(user -> appointment.getAssignedEmployees().stream().noneMatch(ae -> ae.getId().equals(user.getId())))
                 .filter(user -> shiftSchedulesRepository.findConflictingShifts(user.getId(), startTime, endTime).isEmpty())
-                .map(u -> new EmployeeOptionDTO(u.getId(), u.getEmail(), u.getFullName(), u.getPhoneNumber()))
+                .map(u ->  {
+                    Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(u.getId());
+                    String serviceCenter = employeeCenter.map(ec -> ec.getServiceCenter().getName()).orElse("");
+                    return new EmployeeCenterDTO(u.getId(), u.getEmail(), u.getFullName(), u.getPhoneNumber(), serviceCenter);
+                })
                 .collect(Collectors.toList());
     }
 

@@ -1,13 +1,8 @@
 package com.ead.backend.service;
 
-import com.ead.backend.dto.AppointmentDTO;
-import com.ead.backend.dto.TimeLogRequestDto;
-import com.ead.backend.dto.TimeLogResponseDTO;
+import com.ead.backend.dto.*;
 import com.ead.backend.entity.*;
-import com.ead.backend.repository.AppointmentRepository;
-import com.ead.backend.repository.TimeLogRepository;
-import com.ead.backend.repository.UserRepository;
-import com.ead.backend.repository.VehicleRepository;
+import com.ead.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +12,7 @@ import com.ead.backend.enums.AppointmentType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,6 +28,7 @@ public class EmployeeService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final EmployeeCenterRepository employeeCenterRepository;
 
     /**
      * Retrieves all time logs for a given appointment and employee.
@@ -61,34 +58,26 @@ public class EmployeeService {
 
     /**
      * Retrieves all appointments assigned to an employee.
-     *
-     * @param employeeId the employee ID
-     * @param status the appointment status
      * @return list of appointments
      */
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByEmployee(UUID employeeId, String status) {
-        logger.info("=== EMPLOYEE SERVICE - GET APPOINTMENTS BY EMPLOYEE METHOD STARTED ===");
-        List<String> allowedStatuses = List.of("CONFIRMED", "IN_PROGRESS", "COMPLETED");
-        List<Appointment> appointments;
-        if (status == null) {
-            appointments = appointmentRepository.findByAssignedEmployeesIdAndStatusIn(employeeId, allowedStatuses);
-        } else {
-            if (!allowedStatuses.contains(status)) {
-                throw new RuntimeException("INVALID_STATUS");
-            }
-            appointments = appointmentRepository.findByAssignedEmployeesIdAndStatus(employeeId, status);
+    public List<AppointmentDTO> getAppointmentsByEmployee(String employeeEmail) {
+        Optional<User> employeeOpt = userRepository.findByEmail(employeeEmail);
+
+        if (employeeOpt.isEmpty()) {
+            return List.of();
         }
+
+        Set<User> employees = Set.of(employeeOpt.get());
+        List<Appointment> appointments = appointmentRepository.findByAssignedEmployees(employees);
+
         return appointments.stream().map(a -> {
             // User details
             User user = a.getUser();
-            UUID userId = user != null ? user.getId() : null;
             String userFullName = user != null ? user.getFullName() : null;
-            String phoneNumber = user != null ? user.getPhoneNumber() : null;
 
             // Vehicle details
             Vehicle vehicle = a.getVehicle();
-            UUID vehicleId = vehicle != null ? vehicle.getId() : null;
             String brand = vehicle != null ? vehicle.getBrand() : null;
             String model = vehicle != null ? vehicle.getModel() : null;
             String color = vehicle != null ? vehicle.getColor() : null;
@@ -105,10 +94,7 @@ public class EmployeeService {
 
             return new AppointmentDTO(
                     a.getId(),
-                    userId,
                     userFullName,
-                    phoneNumber,
-                    vehicleId,
                     brand,
                     model,
                     color,
@@ -125,6 +111,7 @@ public class EmployeeService {
             );
         }).toList();
     }
+
 
     /**
      * Updates the status of an appointment.
@@ -212,5 +199,14 @@ public class EmployeeService {
         timeLog.setNotes(timeLogDto.getNotes());
 
         timeLogRepository.save(timeLog);
+    }
+
+    public EmployeeCenterDTO getEmployeeDetails(String employeeEmail) {
+        User employee = userRepository.findByEmail(employeeEmail)
+                .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
+        Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(employee.getId());
+        String serviceCenter = employeeCenter.map(ec -> ec.getServiceCenter().getName()).orElse("");
+        return new EmployeeCenterDTO(employee.getId(), employee.getEmail(), employee.getFullName(),employee.getPhoneNumber(), serviceCenter);
+
     }
 }
