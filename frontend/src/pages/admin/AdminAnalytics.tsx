@@ -17,6 +17,7 @@ import {
   getCustomerInsights,
   getTodayRange,
   getLastNDaysRange,
+  getNextNDaysRange,
   getCurrentMonthRange,
   getYearToDateRange
 } from '../../services/analyticsService';
@@ -81,6 +82,12 @@ const AdminAnalytics = () => {
         const last7 = getLastNDaysRange(7);
         params.startDate = last7.startDate;
         params.endDate = last7.endDate;
+        break;
+      }
+      case 'next7days': {
+        const next7 = getNextNDaysRange(7);
+        params.startDate = next7.startDate;
+        params.endDate = next7.endDate;
         break;
       }
       case 'last30days': {
