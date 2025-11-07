@@ -1,11 +1,20 @@
 import heroImage from "@/assets/hero-car.jpg";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about');
     if (aboutSection) {
       aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const handleGetStarted = () => {
+    navigate('/login');
   };
 
   return (
@@ -41,15 +50,20 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 animate-fade-in-up-delay">
+            {!isAuthenticated && (
+              <button 
+                onClick={handleGetStarted}
+                className="px-8 py-4 bg-orange-600 text-gray-100 font-semibold rounded-md hover:bg-orange-700 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]"
+              >
+                GET STARTED
+              </button>
+            )}
             <button 
               onClick={scrollToAbout}
-              className="px-8 py-4 bg-orange-600 text-gray-100 font-semibold rounded-md hover:bg-orange-700 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]"
+              className="px-8 py-4 bg-transparent border-2 border-white/20 text-gray-200 font-semibold rounded-md hover:border-orange-700 hover:text-orange-700 transition-all duration-300"
             >
               LEARN MORE
             </button>
-            {/* <button className="px-8 py-4 bg-transparent border-2 border-white/20 text-gray-200 font-semibold rounded-md hover:border-orange-700 hover:text-orange-700 transition-all duration-300">
-              LEARN MORE
-            </button> */}
           </div>
         </div>
       </div>
