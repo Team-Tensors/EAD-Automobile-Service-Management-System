@@ -20,24 +20,24 @@ const Hero = () => {
           {/* Tagline */}
           <div className="flex items-center space-x-3 mb-6 animate-fade-in">
             <div className="w-12 h-0.5 bg-orange-600"></div>
-            <p className="text-sm text-gray-400 uppercase tracking-wider">
+            <p className="text-sm text-gray-200 uppercase tracking-wider dark:text-white">
               Discover the passion and expertise behind DriveCare
             </p>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight animate-fade-in-up font-heading">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-200 mb-8 leading-tight animate-fade-in-up font-heading">
             TOP-QUALITY SERVICE
             <br />
-            <span className="text-white">FOR YOUR VEHICLE</span>
+            <span className="text-gray-200">FOR YOUR VEHICLE</span>
           </h1>
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 animate-fade-in-up-delay">
-            <button className="px-8 py-4 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]">
+            <button className="px-8 py-4 bg-orange-600 text-gray-100 font-semibold rounded-md hover:bg-orange-700 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,87,51,0.4)]">
               GET STARTED
             </button>
-            <button className="px-8 py-4 bg-transparent border-2 border-white/20 text-white font-semibold rounded-md hover:border-orange-700 hover:text-orange-700 transition-all duration-300">
+            <button className="px-8 py-4 bg-transparent border-2 border-white/20 text-gray-200 font-semibold rounded-md hover:border-orange-700 hover:text-orange-700 transition-all duration-300">
               LEARN MORE
             </button>
           </div>
