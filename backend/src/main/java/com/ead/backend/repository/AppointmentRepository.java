@@ -131,20 +131,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     /**
      * Get revenue and appointment count grouped by date
      */
-    @Query("SELECT DATE(a.appointmentDate), " +
-            "SUM(som.estimatedCost), " +
-            "COUNT(a), " +
-            "SUM(CASE WHEN som.type = 'SERVICE' THEN som.estimatedCost ELSE 0 END), " +
-            "SUM(CASE WHEN som.type = 'MODIFICATION' THEN som.estimatedCost ELSE 0 END), " +
+    @Query(value = "SELECT CAST(a.appointment_date AS DATE), " +
+            "SUM(som.estimated_cost), " +
+            "COUNT(a.id), " +
+            "SUM(CASE WHEN som.type = 'SERVICE' THEN som.estimated_cost ELSE 0 END), " +
+            "SUM(CASE WHEN som.type = 'MODIFICATION' THEN som.estimated_cost ELSE 0 END), " +
             "COUNT(CASE WHEN som.type = 'SERVICE' THEN 1 END), " +
             "COUNT(CASE WHEN som.type = 'MODIFICATION' THEN 1 END) " +
-            "FROM Appointment a " +
-            "JOIN a.serviceOrModification som " +
-            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
-            "AND (:serviceCenterId IS NULL OR a.serviceCenter.id = :serviceCenterId) " +
+            "FROM appointment a " +
+            "JOIN service_or_modification som ON a.service_or_modification_id = som.id " +
+            "WHERE a.appointment_date BETWEEN :startDate AND :endDate " +
+            "AND (:serviceCenterId IS NULL OR a.service_center_id = CAST(:serviceCenterId AS UUID)) " +
             "AND a.status = 'COMPLETED' " +
-            "GROUP BY DATE(a.appointmentDate) " +
-            "ORDER BY DATE(a.appointmentDate)")
+            "GROUP BY CAST(a.appointment_date AS DATE) " +
+            "ORDER BY CAST(a.appointment_date AS DATE)",
+            nativeQuery = true)
     List<Object[]> getRevenueByDateRange(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
