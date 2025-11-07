@@ -198,7 +198,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5 text-gray-400 hover:text-white transition-colors" />
           </button>
@@ -237,25 +237,25 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setQuickDateRange('last7days')}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 Last 7 Days
               </button>
               <button
                 onClick={() => setQuickDateRange('last30days')}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 Last 30 Days
               </button>
               <button
                 onClick={() => setQuickDateRange('thisMonth')}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 This Month
               </button>
               <button
                 onClick={() => setQuickDateRange('ytd')}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors"
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 Year to Date
               </button>
@@ -278,14 +278,25 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                       : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600'
                   }`}
                 >
-                  <input
-                    type="radio"
-                    name="reportType"
-                    value={option.value}
-                    checked={reportType === option.value}
-                    onChange={(e) => setReportType(e.target.value as ReportType)}
-                    className="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 focus:ring-2"
-                  />
+                  <div className="relative flex items-center justify-center mt-1">
+                    <input
+                      type="radio"
+                      name="reportType"
+                      value={option.value}
+                      checked={reportType === option.value}
+                      onChange={(e) => setReportType(e.target.value as ReportType)}
+                      className="sr-only"
+                    />
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      reportType === option.value
+                        ? 'border-orange-500 bg-orange-600/20'
+                        : 'border-zinc-600'
+                    }`}>
+                      {reportType === option.value && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-white">{option.label}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{option.description}</p>
@@ -303,40 +314,62 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label
-                className={`flex items-center justify-center gap-2 p-4 rounded-lg border cursor-pointer transition-all ${
+                className={`flex items-center justify-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
                   exportFormat === 'csv'
                     ? 'bg-orange-600/10 border-orange-500'
                     : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600'
                 }`}
               >
-                <input
-                  type="radio"
-                  name="exportFormat"
-                  value="csv"
-                  checked={exportFormat === 'csv'}
-                  onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-                  className="w-4 h-4 text-orange-600 focus:ring-orange-500 focus:ring-2"
-                />
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    value="csv"
+                    checked={exportFormat === 'csv'}
+                    onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    exportFormat === 'csv'
+                      ? 'border-orange-500 bg-orange-600/20'
+                      : 'border-zinc-600'
+                  }`}>
+                    {exportFormat === 'csv' && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                    )}
+                  </div>
+                </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-white">CSV</p>
                   <p className="text-xs text-gray-400">.csv file</p>
                 </div>
               </label>
               <label
-                className={`flex items-center justify-center gap-2 p-4 rounded-lg border cursor-pointer transition-all ${
+                className={`flex items-center justify-center gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
                   exportFormat === 'excel'
                     ? 'bg-orange-600/10 border-orange-500'
                     : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600'
                 }`}
               >
-                <input
-                  type="radio"
-                  name="exportFormat"
-                  value="excel"
-                  checked={exportFormat === 'excel'}
-                  onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
-                  className="w-4 h-4 text-orange-600 focus:ring-orange-500 focus:ring-2"
-                />
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="radio"
+                    name="exportFormat"
+                    value="excel"
+                    checked={exportFormat === 'excel'}
+                    onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    exportFormat === 'excel'
+                      ? 'border-orange-500 bg-orange-600/20'
+                      : 'border-zinc-600'
+                  }`}>
+                    {exportFormat === 'excel' && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                    )}
+                  </div>
+                </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-white">Excel</p>
                   <p className="text-xs text-gray-400">.xlsx file</p>
@@ -351,14 +384,14 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
           <button
             onClick={onClose}
             disabled={isExporting}
-            className="px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 text-sm font-medium text-gray-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleExport}
             disabled={!startDate || !endDate || isExporting}
-            className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-zinc-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-colors"
+            className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-700 disabled:bg-zinc-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-colors cursor-pointer"
           >
             {isExporting ? (
               <>
