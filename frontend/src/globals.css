@@ -242,6 +242,10 @@
   @apply bg-gray-100;
 }
 
+.light .hover\:bg-zinc-800:hover {
+  @apply bg-gray-100;
+}
+
 /* Light mode for neutral backgrounds */
 .light .bg-neutral-900,
 .light .bg-neutral-900\/80 {
@@ -258,6 +262,10 @@
 
 /* Light mode for text colors */
 .light .text-white {
+  @apply text-gray-900;
+}
+
+.light .hover\:text-white:hover {
   @apply text-gray-900;
 }
 
