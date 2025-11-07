@@ -10,11 +10,13 @@ import {
   Filter,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import { inventoryService } from '../services/inventoryService';
+import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
 
 const CATEGORIES = [
@@ -41,6 +43,7 @@ const EmployeeInventory = () => {
   const [showGetModal, setShowGetModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [getQuantity, setGetQuantity] = useState(0);
+  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,6 +52,19 @@ const EmployeeInventory = () => {
   // Load inventory items
   useEffect(() => {
     loadInventory();
+  }, []);
+
+  // Fetch employee details
+  useEffect(() => {
+    const fetchEmployeeDetails = async () => {
+      try {
+        const details = await employeeService.getEmployeeDetails();
+        setEmployeeDetails(details);
+      } catch (err) {
+        console.error("Error fetching employee details:", err);
+      }
+    };
+    fetchEmployeeDetails();
   }, []);
 
   // Filter items based on search and category
@@ -119,7 +135,7 @@ const EmployeeInventory = () => {
     <div className="min-h-screen bg-black">
       <AuthenticatedNavbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -128,9 +144,26 @@ const EmployeeInventory = () => {
                 Welcome back, {user?.firstName} {user?.lastName}!
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
-              <Calendar className="w-5 h-5 text-gray-300" />
-              <span className="font-semibold">{new Date().toLocaleDateString()}</span>
+            <div className="flex items-center gap-4">
+              {employeeDetails && (
+                <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
+                  <MapPin className="w-5 h-5 text-blue-400" />
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Service Center</p>
+                    <p className={`text-sm font-semibold ${
+                      employeeDetails.serviceCenter 
+                        ? "text-white" 
+                        : "text-gray-500 italic"
+                    }`}>
+                      {employeeDetails.serviceCenter || "Unassigned"}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
+                <Calendar className="w-5 h-5 text-gray-300" />
+                <span className="font-semibold">{new Date().toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -170,17 +203,17 @@ const EmployeeInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
             {/* Category Filter */}
@@ -189,7 +222,7 @@ const EmployeeInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -218,10 +251,7 @@ const EmployeeInventory = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                        <div className="py-8 text-center text-gray-400">
-                        <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
-                        <p className="text-sm">Loading inventory data...</p>
-                      </div>
+                      Loading inventory...
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
@@ -328,7 +358,7 @@ const EmployeeInventory = () => {
       {showGetModal && selectedItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-700">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
+            <div className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
               <h3 className="text-2xl font-bold">Get Item</h3>
               <button
                 onClick={() => {

@@ -7,13 +7,10 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class EmployeeDTO {
+public class EmployeeCenterDTO {
     private UUID id;
     private String email;
     private String fullName;
     private String phoneNumber;
-
-    public EmployeeDTO() {
-
-    }
+    private String serviceCenter;
 }
