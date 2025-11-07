@@ -4,6 +4,7 @@ export interface DashboardSummary {
   totalRevenue: number;
   totalAppointments: number;
   completedAppointments: number;
+  confirmedAppointments: number;
   pendingAppointments: number;
   inProgressAppointments: number;
   cancelledAppointments: number;
