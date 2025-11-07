@@ -305,7 +305,7 @@ const EmployeeDashboard = () => {
         showServiceCenter={true}
         serviceCenter={employeeDetails?.serviceCenter}
       />
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Assigned Services */}
           <div className="lg:col-span-1">
