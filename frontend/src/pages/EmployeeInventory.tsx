@@ -227,28 +227,32 @@ const EmployeeInventory = () => {
           </div>
         </div>
 
-        {/* Inventory Table */}
-        <div className="bg-zinc-900 rounded-lg shadow-md border border-zinc-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-zinc-800 border-b border-zinc-700">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Item Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Quantity</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Min Stock</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Unit Price</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                      Loading inventory...
-                    </td>
-                  </tr>
-                ) : filteredItems.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading inventory...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Inventory Table */}
+            <div className="bg-zinc-900 rounded-lg shadow-md border border-zinc-700 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-zinc-800 border-b border-zinc-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Item Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Quantity</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Min Stock</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Unit Price</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                       No items found
@@ -303,49 +307,51 @@ const EmployeeInventory = () => {
                       </td>
                     </tr>
                   ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Pagination */}
-          {filteredItems.length > 0 && (
-            <div className="px-6 py-4 border-t border-zinc-700 flex items-center justify-between">
-              <div className="text-sm text-gray-400">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={goToPreviousPage}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded-lg transition ${
-                    currentPage === 1
-                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                  title="Previous page"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-sm text-white px-4">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg transition ${
-                    currentPage === totalPages
-                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                  title="Next page"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+              
+              {/* Pagination */}
+              {filteredItems.length > 0 && (
+                <div className="px-6 py-4 border-t border-zinc-700 flex items-center justify-between">
+                  <div className="text-sm text-gray-400">
+                    Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={goToPreviousPage}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === 1
+                          ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                          : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                      }`}
+                      title="Previous page"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm text-white px-4">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === totalPages
+                          ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                          : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                      }`}
+                      title="Next page"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Get Item Modal */}
