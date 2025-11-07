@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, User, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -98,6 +99,7 @@ const Navbar = () => {
 
           {/* Auth Buttons / Profile Dropdown */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
+            <ThemeToggle />
             {user ? (
               // Profile Dropdown for logged-in users
               <div className="relative" ref={profileRef}>
