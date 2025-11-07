@@ -12,6 +12,7 @@ export type ServiceStatus =
 
 export interface Service {
   id: string;
+  appointmentId: string; 
   vehicleName: string;
   licensePlate: string;
   serviceType: string;
@@ -98,6 +99,7 @@ export const mapDetailedToService = async (
 
   return {
     id: detailed.id,
+    appointmentId: detailed.id,
     vehicleName,
     licensePlate,
     serviceType: detailed.service,
