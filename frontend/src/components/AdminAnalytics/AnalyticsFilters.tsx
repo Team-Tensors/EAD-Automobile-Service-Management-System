@@ -184,7 +184,7 @@ const AnalyticsFilters = ({
             disabled={!hasUnappliedChanges}
             className={`ml-auto flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
               hasUnappliedChanges
-                ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20'
+                ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 cursor-pointer'
                 : 'bg-zinc-800 text-gray-500 cursor-not-allowed border border-zinc-700'
             }`}
           >
@@ -255,8 +255,13 @@ const AnalyticsFilters = ({
                       const today = new Date();
                       const lastWeek = new Date(today);
                       lastWeek.setDate(today.getDate() - 7);
-                      onCustomStartDateChange(lastWeek.toISOString().split('T')[0]);
-                      onCustomEndDateChange(today.toISOString().split('T')[0]);
+                      
+                      // Format as YYYY-MM-DD in local timezone
+                      const startDateStr = `${lastWeek.getFullYear()}-${String(lastWeek.getMonth() + 1).padStart(2, '0')}-${String(lastWeek.getDate()).padStart(2, '0')}`;
+                      const endDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      onCustomStartDateChange(startDateStr);
+                      onCustomEndDateChange(endDateStr);
                     }}
                     className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
@@ -267,8 +272,13 @@ const AnalyticsFilters = ({
                       const today = new Date();
                       const lastMonth = new Date(today);
                       lastMonth.setDate(today.getDate() - 30);
-                      onCustomStartDateChange(lastMonth.toISOString().split('T')[0]);
-                      onCustomEndDateChange(today.toISOString().split('T')[0]);
+                      
+                      // Format as YYYY-MM-DD in local timezone
+                      const startDateStr = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}-${String(lastMonth.getDate()).padStart(2, '0')}`;
+                      const endDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      onCustomStartDateChange(startDateStr);
+                      onCustomEndDateChange(endDateStr);
                     }}
                     className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
@@ -278,8 +288,13 @@ const AnalyticsFilters = ({
                     onClick={() => {
                       const today = new Date();
                       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-                      onCustomStartDateChange(firstDay.toISOString().split('T')[0]);
-                      onCustomEndDateChange(today.toISOString().split('T')[0]);
+                      
+                      // Format as YYYY-MM-DD in local timezone
+                      const startDateStr = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-${String(firstDay.getDate()).padStart(2, '0')}`;
+                      const endDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      onCustomStartDateChange(startDateStr);
+                      onCustomEndDateChange(endDateStr);
                     }}
                     className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
@@ -289,8 +304,13 @@ const AnalyticsFilters = ({
                     onClick={() => {
                       const today = new Date();
                       const firstDay = new Date(today.getFullYear(), 0, 1);
-                      onCustomStartDateChange(firstDay.toISOString().split('T')[0]);
-                      onCustomEndDateChange(today.toISOString().split('T')[0]);
+                      
+                      // Format as YYYY-MM-DD in local timezone
+                      const startDateStr = `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-${String(firstDay.getDate()).padStart(2, '0')}`;
+                      const endDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                      
+                      onCustomStartDateChange(startDateStr);
+                      onCustomEndDateChange(endDateStr);
                     }}
                     className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors cursor-pointer"
                   >
@@ -307,14 +327,14 @@ const AnalyticsFilters = ({
                   setShowDatePicker(false);
                   setPendingDateRange(dateRange);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCustomDateApply}
                 disabled={!customStartDate || !customEndDate}
-                className="px-6 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-zinc-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-colors"
+                className="px-6 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-zinc-700 disabled:text-gray-500 cursor-pointer disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-colors"
               >
                 Apply
               </button>
