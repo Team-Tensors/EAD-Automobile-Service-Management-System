@@ -7,12 +7,10 @@ import "./globals.css";
 import App from "./App.tsx";
 import Chatbot from "./components/Chatbot/Chatbot";
 
-const basename = import.meta.env.BASE_URL;
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter basename={basename}>
+      <BrowserRouter>
         <App />
 
         <Toaster
