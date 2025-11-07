@@ -1,13 +1,8 @@
 package com.ead.backend.service;
 
-import com.ead.backend.dto.AppointmentDTO;
-import com.ead.backend.dto.TimeLogRequestDto;
-import com.ead.backend.dto.TimeLogResponseDTO;
+import com.ead.backend.dto.*;
 import com.ead.backend.entity.*;
-import com.ead.backend.repository.AppointmentRepository;
-import com.ead.backend.repository.TimeLogRepository;
-import com.ead.backend.repository.UserRepository;
-import com.ead.backend.repository.VehicleRepository;
+import com.ead.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +12,7 @@ import com.ead.backend.enums.AppointmentType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,6 +28,7 @@ public class EmployeeService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final EmployeeCenterRepository employeeCenterRepository;
 
     /**
      * Retrieves all time logs for a given appointment and employee.
@@ -212,5 +209,14 @@ public class EmployeeService {
         timeLog.setNotes(timeLogDto.getNotes());
 
         timeLogRepository.save(timeLog);
+    }
+
+    public EmployeeCenterDTO getEmployeeDetails(String employeeEmail) {
+        User employee = userRepository.findByEmail(employeeEmail)
+                .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
+        Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(employee.getId());
+        String serviceCenter = employeeCenter.map(ec -> ec.getServiceCenter().getName()).orElse("");
+        return new EmployeeCenterDTO(employee.getId(), employee.getEmail(), employee.getFullName(),employee.getPhoneNumber(), serviceCenter);
+
     }
 }

@@ -1,7 +1,8 @@
 package com.ead.backend.controller;
 
 import com.ead.backend.annotation.JwtSecurityAnnotations;
-import com.ead.backend.dto.EmployeeOptionDTO;
+import com.ead.backend.dto.EmployeeCenterDTO;
+import com.ead.backend.dto.EmployeeDTO;
 import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.service.ShiftScheduleService;
@@ -53,8 +54,8 @@ public class ShiftScheduleController {
 
     @JwtSecurityAnnotations.AdminOnly
     @GetMapping("/possible-employees/{appointmentId}")
-    public ResponseEntity<List<EmployeeOptionDTO>> getPossibleEmployees(@PathVariable("appointmentId") UUID appointmentId){
-        List<EmployeeOptionDTO> possibleEmployees = shiftScheduleService.getPossibleEmployeesForAppointment(appointmentId);
+    public ResponseEntity<List<EmployeeCenterDTO>> getPossibleEmployees(@PathVariable("appointmentId") UUID appointmentId){
+        List<EmployeeCenterDTO> possibleEmployees = shiftScheduleService.getPossibleEmployeesForAppointment(appointmentId);
         return ResponseEntity.ok(possibleEmployees);
     }
 
