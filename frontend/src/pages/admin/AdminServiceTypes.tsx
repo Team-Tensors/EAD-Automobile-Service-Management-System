@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Calendar,
   Plus,
   Search,
   Wrench,
@@ -12,14 +11,13 @@ import {
   ChevronRight,
   Clock
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 import { serviceTypeAdminService } from '../../services/serviceTypeAdminService';
 import type { ServiceTypeDto, ServiceTypeCreateDto } from '../../types/serviceType';
 import type { AppointmentType } from '../../types/appointment';
 import toast from 'react-hot-toast';
+import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 
 const AdminServiceTypes = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState<ServiceTypeDto[]>([]);
   const [filteredItems, setFilteredItems] = useState<ServiceTypeDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,22 +197,7 @@ const AdminServiceTypes = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Service Types Management</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <span className="font-semibold text-white">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader title="Service Types Management" />
 
       {/* Loading State */}
       {loading ? (
