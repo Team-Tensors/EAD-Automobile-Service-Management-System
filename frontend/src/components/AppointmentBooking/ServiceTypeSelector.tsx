@@ -51,7 +51,7 @@ const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({
                     {type.estimatedDuration}
                   </span>
                   <span className="text-orange-500 font-semibold">
-                    Rs. {type.price}
+                    Rs. {type.price} onwards
                   </span>
                 </div>
               </div>
