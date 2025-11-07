@@ -145,7 +145,7 @@ const Services: React.FC = () => {
             {/* Active progress line */}
             <div
               className="absolute top-8 left-0 h-[2px] bg-orange-600 transition-all duration-300"
-              style={{ width: `${((active + 0.5) / tabs.length) * 100}%` }}
+              style={{ width: active === tabs.length - 1 ? '100%' : `${((active + 0.5) / tabs.length) * 100}%` }}
             />
             
             {/* Tab buttons */}

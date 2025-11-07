@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 import { inventoryService } from '../../services/inventoryService';
 import { serviceCenterService } from '../../services/serviceCenterService';
 import type { InventoryItem, InventoryItemCreateDto } from '../../types/inventory';
@@ -40,6 +41,7 @@ const AdminInventory = () => {
   const [selectedServiceCenter, setSelectedServiceCenter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRestockModal, setShowRestockModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [restockQuantity, setRestockQuantity] = useState(0);
   
@@ -124,9 +126,39 @@ const AdminInventory = () => {
       setShowAddModal(false);
       resetForm();
       loadInventory();
+      
+      // Show success toast
+      toast.success(`Successfully added ${formData.itemName} to inventory!`, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#22c55e',
+          secondary: '#fff',
+        },
+      });
     } catch (error: any) {
       console.error('Failed to add item:', error);
-      alert(error.response?.data?.message || 'Failed to add item');
+      const errorMessage = error.response?.data?.message || 'Failed to add item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
@@ -140,21 +172,81 @@ const AdminInventory = () => {
       setSelectedItem(null);
       setRestockQuantity(0);
       loadInventory();
+      
+      // Show success toast
+      toast.success(`Successfully restocked ${selectedItem.itemName}!`, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#22c55e',
+          secondary: '#fff',
+        },
+      });
     } catch (error: any) {
       console.error('Failed to restock:', error);
-      alert(error.response?.data?.message || 'Failed to restock item');
+      const errorMessage = error.response?.data?.message || 'Failed to restock item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
   const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
     try {
       await inventoryService.remove(id);
+      setShowDeleteModal(false);
+      setSelectedItem(null);
       loadInventory();
+      
+      // Show success toast
+      toast.success('Item successfully deleted from inventory!', {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#22c55e',
+          secondary: '#fff',
+        },
+      });
     } catch (error: any) {
       console.error('Failed to delete item:', error);
-      alert(error.response?.data?.message || 'Failed to delete item');
+      const errorMessage = error.response?.data?.message || 'Failed to delete item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
@@ -200,6 +292,9 @@ const AdminInventory = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Toast Notifications */}
+      <Toaster />
+      
       {/* Header */}
       <AdminHeader title="Inventory Management" />
 
@@ -384,7 +479,10 @@ const AdminInventory = () => {
                             <PackagePlus className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteItem(item.id)}
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setShowDeleteModal(true);
+                            }}
                             className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
                             title="Delete"
                           >
@@ -657,6 +755,81 @@ const AdminInventory = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedItem && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-red-900/50">
+            <div className="bg-gradient-to-r from-red-900/50 to-red-800/50 text-white p-6 border-b border-red-800/50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-500/20 rounded-lg">
+                  <AlertCircle className="w-6 h-6 text-red-500" />
+                </div>
+                <h3 className="text-2xl font-bold">Delete Item</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedItem(null);
+                }}
+                className="text-white hover:bg-white/20 p-2 rounded-lg transition"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-lg">
+                <p className="text-red-400 font-semibold mb-2">Warning: This action cannot be undone!</p>
+                <p className="text-gray-300 text-sm">
+                  You are about to permanently delete the following item from the inventory:
+                </p>
+              </div>
+
+              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
+                <p className="text-sm text-gray-400 mb-1">Item Name</p>
+                <p className="font-semibold text-white text-lg">{selectedItem.itemName}</p>
+                
+                <div className="grid grid-cols-2 gap-4 mt-3">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Category</p>
+                    <p className="text-white">{selectedItem.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Service Center</p>
+                    <p className="text-white">{selectedItem.serviceCenterName}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <p className="text-sm text-gray-400 mb-1">Current Stock</p>
+                  <p className="text-white font-semibold">{selectedItem.quantity} units</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setSelectedItem(null);
+                  }}
+                  className="flex-1 px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg font-semibold transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeleteItem(selectedItem.id)}
+                  className="flex-1 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Item
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
