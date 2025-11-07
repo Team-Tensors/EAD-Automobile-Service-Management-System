@@ -169,6 +169,16 @@ public class AnalyticsController {
             filter.setEndDate(endDate);
         }
 
+        // Normalize start date to beginning of day
+        if (filter.getStartDate() != null) {
+            filter.setStartDate(filter.getStartDate().toLocalDate().atStartOfDay());
+        }
+
+        // Normalize end date to end of day (23:59:59.999) to include all appointments on that day
+        if (filter.getEndDate() != null) {
+            filter.setEndDate(filter.getEndDate().toLocalDate().atTime(23, 59, 59, 999999999));
+        }
+
         filter.setServiceCenterId(serviceCenterId);
         filter.setAppointmentType(appointmentType);
         filter.setStatus(status);
