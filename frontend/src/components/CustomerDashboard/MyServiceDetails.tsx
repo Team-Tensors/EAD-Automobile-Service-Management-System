@@ -68,17 +68,17 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
       )}
 
       {/* Header */}
-      <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg p-6 border border-zinc-800">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-2">
+      <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 border border-zinc-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3 sm:gap-0 mb-6">
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
               {service.vehicleName}
             </h2>
             {/* Start Date */}
-            <div className="flex items-center divide-x divide-gray-500 text-gray-400">
-              <p className="pr-2">{service.serviceType}</p>
-              <p className="pl-2 pr-2">{formatDate(service.startDate)}</p>
-              <p className="pl-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:divide-x sm:divide-gray-500 text-gray-400 gap-1 sm:gap-0 text-sm sm:text-base">
+              <p className="sm:pr-2">{service.serviceType}</p>
+              <p className="sm:pl-2 sm:pr-2">{formatDate(service.startDate)}</p>
+              <p className="sm:pl-2">
                 {new Date(service.startDate).toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -87,7 +87,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             </div>
           </div>
           <span
-            className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold border whitespace-nowrap ${getStatusColor(
               service.status
             )}`}
           >
@@ -96,35 +96,35 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
         </div>
 
         {/* Info grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Service Center */}
-          <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <MapPin className="w-5 h-5 text-orange-500" />
-            <div>
+          <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-gray-400">Service Center</p>
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-white text-sm sm:text-base truncate">
                 {service.serviceCenter}
               </p>
             </div>
           </div>
 
           {/* Assigned Employee */}
-          <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <User className="w-5 h-5 text-orange-500" />
-            <div>
+          <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
+            <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-gray-400">Assigned Employee</p>
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-white text-sm sm:text-base truncate">
                 {service.assignedEmployee}
               </p>
             </div>
           </div>
 
           {/* Start Time */}
-          <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <Clock className="w-5 h-5 text-orange-500" />
-            <div>
+          <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <div className="min-w-0">
               <p className="text-xs text-gray-400">Start Time</p>
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-white text-sm sm:text-base">
                 {service.actualStartTime
                   ? new Date(service.actualStartTime).toLocaleTimeString("en-US", {
                       hour: "2-digit",
@@ -137,11 +137,11 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
 
           {/* End Time - Show when service is completed */}
           {service.status === "completed" && (
-            <div className="flex items-center gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-              <Clock className="w-5 h-5 text-orange-500" />
-              <div>
+            <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+              <div className="min-w-0">
                 <p className="text-xs text-gray-400">End Time</p>
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-white text-sm sm:text-base">
                   {service.actualEndTime
                     ? new Date(service.actualEndTime).toLocaleTimeString("en-US", {
                         hour: "2-digit",
@@ -155,10 +155,10 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mt-6">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button
             onClick={onToggleMap}
-            className="flex-1 bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 bg-orange-500 text-white px-4 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <MapPin className="w-4 h-4" />
             {showMap ? "Hide" : "Show"} Location
@@ -166,7 +166,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
           <button
             onClick={() => handleDownloadReport(service)}
             disabled={service.status !== "completed"}
-            className={`flex-1 px-4 py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border ${
+            className={`w-full sm:flex-1 px-4 py-2.5 sm:py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2 border text-sm sm:text-base ${
               service.status === "completed"
                 ? "bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700 cursor-pointer"
                 : "bg-zinc-900 text-gray-600 border-zinc-800 cursor-not-allowed opacity-50"
@@ -178,9 +178,14 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             }
           >
             <Download className="w-4 h-4" />
-            {service.status === "completed"
-              ? "Download Report"
-              : "Report Unavailable"}
+            <span className="hidden sm:inline">
+              {service.status === "completed"
+                ? "Download Report"
+                : "Report Unavailable"}
+            </span>
+            <span className="sm:hidden">
+              {service.status === "completed" ? "Download" : "Unavailable"}
+            </span>
           </button>
         </div>
       </div>
@@ -192,17 +197,17 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
 
       {/* Fallback if no location data */}
       {showMap && !service.serviceCenterLocation && (
-        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg p-6 border border-zinc-800">
-          <h3 className="text-lg font-bold text-white mb-4">
+        <div className="bg-zinc-900/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 border border-zinc-800">
+          <h3 className="text-base sm:text-lg font-bold text-white mb-4">
             Service Center Location
           </h3>
-          <div className="bg-black/40 rounded-lg h-64 flex items-center justify-center border border-zinc-800">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-orange-500 mx-auto mb-2" />
-              <p className="text-gray-400">
+          <div className="bg-black/40 rounded-lg h-48 sm:h-64 flex items-center justify-center border border-zinc-800">
+            <div className="text-center px-4">
+              <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500 mx-auto mb-2" />
+              <p className="text-sm sm:text-base text-gray-400">
                 Location information not available
               </p>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-xs sm:text-sm text-gray-400 mt-2">
                 {service.serviceCenter}
               </p>
             </div>
