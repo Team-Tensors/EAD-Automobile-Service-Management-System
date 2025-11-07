@@ -242,6 +242,10 @@
   @apply bg-gray-100;
 }
 
+.light .bg-zinc-700 {
+  @apply bg-gray-300;
+}
+
 .light .hover\:bg-zinc-800:hover {
   @apply bg-gray-100;
 }
