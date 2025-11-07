@@ -165,12 +165,13 @@ public class AnalyticsController {
 
         AnalyticsFilterRequestDTO filter = new AnalyticsFilterRequestDTO();
 
-        // If allTime is true, override date parameters to get all historical and future data
+        // If allTime is true, set the flag and leave dates as null for unrestricted queries
         if (allTime != null && allTime) {
-            // Set to beginning of time (year 2000) to far future (year 2100)
-            filter.setStartDate(LocalDateTime.of(2000, 1, 1, 0, 0, 0));
-            filter.setEndDate(LocalDateTime.of(2100, 12, 31, 23, 59, 59, 999999999));
+            filter.setAllTime(true);
+            filter.setStartDate(null);
+            filter.setEndDate(null);
         } else {
+            filter.setAllTime(false);
             // Default to last 30 days if not provided
             if (startDate == null || endDate == null) {
                 AnalyticsFilterRequestDTO defaults = AnalyticsFilterRequestDTO.defaultLast30Days();
