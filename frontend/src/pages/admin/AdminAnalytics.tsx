@@ -12,12 +12,11 @@ import {
   PieChart,
   Activity
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees } from '../../services/adminService';
 import type { AdminService, Employee } from '@/types/admin';
+import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 
 const AdminAnalytics = () => {
-  const { user } = useAuth();
   const [upcomingAppointments, setUpcomingAppointments] = useState<AdminService[]>([]);
   const [ongoingAppointments, setOngoingAppointments] = useState<AdminService[]>([]);
   const [unassignedAppointments, setUnassignedAppointments] = useState<AdminService[]>([]);
@@ -76,22 +75,7 @@ const AdminAnalytics = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <span className="font-semibold text-white">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader title="Analytics Dashboard" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
