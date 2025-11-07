@@ -14,7 +14,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { inventoryService } from '../../services/inventoryService';
+import { serviceCenterService } from '../../services/serviceCenterService';
 import type { InventoryItem, InventoryItemCreateDto } from '../../types/inventory';
+import type { ServiceCenter } from '../../types/serviceCenter';
 
 const CATEGORIES = [
   'Lubricant',
@@ -42,6 +44,10 @@ const AdminInventory = () => {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [restockQuantity, setRestockQuantity] = useState(0);
   
+  // Service centers state
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
+  const [loadingServiceCenters, setLoadingServiceCenters] = useState(false);
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -53,12 +59,14 @@ const AdminInventory = () => {
     quantity: 0,
     unitPrice: 0,
     category: 'Spare Part',
-    minStock: 10
+    minStock: 10,
+    serviceCenterId: ''
   });
 
-  // Load inventory items
+  // Load inventory items and service centers
   useEffect(() => {
     loadInventory();
+    loadServiceCenters();
   }, []);
 
   // Filter items based on search and category
@@ -94,6 +102,18 @@ const AdminInventory = () => {
       console.error('Failed to load inventory:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadServiceCenters = async () => {
+    try {
+      setLoadingServiceCenters(true);
+      const data = await serviceCenterService.fetchServiceCenters();
+      setServiceCenters(data);
+    } catch (error) {
+      console.error('Failed to load service centers:', error);
+    } finally {
+      setLoadingServiceCenters(false);
     }
   };
 
@@ -145,7 +165,8 @@ const AdminInventory = () => {
       quantity: 0,
       unitPrice: 0,
       category: 'Spare Part',
-      minStock: 10
+      minStock: 10,
+      serviceCenterId: ''
     });
   };
 
@@ -197,8 +218,16 @@ const AdminInventory = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
+      {/* Loading State */}
+      {loading ? (
+        <div className="py-20 text-center text-gray-400">
+          <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+          <p className="text-sm">Loading inventory data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
@@ -282,6 +311,7 @@ const AdminInventory = () => {
               <thead className="bg-zinc-800 border-b border-zinc-700">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-white">Item Name</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Service Center</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-white">Category</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Quantity</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-white">Min Stock</th>
@@ -294,13 +324,13 @@ const AdminInventory = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-400">
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
                       Loading inventory...
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-6 py-12 text-center text-gray-400">
+                    <td colSpan={9} className="px-6 py-12 text-center text-gray-400">
                       No items found
                     </td>
                   </tr>
@@ -316,6 +346,11 @@ const AdminInventory = () => {
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-white">{item.itemName}</p>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-300 text-sm">
+                          {item.serviceCenterName || 'N/A'}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold">
@@ -447,6 +482,23 @@ const AdminInventory = () => {
                   placeholder="Item description..."
                   rows={3}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Service Center *
+                </label>
+                <select
+                  required
+                  value={formData.serviceCenterId}
+                  onChange={(e) => setFormData({ ...formData, serviceCenterId: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="">Select a service center</option>
+                  {serviceCenters.map(center => (
+                    <option key={center.id} value={center.id}>{center.name} - {center.city}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -607,6 +659,8 @@ const AdminInventory = () => {
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

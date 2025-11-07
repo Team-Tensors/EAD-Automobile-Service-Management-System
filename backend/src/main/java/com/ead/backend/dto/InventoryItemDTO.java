@@ -18,6 +18,8 @@ public class InventoryItemDTO {
     private Integer minStock;
     private String createdByName;
     private UUID createdById;
+    private UUID serviceCenterId;
+    private String serviceCenterName;
     private LocalDateTime createdAt;
     private LocalDateTime lastUpdated;
     private boolean lowStock;
