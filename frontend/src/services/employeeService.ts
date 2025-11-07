@@ -37,6 +37,14 @@ export interface CreateTimeLogRequest {
   notes: string;
 }
 
+export interface EmployeeCenterDTO {
+  id: string;
+  email: string;
+  fullName: string;
+  phoneNumber: string;
+  serviceCenter: string;
+}
+
 /**
  * Get all appointments assigned to a specific employee
  * @param employeeId - The employee's ID
@@ -136,12 +144,28 @@ export const getEmployeeStats = async (employeeId: number): Promise<any> => {
   }
 };
 
+/**
+ * Get employee details
+ * @returns Promise with employee details including service center
+ */
+export const getEmployeeDetails = async (): Promise<EmployeeCenterDTO> => {
+  try {
+    const response = await api.get(`/employee/details`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching employee details:', error);
+    throw error;
+  }
+};
+
+
 export const employeeService = {
   getEmployeeAppointments,
   updateAppointmentStatus,
   getAppointmentTimeLogs,
   createTimeLog,
   getEmployeeStats,
+  getEmployeeDetails,
 };
 
 export default employeeService;
