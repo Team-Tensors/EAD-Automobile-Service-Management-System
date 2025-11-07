@@ -47,7 +47,6 @@ const AdminInventory = () => {
   
   // Service centers state
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
-  const [loadingServiceCenters, setLoadingServiceCenters] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,13 +112,10 @@ const AdminInventory = () => {
 
   const loadServiceCenters = async () => {
     try {
-      setLoadingServiceCenters(true);
       const data = await serviceCenterService.fetchServiceCenters();
       setServiceCenters(data);
     } catch (error) {
       console.error('Failed to load service centers:', error);
-    } finally {
-      setLoadingServiceCenters(false);
     }
   };
 
