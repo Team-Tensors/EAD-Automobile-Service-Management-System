@@ -31,6 +31,7 @@ const AnalyticsFilters = ({
   const [pendingDateRange, setPendingDateRange] = useState(dateRange);
   const [pendingServiceCenterId, setPendingServiceCenterId] = useState(serviceCenterId);
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
+  const [shouldApplyAfterUpdate, setShouldApplyAfterUpdate] = useState(false);
 
   // Track when filters change
   useEffect(() => {
@@ -39,6 +40,14 @@ const AnalyticsFilters = ({
       pendingServiceCenterId !== serviceCenterId;
     setHasUnappliedChanges(filtersChanged);
   }, [pendingDateRange, pendingServiceCenterId, dateRange, serviceCenterId]);
+
+  // Apply filters after parent state has been updated
+  useEffect(() => {
+    if (shouldApplyAfterUpdate) {
+      onApplyFilters();
+      setShouldApplyAfterUpdate(false);
+    }
+  }, [dateRange, serviceCenterId, shouldApplyAfterUpdate, onApplyFilters]);
 
   const dateRangeOptions = [
     { value: 'today', label: 'Today' },
@@ -63,9 +72,12 @@ const AnalyticsFilters = ({
   };
 
   const handleApplyFilters = () => {
+    // Update the parent state first
     onDateRangeChange(pendingDateRange);
     onServiceCenterChange(pendingServiceCenterId);
-    onApplyFilters();
+    
+    // Set flag to trigger apply after state updates
+    setShouldApplyAfterUpdate(true);
     setHasUnappliedChanges(false);
   };
 
