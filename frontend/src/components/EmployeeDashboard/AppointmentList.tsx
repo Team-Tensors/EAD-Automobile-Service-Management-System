@@ -7,6 +7,7 @@ interface Appointment {
   brand: string;
   model: string;
   appointmentType: string;
+  serviceOrModificationName: string;
   status: string;
   appointmentDate: string;
 }
@@ -23,7 +24,6 @@ interface AppointmentListProps {
   getStatusIcon: (status: string) => React.ReactNode;
   getDisplayStatus: (status: string) => string;
   formatDate: (dateTime: string) => string;
-  formatDateTime: (dateTime: string) => string;
 }
 
 const AppointmentList: React.FC<AppointmentListProps> = ({
@@ -38,7 +38,6 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   getStatusIcon,
   getDisplayStatus,
   formatDate,
-  formatDateTime,
 }) => (
   <div className="bg-zinc-900/50 rounded-lg p-6 border border-zinc-800">
     <div className="flex items-center justify-between mb-4">
@@ -88,33 +87,47 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
               : "border-zinc-800 hover:border-zinc-700 bg-zinc-900/50"
           }`}
         >
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Car className="w-4 h-4 text-gray-500" />
-                <p className="font-semibold text-white">
-                  {apt.brand} {apt.model}
-                </p>
-              </div>
-              <p className="text-sm text-gray-400 mb-2">
-                {apt.appointmentType}
-              </p>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
-                  apt.status
-                )}`}
-              >
-                {getStatusIcon(apt.status)}
-                {getDisplayStatus(apt.status)}
-              </span>
-            </div>
+          {/* Service/Modification Name - Priority 1 */}
+          <div className="mb-2">
+            <h3 className="font-bold text-white text-base">
+              {apt.serviceOrModificationName}
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {apt.appointmentType}
+            </p>
           </div>
-          <div className="space-y-1">
-            <div className="text-xs text-gray-400">
+
+          {/* Vehicle Details - Priority 2 */}
+          <div className="flex items-center gap-2 mb-2">
+            <Car className="w-4 h-4 text-gray-500" />
+            <p className="text-sm text-gray-400">
+              {apt.brand} {apt.model}
+            </p>
+          </div>
+
+          {/* Status Badge */}
+          <div className="mb-2">
+            <span
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                apt.status
+              )}`}
+            >
+              {getStatusIcon(apt.status)}
+              {getDisplayStatus(apt.status)}
+            </span>
+          </div>
+
+          {/* Date and Time - Priority 3 */}
+          <div className="flex items-center gap-3 text-xs">
+            <div className="text-gray-400">
               {formatDate(apt.appointmentDate)}
             </div>
-            <div className="text-xs text-orange-300">
-              {formatDateTime(apt.appointmentDate).split(", ")[1]}
+            <div className="text-orange-400 font-medium">
+              {new Date(apt.appointmentDate).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </div>
           </div>
         </div>
