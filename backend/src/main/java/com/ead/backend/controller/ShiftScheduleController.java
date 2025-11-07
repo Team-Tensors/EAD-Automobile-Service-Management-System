@@ -6,6 +6,7 @@ import com.ead.backend.dto.EmployeeDTO;
 import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.service.ShiftScheduleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/shift")
 public class ShiftScheduleController {
@@ -45,6 +47,7 @@ public class ShiftScheduleController {
         try {
             String email = authentication.getName();
             List<ShiftScheduleAppointmentsDTO> possibleAppointments = shiftScheduleService.getAvailableAppointmentsForEmployee(email);
+            log.info("Possible appointments for employee {}", possibleAppointments);
             return ResponseEntity.ok(possibleAppointments);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).build();
