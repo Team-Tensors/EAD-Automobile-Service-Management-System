@@ -1,4 +1,4 @@
-import { User, Loader } from 'lucide-react';
+import { User} from 'lucide-react';
 import type { Employee } from '@/types/admin';
 import type { ServiceCenter } from '@/types/serviceCenter';
 import EmployeeTableHeader, { type SortField, type SortOrder } from './EmployeeTableHeader';
@@ -54,8 +54,9 @@ const EmployeeTable = ({
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader className="w-12 h-12 text-orange-500 animate-spin" />
+        <div className="py-20 text-center text-gray-400">
+          <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+          <p className="text-sm">Loading employee data...</p>
         </div>
       ) : employees.length === 0 ? (
         <div className="text-center py-12">

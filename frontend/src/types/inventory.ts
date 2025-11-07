@@ -9,6 +9,8 @@ export interface InventoryItem {
   minStock: number;
   createdByName: string;
   createdById: string;
+  serviceCenterId: string;
+  serviceCenterName: string;
   createdAt: string;
   lastUpdated: string;
   lowStock: boolean;
@@ -21,6 +23,7 @@ export interface InventoryItemCreateDto {
   unitPrice: number;
   category: string;
   minStock: number;
+  serviceCenterId: string;
 }
 
 export interface InventoryItemUpdateDto {

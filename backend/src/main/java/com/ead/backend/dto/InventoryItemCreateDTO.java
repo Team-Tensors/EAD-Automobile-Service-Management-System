@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 public class InventoryItemCreateDTO {
@@ -29,4 +30,7 @@ public class InventoryItemCreateDTO {
     @NotNull(message = "Minimum stock is required")
     @Min(value = 1, message = "Minimum stock must be at least 1")
     private Integer minStock;
+
+    @NotNull(message = "Service center is required")
+    private UUID serviceCenterId;
 }

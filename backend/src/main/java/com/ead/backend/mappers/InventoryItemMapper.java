@@ -33,6 +33,12 @@ public class InventoryItemMapper {
                     : item.getCreatedBy().getEmail());
         }
 
+        // Map service center information
+        if (item.getServiceCenter() != null) {
+            dto.setServiceCenterId(item.getServiceCenter().getId());
+            dto.setServiceCenterName(item.getServiceCenter().getName());
+        }
+
         return dto;
     }
 }

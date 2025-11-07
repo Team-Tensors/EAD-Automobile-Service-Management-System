@@ -76,7 +76,7 @@ const AdminAnalytics = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -96,11 +96,9 @@ const AdminAnalytics = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-0 py-8">
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <Activity className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
-              <p className="text-gray-400">Loading analytics data...</p>
-            </div>
+          <div className="py-12 text-center text-gray-400">
+            <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+            <p className="text-sm">Loading analytics data...</p>
           </div>
         ) : (
           <>
