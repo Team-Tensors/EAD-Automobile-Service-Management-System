@@ -16,6 +16,12 @@ GET {{baseUrl}}/dashboard
 Authorization: {{token}}
 
 ### ====================================================================
+### 1a. Get Dashboard Summary (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/dashboard?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
 ### 2. Get Dashboard Summary with Date Range
 ### ====================================================================
 GET {{baseUrl}}/dashboard?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
@@ -34,6 +40,12 @@ GET {{baseUrl}}/service-distribution
 Authorization: {{token}}
 
 ### ====================================================================
+### 4a. Get Service Type Distribution (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/service-distribution?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
 ### 5. Get Service Distribution with Filters
 ### ====================================================================
 GET {{baseUrl}}/service-distribution?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59&status=COMPLETED
@@ -49,6 +61,12 @@ Authorization: {{token}}
 ### 7. Get Revenue Trend (Daily)
 ### ====================================================================
 GET {{baseUrl}}/revenue-trend?periodType=DAILY
+Authorization: {{token}}
+
+### ====================================================================
+### 7a. Get Revenue Trend (All Time - Monthly View)
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?allTime=true&periodType=MONTHLY
 Authorization: {{token}}
 
 ### ====================================================================
@@ -76,6 +94,12 @@ GET {{baseUrl}}/employee-performance
 Authorization: {{token}}
 
 ### ====================================================================
+### 11a. Get Employee Performance (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/employee-performance?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
 ### 12. Get Employee Performance with Date Range
 ### ====================================================================
 GET {{baseUrl}}/employee-performance?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
@@ -91,6 +115,12 @@ Authorization: {{token}}
 ### 14. Get Customer Insights
 ### ====================================================================
 GET {{baseUrl}}/customer-insights
+Authorization: {{token}}
+
+### ====================================================================
+### 14a. Get Customer Insights (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/customer-insights?allTime=true
 Authorization: {{token}}
 
 ### ====================================================================

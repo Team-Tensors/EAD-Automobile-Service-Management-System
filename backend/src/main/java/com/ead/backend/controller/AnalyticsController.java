@@ -33,10 +33,11 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) UUID serviceCenterId,
             @RequestParam(required = false) AppointmentType appointmentType,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "false") Boolean allTime) {
 
         try {
-            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, appointmentType, status, PeriodType.DAILY);
+            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, appointmentType, status, PeriodType.DAILY, allTime);
             ServiceDistributionResponseDTO data = analyticsService.getServiceTypeDistribution(filter);
             return ResponseEntity.ok(AnalyticsResponseDTO.success("Service distribution retrieved successfully", data));
         } catch (Exception e) {
@@ -54,10 +55,11 @@ public class AnalyticsController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) UUID serviceCenterId,
-            @RequestParam(required = false, defaultValue = "DAILY") PeriodType periodType) {
+            @RequestParam(required = false, defaultValue = "DAILY") PeriodType periodType,
+            @RequestParam(required = false, defaultValue = "false") Boolean allTime) {
 
         try {
-            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, periodType);
+            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, periodType, allTime);
             RevenueTrendResponseDTO data = analyticsService.getRevenueTrend(filter);
             return ResponseEntity.ok(AnalyticsResponseDTO.success("Revenue trend retrieved successfully", data));
         } catch (Exception e) {
@@ -74,10 +76,11 @@ public class AnalyticsController {
     public ResponseEntity<AnalyticsResponseDTO<EmployeePerformanceResponseDTO>> getEmployeePerformance(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) UUID serviceCenterId) {
+            @RequestParam(required = false) UUID serviceCenterId,
+            @RequestParam(required = false, defaultValue = "false") Boolean allTime) {
 
         try {
-            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, PeriodType.DAILY);
+            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, PeriodType.DAILY, allTime);
             EmployeePerformanceResponseDTO data = analyticsService.getEmployeePerformance(filter);
             return ResponseEntity.ok(AnalyticsResponseDTO.success("Employee performance retrieved successfully", data));
         } catch (Exception e) {
@@ -93,10 +96,11 @@ public class AnalyticsController {
     @GetMapping("/customer-insights")
     public ResponseEntity<AnalyticsResponseDTO<CustomerInsightsResponseDTO>> getCustomerInsights(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @RequestParam(required = false, defaultValue = "false") Boolean allTime) {
 
         try {
-            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, null, null, null, PeriodType.DAILY);
+            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, null, null, null, PeriodType.DAILY, allTime);
             CustomerInsightsResponseDTO data = analyticsService.getCustomerInsights(filter);
             return ResponseEntity.ok(AnalyticsResponseDTO.success("Customer insights retrieved successfully", data));
         } catch (Exception e) {
@@ -113,10 +117,11 @@ public class AnalyticsController {
     public ResponseEntity<AnalyticsResponseDTO<AnalyticsDashboardDTO>> getDashboard(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @RequestParam(required = false) UUID serviceCenterId) {
+            @RequestParam(required = false) UUID serviceCenterId,
+            @RequestParam(required = false, defaultValue = "false") Boolean allTime) {
 
         try {
-            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, PeriodType.DAILY);
+            AnalyticsFilterRequestDTO filter = createFilter(startDate, endDate, serviceCenterId, null, null, PeriodType.DAILY, allTime);
             AnalyticsDashboardDTO data = analyticsService.getDashboardSummary(filter);
             return ResponseEntity.ok(AnalyticsResponseDTO.success("Dashboard summary retrieved successfully", data));
         } catch (Exception e) {
@@ -155,28 +160,36 @@ public class AnalyticsController {
             UUID serviceCenterId,
             AppointmentType appointmentType,
             String status,
-            PeriodType periodType) {
+            PeriodType periodType,
+            Boolean allTime) {
 
         AnalyticsFilterRequestDTO filter = new AnalyticsFilterRequestDTO();
 
-        // Default to last 30 days if not provided
-        if (startDate == null || endDate == null) {
-            AnalyticsFilterRequestDTO defaults = AnalyticsFilterRequestDTO.defaultLast30Days();
-            filter.setStartDate(startDate != null ? startDate : defaults.getStartDate());
-            filter.setEndDate(endDate != null ? endDate : defaults.getEndDate());
+        // If allTime is true, override date parameters to get all historical and future data
+        if (allTime != null && allTime) {
+            // Set to beginning of time (year 2000) to far future (year 2100)
+            filter.setStartDate(LocalDateTime.of(2000, 1, 1, 0, 0, 0));
+            filter.setEndDate(LocalDateTime.of(2100, 12, 31, 23, 59, 59, 999999999));
         } else {
-            filter.setStartDate(startDate);
-            filter.setEndDate(endDate);
-        }
+            // Default to last 30 days if not provided
+            if (startDate == null || endDate == null) {
+                AnalyticsFilterRequestDTO defaults = AnalyticsFilterRequestDTO.defaultLast30Days();
+                filter.setStartDate(startDate != null ? startDate : defaults.getStartDate());
+                filter.setEndDate(endDate != null ? endDate : defaults.getEndDate());
+            } else {
+                filter.setStartDate(startDate);
+                filter.setEndDate(endDate);
+            }
 
-        // Normalize start date to beginning of day
-        if (filter.getStartDate() != null) {
-            filter.setStartDate(filter.getStartDate().toLocalDate().atStartOfDay());
-        }
+            // Normalize start date to beginning of day
+            if (filter.getStartDate() != null) {
+                filter.setStartDate(filter.getStartDate().toLocalDate().atStartOfDay());
+            }
 
-        // Normalize end date to end of day (23:59:59.999) to include all appointments on that day
-        if (filter.getEndDate() != null) {
-            filter.setEndDate(filter.getEndDate().toLocalDate().atTime(23, 59, 59, 999999999));
+            // Normalize end date to end of day (23:59:59.999) to include all appointments on that day
+            if (filter.getEndDate() != null) {
+                filter.setEndDate(filter.getEndDate().toLocalDate().atTime(23, 59, 59, 999999999));
+            }
         }
 
         filter.setServiceCenterId(serviceCenterId);
