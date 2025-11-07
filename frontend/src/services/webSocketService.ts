@@ -123,20 +123,28 @@ class WebSocketService {
     onMessage: (message: WebSocketMessage) => void
   ) {
     if (!this.client || !this.connected) {
-      console.error('WebSocket not connected');
+      console.error('Cannot subscribe - WebSocket not connected');
       return null;
     }
 
-    console.log('Subscribing to chat:', chatRoomId);
+    const destination = `/topic/chat/${chatRoomId}`;
+    console.log('Subscribing to chat destination:', destination);
     
-    return this.client.subscribe(
-      `/topic/chat/${chatRoomId}`,
-      (message: Stomp.Message) => {
-        console.log('Received message from WebSocket:', message.body);
-        const data: WebSocketMessage = JSON.parse(message.body);
-        onMessage(data);
-      }
-    );
+    try {
+      const subscription = this.client.subscribe(
+        destination,
+        (message: Stomp.Message) => {
+          console.log('Received message from WebSocket:', message.body);
+          const data: WebSocketMessage = JSON.parse(message.body);
+          onMessage(data);
+        }
+      );
+      console.log('Successfully subscribed to:', destination);
+      return subscription;
+    } catch (error) {
+      console.error('Error subscribing to chat:', error);
+      return null;
+    }
   }
 
   /**
