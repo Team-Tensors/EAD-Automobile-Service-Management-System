@@ -1,7 +1,7 @@
 // Create this file: src/services/webSocketService.ts
 
 import SockJS from 'sockjs-client';
-import { Client, Frame, type Message } from 'stompjs';
+import * as Stomp from 'stompjs';
 
 export interface WebSocketMessage {
   messageId: string;
@@ -28,7 +28,7 @@ export interface UserStatus {
 }
 
 class WebSocketService {
-  private client: Client | null = null;
+  private client: Stomp.Client | null = null;
   private connected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -43,20 +43,24 @@ class WebSocketService {
         // Create SockJS connection
         const socket = new SockJS('http://localhost:4000/api/ws-chat');
         
-        // Create STOMP client
-        this.client = new Client();
-        (this.client as any).webSocketFactory = () => socket as any;
+        // Create STOMP client using over method
+        this.client = Stomp.over(socket);
+
+        // Set authentication headers
+        const headers = {
+          Authorization: `Bearer ${token}`
+        };
 
         // Connection success
         this.client.connect(
-          {},
-          (frame?: Frame) => {
+          headers,
+          (frame?: Stomp.Frame) => {
             console.log('WebSocket connected:', frame);
             this.connected = true;
             this.reconnectAttempts = 0;
             resolve();
           },
-          (error: string | Frame) => {
+          (error: string | Stomp.Frame) => {
             console.error('WebSocket connection error:', error);
             this.connected = false;
             
@@ -113,7 +117,7 @@ class WebSocketService {
 
     return this.client.subscribe(
       `/topic/chat/${chatRoomId}`,
-      (message: Message) => {
+      (message: Stomp.Message) => {
         const data: WebSocketMessage = JSON.parse(message.body);
         onMessage(data);
       }
@@ -134,7 +138,7 @@ class WebSocketService {
 
     return this.client.subscribe(
       `/topic/chat/${chatRoomId}/typing`,
-      (message: Message) => {
+      (message: Stomp.Message) => {
         const data: TypingIndicator = JSON.parse(message.body);
         onTyping(data);
       }
@@ -155,7 +159,7 @@ class WebSocketService {
 
     return this.client.subscribe(
       `/topic/chat/${chatRoomId}/read`,
-      (message: Message) => {
+      (message: Stomp.Message) => {
         const data: WebSocketMessage = JSON.parse(message.body);
         onRead(data);
       }
@@ -176,7 +180,7 @@ class WebSocketService {
 
     return this.client.subscribe(
       `/topic/chat/${chatRoomId}/status`,
-      (message: Message) => {
+      (message: Stomp.Message) => {
         const data: UserStatus = JSON.parse(message.body);
         onStatus(data);
       }
@@ -224,7 +228,7 @@ class WebSocketService {
     this.client.send(
       '/app/chat.markRead',
       {},
-      JSON.stringify(chatRoomId)
+      chatRoomId  // Send as plain string (UUID)
     );
   }
 
@@ -239,7 +243,7 @@ class WebSocketService {
     this.client.send(
       '/app/chat.join',
       {},
-      JSON.stringify(chatRoomId)
+      chatRoomId  // Send as plain string (UUID)
     );
   }
 }

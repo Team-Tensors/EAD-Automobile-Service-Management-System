@@ -656,6 +656,14 @@ public class AppointmentService {
     }
 
     // ===================================================================
+    // PUBLIC: Find appointment by ID (for chat service)
+    // ===================================================================
+    public Appointment findById(UUID appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+    }
+
+    // ===================================================================
     // HELPER: Convert Appointment to AdminAppointmentDTO
     // ===================================================================
     private AdminAppointmentDTO toAdminAppointmentDTO(Appointment appointment) {
