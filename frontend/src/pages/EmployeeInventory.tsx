@@ -119,7 +119,7 @@ const EmployeeInventory = () => {
     <div className="min-h-screen bg-black">
       <AuthenticatedNavbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
@@ -170,17 +170,17 @@ const EmployeeInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700 mb-6">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
             {/* Category Filter */}
@@ -189,7 +189,7 @@ const EmployeeInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -218,7 +218,10 @@ const EmployeeInventory = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                      Loading inventory...
+                        <div className="py-8 text-center text-gray-400">
+                        <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+                        <p className="text-sm">Loading inventory data...</p>
+                      </div>
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
