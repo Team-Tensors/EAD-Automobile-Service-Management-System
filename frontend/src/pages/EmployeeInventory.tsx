@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
 import DashboardHeader from "@/components/DashboardHeader";
 import { inventoryService } from '../services/inventoryService';
 import type { InventoryItem } from '../types/inventory';
@@ -149,7 +150,7 @@ const EmployeeInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
       {/* Toast Notifications */}
       <Toaster />
       
@@ -163,7 +164,7 @@ const EmployeeInventory = () => {
       />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700">
@@ -434,6 +435,7 @@ const EmployeeInventory = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };
