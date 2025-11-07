@@ -52,18 +52,24 @@ export const ServiceProgressBar: React.FC<ServiceProgressBarProps> = ({
       {/* Progress Bar Container */}
       <div className="relative">
         {/* Stage Labels - Top */}
-        <div className="flex justify-between mb-3 sm:mb-4">
+        <div className="relative flex mb-3 sm:mb-4">
           {stages.map((stage, index) => {
             const isCompleted = index < currentStageIndex;
             const isCurrent = index === currentStageIndex;
+            const position = (index / (stages.length - 1)) * 100;
+            const isFirst = index === 0;
+            const isLast = index === stages.length - 1;
 
             return (
               <div
                 key={stage.key}
-                className="flex flex-col items-center flex-1"
+                className={`absolute flex flex-col items-center ${
+                  isFirst ? "left-0" : isLast ? "right-0" : "-translate-x-1/2"
+                }`}
+                style={!isFirst && !isLast ? { left: `${position}%` } : undefined}
               >
                 <span
-                  className={`text-[10px] sm:text-xs font-medium mb-2 text-center ${
+                  className={`text-[10px] sm:text-xs font-medium mb-2 text-center whitespace-nowrap ${
                     isCompleted
                       ? "text-blue-400"
                       : isCurrent
@@ -76,6 +82,8 @@ export const ServiceProgressBar: React.FC<ServiceProgressBarProps> = ({
               </div>
             );
           })}
+          {/* Spacer to maintain height */}
+          <div className="h-6 sm:h-7 w-full" />
         </div>
 
         {/* Progress Track */}
@@ -88,7 +96,7 @@ export const ServiceProgressBar: React.FC<ServiceProgressBarProps> = ({
         </div>
 
         {/* Stage Circles */}
-        <div className="absolute top-[22px] sm:top-[26px] left-0 right-0 flex justify-between px-0">
+        <div className="absolute top-[22px] sm:top-[26px] left-0 right-0 flex justify-between">
           {stages.map((stage, index) => {
             const isCompleted = index < currentStageIndex;
             const isCurrent = index === currentStageIndex;
@@ -117,7 +125,11 @@ export const ServiceProgressBar: React.FC<ServiceProgressBarProps> = ({
           <div
             className="absolute top-[18px] sm:top-[22px] transition-all duration-700 ease-out"
             style={{
-              left: `calc(${progressPercentage}% - 16px)`,
+              left: currentStageIndex === 0
+                ? '0' // Stop at the first circle
+                : currentStageIndex === stages.length - 1 
+                ? 'calc(100% - 32px)' // Stop at the last circle
+                : `calc(${progressPercentage}% - 16px)`,
             }}
           >
             <div className="relative">
