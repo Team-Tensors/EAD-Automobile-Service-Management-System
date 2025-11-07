@@ -132,13 +132,6 @@ const AuthenticatedNavbar = () => {
       icon: User,
       roles: ["ADMIN"],
     },
-    // {
-    //   name: "NOTIFICATIONS",
-    //   path: "/admin/notifications",
-    //   icon: Calendar,
-    //   roles: ["ADMIN"],
-    // },
-    // Add more tabs here as needed
   ];
 
   // Filter tabs based on user role if roles are specified
