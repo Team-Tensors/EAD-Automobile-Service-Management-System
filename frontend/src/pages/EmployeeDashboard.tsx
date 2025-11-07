@@ -379,7 +379,6 @@ const EmployeeDashboard = () => {
                   getStatusIcon={getStatusIcon}
                   getDisplayStatus={getDisplayStatus}
                   formatDate={formatDate}
-                  formatDateTime={formatDateTime}
                   onShowStatusUpdate={() => {
                     setShowStatusUpdate(true);
                     setShowTimeLog(false);
