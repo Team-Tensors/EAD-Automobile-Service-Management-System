@@ -7,15 +7,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.ead.backend.dto.EmployeeCenterDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ead.backend.dto.EmployeeDTO;
+import com.ead.backend.dto.EmployeeCenterDTO;
 import com.ead.backend.dto.SelfShiftScheduleRequestDTO;
 import com.ead.backend.dto.ShiftScheduleAppointmentsDTO;
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.EmployeeCenter;
+import com.ead.backend.entity.ServiceCenter;
 import com.ead.backend.entity.ShiftSchedules;
 import com.ead.backend.entity.User;
 import com.ead.backend.enums.ShiftAssignmentType;
@@ -49,7 +49,9 @@ public class ShiftScheduleService {
         User employee = userRepository.findByEmail(employeeEmail)
                 .orElseThrow(() -> new RuntimeException("EMPLOYEE_NOT_FOUND"));
         UUID employeeId = employee.getId();
-        List<Appointment> pendingAppointments = appointmentRepository.findByStatus("PENDING");
+        Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(employeeId);
+        ServiceCenter serviceCenter = employeeCenter.map(EmployeeCenter::getServiceCenter).orElse(null);
+        List<Appointment> pendingAppointments = appointmentRepository.findByStatusAndServiceCenter("PENDING", serviceCenter);
         return pendingAppointments.stream()
                 .filter(apt -> canEmployeeTakeAppointment(employeeId, apt))
                 .map(ShiftScheduleMapper::toDTO)

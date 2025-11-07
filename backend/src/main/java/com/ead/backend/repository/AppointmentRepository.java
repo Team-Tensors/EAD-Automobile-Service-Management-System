@@ -1,6 +1,7 @@
 package com.ead.backend.repository;
 
 import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.ServiceCenter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,7 +34,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             LocalDateTime appointmentDate,
             String status
     );
-    List<Appointment> findByStatus(String pending);
+    List<Appointment> findByStatusAndServiceCenter(String pending, ServiceCenter serviceCenter);
+
+    List<Appointment> findByStatus(String status);
 
     // Check if vehicle has any active appointments (non-cancelled)
     boolean existsByVehicleIdAndStatusNot(UUID vehicleId, String status);
