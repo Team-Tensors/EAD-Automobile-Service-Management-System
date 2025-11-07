@@ -218,7 +218,10 @@ const EmployeeInventory = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                      Loading inventory...
+                        <div className="py-8 text-center text-gray-400">
+                        <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
+                        <p className="text-sm">Loading inventory data...</p>
+                      </div>
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (

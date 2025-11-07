@@ -71,7 +71,7 @@ const ShiftSchedulingPage: React.FC = () => {
         <div className="bg-zinc-900/50 rounded-lg p-6 border border-zinc-800">
           {loading ? (
             <div className="py-8 text-center text-gray-400">
-              <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-400 mb-3 mx-auto"></div>
+              <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
               <p className="text-sm">Loading available appointments…</p>
             </div>
           ) : error ? (
