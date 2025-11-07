@@ -90,7 +90,7 @@ const Navbar = () => {
               <button
                 key={link.name}
                 onClick={() => navigateToSection(link.targetId)}
-                className="text-sm font-medium text-gray-400 dark:text-gray-400 light:text-gray-600 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors cursor-pointer"
+                className="text-sm font-medium text-gray-400 dark:text-gray-400 light:text-gray-600 hover:text-white transition-colors cursor-pointer"
               >
                 {link.name}
               </button>
@@ -144,7 +144,7 @@ const Navbar = () => {
                     <div className="border-t border-zinc-800 dark:border-zinc-800 light:border-gray-200 mt-2 pt-2">
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 dark:hover:bg-zinc-800 light:hover:bg-gray-100 hover:text-red-300 transition-colors"
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-zinc-800 dark:hover:bg-zinc-800 light:hover:bg-gray-100 hover:text-red-500 transition-colors cursor-pointer"
                       >
                         <LogOut className="w-4 h-4" />
                         Logout

@@ -234,11 +234,27 @@
   @apply bg-white border border-gray-200;
 }
 
+.light .bg-zinc-900\/50{
+  @apply bg-gray-100 border border-gray-200;
+}
+
+.light .bg-zinc-800\/50{
+  @apply bg-gray-100 border border-gray-200;
+}
+
 .light .bg-zinc-950\/80 {
   @apply bg-white/95;
 }
 
 .light .bg-zinc-800 {
+  @apply bg-gray-100;
+}
+
+.light .bg-zinc-700 {
+  @apply bg-gray-300;
+}
+
+.light .hover\:bg-zinc-800:hover {
   @apply bg-gray-100;
 }
 
@@ -258,6 +274,10 @@
 
 /* Light mode for text colors */
 .light .text-white {
+  @apply text-gray-900;
+}
+
+.light .hover\:text-white:hover {
   @apply text-gray-900;
 }
 
