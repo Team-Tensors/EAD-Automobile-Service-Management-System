@@ -109,12 +109,36 @@ export const getCustomAnalytics = async (
 };
 
 /**
+ * Helper: Get today's date range (full 24 hours from local midnight to now + buffer)
+ * Uses local timezone to capture all today's data, with a future buffer to avoid missing recent data
+ */
+export const getTodayRange = (): { startDate: string; endDate: string } => {
+  const now = new Date();
+  // Start of today in local timezone
+  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  // End of today + 1 day buffer to ensure we don't miss data due to timezone differences
+  const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59, 999);
+  
+  return {
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+  };
+};
+
+/**
  * Helper: Get last N days date range
+ * Includes a future buffer to avoid missing recent data
  */
 export const getLastNDaysRange = (days: number): { startDate: string; endDate: string } => {
-  const endDate = new Date();
-  const startDate = new Date();
+  const now = new Date();
+  const startDate = new Date(now);
   startDate.setDate(startDate.getDate() - days);
+  startDate.setHours(0, 0, 0, 0);
+  
+  // Add 1 day buffer to end date
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + 1);
+  endDate.setHours(23, 59, 59, 999);
   
   return {
     startDate: startDate.toISOString(),
@@ -124,11 +148,14 @@ export const getLastNDaysRange = (days: number): { startDate: string; endDate: s
 
 /**
  * Helper: Get current month date range
+ * Includes end-of-month + 1 day buffer
  */
 export const getCurrentMonthRange = (): { startDate: string; endDate: string } => {
   const now = new Date();
-  const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  // First day of current month
+  const startDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+  // Last day of current month + 1 day buffer
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1, 23, 59, 59, 999);
   
   return {
     startDate: startDate.toISOString(),
@@ -138,13 +165,17 @@ export const getCurrentMonthRange = (): { startDate: string; endDate: string } =
 
 /**
  * Helper: Get year-to-date range
+ * Includes current date + 1 day buffer
  */
 export const getYearToDateRange = (): { startDate: string; endDate: string } => {
   const now = new Date();
-  const startDate = new Date(now.getFullYear(), 0, 1);
+  // January 1st of current year
+  const startDate = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0);
+  // Current date + 1 day buffer
+  const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 23, 59, 59, 999);
   
   return {
     startDate: startDate.toISOString(),
-    endDate: now.toISOString(),
+    endDate: endDate.toISOString(),
   };
 };
