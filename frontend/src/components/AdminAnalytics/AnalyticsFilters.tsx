@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Building2, X, ChevronDown, Filter } from 'lucide-react';
+import { Calendar, Building2, X, ChevronDown, Filter, Download } from 'lucide-react';
 import type { ServiceCenter } from '@/types/serviceCenter';
+import ExportModal from './ExportModal';
 
 interface AnalyticsFiltersProps {
   dateRange: string;
@@ -32,6 +33,7 @@ const AnalyticsFilters = ({
   const [pendingServiceCenterId, setPendingServiceCenterId] = useState(serviceCenterId);
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [shouldApplyAfterUpdate, setShouldApplyAfterUpdate] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Track when filters change
   useEffect(() => {
@@ -178,21 +180,39 @@ const AnalyticsFilters = ({
             </div>
           </div>
 
-          {/* Apply Filters Button */}
-          <button
-            onClick={handleApplyFilters}
-            disabled={!hasUnappliedChanges}
-            className={`ml-auto flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-              hasUnappliedChanges
-                ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 cursor-pointer'
-                : 'bg-zinc-800 text-gray-500 cursor-not-allowed border border-zinc-700'
-            }`}
-          >
-            <Filter className="w-4 h-4" />
-            {hasUnappliedChanges ? 'Apply Filters' : 'Filters Applied'}
-          </button>
+          {/* Export and Apply Buttons */}
+          <div className="flex items-center gap-3 ml-auto">
+            {/* Export Button */}
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-full text-sm font-medium text-white transition-all cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+
+            {/* Apply Filters Button */}
+            <button
+              onClick={handleApplyFilters}
+              disabled={!hasUnappliedChanges}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+                hasUnappliedChanges
+                  ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 cursor-pointer'
+                  : 'bg-zinc-800 text-gray-500 cursor-not-allowed border border-zinc-700'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              {hasUnappliedChanges ? 'Apply Filters' : 'Filters Applied'}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal 
+        isOpen={showExportModal} 
+        onClose={() => setShowExportModal(false)} 
+      />
 
       {/* Custom Date Picker Modal */}
       {showDatePicker && (
