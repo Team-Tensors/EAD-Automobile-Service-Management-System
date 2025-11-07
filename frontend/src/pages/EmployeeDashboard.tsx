@@ -71,27 +71,30 @@ const EmployeeDashboard = () => {
     setLoading(true);
     setError(null);
 
-    // Map frontend filter to backend status
-    let backendStatus: string | undefined;
-    if (statusFilter === "NOT STARTED") backendStatus = "CONFIRMED";
-    else if (statusFilter === "IN PROGRESS") backendStatus = "IN_PROGRESS";
-    else if (statusFilter === "COMPLETED") backendStatus = "COMPLETED";
-
     try {
-      const data = await employeeService.getEmployeeAppointments(
-        EMPLOYEE_ID,
-        backendStatus
-      );
+      // Fetch all appointments (new method doesn't take parameters)
+      const data = await employeeService.getEmployeeAppointments();
 
-      setAppointments(data);
+      // Filter appointments based on status filter
+      let filteredData = data;
+      if (statusFilter === "CONFIRMED") {
+        filteredData = data.filter((apt) => apt.status === "CONFIRMED");
+      } else if (statusFilter === "IN PROGRESS") {
+        filteredData = data.filter((apt) => apt.status === "IN_PROGRESS");
+      } else if (statusFilter === "COMPLETED") {
+        filteredData = data.filter((apt) => apt.status === "COMPLETED");
+      }
+      // If statusFilter is "ALL", show all appointments
+
+      setAppointments(filteredData);
 
       // Update selected appointment if it still exists
       setSelectedAppointment((prev) => {
         if (prev) {
-          const stillExists = data.find((apt) => apt.id === prev.id);
+          const stillExists = filteredData.find((apt) => apt.id === prev.id);
           if (stillExists) return stillExists;
         }
-        return data.length > 0 ? data[0] : null;
+        return filteredData.length > 0 ? filteredData[0] : null;
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -275,7 +278,7 @@ const EmployeeDashboard = () => {
   };
 
   const getDisplayStatus = (status: string): string =>
-    status === "CONFIRMED" ? "NOT STARTED" : status.replace("_", " ");
+    status.replace("_", " ");
 
   const formatDateTime = (dateTime: string): string =>
     new Date(dateTime).toLocaleString("en-GB", {

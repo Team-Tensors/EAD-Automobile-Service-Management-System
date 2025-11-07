@@ -34,7 +34,6 @@ public class EmployeeController {
 
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
-        logger.info("EmployeeController initialized successfully with JWT-based role authorization");
     }
 
     @GetMapping("/appointments/{appointmentId}/employees/{employeeId}/timelogs")
@@ -64,15 +63,15 @@ public class EmployeeController {
     /**
      * Retrieve all appointments assigned to an employee.
      */
-    @GetMapping("/appointments/{employeeId}")
-    public ResponseEntity<?> getAppointmentsByEmployee(@PathVariable UUID employeeId, @RequestParam(required = false) String status) {
-        logger.info("=== RETRIEVE APPOINTMENTS FOR EMPLOYEE REQUEST RECEIVED ===");
+    @GetMapping("/appointments")
+    public ResponseEntity<?> getAppointmentsByEmployee(Authentication authentication) {
         try {
-            List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employeeId, status);
+            String employEmail = authentication.getName();
+            List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employEmail);
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
-            logger.error("Error retrieving appointment by employee id: {}", errorMessage);
+            logger.error("Error retrieving appointment by employee email: {}", errorMessage);
             // Check for specific error types
             if ("INVALID_STATUS".equals(errorMessage))  {
                 return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid appointment status.", false));
@@ -81,7 +80,7 @@ public class EmployeeController {
                 return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
             }
         } catch (Exception e) {
-            logger.error("Error retrieving appointments for employee {}: {}", employeeId, e.getMessage());
+            logger.error("Error retrieving appointments for employee: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponseDTO("Unexpected error occurred retrieving appointments.", false));
         }

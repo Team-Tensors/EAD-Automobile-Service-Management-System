@@ -1,19 +1,16 @@
 import React from 'react';
-import { User, Phone, Wrench, Timer, Calendar } from 'lucide-react';
+import { User, Wrench, Timer, Calendar } from 'lucide-react';
 
 interface Appointment {
   id: string;
-  userId: number;
   userFullName: string;
-  phoneNumber: string;
-  vehicleId: string;
   brand: string;
   model: string;
   color: string;
   lastServiceDate: string | null;
   licensePlate: string;
   appointmentType: string;
-  serviceOrModificationId: string; // UUID as string
+  serviceOrModificationId: string;
   serviceOrModificationName: string;
   serviceOrModificationDescription: string;
   estimatedTimeMinutes: number;
@@ -66,20 +63,12 @@ const AppointmentDetail: React.FC<AppointmentDetailProps> = ({
       </span>
     </div>
     {/* CUSTOMER INFO */}
-    <div className="grid grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 gap-4 mb-6">
       <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
         <User className="w-5 h-5 text-orange-500" />
         <div>
           <p className="text-xs text-gray-400">Customer</p>
           <p className="font-semibold text-white">{appointment.userFullName}</p>
-            {/* Removed email display */}
-        </div>
-      </div>
-      <div className="flex items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
-        <Phone className="w-5 h-5 text-orange-500" />
-        <div>
-          <p className="text-xs text-gray-400">Phone</p>
-          <p className="font-semibold text-white">{appointment.phoneNumber}</p>
         </div>
       </div>
     </div>

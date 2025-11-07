@@ -3,10 +3,7 @@ import { api } from '../util/apiUtils';
 // Backend DTO types
 export interface EmployeeAppointmentDTO {
   id: string;
-  userId: number;
   userFullName: string;
-  phoneNumber: string;
-  vehicleId: string;
   brand: string;
   model: string;
   color: string;
@@ -32,8 +29,8 @@ export interface TimeLogDTO {
 
 export interface CreateTimeLogRequest {
   employeeId: number;
-  startTime: string; // ISO format: "YYYY-MM-DDTHH:mm:ss"
-  endTime: string;   // ISO format: "YYYY-MM-DDTHH:mm:ss"
+  startTime: string; 
+  endTime: string;  
   notes: string;
 }
 
@@ -47,19 +44,12 @@ export interface EmployeeCenterDTO {
 
 /**
  * Get all appointments assigned to a specific employee
- * @param employeeId - The employee's ID
- * @param status - Optional status filter (CONFIRMED, IN_PROGRESS, COMPLETED)
  * @returns Promise with array of appointments
  */
-export const getEmployeeAppointments = async (
-  employeeId: number,
-  status?: string
-): Promise<EmployeeAppointmentDTO[]> => {
+export const getEmployeeAppointments = async (): Promise<EmployeeAppointmentDTO[]> => {
   try {
-    const params = status ? { status } : {};
-    const response = await api.get(`/employee/appointments/${employeeId}`, { params });
-    // Ensure we always return an array
-    return Array.isArray(response.data) ? response.data : [];
+    const response = await api.get(`/employee/appointments`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching employee appointments:', error);
     throw error;

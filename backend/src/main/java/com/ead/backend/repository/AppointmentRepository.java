@@ -2,12 +2,14 @@ package com.ead.backend.repository;
 
 import com.ead.backend.entity.Appointment;
 import com.ead.backend.entity.ServiceCenter;
+import com.ead.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
@@ -17,6 +19,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     // Find all appointments assigned to an employee with specific status
     List<Appointment> findByAssignedEmployeesIdAndStatus(UUID employeeId, String status);
+
+    List<Appointment> findByAssignedEmployees(Set<User> assignedEmployees);
 
     // Find all appointments assigned to an employee with multiple statuses
     List<Appointment> findByAssignedEmployeesIdAndStatusIn(UUID employeeId, List<String> statuses);
