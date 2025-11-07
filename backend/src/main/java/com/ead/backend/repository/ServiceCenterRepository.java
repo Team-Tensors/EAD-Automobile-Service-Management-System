@@ -26,4 +26,5 @@ public interface ServiceCenterRepository extends JpaRepository<ServiceCenter, UU
     List<ServiceCenter> findByCityAndIsActiveTrue(String city);
 
     List<ServiceCenter> findByIsActiveTrueAndCenterSlotGreaterThan(Integer slots);
+
 }
