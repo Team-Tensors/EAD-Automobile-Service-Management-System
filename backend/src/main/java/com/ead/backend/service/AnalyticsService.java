@@ -365,6 +365,7 @@ public class AnalyticsService {
         // Calculate metrics
         Long totalAppointments = (long) appointments.size();
         Long completed = appointments.stream().filter(a -> "COMPLETED".equals(a.getStatus())).count();
+        Long confirmed = appointments.stream().filter(a -> "CONFIRMED".equals(a.getStatus())).count();
         Long pending = appointments.stream().filter(a -> "PENDING".equals(a.getStatus())).count();
         Long inProgress = appointments.stream().filter(a -> "IN_PROGRESS".equals(a.getStatus())).count();
         Long cancelled = appointments.stream().filter(a -> "CANCELLED".equals(a.getStatus())).count();
@@ -407,6 +408,7 @@ public class AnalyticsService {
         dashboard.setTotalRevenue(AnalyticsHelper.roundToTwoDecimals(totalRevenue));
         dashboard.setTotalAppointments(totalAppointments);
         dashboard.setCompletedAppointments(completed);
+        dashboard.setConfirmedAppointments(confirmed);
         dashboard.setPendingAppointments(pending);
         dashboard.setInProgressAppointments(inProgress);
         dashboard.setCancelledAppointments(cancelled);

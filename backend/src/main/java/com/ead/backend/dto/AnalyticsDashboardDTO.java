@@ -14,6 +14,7 @@ public class AnalyticsDashboardDTO {
     private Double totalRevenue;
     private Long totalAppointments;
     private Long completedAppointments;
+    private Long confirmedAppointments;
     private Long pendingAppointments;
     private Long inProgressAppointments;
     private Long cancelledAppointments;
