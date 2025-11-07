@@ -43,7 +43,7 @@ const serviceCenterIcon = new L.Icon({
 
 const ServiceCenterMap = ({ mapCenter, userLocation, centers, onSelect }: ServiceCenterMapProps) => {
   return (
-    <div className="sticky top-4 h-[600px]">
+    <div className="sticky top-4 h-[400px] sm:h-[500px] lg:h-[600px]">
       <style>{`
         .leaflet-popup-content-wrapper {
           background-color: #000000 !important;
