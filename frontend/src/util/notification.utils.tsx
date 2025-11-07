@@ -8,6 +8,7 @@ import {
   Clock,
   Settings,
   CheckCircle,
+  MessageCircle,
 } from 'lucide-react';
 
 export const getNotificationIcon = (type: NotificationType): LucideIcon => {
@@ -21,6 +22,7 @@ export const getNotificationIcon = (type: NotificationType): LucideIcon => {
     VEHICLE_ADDED: Settings,
     VEHICLE_UPDATED: Settings,
     VEHICLE_DELETED: Settings,
+    NEW_CHAT_MESSAGE: MessageCircle,
   };
 
   return icons[type] || Bell;
@@ -28,14 +30,18 @@ export const getNotificationIcon = (type: NotificationType): LucideIcon => {
 
 export const getNotificationColor = (type: NotificationType): string => {
   const colors: Record<string, string> = {
-    LOGIN: 'bg-blue-100 text-blue-600',
-    BOOKING: 'bg-green-100 text-green-600',
-    PAYMENT: 'bg-purple-100 text-purple-600',
-    SERVICE: 'bg-orange-100 text-orange-600',
-    REMINDER: 'bg-yellow-100 text-yellow-600',
-    SYSTEM: 'bg-gray-100 text-gray-600',
+    LOGIN_SUCCESS: 'bg-blue-500/20 text-blue-400',
+    APPOINTMENT_CREATED: 'bg-green-500/20 text-green-400',
+    APPOINTMENT_ASSIGNED: 'bg-green-500/20 text-green-400',
+    TASK_ASSIGNED: 'bg-orange-500/20 text-orange-400',
+    APPOINTMENT_STARTED: 'bg-yellow-500/20 text-yellow-400',
+    APPOINTMENT_COMPLETED: 'bg-emerald-500/20 text-emerald-400',
+    VEHICLE_ADDED: 'bg-purple-500/20 text-purple-400',
+    VEHICLE_UPDATED: 'bg-purple-500/20 text-purple-400',
+    VEHICLE_DELETED: 'bg-red-500/20 text-red-400',
+    NEW_CHAT_MESSAGE: 'bg-cyan-500/20 text-cyan-400',
   };
-  return colors[type] || 'bg-blue-100 text-blue-600';
+  return colors[type] || 'bg-gray-500/20 text-gray-400';
 };
 
 export const formatNotificationTime = (timestamp: string): string => {

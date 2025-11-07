@@ -40,8 +40,15 @@ class WebSocketService {
   connect(token: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        // Get API URL from environment variable
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+        
+        // Build WebSocket URL - ensure it uses the correct protocol
+        // If the page is loaded over HTTPS, use HTTPS for the WebSocket too
+        const wsUrl = `${API_URL}/ws-chat`;
+        
         // Create SockJS connection
-        const socket = new SockJS('http://localhost:4000/api/ws-chat');
+        const socket = new SockJS(wsUrl);
         
         // Create STOMP client using over method
         this.client = Stomp.over(socket);

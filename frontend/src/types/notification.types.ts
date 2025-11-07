@@ -18,6 +18,7 @@ export type NotificationType =
   | "VEHICLE_ADDED"
   | "VEHICLE_UPDATED"
   | "VEHICLE_DELETED"
+  | "NEW_CHAT_MESSAGE"
   | string;
 
 export interface NotificationEventDTO {

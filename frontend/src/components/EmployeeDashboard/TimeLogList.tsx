@@ -25,7 +25,7 @@ const TimeLogList: React.FC<TimeLogListProps> = ({ timeLogs, formatDateTime }) =
         {timeLogs.map(log => (
           <div
             key={log.id}
-            className="flex flex-col gap-2 p-4 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl border border-zinc-700 shadow-sm hover:shadow-lg transition-shadow duration-200"
+            className="flex flex-col gap-2 p-4 bg-linear-to-br from-zinc-800 to-zinc-900 rounded-xl border border-zinc-700 shadow-sm hover:shadow-lg transition-shadow duration-200"
           >
             <div className="flex items-center gap-2 mb-1">
               <Timer className="w-4 h-4 text-orange-500" />

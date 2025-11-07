@@ -21,6 +21,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final AppointmentService appointmentService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     /**
      * Get or create chat room for an appointment
@@ -110,6 +111,9 @@ public class ChatService {
 
         // Broadcast to chat room
         messagingTemplate.convertAndSend("/topic/chat/" + chatRoomId, wsMessage);
+
+        // Send notification if customer sent the message
+        sendNewMessageNotification(chatRoom, sender, messageText);
 
         // Return response
         return new SendMessageResponseDTO(
@@ -205,6 +209,46 @@ public class ChatService {
                 message.getIsRead(),
                 isSentByMe
         );
+    }
+
+    /**
+     * Send notification when a new message is received
+     * If customer sends message, notify the employee
+     */
+    private void sendNewMessageNotification(ChatRoom chatRoom, User sender, String messageText) {
+        try {
+            // Check if sender is a customer (not an employee)
+            boolean isCustomer = sender.getRoles().stream()
+                    .anyMatch(role -> "CUSTOMER".equals(role.getName()));
+
+            // If customer sent the message and there's an assigned employee, notify the employee
+            if (isCustomer && chatRoom.getEmployee() != null) {
+                UUID employeeId = chatRoom.getEmployee().getId();
+                String customerName = sender.getFullName();
+                
+                // Create notification data
+                java.util.Map<String, Object> notificationData = new java.util.HashMap<>();
+                notificationData.put("chatRoomId", chatRoom.getChatRoomId().toString());
+                notificationData.put("customerId", sender.getId().toString());
+                notificationData.put("customerName", customerName);
+                notificationData.put("messagePreview", messageText.length() > 50 
+                    ? messageText.substring(0, 50) + "..." 
+                    : messageText);
+                notificationData.put("appointmentId", chatRoom.getAppointment().getId().toString());
+                
+                // Send notification
+                notificationService.sendNotification(
+                    employeeId,
+                    "NEW_CHAT_MESSAGE",
+                    String.format("%s sent you a message: %s", customerName, 
+                        messageText.length() > 30 ? messageText.substring(0, 30) + "..." : messageText),
+                    notificationData
+                );
+            }
+        } catch (Exception e) {
+            // Log error but don't fail the message sending
+            System.err.println("Failed to send chat notification: " + e.getMessage());
+        }
     }
 }
 
