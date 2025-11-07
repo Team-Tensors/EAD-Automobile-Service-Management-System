@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Download, FileText, Calendar, FileSpreadsheet } from 'lucide-react';
+import toast from 'react-hot-toast';
 import {
   getDashboardSummary,
   getServiceDistribution,
@@ -53,7 +54,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
   const handleExport = async () => {
     if (!startDate || !endDate) {
-      alert('Please select both start and end dates');
+      toast.error('Please select both start and end dates');
       return;
     }
 
@@ -134,7 +135,7 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
       }
 
       // Show success message
-      alert(`Report downloaded successfully: ${fileName}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`);
+      toast.success(`Report downloaded: ${fileName}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`);
 
       // Close modal after successful export
       setTimeout(() => {
@@ -142,8 +143,8 @@ const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
       }, 500);
     } catch (error) {
       console.error('Export error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export report. Please try again.';
-      alert(`Export Failed:\n\n${errorMessage}\n\nPlease ensure:\n1. The analytics API is accessible\n2. You have proper permissions\n3. The date range contains data`);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export report';
+      toast.error(`Export failed: ${errorMessage}`);
     } finally {
       setIsExporting(false);
     }
