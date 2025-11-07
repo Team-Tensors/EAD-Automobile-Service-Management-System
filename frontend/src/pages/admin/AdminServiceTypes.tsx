@@ -235,9 +235,9 @@ const AdminServiceTypes = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-400 text-sm">Modifications</p>
-                    <p className="text-3xl font-bold text-purple-500 mt-1">{modificationCount}</p>
+                    <p className="text-3xl font-bold text-orange-500 mt-1">{modificationCount}</p>
                   </div>
-                  <Wrench className="w-12 h-12 text-purple-500" />
+                  <Wrench className="w-12 h-12 text-orange-500" />
                 </div>
               </div>
             </div>
@@ -326,7 +326,7 @@ const AdminServiceTypes = () => {
                               className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 item.type === 'SERVICE'
                                   ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                  : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                                  : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                               }`}
                             >
                               {item.type}
