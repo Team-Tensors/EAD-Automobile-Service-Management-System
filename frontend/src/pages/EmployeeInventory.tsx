@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import DashboardHeader from "@/components/DashboardHeader";
 import { inventoryService } from '../services/inventoryService';
 import type { InventoryItem } from '../types/inventory';
 import toast, { Toaster } from 'react-hot-toast';
@@ -153,18 +154,13 @@ const EmployeeInventory = () => {
       <Toaster />
       
       <AuthenticatedNavbar />
+      
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold uppercase">Inventory</h1>
-              <p className="text-gray-400">Manage service center inventory items effectively.</p>
-            </div>
-            
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        title="Inventory"
+        subtitle="Manage service center inventory items effectively."
+        showWelcomeMessage={false}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-0 py-8">
