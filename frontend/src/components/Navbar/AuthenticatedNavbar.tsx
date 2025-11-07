@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   X,
+  Home,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { type LucideIcon, Car } from "lucide-react";
@@ -239,8 +240,8 @@ const AuthenticatedNavbar = () => {
                     onClick={() => setIsProfileDropdownOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-zinc-800 hover:text-white transition-colors"
                   >
-                    <Navigation className="w-4 h-4" />
-                    Website
+                    <Home className="w-4 h-4" />
+                    Home
                   </Link>
 
                   <Link

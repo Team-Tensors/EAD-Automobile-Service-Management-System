@@ -119,7 +119,7 @@ const EmployeeInventory = () => {
     <div className="min-h-screen bg-black">
       <AuthenticatedNavbar />
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
+      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
         <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>

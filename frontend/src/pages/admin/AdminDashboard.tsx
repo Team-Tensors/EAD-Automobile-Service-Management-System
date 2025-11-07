@@ -197,8 +197,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 sm:px-6 md:px-8 lg:px-0 pt-26 pb-12">
+      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-0 pt-26 pb-12">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Dashboard</h1>

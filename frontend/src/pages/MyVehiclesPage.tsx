@@ -237,7 +237,7 @@ const MyVehiclesPage = () => {
       <AuthenticatedNavbar />
 
       <div className="bg-black border-zinc-700 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-22 pb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 pt-4 sm:pt-22 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-white uppercase">

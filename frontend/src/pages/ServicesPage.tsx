@@ -264,7 +264,7 @@ const ServicesPage = () => {
 
       {/* Header Section */}
       <div className="bg-black border-b border-zinc-700">
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 pt-4 sm:pt-22 pb-4">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-0 pt-4 sm:pt-15 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-white uppercase">
