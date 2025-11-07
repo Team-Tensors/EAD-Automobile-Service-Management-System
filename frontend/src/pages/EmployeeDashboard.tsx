@@ -10,39 +10,15 @@ import TimeLogList from "@/components/EmployeeDashboard/TimeLogList";
 import { useAuth } from "../hooks/useAuth";
 import Footer from "@/components/Footer/Footer";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
-const API_BASE_URL = `${
-  import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-}/employee`;
+import employeeService, {
+  type EmployeeAppointmentDTO,
+  type TimeLogDTO,
+} from "@/services/employeeService";
 
 // ------------------ Types ------------------
-interface Appointment {
-  id: string;
-  userId: number;
-  userFullName: string;
-  phoneNumber: string;
-  vehicleId: string;
-  brand: string;
-  model: string;
-  color: string;
-  lastServiceDate: string | null;
-  licensePlate: string;
-  appointmentType: string;
-  serviceOrModificationId: string; // UUID as string
-  serviceOrModificationName: string;
-  serviceOrModificationDescription: string;
-  estimatedTimeMinutes: number;
-  appointmentDate: string;
-  status: string;
-  description: string;
-}
-
-interface TimeLog {
-  id: number;
-  startTime: string;
-  endTime: string;
-  hoursLogged: number;
-  notes: string;
-}
+// Using types from employeeService
+type Appointment = EmployeeAppointmentDTO;
+type TimeLog = TimeLogDTO;
 
 interface TimeLogForm {
   date: string;
@@ -60,7 +36,7 @@ interface TimeLogErrors {
 
 // ------------------ Component ------------------
 const EmployeeDashboard = () => {
-  const { user, token } = useAuth(); // <-- get token from context
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -95,68 +71,50 @@ const EmployeeDashboard = () => {
     setLoading(true);
     setError(null);
 
-    let backendStatus: string | null = null;
+    // Map frontend filter to backend status
+    let backendStatus: string | undefined;
     if (statusFilter === "NOT STARTED") backendStatus = "CONFIRMED";
     else if (statusFilter === "IN PROGRESS") backendStatus = "IN_PROGRESS";
     else if (statusFilter === "COMPLETED") backendStatus = "COMPLETED";
 
-    let url = `${API_BASE_URL}/appointments/${EMPLOYEE_ID}`;
-    if (backendStatus) url += `?status=${backendStatus}`;
-
     try {
-      const response = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // <-- use dynamic token
-        },
-      });
+      const data = await employeeService.getEmployeeAppointments(
+        EMPLOYEE_ID,
+        backendStatus
+      );
 
-      if (!response.ok) throw new Error("Failed to fetch appointments");
-      const data = await response.json();
+      setAppointments(data);
 
-      // Ensure data is always an array
-      const appointmentsArray = Array.isArray(data) ? data : [];
-      setAppointments(appointmentsArray);
-
+      // Update selected appointment if it still exists
       setSelectedAppointment((prev) => {
         if (prev) {
-          const stillExists = appointmentsArray.find(
-            (apt: Appointment) => apt.id === prev.id
-          );
+          const stillExists = data.find((apt) => apt.id === prev.id);
           if (stillExists) return stillExists;
         }
-        return appointmentsArray.length > 0 ? appointmentsArray[0] : null;
+        return data.length > 0 ? data[0] : null;
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
-  }, [EMPLOYEE_ID, statusFilter, token]);
+  }, [EMPLOYEE_ID, statusFilter]);
 
   // ------------------ Fetch Time Logs ------------------
   const fetchTimeLogs = useCallback(
     async (appointmentId: string) => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/appointments/${appointmentId}/employees/${EMPLOYEE_ID}/timelogs`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // <-- use dynamic token
-            },
-          }
+        const data = await employeeService.getAppointmentTimeLogs(
+          appointmentId,
+          EMPLOYEE_ID
         );
-
-        if (!response.ok) throw new Error("Failed to fetch time logs");
-        const data = await response.json();
         setTimeLogs(data);
       } catch (err) {
         console.error("Error fetching time logs:", err);
         setTimeLogs([]);
       }
     },
-    [EMPLOYEE_ID, token]
+    [EMPLOYEE_ID]
   );
 
   useEffect(() => {
@@ -197,15 +155,10 @@ const EmployeeDashboard = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` }, // <-- use dynamic token
-        }
+      await employeeService.updateAppointmentStatus(
+        selectedAppointment.id,
+        newStatus
       );
-
-      if (!response.ok) throw new Error("Failed to update status");
       await fetchAppointments();
       setShowStatusUpdate(false);
       setNewStatus("");
@@ -260,20 +213,10 @@ const EmployeeDashboard = () => {
         notes: timeLogForm.description,
       };
 
-      const response = await fetch(
-        `${API_BASE_URL}/appointments/${selectedAppointment.id}/timelog`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // <-- use dynamic token
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to log time");
+      await employeeService.createTimeLog(selectedAppointment.id, payload);
       await fetchTimeLogs(selectedAppointment.id);
+      
+      // Reset form
       setShowTimeLog(false);
       setTimeLogForm({
         date: new Date().toISOString().split("T")[0],
