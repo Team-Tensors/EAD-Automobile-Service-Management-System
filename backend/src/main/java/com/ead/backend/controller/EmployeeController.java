@@ -70,22 +70,13 @@ public class EmployeeController {
             List<AppointmentDTO> appointments = employeeService.getAppointmentsByEmployee(employEmail);
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
-            String errorMessage = e.getMessage();
-            logger.error("Error retrieving appointment by employee email: {}", errorMessage);
-            // Check for specific error types
-            if ("INVALID_STATUS".equals(errorMessage))  {
-                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO("Invalid appointment status.", false));
-            }
-            else {
-                return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(errorMessage, false));
-            }
+            return ResponseEntity.status(HttpStatus.OK).body(new MessageResponseDTO(e.getMessage(), false));
+
         } catch (Exception e) {
-            logger.error("Error retrieving appointments for employee: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MessageResponseDTO("Unexpected error occurred retrieving appointments.", false));
         }
     }
-
     /**
      * Update the status of an appointment.
      */
