@@ -71,7 +71,7 @@ const ShiftSchedulingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       <AuthenticatedNavbar />
-      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700 pt-4">
+      <div className="bg-black border-b pt-22">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
