@@ -1,5 +1,6 @@
 import React from "react";
 import { Check } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import type { Notification } from "../../types/notification.types";
 import {
   getNotificationIcon,
@@ -16,12 +17,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onMarkAsRead,
 }) => {
+  const { theme } = useTheme();
   const IconComponent = getNotificationIcon(notification.type);
   
   return (
     <div
-      className={`p-4 hover:bg-zinc-800/50 transition-colors cursor-pointer ${
-        !notification.isRead ? "bg-zinc-800/30" : ""
+      className={`p-4 transition-colors cursor-pointer ${
+        theme === "light"
+          ? `hover:bg-gray-50 ${!notification.isRead ? "bg-orange-50/30" : ""}`
+          : `hover:bg-zinc-800/50 ${!notification.isRead ? "bg-zinc-800/30" : ""}`
       }`}
       onClick={() => !notification.isRead && onMarkAsRead(notification.id)}
     >
@@ -37,13 +41,19 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-white mb-1">
+              <p className={`text-sm font-semibold mb-1 ${
+                theme === "light" ? "text-gray-900" : "text-white"
+              }`}>
                 {notification.type}
               </p>
-              <p className="text-sm text-gray-300 mb-2 line-clamp-2">
+              <p className={`text-sm mb-2 line-clamp-2 ${
+                theme === "light" ? "text-gray-700" : "text-gray-300"
+              }`}>
                 {notification.message}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className={`text-xs ${
+                theme === "light" ? "text-gray-500" : "text-gray-500"
+              }`}>
                 {formatNotificationTime(notification.createdAt)}
               </p>
             </div>
@@ -55,7 +65,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                     e.stopPropagation();
                     onMarkAsRead(notification.id);
                   }}
-                  className="p-1 text-orange-500 hover:bg-zinc-700 rounded-full transition-colors"
+                  className={`p-1 text-orange-500 rounded-full transition-colors ${
+                    theme === "light" ? "hover:bg-orange-100" : "hover:bg-zinc-700"
+                  }`}
                   title="Mark as read"
                 >
                   <Check className="w-4 h-4" />
