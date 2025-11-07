@@ -250,7 +250,7 @@ const MySchedulePage = () => {
         }
       />
 
-      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         {/* Loading State */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
