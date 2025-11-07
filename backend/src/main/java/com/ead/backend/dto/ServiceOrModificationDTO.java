@@ -1,5 +1,6 @@
 package com.ead.backend.dto;
 
+import com.ead.backend.enums.AppointmentType;
 import lombok.*;
 
 import java.util.UUID;
@@ -9,6 +10,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ServiceOrModificationDTO {
     private UUID id;
+    private AppointmentType type;
     private String name;
     private String description;
     private Double estimatedCost;

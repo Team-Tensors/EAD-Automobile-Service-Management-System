@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Calendar,
   Package,
   Plus,
   Search,
@@ -12,11 +11,11 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 import { inventoryService } from '../../services/inventoryService';
 import { serviceCenterService } from '../../services/serviceCenterService';
 import type { InventoryItem, InventoryItemCreateDto } from '../../types/inventory';
 import type { ServiceCenter } from '../../types/serviceCenter';
+import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 
 const CATEGORIES = [
   'Lubricant',
@@ -33,7 +32,6 @@ const CATEGORIES = [
 ];
 
 const AdminInventory = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -203,22 +201,7 @@ const AdminInventory = () => {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Inventory Management</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <span className="font-semibold text-white">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader title="Inventory Management" />
 
       {/* Loading State */}
       {loading ? (
