@@ -19,10 +19,13 @@ interface AdminAppointmentDTO {
 }
 
 interface EmployeeDTO {
-  id: string;
+  employeeId: string;
   email: string;
   fullName: string;
   phoneNumber: string;
+  serviceCenterId?: string;
+  serviceCenterName?: string;
+  totalHoursWorked?: number;
 }
 
 /**
@@ -106,7 +109,7 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   try {
     const response = await api.get('/admin/appointments/employees');
     return response.data.map((dto: EmployeeDTO) => ({
-      id: dto.id, // Keep as UUID string
+      id: dto.employeeId, // UUID string from backend
       name: dto.fullName || '',
       email: dto.email,
       specialization: 'General Service', // Default value - not provided by backend
@@ -114,9 +117,36 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
       currentWorkload: 0, // Default value - not provided by backend
       rating: 4.5, // Default value - not provided by backend
       phoneNumber: dto.phoneNumber || '',
+      serviceCenterId: dto.serviceCenterId, // UUID string from backend
+      serviceCenterName: dto.serviceCenterName || 'Unassigned',
+      totalHoursWorked: dto.totalHoursWorked || 0,
     }));
   } catch (error) {
     console.error('Error fetching employees:', error);
+    throw error;
+  }
+};
+
+/**
+ * Assign employee to a service center
+ * @param employeeId - UUID string of the employee
+ * @param serviceCenterId - UUID string of the service center
+ * @returns Success message from backend
+ */
+export const assignEmployeeToCenter = async (
+  employeeId: string,
+  serviceCenterId: string
+): Promise<string> => {
+  try {
+    const response = await api.post('/admin/appointments/assign-employee', null, {
+      params: {
+        employeeId,
+        serviceCenterId
+      }
+    });
+    return response.data; // Returns "Employee assigned to Service Center successfully."
+  } catch (error) {
+    console.error('Error assigning employee to center:', error);
     throw error;
   }
 };
@@ -164,4 +194,5 @@ export const assignEmployeeToAppointment = async (
     }
     throw error;
   }
+  
 };

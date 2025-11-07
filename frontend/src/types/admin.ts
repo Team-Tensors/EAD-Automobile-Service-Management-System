@@ -70,6 +70,9 @@ export interface Employee {
   currentWorkload: number;
   rating: number;
   phoneNumber?: string;
+  serviceCenterId?: string; // UUID from backend
+  serviceCenterName?: string;
+  totalHoursWorked?: number;
 }
 
 // Extended Admin Service view (combines Appointment with Vehicle and ServiceType details)
