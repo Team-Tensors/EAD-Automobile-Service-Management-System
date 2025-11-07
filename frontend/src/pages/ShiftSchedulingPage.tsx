@@ -11,14 +11,12 @@ import shiftSchedulingService from "@/services/shiftSchedulingService";
 import type { ShiftAppointment } from "@/types/ShiftScheduling";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
-import employeeService, { type EmployeeCenterDTO } from "../services/employeeService";
 
 const ShiftSchedulingPage: React.FC = () => {
   const [appointments, setAppointments] = useState<ShiftAppointment[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -35,18 +33,6 @@ const ShiftSchedulingPage: React.FC = () => {
     };
 
     fetch();
-  }, []);
-
-  useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const details = await employeeService.getEmployeeDetails();
-        setEmployeeDetails(details);
-      } catch (err) {
-        console.error("Error fetching employee details:", err);
-      }
-    };
-    fetchEmployeeDetails();
   }, []);
 
   const handleAssign = async (appointmentId: string) => {
