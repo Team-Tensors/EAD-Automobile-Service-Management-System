@@ -1,14 +1,17 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import type { ServiceDistribution } from '@/types/analytics';
-import { PieChart as PieChartIcon } from 'lucide-react';
+import { PieChart as PieChartIcon, TrendingUp } from 'lucide-react';
 
 interface ServiceTypeChartProps {
   data: ServiceDistribution | null;
   isLoading?: boolean;
 }
 
-// Subtle theme colors inspired by dashboard design
-const COLORS = ['#EA580C', '#d97706', '#dc2626', '#65a30d', '#0891b2', '#7c3aed'];
+// Simplified color scheme: Primary orange with gradient shades
+const COLORS = {
+  services: '#EA580C',        // orange-600 (primary theme color)
+  modifications: '#F97316',   // orange-500 (lighter shade)
+};
 
 const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
   if (isLoading) {
@@ -16,8 +19,8 @@ const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
       <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-blue-500" />
-            Service Type Distribution
+            <PieChartIcon className="w-5 h-5 text-orange-500" />
+            Service Distribution
           </h3>
         </div>
         <div className="flex items-center justify-center h-64">
@@ -27,13 +30,13 @@ const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
     );
   }
 
-  if (!data || data.serviceBreakdown.length === 0) {
+  if (!data || data.totalAppointments === 0) {
     return (
       <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <PieChartIcon className="w-5 h-5 text-blue-500" />
-            Service Type Distribution
+            <PieChartIcon className="w-5 h-5 text-orange-500" />
+            Service Distribution
           </h3>
         </div>
         <div className="flex items-center justify-center h-64">
@@ -43,23 +46,28 @@ const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
     );
   }
 
-  const chartData = data.serviceBreakdown.map((item) => ({
-    name: item.serviceName,
-    value: item.count,
-    percentage: item.percentage,
-    revenue: item.totalRevenue,
-  }));
+  // Main pie chart data - Services vs Modifications
+  const mainChartData = [
+    { name: 'Services', value: data.serviceCount, percentage: data.servicePercentage },
+    { name: 'Modifications', value: data.modificationCount, percentage: data.modificationPercentage },
+  ];
 
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+  // Top 5 services for the list
+  const topServices = data.serviceBreakdown
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const formatCurrency = (amount: number) => {
+    return `Rs. ${amount.toLocaleString('en-LK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  };
+
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ name: string; value: number; payload: { percentage: number } }> }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 shadow-lg">
           <p className="text-white font-semibold">{payload[0].name}</p>
           <p className="text-gray-300 text-sm">Count: {payload[0].value}</p>
-          <p className="text-gray-300 text-sm">
-            Revenue: Rs. {payload[0].payload.revenue.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
-          </p>
-          <p className="text-orange-500 text-sm">{payload[0].payload.percentage.toFixed(1)}%</p>
+          <p className="text-orange-500 text-sm font-semibold">{payload[0].payload.percentage.toFixed(1)}%</p>
         </div>
       );
     }
@@ -68,50 +76,102 @@ const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
 
   return (
     <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
-          <PieChartIcon className="w-5 h-5 text-blue-500" />
-          Service Type Distribution
+          <PieChartIcon className="w-5 h-5 text-orange-500" />
+          Service Distribution
         </h3>
-        <div className="text-sm text-gray-400">
-          Total: <span className="text-white font-semibold">{data.totalAppointments}</span>
+        <div className="text-sm">
+          <span className="text-gray-400">Total: </span>
+          <span className="text-white font-semibold">{data.totalAppointments}</span>
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            outerRadius={100}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {chartData.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            verticalAlign="bottom" 
-            height={36}
-            formatter={(value) => <span className="text-gray-300">{value}</span>}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left: Pie Chart */}
+        <div className="flex flex-col items-center justify-center">
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={mainChartData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                <Cell fill={COLORS.services} />
+                <Cell fill={COLORS.modifications} />
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
 
-      <div className="mt-4 pt-4 border-t border-zinc-800 grid grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm text-gray-400">Services</p>
-          <p className="text-xl font-bold text-white">{data.serviceCount}</p>
-          <p className="text-xs text-gray-500">{data.servicePercentage.toFixed(1)}%</p>
+          {/* Legend */}
+          <div className="flex gap-6 mt-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.services }}></div>
+              <span className="text-sm text-gray-300">Services</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS.modifications }}></div>
+              <span className="text-sm text-gray-300">Modifications</span>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 gap-4 w-full mt-6">
+            <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
+              <p className="text-xs text-gray-400 mb-1">Services</p>
+              <p className="text-2xl font-bold text-white">{data.serviceCount}</p>
+              <p className="text-xs text-orange-500 font-semibold">{data.servicePercentage.toFixed(1)}%</p>
+            </div>
+            <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700">
+              <p className="text-xs text-gray-400 mb-1">Modifications</p>
+              <p className="text-2xl font-bold text-white">{data.modificationCount}</p>
+              <p className="text-xs text-orange-500 font-semibold">{data.modificationPercentage.toFixed(1)}%</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-gray-400">Modifications</p>
-          <p className="text-xl font-bold text-white">{data.modificationCount}</p>
-          <p className="text-xs text-gray-500">{data.modificationPercentage.toFixed(1)}%</p>
+
+        {/* Right: Top Services List */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-orange-500" />
+            <h4 className="text-sm font-semibold text-white">Top Services</h4>
+          </div>
+          <div className="space-y-3 flex-1">
+            {topServices.map((service, index) => (
+              <div key={service.serviceId} className="flex items-center gap-3">
+                {/* Rank */}
+                <div className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                  index === 0 ? 'bg-orange-600 text-white' : 
+                  index === 1 ? 'bg-orange-600/70 text-white' : 
+                  'bg-zinc-700 text-gray-400'
+                }`}>
+                  {index + 1}
+                </div>
+
+                {/* Service Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-white font-medium truncate">{service.serviceName}</p>
+                  <p className="text-xs text-gray-400">
+                    {service.count} appointments • {formatCurrency(service.totalRevenue)}
+                  </p>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="shrink-0 w-12 text-right">
+                  <p className="text-xs font-semibold text-orange-500">{service.percentage.toFixed(0)}%</p>
+                </div>
+              </div>
+            ))}
+            {topServices.length === 0 && (
+              <p className="text-sm text-gray-500 text-center py-8">No services data available</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -119,3 +179,4 @@ const ServiceTypeChart = ({ data, isLoading }: ServiceTypeChartProps) => {
 };
 
 export default ServiceTypeChart;
+
