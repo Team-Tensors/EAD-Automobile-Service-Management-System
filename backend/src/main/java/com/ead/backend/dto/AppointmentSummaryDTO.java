@@ -15,4 +15,5 @@ public class AppointmentSummaryDTO {
     private LocalDateTime date;
     private String status;
     private boolean canStart;
+    private String serviceCenter;
 }

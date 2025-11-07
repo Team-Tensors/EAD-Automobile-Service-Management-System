@@ -6,6 +6,7 @@ import com.ead.backend.dto.VehicleResponseDTO;
 import com.ead.backend.entity.User;
 import com.ead.backend.entity.Vehicle;
 import com.ead.backend.mappers.VehicleMapper;
+import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.UserRepository;
 import com.ead.backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
@@ -107,6 +109,11 @@ public class VehicleService {
         User user = getCurrentUser();
         Vehicle vehicle = vehicleRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found or access denied"));
+
+        // Check if vehicle has any active appointments (non-cancelled)
+        if (appointmentRepository.existsByVehicleIdAndStatusNot(id, "CANCELLED")) {
+            throw new RuntimeException("Cannot delete vehicle with existing appointments. Please cancel all appointments first.");
+        }
 
         vehicleRepository.delete(vehicle);
         sendDeleteNotifications(vehicle, user);
