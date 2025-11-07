@@ -103,11 +103,21 @@ const ChatPage: React.FC = () => {
   }, [appointmentId]);
 
   useEffect(() => {
-    if (!chatRoom || !webSocketService.isConnected()) return;
+    if (!chatRoom || !webSocketService.isConnected()) {
+      console.log('Subscription effect skipped:', { 
+        hasChatRoom: !!chatRoom, 
+        isConnected: webSocketService.isConnected(),
+        wsConnected: wsConnected
+      });
+      return;
+    }
+
+    console.log('Setting up WebSocket subscriptions for chatRoom:', chatRoom.chatRoomId);
 
     const messageSubscription = webSocketService.subscribeToChat(
       chatRoom.chatRoomId,
       (wsMessage: WebSocketMessage) => {
+        console.log('Message received in ChatPage:', wsMessage);
         const newMsg: ChatMessage = {
           messageId: wsMessage.messageId,
           chatRoomId: wsMessage.chatRoomId,
@@ -133,6 +143,8 @@ const ChatPage: React.FC = () => {
         setTimeout(scrollToBottom, 100);
       }
     );
+
+    console.log('Message subscription result:', messageSubscription ? 'Success' : 'Failed');
 
     const typingSubscription = webSocketService.subscribeToTyping(
       chatRoom.chatRoomId,
@@ -168,12 +180,13 @@ const ChatPage: React.FC = () => {
     );
 
     return () => {
+      console.log('Cleaning up WebSocket subscriptions');
       messageSubscription?.unsubscribe();
       typingSubscription?.unsubscribe();
       statusSubscription?.unsubscribe();
       readSubscription?.unsubscribe();
     };
-  }, [chatRoom, user]);
+  }, [chatRoom, user, wsConnected]);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
