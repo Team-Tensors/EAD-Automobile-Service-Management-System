@@ -103,6 +103,12 @@ const AuthenticatedNavbar = () => {
       roles: ["EMPLOYEE"],
     },
     {
+      name: "MY SCHEDULE",
+      path: "/my-schedule",
+      icon: Calendar,
+      roles: ["EMPLOYEE"],
+    },
+    {
       name: "SHIFT SCHEDULING",
       path: "/shift-scheduling",
       icon: Calendar,

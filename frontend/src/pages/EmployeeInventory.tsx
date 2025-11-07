@@ -8,12 +8,9 @@ import {
   ListChecks,
   X,
   Filter,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  MapPin
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import { inventoryService } from '../services/inventoryService';
 import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
@@ -34,7 +31,6 @@ const CATEGORIES = [
 ];
 
 const EmployeeInventory = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,35 +132,13 @@ const EmployeeInventory = () => {
       <AuthenticatedNavbar />
       {/* Header */}
       <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
+        <div className="max-w-7xl mx-auto px-0 pt-26 pb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Employee Inventory</h1>
-              <p className="text-gray-300 mt-1">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
+              <h1 className="text-2xl font-bold uppercase">Inventory</h1>
+              <p className="text-gray-400">Manage service center inventory items effectively.</p>
             </div>
-            <div className="flex items-center gap-4">
-              {employeeDetails && (
-                <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
-                  <MapPin className="w-5 h-5 text-blue-400" />
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400">Service Center</p>
-                    <p className={`text-sm font-semibold ${
-                      employeeDetails.serviceCenter 
-                        ? "text-white" 
-                        : "text-gray-500 italic"
-                    }`}>
-                      {employeeDetails.serviceCenter || "Unassigned"}
-                    </p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
-                <Calendar className="w-5 h-5 text-gray-300" />
-                <span className="font-semibold">{new Date().toLocaleDateString()}</span>
-              </div>
-            </div>
+            
           </div>
         </div>
       </header>
