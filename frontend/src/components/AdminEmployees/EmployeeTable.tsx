@@ -1,4 +1,4 @@
-import { User, Loader } from 'lucide-react';
+import { User } from 'lucide-react';
 import type { Employee } from '@/types/admin';
 import type { ServiceCenter } from '@/types/serviceCenter';
 import EmployeeTableHeader, { type SortField, type SortOrder } from './EmployeeTableHeader';
