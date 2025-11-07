@@ -234,6 +234,14 @@
   @apply bg-white border border-gray-200;
 }
 
+.light .bg-zinc-900\/50{
+  @apply bg-gray-100 border border-gray-200;
+}
+
+.light .bg-zinc-800\/50{
+  @apply bg-gray-100 border border-gray-200;
+}
+
 .light .bg-zinc-950\/80 {
   @apply bg-white/95;
 }
