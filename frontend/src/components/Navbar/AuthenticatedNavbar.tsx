@@ -81,6 +81,12 @@ const AuthenticatedNavbar = () => {
       icon: Car,
       roles: ["CUSTOMER"],
     },
+      {
+      name: "SERVICES",
+      path: "/services",
+      icon: Car,
+      roles: ["CUSTOMER"],
+    },
     {
       name: "SERVICE CENTERS",
       path: "/service-centers",
