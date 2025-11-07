@@ -147,6 +147,27 @@ export const getLastNDaysRange = (days: number): { startDate: string; endDate: s
 };
 
 /**
+ * Helper: Get next N days date range
+ * For upcoming appointments and scheduled services
+ */
+export const getNextNDaysRange = (days: number): { startDate: string; endDate: string } => {
+  const now = new Date();
+  // Start from today
+  const startDate = new Date(now);
+  startDate.setHours(0, 0, 0, 0);
+  
+  // End date is N days in the future
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + days);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return {
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+  };
+};
+
+/**
  * Helper: Get current month date range
  * Includes end-of-month + 1 day buffer
  */
