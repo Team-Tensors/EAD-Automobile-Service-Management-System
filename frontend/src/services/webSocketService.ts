@@ -40,7 +40,11 @@ class WebSocketService {
   connect(token: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const wsUrl = `${api.defaults.baseURL}/ws-chat`;
+        // Build WebSocket URL - remove /api suffix if present since WebSocket endpoint is at root
+        const baseUrl = api.defaults.baseURL || '';
+        const wsUrl = baseUrl.replace(/\/api$/, '') + '/api/ws-chat';
+        
+        console.log('Connecting to WebSocket URL:', wsUrl);
         
         // Create SockJS connection
         const socket = new SockJS(wsUrl);
@@ -52,6 +56,13 @@ class WebSocketService {
         const headers = {
           Authorization: `Bearer ${token}`
         };
+
+        // Disable STOMP debug for production, enable for dev
+        if (import.meta.env.DEV) {
+          this.client.debug = (msg: string) => console.log(msg);
+        } else {
+          this.client.debug = () => {}; // Disable debug in production
+        }
 
         // Connection success
         this.client.connect(
