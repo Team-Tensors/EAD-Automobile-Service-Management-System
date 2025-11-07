@@ -53,7 +53,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
       <Filter className="w-5 h-5 text-gray-500" />
     </div>
     <div className="flex gap-2 mb-4 flex-wrap items-center">
-      {["ALL", "NOT STARTED", "IN PROGRESS", "COMPLETED"].map((status) => (
+      {["ALL", "CONFIRMED", "IN PROGRESS", "COMPLETED"].map((status) => (
         <button
           key={status}
           onClick={() => setStatusFilter(status)}

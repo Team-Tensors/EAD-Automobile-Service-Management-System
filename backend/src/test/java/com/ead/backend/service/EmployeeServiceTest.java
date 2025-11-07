@@ -1,25 +1,40 @@
 package com.ead.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.ead.backend.dto.AppointmentDTO;
 import com.ead.backend.dto.TimeLogRequestDto;
 import com.ead.backend.dto.TimeLogResponseDTO;
-import com.ead.backend.entity.*;
+import com.ead.backend.entity.Appointment;
+import com.ead.backend.entity.ServiceOrModification;
+import com.ead.backend.entity.TimeLog;
+import com.ead.backend.entity.User;
+import com.ead.backend.entity.Vehicle;
 import com.ead.backend.enums.AppointmentType;
 import com.ead.backend.repository.AppointmentRepository;
 import com.ead.backend.repository.TimeLogRepository;
 import com.ead.backend.repository.UserRepository;
 import com.ead.backend.repository.VehicleRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import java.time.LocalDateTime;
-import java.util.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
@@ -36,6 +51,7 @@ class EmployeeServiceTest {
 
     private UUID appointmentId;
     private UUID employeeId;
+    private String employeeEmail;
     private Appointment appointment;
     private User employee;
     private Vehicle vehicle;
@@ -45,8 +61,10 @@ class EmployeeServiceTest {
     void setUp() {
         appointmentId = UUID.randomUUID();
         employeeId = UUID.randomUUID();
+        employeeEmail = "employee@test.com";
         employee = new User();
         employee.setId(employeeId);
+        employee.setEmail(employeeEmail);
         employee.setFullName("John Doe");
         employee.setPhoneNumber("1234567890");
         vehicle = new Vehicle();
@@ -92,26 +110,19 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void testGetAppointmentsByEmployee_WithStatusNull_ReturnsAppointments() {
-        when(appointmentRepository.findByAssignedEmployeesIdAndStatusIn(eq(employeeId), anyList())).thenReturn(List.of(appointment));
-        List<AppointmentDTO> result = employeeService.getAppointmentsByEmployee(employeeId, null);
+    void testGetAppointmentsByEmployee_ReturnsAppointments() {
+        when(userRepository.findByEmail(employeeEmail)).thenReturn(Optional.of(employee));
+        when(appointmentRepository.findByAssignedEmployees(anySet())).thenReturn(List.of(appointment));
+        List<AppointmentDTO> result = employeeService.getAppointmentsByEmployee(employeeEmail);
         assertEquals(1, result.size());
-        // Use field access for DTOs
         assertEquals(appointment.getUser().getFullName(), result.get(0).getUserFullName());
     }
 
     @Test
-    void testGetAppointmentsByEmployee_WithValidStatus_ReturnsAppointments() {
-        when(appointmentRepository.findByAssignedEmployeesIdAndStatus(employeeId, "CONFIRMED")).thenReturn(List.of(appointment));
-        List<AppointmentDTO> result = employeeService.getAppointmentsByEmployee(employeeId, "CONFIRMED");
-        assertEquals(1, result.size());
-        assertEquals("CONFIRMED", result.get(0).getStatus());
-    }
-
-    @Test
-    void testGetAppointmentsByEmployee_WithInvalidStatus_Throws() {
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> employeeService.getAppointmentsByEmployee(employeeId, "INVALID"));
-        assertEquals("INVALID_STATUS", ex.getMessage());
+    void testGetAppointmentsByEmployee_EmployeeNotFound_ReturnsEmptyList() {
+        when(userRepository.findByEmail(employeeEmail)).thenReturn(Optional.empty());
+        List<AppointmentDTO> result = employeeService.getAppointmentsByEmployee(employeeEmail);
+        assertEquals(0, result.size());
     }
 
     @Test
