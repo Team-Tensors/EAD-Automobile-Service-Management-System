@@ -20,11 +20,11 @@ const ServiceCenterList = ({
   getDirectionsUrl,
 }: ServiceCenterListProps) => {
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white mb-4">
+    <div className="space-y-3 sm:space-y-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
         Available Service Centers
         {userLocation && (
-          <span className="text-sm font-normal text-gray-400 ml-2">
+          <span className="block sm:inline text-xs sm:text-sm font-normal text-gray-400 sm:ml-2 mt-1 sm:mt-0">
             (Sorted by distance)
           </span>
         )}
@@ -45,26 +45,26 @@ const ServiceCenterList = ({
         .map((center) => (
           <div
             key={center.id}
-            className={`bg-zinc-900/80 backdrop-blur-sm rounded-lg p-6 border-2 cursor-pointer transition ${
+            className={`bg-zinc-900/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 border-2 cursor-pointer transition ${
               selectedCenter?.id === center.id
                 ? "border-orange-500 bg-zinc-900"
                 : "border-zinc-800 hover:border-orange-500/50"
             }`}
             onClick={() => onSelect(center)}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="w-5 h-5 text-orange-500" />
-                  <h3 className="font-bold text-lg text-white">{center.name}</h3>
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+                  <h3 className="font-bold text-base sm:text-lg text-white truncate">{center.name}</h3>
                 </div>
 
-                <p className="text-gray-400 mb-3">{center.address}</p>
+                <p className="text-sm sm:text-base text-gray-400 mb-3 line-clamp-2">{center.address}</p>
 
                 {userLocation && (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Navigation className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-semibold text-white">
+                  <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                    <Navigation className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-semibold text-white">
                       {calculateDistance(
                         userLocation.latitude,
                         userLocation.longitude,
@@ -76,14 +76,14 @@ const ServiceCenterList = ({
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-300">{center.phone}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-300 truncate">{center.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-300">{center.email}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-300 truncate">{center.email}</span>
                   </div>
                 </div>
               </div>
@@ -93,7 +93,7 @@ const ServiceCenterList = ({
                 href={getDirectionsUrl(center)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-4 p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+                className="flex-shrink-0 p-2 sm:p-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
                 onClick={(e) => e.stopPropagation()}
               >
                 <Navigation className="w-4 h-4" />
