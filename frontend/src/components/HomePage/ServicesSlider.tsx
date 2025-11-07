@@ -17,7 +17,7 @@ const services: Service[] = [
     title: "SYSTEM REPAIR",
     badge: "DIAGNOSTICS",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Complete diagnostic and repair services for all vehicle systems. Our expert technicians use advanced equipment to identify and fix any issues with your car's electronic and mechanical systems.",
   image: "/services/service1.jpg",
     icon: <Wrench size={32} className="text-white" />,
   },
@@ -26,7 +26,7 @@ const services: Service[] = [
     title: "RADIATOR SERVICE",
     badge: "MAINTENANCE",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Professional radiator maintenance and repair to keep your engine cool. We provide radiator flushing, leak repairs, and coolant system checks to prevent overheating and ensure optimal performance.",
   image: "/services/service2.jpg",
     icon: <Gauge size={32} className="text-white" />,
   },
@@ -35,7 +35,7 @@ const services: Service[] = [
     title: "BRAKE REPAIR",
     badge: "REPAIR",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Expert brake repair and replacement services for your safety. From brake pad replacement to complete brake system overhauls, we ensure your vehicle stops reliably every time.",
   image: "/services/service3.jpg",
     icon: <Disc3 size={32} className="text-white" />,
   },
@@ -44,7 +44,7 @@ const services: Service[] = [
     title: "BATTERY REPAIR",
     badge: "MAINTENANCE",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Battery testing, maintenance, and replacement services. We diagnose battery issues, clean terminals, check charging systems, and install new batteries to keep your vehicle starting strong.",
   image: "/services/service4.jpg",
     icon: <Zap size={32} className="text-white" />,
   },
@@ -53,7 +53,7 @@ const services: Service[] = [
     title: "OIL CHANGE",
     badge: "REPAIR",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Quick and professional oil change services to extend engine life. We use quality oil and filters, check fluid levels, and perform multi-point inspections to keep your engine running smoothly.",
   image: "/services/service5.jpg",
     icon: <Droplet size={32} className="text-white" />,
   },
@@ -62,7 +62,7 @@ const services: Service[] = [
     title: "SYSTEM REPAIR",
     badge: "REPAIR",
     description:
-      "At DriveCare, we offer a comprehensive range of automotive services to keep your vehicle running smoothly. Trust DriveCare for all your car care needs.",
+      "Comprehensive repair services for exhaust, fuel, and ignition systems. Our certified mechanics handle everything from minor adjustments to major system repairs with precision and care.",
   image: "/services/service6.jpg",
     icon: <Flame size={32} className="text-white" />,
   },

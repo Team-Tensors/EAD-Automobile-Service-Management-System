@@ -94,15 +94,49 @@ const EmployeeInventory = () => {
   const handleGetItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem || getQuantity <= 0) return;
+    
     try {
       await inventoryService.buy(selectedItem.id, { quantity: getQuantity });
       setShowGetModal(false);
       setSelectedItem(null);
       setGetQuantity(0);
       loadInventory();
+      
+      // Show success toast
+      toast.success(
+        `Successfully obtained ${getQuantity} unit(s) of ${selectedItem.itemName}!`,
+        {
+          duration: 4000,
+          position: 'top-right',
+          style: {
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid #27272a',
+          },
+          iconTheme: {
+            primary: '#22c55e',
+            secondary: '#fff',
+          },
+        }
+      );
     } catch (error: any) {
       console.error('Failed to get item:', error);
-      alert(error.response?.data?.message || 'Failed to get item');
+      const errorMessage = error.response?.data?.message || 'Failed to get item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
@@ -129,6 +163,9 @@ const EmployeeInventory = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Toast Notifications */}
+      <Toaster />
+      
       <AuthenticatedNavbar />
       {/* Header */}
       <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 mt-0">
