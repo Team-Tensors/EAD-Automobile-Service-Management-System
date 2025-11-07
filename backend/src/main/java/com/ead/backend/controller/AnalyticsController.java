@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/analytics")
+@RequestMapping("/analytics")
 @PreAuthorize("hasRole('ADMIN')")
 public class AnalyticsController {
 
@@ -25,7 +25,7 @@ public class AnalyticsController {
 
     /**
      * Get service type distribution analytics
-     * GET /api/analytics/service-distribution
+     * GET /analytics/service-distribution
      */
     @GetMapping("/service-distribution")
     public ResponseEntity<AnalyticsResponseDTO<ServiceDistributionResponseDTO>> getServiceDistribution(
@@ -47,7 +47,7 @@ public class AnalyticsController {
 
     /**
      * Get revenue trend analytics
-     * GET /api/analytics/revenue-trend
+     * GET /analytics/revenue-trend
      */
     @GetMapping("/revenue-trend")
     public ResponseEntity<AnalyticsResponseDTO<RevenueTrendResponseDTO>> getRevenueTrend(
@@ -68,7 +68,7 @@ public class AnalyticsController {
 
     /**
      * Get employee performance analytics
-     * GET /api/analytics/employee-performance
+     * GET /analytics/employee-performance
      */
     @GetMapping("/employee-performance")
     public ResponseEntity<AnalyticsResponseDTO<EmployeePerformanceResponseDTO>> getEmployeePerformance(
@@ -88,7 +88,7 @@ public class AnalyticsController {
 
     /**
      * Get customer insights analytics
-     * GET /api/analytics/customer-insights
+     * GET /analytics/customer-insights
      */
     @GetMapping("/customer-insights")
     public ResponseEntity<AnalyticsResponseDTO<CustomerInsightsResponseDTO>> getCustomerInsights(
@@ -107,7 +107,7 @@ public class AnalyticsController {
 
     /**
      * Get dashboard summary analytics
-     * GET /api/analytics/dashboard
+     * GET /analytics/dashboard
      */
     @GetMapping("/dashboard")
     public ResponseEntity<AnalyticsResponseDTO<AnalyticsDashboardDTO>> getDashboard(
@@ -127,7 +127,7 @@ public class AnalyticsController {
 
     /**
      * POST endpoint for complex analytics filters
-     * POST /api/analytics/custom
+     * POST /analytics/custom
      */
     @PostMapping("/custom")
     public ResponseEntity<AnalyticsResponseDTO<AnalyticsDashboardDTO>> getCustomAnalytics(
