@@ -82,14 +82,25 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             } else if (StompCommand.SEND.equals(command)) {
                 // Log SEND commands for debugging
                 String destination = accessor.getDestination();
-                log.debug("WebSocket SEND to destination: {}", destination);
+                log.info("WebSocket SEND to destination: {}", destination);
                 
                 // Check if user is authenticated
                 if (accessor.getUser() == null) {
                     log.error("User not authenticated for SEND command to: {}", destination);
+                    log.error("Session ID: {}", accessor.getSessionId());
+                    log.error("Message headers: {}", accessor.getMessageHeaders());
                 } else {
-                    log.debug("Authenticated user {} sending to: {}", 
+                    log.info("Authenticated user {} sending to: {}", 
                         accessor.getUser().getName(), destination);
+                }
+            } else if (StompCommand.SUBSCRIBE.equals(command)) {
+                // Log SUBSCRIBE commands
+                String destination = accessor.getDestination();
+                log.info("WebSocket SUBSCRIBE to destination: {}", destination);
+                if (accessor.getUser() != null) {
+                    log.info("User {} subscribed to: {}", accessor.getUser().getName(), destination);
+                } else {
+                    log.warn("Unauthenticated user trying to subscribe to: {}", destination);
                 }
             }
         }
