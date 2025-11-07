@@ -97,6 +97,9 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/chat/**").permitAll()
 
+                // WebSocket endpoints
+                .requestMatchers("/ws-chat/**").permitAll()
+
                         // OAuth2 endpoints - allow all OAuth2 related paths
                         .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/oauth2/**").permitAll()
 

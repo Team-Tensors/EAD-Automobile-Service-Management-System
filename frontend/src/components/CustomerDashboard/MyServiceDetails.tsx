@@ -1,4 +1,5 @@
-import { MapPin, Clock, User, Download } from "lucide-react";
+import { MapPin, Clock, User, Download, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // ADD THIS
 import type { Service, ServiceStatus } from "../../types/myService";
 import { ServiceLocationMap } from "./ServiceLocationMap";
 import { ServiceProgressBar } from "./ServiceProgressBar";
@@ -60,6 +61,16 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
   showMap,
   onToggleMap,
 }) => {
+  const navigate = useNavigate(); // ADD THIS
+  
+  // ADD THIS FUNCTION
+  const handleOpenChat = () => {
+    navigate(`/chat/${service.appointmentId}`);
+  };
+  
+  // Show chat button only for confirmed, in_progress, or completed services
+  const showChatButton = ['confirmed', 'in_progress', 'completed'].includes(service.status);
+  
   return (
     <div className="space-y-6">
       {/* Progress Bar - Show for non-cancelled services */}
@@ -99,7 +110,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Service Center */}
           <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
             <div className="min-w-0">
               <p className="text-xs text-gray-400">Service Center</p>
               <p className="font-semibold text-white text-sm sm:text-base truncate">
@@ -110,7 +121,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
 
           {/* Assigned Employee */}
           <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
             <div className="min-w-0">
               <p className="text-xs text-gray-400">Assigned Employee</p>
               <p className="font-semibold text-white text-sm sm:text-base truncate">
@@ -121,7 +132,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
 
           {/* Start Time */}
           <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
             <div className="min-w-0">
               <p className="text-xs text-gray-400">Start Time</p>
               <p className="font-semibold text-white text-sm sm:text-base">
@@ -138,7 +149,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
           {/* End Time - Show when service is completed */}
           {service.status === "completed" && (
             <div className="flex items-center gap-2 sm:gap-3 p-3 bg-black/40 rounded-lg border border-zinc-800">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 flex-shrink-0" />
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 shrink-0" />
               <div className="min-w-0">
                 <p className="text-xs text-gray-400">End Time</p>
                 <p className="font-semibold text-white text-sm sm:text-base">
@@ -154,8 +165,19 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 mt-6">
+        {/* Action Buttons - UPDATED */}
+        <div className="flex gap-3 mt-6">
+          {/* Chat Button - NEW */}
+          {showChatButton && (
+            <button
+              onClick={handleOpenChat}
+              className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat with Employee
+            </button>
+          )}
+          
           <button
             onClick={onToggleMap}
             className="w-full sm:flex-1 bg-orange-500 text-white px-4 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2 text-sm sm:text-base"
@@ -163,6 +185,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             <MapPin className="w-4 h-4" />
             {showMap ? "Hide" : "Show"} Location
           </button>
+          
           <button
             onClick={() => handleDownloadReport(service)}
             disabled={service.status !== "completed"}
