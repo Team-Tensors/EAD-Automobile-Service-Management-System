@@ -57,18 +57,17 @@ class WebSocketService {
           Authorization: `Bearer ${token}`
         };
 
-        // Disable STOMP debug for production, enable for dev
-        if (import.meta.env.DEV) {
-          this.client.debug = (msg: string) => console.log(msg);
-        } else {
-          this.client.debug = () => {}; // Disable debug in production
-        }
+        // Enable STOMP debug to see what's happening
+        this.client.debug = (msg: string) => {
+          console.log('[STOMP Debug]', msg);
+        };
 
         // Connection success
         this.client.connect(
           headers,
           (frame?: Stomp.Frame) => {
-            console.log('WebSocket connected:', frame);
+            console.log('WebSocket connected successfully');
+            console.log('Connection frame:', frame);
             this.connected = true;
             this.reconnectAttempts = 0;
             resolve();
@@ -128,9 +127,12 @@ class WebSocketService {
       return null;
     }
 
+    console.log('Subscribing to chat:', chatRoomId);
+    
     return this.client.subscribe(
       `/topic/chat/${chatRoomId}`,
       (message: Stomp.Message) => {
+        console.log('Received message from WebSocket:', message.body);
         const data: WebSocketMessage = JSON.parse(message.body);
         onMessage(data);
       }
@@ -205,14 +207,23 @@ class WebSocketService {
    */
   sendMessage(chatRoomId: string, message: string) {
     if (!this.client || !this.connected) {
+      console.error('Cannot send message - WebSocket not connected');
       throw new Error('WebSocket not connected');
     }
 
-    this.client.send(
-      '/app/chat.send',
-      {},
-      JSON.stringify({ chatRoomId, message })
-    );
+    console.log('Sending message:', { chatRoomId, message });
+    
+    try {
+      this.client.send(
+        '/app/chat.send',
+        {},
+        JSON.stringify({ chatRoomId, message })
+      );
+      console.log('Message sent successfully');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
   }
 
   /**
@@ -250,14 +261,22 @@ class WebSocketService {
    */
   joinChatRoom(chatRoomId: string) {
     if (!this.client || !this.connected) {
+      console.error('Cannot join chat room - WebSocket not connected');
       return;
     }
 
-    this.client.send(
-      '/app/chat.join',
-      {},
-      chatRoomId  // Send as plain string (UUID)
-    );
+    console.log('Joining chat room:', chatRoomId);
+    
+    try {
+      this.client.send(
+        '/app/chat.join',
+        {},
+        chatRoomId  // Send as plain string (UUID)
+      );
+      console.log('Join room request sent successfully');
+    } catch (error) {
+      console.error('Error joining chat room:', error);
+    }
   }
 }
 
