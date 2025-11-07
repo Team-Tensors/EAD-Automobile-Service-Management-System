@@ -11,16 +11,13 @@ import shiftSchedulingService from "@/services/shiftSchedulingService";
 import type { ShiftAppointment } from "@/types/ShiftScheduling";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
-import { useAuth } from "../hooks/useAuth";
-import employeeService, { type EmployeeCenterDTO } from "../services/employeeService";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const ShiftSchedulingPage: React.FC = () => {
-  const { user } = useAuth();
   const [appointments, setAppointments] = useState<ShiftAppointment[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [assigningId, setAssigningId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -37,18 +34,6 @@ const ShiftSchedulingPage: React.FC = () => {
     };
 
     fetch();
-  }, []);
-
-  useEffect(() => {
-    const fetchEmployeeDetails = async () => {
-      try {
-        const details = await employeeService.getEmployeeDetails();
-        setEmployeeDetails(details);
-      } catch (err) {
-        console.error("Error fetching employee details:", err);
-      }
-    };
-    fetchEmployeeDetails();
   }, []);
 
   const handleAssign = async (appointmentId: string) => {
@@ -69,36 +54,14 @@ const ShiftSchedulingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
       <AuthenticatedNavbar />
-      <div className="bg-black border-b pt-22">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Shift Scheduling</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
-                Self-assign available appointments to your schedule.
-              </p>
-            </div>
-            {employeeDetails && (
-              <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3">
-                <MapPin className="w-5 h-5 text-blue-400" />
-                <div className="text-right">
-                  <p className="text-xs text-gray-400">Service Center</p>
-                  <p className={`text-sm font-semibold ${
-                    employeeDetails.serviceCenter 
-                      ? "text-white" 
-                      : "text-gray-500 italic"
-                  }`}>
-                    {employeeDetails.serviceCenter || "Unassigned"}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      
+      <DashboardHeader
+        title="Shift Scheduling"
+        subtitle="Manage your shift appointments efficiently."
+        showWelcomeMessage={false}
+      />
 
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="bg-zinc-900/50 rounded-lg p-6 border border-zinc-800">
