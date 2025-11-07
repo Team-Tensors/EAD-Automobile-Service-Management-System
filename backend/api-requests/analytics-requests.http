@@ -1,12 +1,12 @@
 ### ====================================================================
 ### Analytics API Requests
 ### Description: Analytics endpoints for dashboard metrics
-### Base URL: http://localhost:8080/api/analytics
+### Base URL: http://localhost:8080/analytics
 ### Authorization: Required - Admin role only
 ### ====================================================================
 
 ### Variables
-@baseUrl = http://localhost:8080/api/analytics
+@baseUrl = http://localhost:8080/analytics
 @token = Bearer YOUR_JWT_TOKEN_HERE
 
 ### ====================================================================
