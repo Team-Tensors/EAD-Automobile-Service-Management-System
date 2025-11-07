@@ -35,6 +35,10 @@ public class InventoryItem {
     private Integer minStock = 10;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_center_id", nullable = false)
+    private ServiceCenter serviceCenter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
