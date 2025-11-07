@@ -39,6 +39,7 @@ const AdminInventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedServiceCenter, setSelectedServiceCenter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
@@ -69,13 +70,18 @@ const AdminInventory = () => {
     loadServiceCenters();
   }, []);
 
-  // Filter items based on search and category
+  // Filter items based on search, category, and service center
   useEffect(() => {
     let filtered = items;
 
     // Filter by category
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(item => item.category === selectedCategory);
+    }
+
+    // Filter by service center
+    if (selectedServiceCenter !== 'All') {
+      filtered = filtered.filter(item => item.serviceCenterName === selectedServiceCenter);
     }
 
     // Filter by search query
@@ -91,7 +97,7 @@ const AdminInventory = () => {
 
     setFilteredItems(filtered);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [items, searchQuery, selectedCategory]);
+  }, [items, searchQuery, selectedCategory, selectedServiceCenter]);
 
   const loadInventory = async () => {
     try {
@@ -264,17 +270,17 @@ const AdminInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800 mb-6">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
 
@@ -284,7 +290,7 @@ const AdminInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -293,12 +299,27 @@ const AdminInventory = () => {
               </select>
             </div>
 
+            {/* Service Center Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <select
+                value={selectedServiceCenter}
+                onChange={(e) => setSelectedServiceCenter(e.target.value)}
+                className="pl-10 pr-3 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+              >
+                <option value="All">All Service Centers</option>
+                {Array.from(new Set(items.map(item => item.serviceCenterName).filter(Boolean))).map(center => (
+                  <option key={center} value={center}>{center}</option>
+                ))}
+              </select>
+            </div>
+
             {/* Add Item Button */}
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
               Add Item
             </button>
           </div>
