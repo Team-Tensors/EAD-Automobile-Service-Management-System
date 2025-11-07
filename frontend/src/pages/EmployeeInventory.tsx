@@ -18,6 +18,7 @@ import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import { inventoryService } from '../services/inventoryService';
 import employeeService, { type EmployeeCenterDTO } from '../services/employeeService';
 import type { InventoryItem } from '../types/inventory';
+import Footer from '@/components/Footer/Footer';
 
 const CATEGORIES = [
   'Lubricant',
@@ -478,6 +479,7 @@ const EmployeeInventory = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };
