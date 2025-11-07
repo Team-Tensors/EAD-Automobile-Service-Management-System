@@ -24,7 +24,7 @@ import {
 
 // Local interface for transformed service/modification types
 interface ServiceType {
-  id: string; 
+  id: string;
   name: string;
   description: string;
   estimatedDuration: string;
@@ -203,7 +203,7 @@ const AppointmentBookingPage = () => {
     const createDto: VehicleCreateDto = {
       brand: vehicleData.brand,
       model: vehicleData.model,
-      year: parseInt(vehicleData.year, 10), 
+      year: parseInt(vehicleData.year, 10),
       color: vehicleData.color,
       licensePlate: vehicleData.licensePlate,
       lastServiceDate: vehicleData.lastServiceDate || undefined,
@@ -273,9 +273,9 @@ const AppointmentBookingPage = () => {
     const appointmentDateTime = `${formData.appointmentDate}T${formData.appointmentTime}:00`;
 
     const appointmentRequest = {
-      vehicleId: formData.vehicleId, 
-      serviceOrModificationId: serviceOrModificationId, 
-      serviceCenterId: formData.serviceCenterId, 
+      vehicleId: formData.vehicleId,
+      serviceOrModificationId: serviceOrModificationId,
+      serviceCenterId: formData.serviceCenterId,
       appointmentType: formData.appointmentType as AppointmentType,
       appointmentDate: appointmentDateTime,
       description: formData.description || undefined,
@@ -489,6 +489,7 @@ const AppointmentBookingPage = () => {
             {currentStep === 3 && (
               <ScheduleStep
                 formData={formData}
+                appointmentType={formData.appointmentType}
                 serviceCenters={serviceCenters}
                 isLoadingServiceCenters={isLoadingServiceCenters}
                 onChange={(e) => {
