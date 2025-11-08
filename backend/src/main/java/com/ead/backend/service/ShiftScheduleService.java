@@ -3,6 +3,7 @@ package com.ead.backend.service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ public class ShiftScheduleService {
     private final EmployeeCenterRepository employeeCenterRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final EmployeeCenterRepository empCenterRepository;
 
 
     public List<ShiftScheduleAppointmentsDTO> getPendingAppointments() {
@@ -81,16 +83,31 @@ public class ShiftScheduleService {
         int estimatedDurationMinutes = appointment.getServiceOrModification().getEstimatedTimeMinutes();
         LocalDateTime endTime = startTime.plusMinutes(estimatedDurationMinutes);
 
+        ServiceCenter serviceCenterForAppointment = appointment.getServiceCenter();
+
         // Find all users, filter by role EMPLOYEE, active, not already assigned, and no shift conflicts
         return userRepository.findAll().stream()
                 .filter(user -> user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "EMPLOYEE".equals(r.getName())))
                 .filter(user -> Boolean.TRUE.equals(user.getActive()))
-                .filter(user -> appointment.getAssignedEmployees().stream().noneMatch(ae -> ae.getId().equals(user.getId())))
+                .filter(user -> appointment.getAssignedEmployees() == null || appointment.getAssignedEmployees().stream()
+                                .noneMatch(ae -> ae.getId().equals(user.getId())))
                 .filter(user -> shiftSchedulesRepository.findConflictingShifts(user.getId(), startTime, endTime).isEmpty())
-                .map(u ->  {
-                    Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(u.getId());
-                    String serviceCenter = employeeCenter.map(ec -> ec.getServiceCenter().getName()).orElse("");
-                    return new EmployeeCenterDTO(u.getId(), u.getEmail(), u.getFullName(), u.getPhoneNumber(), serviceCenter);
+                .map(user -> {
+                    Optional<EmployeeCenter> employeeCenter = employeeCenterRepository.findByEmployeeId(user.getId());
+                    return employeeCenter.map(ec -> new Object[]{user, ec}).orElse(null);
+                })
+                .filter(Objects::nonNull)
+                .filter(arr -> {
+                    EmployeeCenter ec = (EmployeeCenter) arr[1];
+                    return ec.getServiceCenter() != null &&
+                            ec.getServiceCenter().equals(serviceCenterForAppointment);
+                })
+                .map(arr -> {
+                    User user = (User) arr[0];
+                    EmployeeCenter ec = (EmployeeCenter) arr[1];
+                    String serviceCenter = ec.getServiceCenter().getName();
+                    return new EmployeeCenterDTO(user.getId(), user.getEmail(),
+                            user.getFullName(), user.getPhoneNumber(), serviceCenter);
                 })
                 .collect(Collectors.toList());
     }
