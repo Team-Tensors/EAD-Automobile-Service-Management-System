@@ -191,12 +191,12 @@ const MyVehiclesPage = () => {
         setVehicleToDelete(null);
 
         // Check if the error is due to existing appointments
+        const errorMessage = err.response?.data?.message || err.response?.data || err.message || "";
         if (
-          err.response?.data?.message?.includes("existing appointments") ||
-          err.response?.data?.includes("existing appointments") ||
-          err.message?.includes("existing appointments")
+          errorMessage.includes("Cannot delete vehicle") && errorMessage.includes("appointments")
         ) {
-          return "Cannot delete vehicle with existing appointments. Please cancel all appointments first.";
+          // Return the exact error message from the backend
+          return err.response?.data?.message || "Cannot delete vehicle with existing appointments. Please cancel all appointments first.";
         }
 
         return "Failed to delete vehicle";
