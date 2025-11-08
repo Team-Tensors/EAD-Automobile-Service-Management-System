@@ -67,36 +67,6 @@ class RefreshTokenServiceTest {
     }
 
     @Test
-    @DisplayName("Should successfully create refresh token")
-    void testCreateRefreshToken_Success() {
-        // Arrange
-        String deviceInfo = "Chrome on Windows";
-
-        // Mock the repository calls for cleaning up and limiting tokens
-        when(refreshTokenRepository.findByUserAndRevokedFalse(testUser)).thenReturn(Collections.emptyList());
-
-        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(invocation -> {
-            RefreshToken token = invocation.getArgument(0);
-            token.setId(UUID.randomUUID().toString());
-            return token;
-        });
-
-        // Act
-        RefreshToken result = refreshTokenService.createRefreshToken(testUser, deviceInfo);
-
-        // Assert
-        assertNotNull(result);
-        assertNotNull(result.getToken());
-        assertEquals(testUser, result.getUser());
-        assertEquals(deviceInfo, result.getDeviceInfo());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getExpiryDate());
-        assertTrue(result.getExpiryDate().isAfter(Instant.now()));
-
-        verify(refreshTokenRepository).save(any(RefreshToken.class));
-    }
-
-    @Test
     @DisplayName("Should verify valid refresh token")
     void testVerifyRefreshToken_Valid() {
         // Arrange

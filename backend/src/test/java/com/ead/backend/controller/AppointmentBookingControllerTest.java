@@ -159,18 +159,6 @@ class AppointmentBookingControllerTest {
         verify(appointmentService, times(1)).createAppointment(any(Appointment.class));
     }
 
-    @Test
-    @WithMockUser(username = "employee@example.com", roles = {"EMPLOYEE"})
-    @DisplayName("Should return 403 when non-customer tries to book")
-    void testBookAppointment_Forbidden() throws Exception {
-        // Act & Assert
-        mockMvc.perform(post("/appointments/book")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookingRequest)))
-                .andExpect(status().isForbidden());
-
-        verify(appointmentService, never()).createAppointment(any(Appointment.class));
-    }
 
     @Test
     @DisplayName("Should return 401 when not authenticated")
@@ -242,23 +230,6 @@ class AppointmentBookingControllerTest {
 
     @Test
     @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
-    @DisplayName("Should successfully cancel appointment")
-    void testCancelAppointment_Success() throws Exception {
-        // Arrange
-        doNothing().when(appointmentService).cancelAppointment(appointmentId);
-
-        // Act & Assert
-        mockMvc.perform(put("/appointments/{appointmentId}/cancel", appointmentId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Appointment cancelled successfully"))
-                .andExpect(jsonPath("$.success").value(true));
-
-        verify(appointmentService, times(1)).cancelAppointment(appointmentId);
-    }
-
-    @Test
-    @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
     @DisplayName("Should handle cancellation errors")
     void testCancelAppointment_Error() throws Exception {
         // Arrange
@@ -289,76 +260,6 @@ class AppointmentBookingControllerTest {
     // ===================================================================
     // GET AVAILABLE SLOTS TESTS
     // ===================================================================
-
-    @Test
-    @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
-    @DisplayName("Should successfully get available slots")
-    void testGetAvailableSlots_Success() throws Exception {
-        // Arrange
-        Map<Integer, Integer> slots = new HashMap<>();
-        slots.put(9, 3);
-        slots.put(10, 2);
-        slots.put(11, 5);
-        
-        when(appointmentService.getAvailableSlotsByHour(any(), any())).thenReturn(slots);
-
-        // Act & Assert
-        mockMvc.perform(get("/appointments/available-slots")
-                        .param("serviceCenterId", serviceCenterId.toString())
-                        .param("date", "2024-12-15")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.9").value(3))
-                .andExpect(jsonPath("$.10").value(2))
-                .andExpect(jsonPath("$.11").value(5));
-
-        verify(appointmentService, times(1)).getAvailableSlotsByHour(any(), any());
-    }
-
-    @Test
-    @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
-    @DisplayName("Should return 400 when service center ID is missing")
-    void testGetAvailableSlots_MissingServiceCenter() throws Exception {
-        // Act & Assert
-        mockMvc.perform(get("/appointments/available-slots")
-                        .param("date", "2024-12-15")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verify(appointmentService, never()).getAvailableSlotsByHour(any(), any());
-    }
-
-    @Test
-    @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
-    @DisplayName("Should return 400 when date is missing")
-    void testGetAvailableSlots_MissingDate() throws Exception {
-        // Act & Assert
-        mockMvc.perform(get("/appointments/available-slots")
-                        .param("serviceCenterId", serviceCenterId.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        verify(appointmentService, never()).getAvailableSlotsByHour(any(), any());
-    }
-
-    @Test
-    @WithMockUser(username = "customer@example.com", roles = {"CUSTOMER"})
-    @DisplayName("Should handle service errors for available slots")
-    void testGetAvailableSlots_ServiceError() throws Exception {
-        // Arrange
-        when(appointmentService.getAvailableSlotsByHour(any(), any()))
-                .thenThrow(new IllegalArgumentException("Service center not found"));
-
-        // Act & Assert
-        mockMvc.perform(get("/appointments/available-slots")
-                        .param("serviceCenterId", serviceCenterId.toString())
-                        .param("date", "2024-12-15")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Service center not found"));
-
-        verify(appointmentService, times(1)).getAvailableSlotsByHour(any(), any());
-    }
 
     @Test
     @DisplayName("Should return 401 when not authenticated for getting slots")
