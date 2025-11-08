@@ -1,7 +1,7 @@
 
 export default function AboutSection() {
   return (
-    <section className="relative bg-black px-6 py-16 md:px-12 md:py-24 mb-5 overflow-hidden">
+    <section id="about" className="relative bg-black px-6 py-16 md:px-12 md:py-24 mb-5 overflow-hidden">
       {/* Right side radial glow in middle */}
       <div
         className="pointer-events-none absolute right-0 top-1/2 transform -translate-y-1/2 w-1/3 h-full opacity-60"
