@@ -195,6 +195,130 @@ class AppointmentIntegrationTest {
         assertEquals(0, appointments.size());
     }
 
+    @Test
+    @WithMockUser(username = "appointment-test@example.com", roles = {"CUSTOMER"})
+    @DisplayName("Integration: Should reject booking at different center when pending appointment exists")
+    void testBookAppointment_RejectDifferentCenterWithPending() throws Exception {
+        // Create another service center
+        ServiceCenter secondCenter = new ServiceCenter();
+        secondCenter.setName("Second Service Center");
+        secondCenter.setAddress("456 Test Ave");
+        secondCenter.setCity("Test City 2");
+        secondCenter.setLatitude(new java.math.BigDecimal("7.2906"));
+        secondCenter.setLongitude(new java.math.BigDecimal("80.6337"));
+        secondCenter.setPhone("9876543210");
+        secondCenter.setEmail("second@center.com");
+        secondCenter.setIsActive(true);
+        secondCenter.setCenterSlot(5);
+        secondCenter = serviceCenterRepository.save(secondCenter);
+
+        // Book first appointment at testServiceCenter
+        mockMvc.perform(post("/appointments/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingRequest)))
+                .andExpect(status().isCreated());
+
+        // Try to book another appointment at secondCenter with same type
+        AppointmentBookingRequestDTO secondRequest = new AppointmentBookingRequestDTO();
+        secondRequest.setVehicleId(testVehicle.getId());
+        secondRequest.setServiceOrModificationId(testService.getId());
+        secondRequest.setServiceCenterId(secondCenter.getId());
+        secondRequest.setAppointmentType(AppointmentType.SERVICE);
+        secondRequest.setAppointmentDate(LocalDateTime.now().plusDays(5).withHour(11).withMinute(0).withSecond(0).withNano(0));
+        secondRequest.setDescription("Second appointment at different center");
+
+        // Act & Assert - should be rejected
+        mockMvc.perform(post("/appointments/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("pending service appointment at another service center")));
+
+        // Verify only one appointment exists
+        List<Appointment> appointments = appointmentRepository.findByUserId(testCustomer.getId());
+        assertEquals(1, appointments.size());
+        assertEquals(testServiceCenter.getId(), appointments.get(0).getServiceCenter().getId());
+    }
+
+    @Test
+    @WithMockUser(username = "appointment-test@example.com", roles = {"CUSTOMER"})
+    @DisplayName("Integration: Should allow booking at different center when previous appointment is completed")
+    void testBookAppointment_AllowDifferentCenterAfterCompleted() throws Exception {
+        // Create another service center
+        ServiceCenter secondCenter = new ServiceCenter();
+        secondCenter.setName("Second Service Center");
+        secondCenter.setAddress("456 Test Ave");
+        secondCenter.setCity("Test City 2");
+        secondCenter.setLatitude(new java.math.BigDecimal("7.2906"));
+        secondCenter.setLongitude(new java.math.BigDecimal("80.6337"));
+        secondCenter.setPhone("9876543210");
+        secondCenter.setEmail("second@center.com");
+        secondCenter.setIsActive(true);
+        secondCenter.setCenterSlot(5);
+        secondCenter = serviceCenterRepository.save(secondCenter);
+
+        // Create a completed appointment at testServiceCenter
+        Appointment completedAppointment = new Appointment();
+        completedAppointment.setUser(testCustomer);
+        completedAppointment.setVehicle(testVehicle);
+        completedAppointment.setServiceOrModification(testService);
+        completedAppointment.setServiceCenter(testServiceCenter);
+        completedAppointment.setAppointmentType(AppointmentType.SERVICE);
+        completedAppointment.setAppointmentDate(LocalDateTime.now().minusDays(1).withHour(10).withMinute(0));
+        completedAppointment.setStatus("COMPLETED");
+        appointmentRepository.save(completedAppointment);
+
+        // Try to book another appointment at secondCenter with same type - should succeed
+        AppointmentBookingRequestDTO secondRequest = new AppointmentBookingRequestDTO();
+        secondRequest.setVehicleId(testVehicle.getId());
+        secondRequest.setServiceOrModificationId(testService.getId());
+        secondRequest.setServiceCenterId(secondCenter.getId());
+        secondRequest.setAppointmentType(AppointmentType.SERVICE);
+        secondRequest.setAppointmentDate(LocalDateTime.now().plusDays(5).withHour(11).withMinute(0).withSecond(0).withNano(0));
+        secondRequest.setDescription("Second appointment at different center");
+
+        // Act & Assert - should succeed
+        mockMvc.perform(post("/appointments/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondRequest)))
+                .andExpect(status().isCreated());
+
+        // Verify both appointments exist
+        List<Appointment> appointments = appointmentRepository.findByUserId(testCustomer.getId());
+        assertEquals(2, appointments.size());
+    }
+
+    @Test
+    @WithMockUser(username = "appointment-test@example.com", roles = {"CUSTOMER"})
+    @DisplayName("Integration: Should allow booking at same center when pending appointment exists")
+    void testBookAppointment_AllowSameCenterMultipleBookings() throws Exception {
+        // Book first appointment at testServiceCenter
+        mockMvc.perform(post("/appointments/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingRequest)))
+                .andExpect(status().isCreated());
+
+        // Try to book another appointment at same center with same type - should succeed
+        AppointmentBookingRequestDTO secondRequest = new AppointmentBookingRequestDTO();
+        secondRequest.setVehicleId(testVehicle.getId());
+        secondRequest.setServiceOrModificationId(testService.getId());
+        secondRequest.setServiceCenterId(testServiceCenter.getId());
+        secondRequest.setAppointmentType(AppointmentType.SERVICE);
+        secondRequest.setAppointmentDate(LocalDateTime.now().plusDays(5).withHour(11).withMinute(0).withSecond(0).withNano(0));
+        secondRequest.setDescription("Second appointment at same center");
+
+        // Act & Assert - should succeed
+        mockMvc.perform(post("/appointments/book")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(secondRequest)))
+                .andExpect(status().isCreated());
+
+        // Verify both appointments exist at same center
+        List<Appointment> appointments = appointmentRepository.findByUserId(testCustomer.getId());
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().allMatch(a -> a.getServiceCenter().getId().equals(testServiceCenter.getId())));
+    }
+
     // ===================================================================
     // GET APPOINTMENTS INTEGRATION TESTS
     // ===================================================================
