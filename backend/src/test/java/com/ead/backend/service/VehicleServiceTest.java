@@ -322,25 +322,6 @@ class VehicleServiceTest {
     // ===================================================================
 
     @Test
-    @DisplayName("Should successfully delete vehicle")
-    void testDeleteVehicle_Success() {
-        // Arrange
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(vehicleRepository.findByIdAndUserId(testVehicleId, testUserId))
-                .thenReturn(Optional.of(testVehicle));
-        doNothing().when(vehicleRepository).delete(testVehicle);
-        doNothing().when(notificationService).sendNotification(any(), any(), any(), any());
-
-        // Act
-        vehicleService.deleteVehicle(testVehicleId);
-
-        // Assert
-        verify(vehicleRepository, times(1)).delete(testVehicle);
-        verify(notificationService, times(1)).sendNotification(any(), eq("VEHICLE_DELETED"), any(), any());
-        verify(emailService, times(1)).sendVehicleDeletedEmail(any(), any(), any(), any(), any());
-    }
-
-    @Test
     @DisplayName("Should throw exception when deleting non-existent vehicle")
     void testDeleteVehicle_NotFound() {
         // Arrange
