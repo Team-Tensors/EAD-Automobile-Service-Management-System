@@ -1,0 +1,35 @@
+package com.ead.backend.dto;
+
+import com.ead.backend.enums.AppointmentType;
+import com.ead.backend.enums.PeriodType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AnalyticsFilterRequestDTO {
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private UUID serviceCenterId;
+    private AppointmentType appointmentType;
+    private String status;
+    private PeriodType periodType = PeriodType.DAILY;
+    private Boolean allTime = false;
+
+    // Default constructor with last 30 days
+    public static AnalyticsFilterRequestDTO defaultLast30Days() {
+        AnalyticsFilterRequestDTO dto = new AnalyticsFilterRequestDTO();
+        // Set to end of current day
+        dto.setEndDate(LocalDateTime.now().toLocalDate().atTime(23, 59, 59, 999999999));
+        // Set to start of day 30 days ago
+        dto.setStartDate(LocalDateTime.now().minusDays(30).toLocalDate().atStartOfDay());
+        dto.setPeriodType(PeriodType.DAILY);
+        return dto;
+    }
+}
+

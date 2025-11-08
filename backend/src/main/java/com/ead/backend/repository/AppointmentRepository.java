@@ -65,4 +65,179 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    // ===================================================================
+    // ANALYTICS QUERIES
+    // ===================================================================
+
+    /**
+     * Find appointments by status and date range
+     */
+    List<Appointment> findByStatusAndAppointmentDateBetween(
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    /**
+     * Find appointments by date range
+     */
+    List<Appointment> findByAppointmentDateBetween(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    /**
+     * Find appointments by date range and service center
+     */
+    List<Appointment> findByAppointmentDateBetweenAndServiceCenterId(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            UUID serviceCenterId
+    );
+
+    /**
+     * Count appointments by status
+     */
+    Long countByStatus(String status);
+
+    /**
+     * Count appointments by status and date range
+     */
+    Long countByStatusAndAppointmentDateBetween(
+            String status,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    /**
+     * Get service type distribution with revenue
+     */
+    @Query("SELECT som.id, som.name, som.type, COUNT(a), SUM(som.estimatedCost), AVG(som.estimatedCost) " +
+            "FROM Appointment a " +
+            "JOIN a.serviceOrModification som " +
+            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "AND (:serviceCenterId IS NULL OR a.serviceCenter.id = :serviceCenterId) " +
+            "AND (:status IS NULL OR a.status = :status) " +
+            "GROUP BY som.id, som.name, som.type " +
+            "ORDER BY COUNT(a) DESC")
+    List<Object[]> getServiceTypeDistribution(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("serviceCenterId") UUID serviceCenterId,
+            @Param("status") String status
+    );
+
+    /**
+     * Get service type distribution with revenue (all time)
+     */
+    @Query("SELECT som.id, som.name, som.type, COUNT(a), SUM(som.estimatedCost), AVG(som.estimatedCost) " +
+            "FROM Appointment a " +
+            "JOIN a.serviceOrModification som " +
+            "WHERE (:serviceCenterId IS NULL OR a.serviceCenter.id = :serviceCenterId) " +
+            "AND (:status IS NULL OR a.status = :status) " +
+            "GROUP BY som.id, som.name, som.type " +
+            "ORDER BY COUNT(a) DESC")
+    List<Object[]> getServiceTypeDistributionAllTime(
+            @Param("serviceCenterId") UUID serviceCenterId,
+            @Param("status") String status
+    );
+
+    /**
+     * Get revenue and appointment count grouped by date
+     */
+    @Query(value = "SELECT CAST(a.appointment_date AS DATE), " +
+            "SUM(som.estimated_cost), " +
+            "COUNT(a.id), " +
+            "SUM(CASE WHEN som.type = 'SERVICE' THEN som.estimated_cost ELSE 0 END), " +
+            "SUM(CASE WHEN som.type = 'MODIFICATION' THEN som.estimated_cost ELSE 0 END), " +
+            "COUNT(CASE WHEN som.type = 'SERVICE' THEN 1 END), " +
+            "COUNT(CASE WHEN som.type = 'MODIFICATION' THEN 1 END) " +
+            "FROM appointment a " +
+            "JOIN service_or_modification som ON a.service_or_modification_id = som.id " +
+            "WHERE a.appointment_date BETWEEN :startDate AND :endDate " +
+            "AND (:serviceCenterId IS NULL OR a.service_center_id = CAST(:serviceCenterId AS UUID)) " +
+            "AND a.status = 'COMPLETED' " +
+            "GROUP BY CAST(a.appointment_date AS DATE) " +
+            "ORDER BY CAST(a.appointment_date AS DATE)",
+            nativeQuery = true)
+    List<Object[]> getRevenueByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("serviceCenterId") UUID serviceCenterId
+    );
+
+    /**
+     * Get revenue and appointment count grouped by date (all time)
+     */
+    @Query(value = "SELECT CAST(a.appointment_date AS DATE), " +
+            "SUM(som.estimated_cost), " +
+            "COUNT(a.id), " +
+            "SUM(CASE WHEN som.type = 'SERVICE' THEN som.estimated_cost ELSE 0 END), " +
+            "SUM(CASE WHEN som.type = 'MODIFICATION' THEN som.estimated_cost ELSE 0 END), " +
+            "COUNT(CASE WHEN som.type = 'SERVICE' THEN 1 END), " +
+            "COUNT(CASE WHEN som.type = 'MODIFICATION' THEN 1 END) " +
+            "FROM appointment a " +
+            "JOIN service_or_modification som ON a.service_or_modification_id = som.id " +
+            "WHERE (:serviceCenterId IS NULL OR a.service_center_id = CAST(:serviceCenterId AS UUID)) " +
+            "AND a.status = 'COMPLETED' " +
+            "GROUP BY CAST(a.appointment_date AS DATE) " +
+            "ORDER BY CAST(a.appointment_date AS DATE)",
+            nativeQuery = true)
+    List<Object[]> getRevenueByDateRangeAllTime(
+            @Param("serviceCenterId") UUID serviceCenterId
+    );
+
+    /**
+     * Get appointments for employees (for performance metrics)
+     */
+    @Query("SELECT ae.id, u.id, u.fullName, u.email, COUNT(a), " +
+            "COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'IN_PROGRESS' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'PENDING' THEN 1 END) " +
+            "FROM Appointment a " +
+            "JOIN a.assignedEmployees ae " +
+            "JOIN User u ON u.id = ae.id " +
+            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "AND (:serviceCenterId IS NULL OR a.serviceCenter.id = :serviceCenterId) " +
+            "GROUP BY ae.id, u.id, u.fullName, u.email " +
+            "ORDER BY COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END) DESC")
+    List<Object[]> getEmployeeAppointmentMetrics(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("serviceCenterId") UUID serviceCenterId
+    );
+
+    /**
+     * Get appointments for employees (all time)
+     */
+    @Query("SELECT ae.id, u.id, u.fullName, u.email, COUNT(a), " +
+            "COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'IN_PROGRESS' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'PENDING' THEN 1 END) " +
+            "FROM Appointment a " +
+            "JOIN a.assignedEmployees ae " +
+            "JOIN User u ON u.id = ae.id " +
+            "WHERE (:serviceCenterId IS NULL OR a.serviceCenter.id = :serviceCenterId) " +
+            "GROUP BY ae.id, u.id, u.fullName, u.email " +
+            "ORDER BY COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END) DESC")
+    List<Object[]> getEmployeeAppointmentMetricsAllTime(
+            @Param("serviceCenterId") UUID serviceCenterId
+    );
+
+    /**
+     * Count distinct customers
+     */
+    @Query("SELECT COUNT(DISTINCT a.user.id) FROM Appointment a " +
+            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate")
+    Long countDistinctCustomers(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    /**
+     * Count distinct customers (all time)
+     */
+    @Query("SELECT COUNT(DISTINCT a.user.id) FROM Appointment a")
+    Long countDistinctCustomersAllTime();
 }

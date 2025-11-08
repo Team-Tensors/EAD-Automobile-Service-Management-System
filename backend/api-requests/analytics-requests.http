@@ -1,0 +1,336 @@
+### ====================================================================
+### Analytics API Requests
+### Description: Analytics endpoints for dashboard metrics
+### Base URL: http://localhost:8080/analytics
+### Authorization: Required - Admin role only
+### ====================================================================
+
+### Variables
+@baseUrl = http://localhost:8080/analytics
+@token = Bearer YOUR_JWT_TOKEN_HERE
+
+### ====================================================================
+### 1. Get Dashboard Summary (Last 30 days by default)
+### ====================================================================
+GET {{baseUrl}}/dashboard
+Authorization: {{token}}
+
+### ====================================================================
+### 1a. Get Dashboard Summary (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/dashboard?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
+### 2. Get Dashboard Summary with Date Range
+### ====================================================================
+GET {{baseUrl}}/dashboard?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
+Authorization: {{token}}
+
+### ====================================================================
+### 3. Get Dashboard Summary for Specific Service Center
+### ====================================================================
+GET {{baseUrl}}/dashboard?serviceCenterId=YOUR_SERVICE_CENTER_UUID&startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
+Authorization: {{token}}
+
+### ====================================================================
+### 4. Get Service Type Distribution
+### ====================================================================
+GET {{baseUrl}}/service-distribution
+Authorization: {{token}}
+
+### ====================================================================
+### 4a. Get Service Type Distribution (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/service-distribution?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
+### 5. Get Service Distribution with Filters
+### ====================================================================
+GET {{baseUrl}}/service-distribution?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59&status=COMPLETED
+Authorization: {{token}}
+
+### ====================================================================
+### 6. Get Service Distribution for Specific Type
+### ====================================================================
+GET {{baseUrl}}/service-distribution?appointmentType=SERVICE&status=COMPLETED
+Authorization: {{token}}
+
+### ====================================================================
+### 7. Get Revenue Trend (Daily)
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?periodType=DAILY
+Authorization: {{token}}
+
+### ====================================================================
+### 7a. Get Revenue Trend (All Time - Monthly View)
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?allTime=true&periodType=MONTHLY
+Authorization: {{token}}
+
+### ====================================================================
+### 8. Get Revenue Trend (Weekly)
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?startDate=2025-09-01T00:00:00&endDate=2025-11-08T23:59:59&periodType=WEEKLY
+Authorization: {{token}}
+
+### ====================================================================
+### 9. Get Revenue Trend (Monthly)
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?startDate=2025-01-01T00:00:00&endDate=2025-11-08T23:59:59&periodType=MONTHLY
+Authorization: {{token}}
+
+### ====================================================================
+### 10. Get Revenue Trend for Specific Service Center
+### ====================================================================
+GET {{baseUrl}}/revenue-trend?serviceCenterId=YOUR_SERVICE_CENTER_UUID&periodType=DAILY
+Authorization: {{token}}
+
+### ====================================================================
+### 11. Get Employee Performance
+### ====================================================================
+GET {{baseUrl}}/employee-performance
+Authorization: {{token}}
+
+### ====================================================================
+### 11a. Get Employee Performance (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/employee-performance?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
+### 12. Get Employee Performance with Date Range
+### ====================================================================
+GET {{baseUrl}}/employee-performance?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
+Authorization: {{token}}
+
+### ====================================================================
+### 13. Get Employee Performance for Specific Service Center
+### ====================================================================
+GET {{baseUrl}}/employee-performance?serviceCenterId=YOUR_SERVICE_CENTER_UUID
+Authorization: {{token}}
+
+### ====================================================================
+### 14. Get Customer Insights
+### ====================================================================
+GET {{baseUrl}}/customer-insights
+Authorization: {{token}}
+
+### ====================================================================
+### 14a. Get Customer Insights (All Time Data)
+### ====================================================================
+GET {{baseUrl}}/customer-insights?allTime=true
+Authorization: {{token}}
+
+### ====================================================================
+### 15. Get Customer Insights with Date Range
+### ====================================================================
+GET {{baseUrl}}/customer-insights?startDate=2025-10-01T00:00:00&endDate=2025-11-08T23:59:59
+Authorization: {{token}}
+
+### ====================================================================
+### 16. Custom Analytics with POST (Complex Filters)
+### ====================================================================
+POST {{baseUrl}}/custom
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2025-10-01T00:00:00",
+  "endDate": "2025-11-08T23:59:59",
+  "serviceCenterId": null,
+  "appointmentType": "SERVICE",
+  "status": "COMPLETED",
+  "periodType": "WEEKLY"
+}
+
+### ====================================================================
+### 17. Custom Analytics - Last 7 Days
+### ====================================================================
+POST {{baseUrl}}/custom
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2025-11-01T00:00:00",
+  "endDate": "2025-11-08T23:59:59",
+  "periodType": "DAILY"
+}
+
+### ====================================================================
+### 18. Custom Analytics - Modifications Only
+### ====================================================================
+POST {{baseUrl}}/custom
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "startDate": "2025-10-01T00:00:00",
+  "endDate": "2025-11-08T23:59:59",
+  "appointmentType": "MODIFICATION",
+  "status": "COMPLETED",
+  "periodType": "MONTHLY"
+}
+
+### ====================================================================
+### Sample Response Structures
+### ====================================================================
+
+###
+### Dashboard Summary Response:
+### {
+###   "success": true,
+###   "message": "Dashboard summary retrieved successfully",
+###   "data": {
+###     "totalRevenue": 25000.50,
+###     "totalAppointments": 150,
+###     "completedAppointments": 100,
+###     "confirmedAppointments": 30,
+###     "pendingAppointments": 12,
+###     "inProgressAppointments": 6,
+###     "cancelledAppointments": 2,
+###     "totalCustomers": 75,
+###     "totalEmployees": 12,
+###     "completionRate": 66.67,
+###     "averageServiceCost": 250.00,
+###     "repeatCustomerRate": 45.5,
+###     "popularServices": [...],
+###     "topEmployees": [...],
+###     "periodStart": "2025-10-08T00:00:00",
+###     "periodEnd": "2025-11-08T23:59:59"
+###   },
+###   "timestamp": "2025-11-08T00:30:00"
+### }
+###
+### NOTE: All 5 appointment statuses are now tracked:
+### - COMPLETED: Finished services
+### - CONFIRMED: Bookings confirmed by customer/admin
+### - PENDING: Initial booking requests
+### - IN_PROGRESS: Currently being serviced
+### - CANCELLED: Cancelled appointments
+### Total should equal: completed + confirmed + pending + inProgress + cancelled
+
+###
+### Service Distribution Response:
+### {
+###   "success": true,
+###   "message": "Service distribution retrieved successfully",
+###   "data": {
+###     "totalAppointments": 150,
+###     "serviceCount": 100,
+###     "modificationCount": 50,
+###     "servicePercentage": 66.67,
+###     "modificationPercentage": 33.33,
+###     "serviceBreakdown": [
+###       {
+###         "serviceId": "uuid-here",
+###         "serviceName": "Oil Change",
+###         "serviceType": "SERVICE",
+###         "count": 45,
+###         "percentage": 30.0,
+###         "totalRevenue": 2250.0,
+###         "averageCost": 50.0
+###       },
+###       ...
+###     ]
+###   },
+###   "timestamp": "2025-11-08T10:30:00"
+### }
+
+###
+### Revenue Trend Response:
+### {
+###   "success": true,
+###   "message": "Revenue trend retrieved successfully",
+###   "data": {
+###     "totalRevenue": 25000.50,
+###     "averageRevenue": 833.35,
+###     "maxRevenue": 1500.0,
+###     "minRevenue": 200.0,
+###     "totalAppointments": 150,
+###     "periodType": "DAILY",
+###     "trends": [
+###       {
+###         "period": "2025-10-08",
+###         "periodLabel": "Oct 08, 2025",
+###         "revenue": 850.0,
+###         "appointmentCount": 5,
+###         "serviceRevenue": 600.0,
+###         "modificationRevenue": 250.0,
+###         "serviceCount": 3,
+###         "modificationCount": 2
+###       },
+###       ...
+###     ]
+###   },
+###   "timestamp": "2025-11-08T10:30:00"
+### }
+
+###
+### Employee Performance Response:
+### {
+###   "success": true,
+###   "message": "Employee performance retrieved successfully",
+###   "data": {
+###     "totalEmployees": 12,
+###     "totalAppointments": 150,
+###     "averageCompletionRate": 82.5,
+###     "totalHoursLogged": 450.5,
+###     "employees": [...],
+###     "topPerformers": [
+###       {
+###         "employeeId": "uuid-here",
+###         "employeeName": "John Doe",
+###         "email": "john@example.com",
+###         "totalAppointments": 25,
+###         "completedAppointments": 23,
+###         "inProgressAppointments": 2,
+###         "pendingAppointments": 0,
+###         "completionRate": 92.0,
+###         "totalHoursLogged": 85.5,
+###         "averageHoursPerAppointment": 3.42,
+###         "rank": 1
+###       },
+###       ...
+###     ]
+###   },
+###   "timestamp": "2025-11-08T10:30:00"
+### }
+
+###
+### Customer Insights Response:
+### {
+###   "success": true,
+###   "message": "Customer insights retrieved successfully",
+###   "data": {
+###     "totalCustomers": 75,
+###     "repeatCustomers": 34,
+###     "newCustomers": 41,
+###     "repeatCustomerRate": 45.33,
+###     "averageAppointmentsPerCustomer": 2.0,
+###     "averageSpendPerCustomer": 333.34,
+###     "totalAppointments": 150,
+###     "customerInsights": [...],
+###     "topCustomers": [
+###       {
+###         "customerId": "uuid-here",
+###         "customerName": "Jane Smith",
+###         "email": "jane@example.com",
+###         "phoneNumber": "+1234567890",
+###         "totalAppointments": 8,
+###         "completedAppointments": 7,
+###         "cancelledAppointments": 1,
+###         "totalSpent": 1250.0,
+###         "firstAppointmentDate": "2025-08-15T10:00:00",
+###         "lastAppointmentDate": "2025-11-05T14:30:00",
+###         "isRepeatCustomer": true,
+###         "vehicleCount": 2,
+###         "daysSinceLastAppointment": 3
+###       },
+###       ...
+###     ]
+###   },
+###   "timestamp": "2025-11-08T10:30:00"
+### }
+
