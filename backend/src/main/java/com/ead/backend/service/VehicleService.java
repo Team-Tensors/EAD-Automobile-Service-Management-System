@@ -110,9 +110,12 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new RuntimeException("Vehicle not found or access denied"));
 
-        // Check if vehicle has any active appointments (non-cancelled)
-        if (appointmentRepository.existsByVehicleIdAndStatusNot(id, "CANCELLED")) {
-            throw new RuntimeException("Cannot delete vehicle with existing appointments. Please cancel all appointments first.");
+        // Check if vehicle has any confirmed or in-progress appointments
+        if (appointmentRepository.hasActiveAppointments(id)) {
+            throw new IllegalArgumentException(
+                    "Cannot delete vehicle with confirmed or in-progress appointments. " +
+                    "Please cancel or complete all appointments first."
+            );
         }
 
         vehicleRepository.delete(vehicle);
