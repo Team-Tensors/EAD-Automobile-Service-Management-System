@@ -112,6 +112,8 @@ class AppointmentIntegrationTest {
                     center.setName("Integration Test Center");
                     center.setAddress("123 Test Street");
                     center.setCity("Test City");
+                    center.setLatitude(new java.math.BigDecimal("6.9271"));
+                    center.setLongitude(new java.math.BigDecimal("79.8612"));
                     center.setPhone("1234567890");
                     center.setEmail("test@center.com");
                     center.setIsActive(true);
