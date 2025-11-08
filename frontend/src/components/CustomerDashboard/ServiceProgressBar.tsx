@@ -129,6 +129,8 @@ export const ServiceProgressBar: React.FC<ServiceProgressBarProps> = ({
                 ? '0' // Stop at the first circle
                 : currentStageIndex === stages.length - 1 
                 ? 'calc(100% - 32px)' // Stop at the last circle
+                : currentStageIndex === 2
+                ? 'calc(66.67% - 24px)' // Adjust in_progress position
                 : `calc(${progressPercentage}% - 16px)`,
             }}
           >
