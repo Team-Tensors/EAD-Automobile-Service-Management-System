@@ -152,6 +152,41 @@ export const assignEmployeeToCenter = async (
 };
 
 /**
+ * Get possible (eligible) employees for a specific appointment
+ * Returns only employees who have no conflicting shifts and meet appointment requirements
+ * @param appointmentId - UUID string of the appointment
+ */
+export const getPossibleEmployeesForAppointment = async (
+  appointmentId: string
+): Promise<Employee[]> => {
+  try {
+    const response = await api.get(`/shift/possible-employees/${appointmentId}`);
+    return response.data.map((dto: {
+      id: string;
+      email: string;
+      fullName: string;
+      phoneNumber: string;
+      serviceCenter: string;
+    }) => ({
+      id: dto.id, // UUID string from backend
+      name: dto.fullName || '',
+      email: dto.email,
+      specialization: dto.serviceCenter || 'General Service',
+      availability: 'available' as const,
+      currentWorkload: 0,
+      rating: 4.5,
+      phoneNumber: dto.phoneNumber || '',
+      serviceCenterId: undefined,
+      serviceCenterName: dto.serviceCenter || 'Unassigned',
+      totalHoursWorked: 0,
+    }));
+  } catch (error) {
+    console.error('Error fetching possible employees for appointment:', error);
+    throw error;
+  }
+};
+
+/**
  * Assign employees to an appointment
  * @param appointmentId - UUID string of the appointment
  * @param employeeIds - Array of UUID strings for employees to assign
