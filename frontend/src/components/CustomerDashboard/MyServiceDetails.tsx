@@ -165,15 +165,15 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
           )}
         </div>
 
-        {/* Action Buttons - UPDATED */}
-        <div className="flex gap-3 mt-6">
+        {/* Action Buttons - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           {/* Chat Button - NEW */}
           {showChatButton && (
             <button
               onClick={handleOpenChat}
-              className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center justify-center gap-2"
+              className="w-full sm:flex-1 bg-blue-500 text-white px-4 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center justify-center gap-2 text-sm sm:text-base"
             >
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               Chat with Employee
             </button>
           )}
@@ -182,7 +182,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
             onClick={onToggleMap}
             className="w-full sm:flex-1 bg-orange-500 text-white px-4 py-2.5 sm:py-2 rounded-lg font-semibold hover:bg-orange-600 transition flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <MapPin className="w-4 h-4" />
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
             {showMap ? "Hide" : "Show"} Location
           </button>
           
@@ -200,7 +200,7 @@ export const MyServiceDetails: React.FC<MyServiceDetailsProps> = ({
                 : "Download service completion report"
             }
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden sm:inline">
               {service.status === "completed"
                 ? "Download Report"

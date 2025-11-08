@@ -8,14 +8,15 @@ import {
   ListChecks,
   X,
   Filter,
-  Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
+import Footer from "@/components/Footer/Footer";
+import DashboardHeader from "@/components/DashboardHeader";
 import { inventoryService } from '../services/inventoryService';
 import type { InventoryItem } from '../types/inventory';
+import toast, { Toaster } from 'react-hot-toast';
 
 const CATEGORIES = [
   'Lubricant',
@@ -32,7 +33,6 @@ const CATEGORIES = [
 ];
 
 const EmployeeInventory = () => {
-  const { user } = useAuth();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,15 +82,49 @@ const EmployeeInventory = () => {
   const handleGetItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedItem || getQuantity <= 0) return;
+    
     try {
       await inventoryService.buy(selectedItem.id, { quantity: getQuantity });
       setShowGetModal(false);
       setSelectedItem(null);
       setGetQuantity(0);
       loadInventory();
-    } catch (error: any) {
+      
+      // Show success toast
+      toast.success(
+        `Successfully obtained ${getQuantity} unit(s) of ${selectedItem.itemName}!`,
+        {
+          duration: 4000,
+          position: 'top-right',
+          style: {
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid #27272a',
+          },
+          iconTheme: {
+            primary: '#22c55e',
+            secondary: '#fff',
+          },
+        }
+      );
+    } catch (error: unknown) {
       console.error('Failed to get item:', error);
-      alert(error.response?.data?.message || 'Failed to get item');
+      const errorMessage = (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to get item';
+      
+      // Show error toast
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          background: '#18181b',
+          color: '#fff',
+          border: '1px solid #27272a',
+        },
+        iconTheme: {
+          primary: '#ef4444',
+          secondary: '#fff',
+        },
+      });
     }
   };
 
@@ -116,28 +150,21 @@ const EmployeeInventory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
+      {/* Toast Notifications */}
+      <Toaster />
+      
       <AuthenticatedNavbar />
+      
       {/* Header */}
-      <header className="bg-gradient-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Employee Inventory</h1>
-              <p className="text-gray-300 mt-1">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-600">
-              <Calendar className="w-5 h-5 text-gray-300" />
-              <span className="font-semibold">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        title="Inventory"
+        subtitle="Manage service center inventory items effectively."
+        showWelcomeMessage={false}
+      />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-0 py-8">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700">
@@ -170,17 +197,17 @@ const EmployeeInventory = () => {
         </div>
 
         {/* Controls */}
-        <div className="bg-zinc-900 rounded-lg shadow-md p-3 border border-zinc-800 mb-5">
+        <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-700 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search by item name or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-[10px] bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
             {/* Category Filter */}
@@ -189,7 +216,7 @@ const EmployeeInventory = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                className="pl-10 pr-8 py-3 bg-zinc-800 border border-zinc-600 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="All">All Categories</option>
                 {CATEGORIES.map(cat => (
@@ -200,31 +227,32 @@ const EmployeeInventory = () => {
           </div>
         </div>
 
-        {/* Inventory Table */}
-        <div className="bg-zinc-900 rounded-lg shadow-md border border-zinc-700 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-zinc-800 border-b border-zinc-700">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Item Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Quantity</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Min Stock</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Unit Price</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
-                        <div className="py-8 text-center text-gray-400">
-                        <div className="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-orange-600 mb-3 mx-auto"></div>
-                        <p className="text-sm">Loading inventory data...</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredItems.length === 0 ? (
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading inventory...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Inventory Table */}
+            <div className="bg-zinc-900 rounded-lg shadow-md border border-zinc-700 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-zinc-800 border-b border-zinc-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Item Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Category</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Quantity</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Min Stock</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Unit Price</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-300">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                       No items found
@@ -279,56 +307,58 @@ const EmployeeInventory = () => {
                       </td>
                     </tr>
                   ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Pagination */}
-          {filteredItems.length > 0 && (
-            <div className="px-6 py-4 border-t border-zinc-700 flex items-center justify-between">
-              <div className="text-sm text-gray-400">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={goToPreviousPage}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded-lg transition ${
-                    currentPage === 1
-                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                  title="Previous page"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-sm text-white px-4">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg transition ${
-                    currentPage === totalPages
-                      ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }`}
-                  title="Next page"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+              
+              {/* Pagination */}
+              {filteredItems.length > 0 && (
+                <div className="px-6 py-4 border-t border-zinc-700 flex items-center justify-between">
+                  <div className="text-sm text-gray-400">
+                    Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredItems.length)} of {filteredItems.length} items
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={goToPreviousPage}
+                      disabled={currentPage === 1}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === 1
+                          ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                          : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                      }`}
+                      title="Previous page"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm text-white px-4">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={goToNextPage}
+                      disabled={currentPage === totalPages}
+                      className={`p-2 rounded-lg transition ${
+                        currentPage === totalPages
+                          ? 'bg-zinc-800 text-gray-600 cursor-not-allowed'
+                          : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                      }`}
+                      title="Next page"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Get Item Modal */}
       {showGetModal && selectedItem && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 ">
           <div className="bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full border border-zinc-700">
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
+            <div className="bg-linear-to-r from-zinc-800 to-zinc-700 text-white p-6 border-b border-zinc-600 flex items-center justify-between rounded-lg">
               <h3 className="text-2xl font-bold">Get Item</h3>
               <button
                 onClick={() => {
@@ -411,6 +441,7 @@ const EmployeeInventory = () => {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 };
