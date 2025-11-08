@@ -65,7 +65,13 @@ public class SecurityConfig {
                 // CORS Configuration for React frontend
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new org.springframework.web.cors.CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://team-tensors.github.io", "https://drivecare.pcgenerals.com"));
+                    config.setAllowedOrigins(List.of(
+                        "http://localhost:3000",      // React dev (old)
+                        "http://localhost:5173",      // Vite dev
+                        "http://localhost:30173",     // Kubernetes NodePort
+                        "https://team-tensors.github.io", 
+                        "https://drivecare.pcgenerals.com"
+                    ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setAllowCredentials(true);
