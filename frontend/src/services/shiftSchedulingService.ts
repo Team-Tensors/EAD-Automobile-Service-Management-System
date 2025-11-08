@@ -22,6 +22,12 @@ class ShiftSchedulingService {
     public async assignEmployee(payload: { appointmentId: string }) {
         return await api.post('/shift/self-assign-employee', payload);
     }
+
+    
+
+    public async getPossibleEmployeesForAppointment(appointmentId: string) {
+        return await api.get(`${this.base}/possible-employees/${appointmentId}`);
+    }
 }
 
 export default new ShiftSchedulingService();

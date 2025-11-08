@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { AdminService, Employee } from '@/types/admin';
-import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees, assignEmployeeToAppointment } from '../../services/adminService';
+import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getPossibleEmployeesForAppointment, assignEmployeeToAppointment } from '../../services/adminService';
 import { UnassignedSectionSkeleton, AppointmentListSkeleton } from '../../components/AdminDashboard/SkeletonLoaders';
 import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 
@@ -27,6 +27,7 @@ const AdminDashboard = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchEmployee, setSearchEmployee] = useState('');
   const [isAssigning, setIsAssigning] = useState(false);
+  const [isFetchingEmployees, setIsFetchingEmployees] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -49,24 +50,21 @@ const AdminDashboard = () => {
         setIsLoading(true);
         setErrorMessage(null);
         
-        const [upcoming, ongoing, unassigned, employeeList] = await Promise.all([
+        const [upcoming, ongoing, unassigned] = await Promise.all([
           getUpcomingAppointments(),
           getOngoingAppointments(),
-          getUnassignedAppointments(),
-          getAllEmployees()
+          getUnassignedAppointments()
         ]);
         
         console.log('AdminDashboard: Data fetched successfully', {
           upcoming: upcoming.length,
           ongoing: ongoing.length,
-          unassigned: unassigned.length,
-          employees: employeeList.length
+          unassigned: unassigned.length
         });
         
         setUpcomingAppointments(upcoming);
         setOngoingAppointments(ongoing);
         setUnassignedAppointments(unassigned);
-        setEmployees(employeeList);
       } catch (error) {
         console.error('Error loading dashboard data:', error);
         setErrorMessage(error instanceof Error ? error.message : 'Failed to load dashboard data');
@@ -103,9 +101,31 @@ const AdminDashboard = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const handleAssignEmployee = (service: AdminService) => {
+  const handleAssignEmployee = async (service: AdminService) => {
     setSelectedService(service);
     setShowAssignModal(true);
+    setErrorMessage(null);
+    
+    // Fetch eligible employees for this specific appointment
+    try {
+      setIsFetchingEmployees(true);
+      setEmployees([]); // Clear previous employees
+      
+      const eligibleEmployees = await getPossibleEmployeesForAppointment(service.id);
+      console.log(`Fetched ${eligibleEmployees.length} eligible employees for appointment ${service.id}`);
+      
+      setEmployees(eligibleEmployees);
+    } catch (error) {
+      console.error('Error fetching eligible employees:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Failed to fetch eligible employees';
+      setErrorMessage(errorMsg);
+      toast.error(errorMsg, {
+        duration: 5000,
+        icon: <XCircle className="w-5 h-5" />,
+      });
+    } finally {
+      setIsFetchingEmployees(false);
+    }
   };
 
   const assignEmployeeToService = async (employee: Employee) => {
@@ -237,7 +257,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Total Appointments */}
           <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
             <div className="flex items-center justify-between">
@@ -274,19 +294,6 @@ const AdminDashboard = () => {
                 </p>
               </div>
               <CircleDashed className="w-12 h-12 text-green-500" />
-            </div>
-          </div>
-
-          {/* Available Employees */}
-          <div className="bg-zinc-900 rounded-lg shadow-md p-6 border border-zinc-800">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Employees</p>
-                <p className="text-3xl font-bold text-purple-500 mt-1">
-                  {employees.length}
-                </p>
-              </div>
-              <User className="w-12 h-12 text-purple-500" />
             </div>
           </div>
         </div>
@@ -516,6 +523,8 @@ const AdminDashboard = () => {
                   setShowAssignModal(false);
                   setSelectedService(null);
                   setSearchEmployee('');
+                  setEmployees([]); // Clear employees when closing
+                  setErrorMessage(null);
                 }}
                 className="text-white hover:bg-zinc-700 p-2 rounded-lg transition"
               >
@@ -539,7 +548,16 @@ const AdminDashboard = () => {
 
             {/* Employee List or Loader */}
             <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto admin-scrollbar pr-2">
-              {isAssigning ? (
+              {isFetchingEmployees ? (
+                // Show loader when fetching eligible employees
+                <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                  <Loader className="w-12 h-12 text-orange-500 animate-spin" />
+                  <div className="text-center">
+                    <p className="text-white font-semibold text-lg">Finding Eligible Employees...</p>
+                    <p className="text-gray-400 text-sm mt-2">Checking for schedule conflicts</p>
+                  </div>
+                </div>
+              ) : isAssigning ? (
                 // Show loader when assigning
                 <div className="flex flex-col items-center justify-center py-16 space-y-4">
                   <Loader className="w-12 h-12 text-orange-500 animate-spin" />
@@ -548,8 +566,19 @@ const AdminDashboard = () => {
                     <p className="text-gray-400 text-sm mt-2">This may take a few seconds</p>
                   </div>
                 </div>
+              ) : filteredEmployees.length === 0 ? (
+                // No eligible employees found
+                <div className="text-center py-8">
+                  <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+                  <p className="text-white font-semibold text-lg mb-2">No Eligible Employees Available</p>
+                  <p className="text-gray-400 text-sm">
+                    {employees.length === 0 
+                      ? 'All employees have conflicting appointments at this time.'
+                      : 'No employees match your search criteria.'}
+                  </p>
+                </div>
               ) : (
-                // Show employee list when not assigning
+                // Show employee list when not fetching/assigning
                 <>
                   {filteredEmployees.map(employee => (
                     <div
@@ -576,12 +605,6 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
-
-                  {filteredEmployees.length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-gray-400">No employees found</p>
-                    </div>
-                  )}
                 </>
               )}
             </div>
