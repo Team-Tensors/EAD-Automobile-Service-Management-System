@@ -1,5 +1,3 @@
-// src/pages/EmployeeDashboard.tsx
-
 import { useState, useEffect, useCallback } from "react";
 import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
 import AppointmentList from "@/components/EmployeeDashboard/AppointmentList";
@@ -10,39 +8,17 @@ import TimeLogList from "@/components/EmployeeDashboard/TimeLogList";
 import { useAuth } from "../hooks/useAuth";
 import Footer from "@/components/Footer/Footer";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
-const API_BASE_URL = `${
-  import.meta.env.VITE_API_URL || "http://localhost:4000/api"
-}/employee`;
+import DashboardHeader from "@/components/DashboardHeader";
+import employeeService, {
+  type EmployeeAppointmentDTO,
+  type TimeLogDTO,
+  type EmployeeCenterDTO,
+} from "@/services/employeeService";
 
 // ------------------ Types ------------------
-interface Appointment {
-  id: string;
-  userId: number;
-  userFullName: string;
-  phoneNumber: string;
-  vehicleId: string;
-  brand: string;
-  model: string;
-  color: string;
-  lastServiceDate: string | null;
-  licensePlate: string;
-  appointmentType: string;
-  serviceOrModificationId: string; // UUID as string
-  serviceOrModificationName: string;
-  serviceOrModificationDescription: string;
-  estimatedTimeMinutes: number;
-  appointmentDate: string;
-  status: string;
-  description: string;
-}
-
-interface TimeLog {
-  id: number;
-  startTime: string;
-  endTime: string;
-  hoursLogged: number;
-  notes: string;
-}
+// Using types from employeeService
+type Appointment = EmployeeAppointmentDTO;
+type TimeLog = TimeLogDTO;
 
 interface TimeLogForm {
   date: string;
@@ -60,7 +36,7 @@ interface TimeLogErrors {
 
 // ------------------ Component ------------------
 const EmployeeDashboard = () => {
-  const { user, token } = useAuth(); // <-- get token from context
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -70,6 +46,7 @@ const EmployeeDashboard = () => {
   const [showTimeLog, setShowTimeLog] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [employeeDetails, setEmployeeDetails] = useState<EmployeeCenterDTO | null>(null);
 
   const EMPLOYEE_ID = user?.id || 9;
 
@@ -95,73 +72,72 @@ const EmployeeDashboard = () => {
     setLoading(true);
     setError(null);
 
-    let backendStatus: string | null = null;
-    if (statusFilter === "NOT STARTED") backendStatus = "CONFIRMED";
-    else if (statusFilter === "IN PROGRESS") backendStatus = "IN_PROGRESS";
-    else if (statusFilter === "COMPLETED") backendStatus = "COMPLETED";
-
-    let url = `${API_BASE_URL}/appointments/${EMPLOYEE_ID}`;
-    if (backendStatus) url += `?status=${backendStatus}`;
-
     try {
-      const response = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // <-- use dynamic token
-        },
-      });
+      // Fetch all appointments (new method doesn't take parameters)
+      const data = await employeeService.getEmployeeAppointments();
 
-      if (!response.ok) throw new Error("Failed to fetch appointments");
-      const data = await response.json();
+      // Filter appointments based on status filter
+      let filteredData = data;
+      if (statusFilter === "CONFIRMED") {
+        filteredData = data.filter((apt) => apt.status === "CONFIRMED");
+      } else if (statusFilter === "IN PROGRESS") {
+        filteredData = data.filter((apt) => apt.status === "IN_PROGRESS");
+      } else if (statusFilter === "COMPLETED") {
+        filteredData = data.filter((apt) => apt.status === "COMPLETED");
+      }
+      // If statusFilter is "ALL", show all appointments
 
-      // Ensure data is always an array
-      const appointmentsArray = Array.isArray(data) ? data : [];
-      setAppointments(appointmentsArray);
+      setAppointments(filteredData);
 
+      // Update selected appointment if it still exists
       setSelectedAppointment((prev) => {
         if (prev) {
-          const stillExists = appointmentsArray.find(
-            (apt: Appointment) => apt.id === prev.id
-          );
+          const stillExists = filteredData.find((apt) => apt.id === prev.id);
           if (stillExists) return stillExists;
         }
-        return appointmentsArray.length > 0 ? appointmentsArray[0] : null;
+        return filteredData.length > 0 ? filteredData[0] : null;
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
-  }, [EMPLOYEE_ID, statusFilter, token]);
+  }, [EMPLOYEE_ID, statusFilter]);
+
+  // ------------------ Fetch Employee Details ------------------
+  const fetchEmployeeDetails = useCallback(async () => {
+    try {
+      const details = await employeeService.getEmployeeDetails();
+      setEmployeeDetails(details);
+    } catch (err) {
+      console.error("Error fetching employee details:", err);
+    }
+  }, []);
 
   // ------------------ Fetch Time Logs ------------------
   const fetchTimeLogs = useCallback(
     async (appointmentId: string) => {
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/appointments/${appointmentId}/employees/${EMPLOYEE_ID}/timelogs`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // <-- use dynamic token
-            },
-          }
+        const data = await employeeService.getAppointmentTimeLogs(
+          appointmentId,
+          EMPLOYEE_ID
         );
-
-        if (!response.ok) throw new Error("Failed to fetch time logs");
-        const data = await response.json();
         setTimeLogs(data);
       } catch (err) {
         console.error("Error fetching time logs:", err);
         setTimeLogs([]);
       }
     },
-    [EMPLOYEE_ID, token]
+    [EMPLOYEE_ID]
   );
 
   useEffect(() => {
     fetchAppointments();
   }, [fetchAppointments]);
+
+  useEffect(() => {
+    fetchEmployeeDetails();
+  }, [fetchEmployeeDetails]);
 
   useEffect(() => {
     if (selectedAppointment) {
@@ -197,15 +173,10 @@ const EmployeeDashboard = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/appointments/${selectedAppointment.id}/status?status=${newStatus}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` }, // <-- use dynamic token
-        }
+      await employeeService.updateAppointmentStatus(
+        selectedAppointment.id,
+        newStatus
       );
-
-      if (!response.ok) throw new Error("Failed to update status");
       await fetchAppointments();
       setShowStatusUpdate(false);
       setNewStatus("");
@@ -260,20 +231,10 @@ const EmployeeDashboard = () => {
         notes: timeLogForm.description,
       };
 
-      const response = await fetch(
-        `${API_BASE_URL}/appointments/${selectedAppointment.id}/timelog`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // <-- use dynamic token
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to log time");
+      await employeeService.createTimeLog(selectedAppointment.id, payload);
       await fetchTimeLogs(selectedAppointment.id);
+      
+      // Reset form
       setShowTimeLog(false);
       setTimeLogForm({
         date: new Date().toISOString().split("T")[0],
@@ -318,7 +279,7 @@ const EmployeeDashboard = () => {
   };
 
   const getDisplayStatus = (status: string): string =>
-    status === "CONFIRMED" ? "NOT STARTED" : status.replace("_", " ");
+    status.replace("_", " ");
 
   const formatDateTime = (dateTime: string): string =>
     new Date(dateTime).toLocaleString("en-GB", {
@@ -338,17 +299,12 @@ const EmployeeDashboard = () => {
 
   // ------------------ Render ------------------
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col pt-12">
       <AuthenticatedNavbar />
-      <div className="bg-linear-to-r from-black to-zinc-950 border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-0 pt-26 pb-12">
-          <h1 className="text-3xl font-bold text-white">Employee Dashboard</h1>
-          <p className="text-gray-400 mt-2">
-            Welcome back,{" "}
-            {user?.fullName || `${user?.firstName} ${user?.lastName}`}!
-          </p>
-        </div>
-      </div>
+      <DashboardHeader
+        showServiceCenter={true}
+        serviceCenter={employeeDetails?.serviceCenter}
+      />
       <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-12 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Assigned Services */}
@@ -366,7 +322,6 @@ const EmployeeDashboard = () => {
               getStatusIcon={getStatusIcon}
               getDisplayStatus={getDisplayStatus}
               formatDate={formatDate}
-              formatDateTime={formatDateTime}
             />
           </div>
           {/* Right Panel - Job Detail */}

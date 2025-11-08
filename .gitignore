@@ -120,8 +120,6 @@ application-dev.properties
 # Configuration Files with Sensitive Data
 config/database.yml
 config/secrets.yml
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -158,7 +156,6 @@ lerna-debug.log*
 .node_repl_history
 *.tgz
 .yarn-integrity
-.env
 .cache/
 .parcel-cache/
 
@@ -259,3 +256,4 @@ vehicle-images/
 backup-files/
 
 # End of GitIgnore File
+config.bat

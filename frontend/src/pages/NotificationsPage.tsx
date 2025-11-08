@@ -4,6 +4,7 @@ import notificationService from "@/services/NotificationService";
 import NotificationItem from "@/components/Notification/NotificationItem";
 import type { Notification } from "../types/notification.types";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/context/ThemeContext";
 import AuthenticatedNavbar from "@/components/Navbar/AuthenticatedNavbar";
 import Footer from "@/components/Footer/Footer";
 
@@ -13,6 +14,7 @@ const NotificationsPage: React.FC = () => {
   const [filter, setFilter] = useState<"all" | "unread">("all");
 
   const { user } = useAuth();
+  const { theme } = useTheme();
   const userId = user?.id;
 
   useEffect(() => {
@@ -73,30 +75,46 @@ const NotificationsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${
+        theme === "light" ? "bg-gray-50" : "bg-black"
+      }`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Loading notifications...</p>
+          <p className={`mt-4 ${theme === "light" ? "text-gray-600" : "text-gray-400"}`}>
+            Loading notifications...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col pt-12">
+    <div className={`min-h-screen flex flex-col ${
+      theme === "light" ? "bg-gray-50" : "bg-black"
+    }`}>
       <AuthenticatedNavbar />
 
       {/* Header Section */}
-      <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border-b border-zinc-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className={`border-b ${
+        theme === "light" 
+          ? "bg-gradient-to-r from-gray-100 to-gray-50 border-gray-200" 
+          : "bg-linear-to-r from-zinc-900 to-zinc-800 border-zinc-700"
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-6 pt-28">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-500/10 rounded-lg">
                 <Bell className="w-6 h-6 text-orange-500" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Notifications</h1>
-                <p className="text-gray-400 text-sm mt-0.5">
+                <h1 className={`text-2xl font-bold ${
+                  theme === "light" ? "text-gray-900" : "text-white"
+                }`}>
+                  Notifications
+                </h1>
+                <p className={`text-sm mt-0.5 ${
+                  theme === "light" ? "text-gray-600" : "text-gray-400"
+                }`}>
                   {unreadCount} unread notification
                   {unreadCount !== 1 ? "s" : ""}
                 </p>
@@ -107,16 +125,22 @@ const NotificationsPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={`flex-1 ${theme === "light" ? "bg-gray-50" : "bg-black"}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-8">
           <div className="flex items-center justify-between mb-6">
             {/* Filter Tabs */}
-            <div className="inline-flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+            <div className={`inline-flex rounded-lg p-1 border ${
+              theme === "light" 
+                ? "bg-white border-gray-200" 
+                : "bg-zinc-900 border-zinc-800"
+            }`}>
               <button
                 onClick={() => setFilter("all")}
                 className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${
                   filter === "all"
                     ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                    : theme === "light"
+                    ? "text-gray-600 hover:text-gray-900"
                     : "text-gray-400 hover:text-gray-300"
                 }`}
               >
@@ -130,6 +154,8 @@ const NotificationsPage: React.FC = () => {
                 className={`px-5 py-2 rounded-md text-sm font-medium transition-all ${
                   filter === "unread"
                     ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                    : theme === "light"
+                    ? "text-gray-600 hover:text-gray-900"
                     : "text-gray-400 hover:text-gray-300"
                 }`}
               >
@@ -162,21 +188,37 @@ const NotificationsPage: React.FC = () => {
           </div>
           {/* Notifications List */}
           {filteredNotifications.length === 0 ? (
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-16 text-center">
-              <div className="inline-flex p-4 bg-zinc-800/50 rounded-full mb-4">
-                <Bell className="w-12 h-12 text-gray-600" />
+            <div className={`border rounded-xl p-16 text-center ${
+              theme === "light" 
+                ? "bg-white border-gray-200 shadow-sm" 
+                : "bg-zinc-900/50 border-zinc-800"
+            }`}>
+              <div className={`inline-flex p-4 rounded-full mb-4 ${
+                theme === "light" ? "bg-gray-100" : "bg-zinc-800/50"
+              }`}>
+                <Bell className={`w-12 h-12 ${
+                  theme === "light" ? "text-gray-400" : "text-gray-600"
+                }`} />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className={`text-xl font-semibold mb-2 ${
+                theme === "light" ? "text-gray-900" : "text-white"
+              }`}>
                 No Notifications
               </h3>
-              <p className="text-gray-400">You're all caught up!</p>
+              <p className={theme === "light" ? "text-gray-600" : "text-gray-400"}>
+                You're all caught up!
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
               {filteredNotifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-all"
+                  className={`border rounded-lg transition-all ${
+                    theme === "light" 
+                      ? "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm" 
+                      : "bg-zinc-900/50 border-zinc-800 hover:border-zinc-700"
+                  }`}
                 >
                   <NotificationItem
                     notification={notification}

@@ -1,22 +1,22 @@
 const Features = () => {
   const features = [
     {
-      label: "CYLINDER CONFIGURATION",
-      value: "V8",
-      subtext: "Cylinder Configuration: V8",
-      description: "Welcome to DriveCare, your trusted partner in car care and services.",
+      label: "EXPERT TECHNICIANS",
+      value: "50+",
+      subtext: "Certified Professionals",
+      description: "Our team of highly skilled and certified technicians is dedicated to providing top-quality service for all your vehicle needs.",
     },
     {
-      label: "FUEL EFFICIENCY",
-      value: "30",
-      subtext: "Fuel Efficiency: 30 mpg",
-      description: "Welcome to DriveCare, your trusted partner in car care and services.",
+      label: "SERVICE CENTERS",
+      value: "15+",
+      subtext: "Locations Nationwide",
+      description: "Conveniently located service centers across the country, ensuring you're never far from expert automotive care.",
     },
     {
-      label: "MAX REVOLUTIONS",
-      value: "7K",
-      subtext: "Max RPM: 7,000",
-      description: "Welcome to DriveCare, your trusted partner in car care and services.",
+      label: "CUSTOMER SATISFACTION",
+      value: "98%",
+      subtext: "Happy Customers",
+      description: "We pride ourselves on delivering exceptional service quality, with nearly all our customers rating their experience as excellent.",
     },
   ];
 

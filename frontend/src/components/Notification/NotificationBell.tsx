@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import NotificationPanel from "@/components/Notification/NotificationPanel";
 import notificationService from "../../services/NotificationService";
 import type { Notification } from "../../types/notification.types";
@@ -9,6 +10,7 @@ interface NotificationBellProps {
 }
 
 const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) => {
+  const { theme } = useTheme();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
@@ -115,7 +117,11 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) => {
     <div className="relative" ref={bellRef}>
       <button
         onClick={handleTogglePanel}
-        className="relative p-1.5 sm:p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+        className={`relative p-1.5 sm:p-2 rounded-full transition-colors ${
+          theme === "light"
+            ? "text-gray-600 hover:bg-gray-100"
+            : "text-gray-400 hover:bg-zinc-800"
+        }`}
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5 sm:w-6 sm:h-6" />

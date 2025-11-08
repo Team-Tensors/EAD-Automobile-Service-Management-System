@@ -12,10 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AppointmentDTO {
     private UUID id;
-    private UUID userId;
     private String userFullName;
-    private String phoneNumber;
-    private UUID vehicleId;
     private String brand;
     private String model;
     private String color;

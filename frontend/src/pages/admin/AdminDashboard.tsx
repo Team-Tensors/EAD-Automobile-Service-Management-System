@@ -13,13 +13,12 @@ import {
   XCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../hooks/useAuth';
 import type { AdminService, Employee } from '@/types/admin';
 import { getUpcomingAppointments, getOngoingAppointments, getUnassignedAppointments, getAllEmployees, assignEmployeeToAppointment } from '../../services/adminService';
 import { UnassignedSectionSkeleton, AppointmentListSkeleton } from '../../components/AdminDashboard/SkeletonLoaders';
+import AdminHeader from '../../components/AdminDashboard/AdminHeader';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
   const [upcomingAppointments, setUpcomingAppointments] = useState<AdminService[]>([]);
   const [ongoingAppointments, setOngoingAppointments] = useState<AdminService[]>([]);
   const [unassignedAppointments, setUnassignedAppointments] = useState<AdminService[]>([]);
@@ -164,21 +163,41 @@ const AdminDashboard = () => {
       .admin-scrollbar::-webkit-scrollbar {
         width: 8px;
       }
-      .admin-scrollbar::-webkit-scrollbar-track {
+      
+      /* Dark theme scrollbar */
+      .dark .admin-scrollbar::-webkit-scrollbar-track {
         background: #18181b;
         border-radius: 4px;
       }
-      .admin-scrollbar::-webkit-scrollbar-thumb {
+      .dark .admin-scrollbar::-webkit-scrollbar-thumb {
         background: #3f3f46;
         border-radius: 4px;
         transition: background 0.2s;
       }
-      .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+      .dark .admin-scrollbar::-webkit-scrollbar-thumb:hover {
         background: #f97316;
       }
-      .admin-scrollbar {
+      .dark .admin-scrollbar {
         scrollbar-width: thin;
         scrollbar-color: #3f3f46 #18181b;
+      }
+      
+      /* Light theme scrollbar */
+      .light .admin-scrollbar::-webkit-scrollbar-track {
+        background: #f3f4f6;
+        border-radius: 4px;
+      }
+      .light .admin-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .light .admin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #f97316;
+      }
+      .light .admin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db #f3f4f6;
       }
     `;
     
@@ -197,22 +216,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-black flex flex-col">
       {/* Header */}
-      <header className="bg-linear-to-r from-black to-zinc-950 text-white shadow-lg border-b border-zinc-700 pt-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-0 pt-26 pb-12">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="text-gray-400 mt-2">
-                Welcome back, {user?.firstName} {user?.lastName}!
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <span className="font-semibold text-white">{new Date().toLocaleDateString()}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader title="Dashboard" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto sm:px-6 md:px-8 lg:px-0 py-8 w-full">
@@ -471,7 +475,7 @@ const AdminDashboard = () => {
                       <span className="text-xs text-gray-400">Progress</span>
                       <span className="text-xs font-semibold text-white">{service.progress}%</span>
                     </div>
-                    <div className="w-full bg-zinc-700 rounded-full h-2">
+                    <div className="w-full bg-zinc-900 rounded-full h-2">
                       <div 
                         className="bg-orange-500 h-2 rounded-full transition-all"
                         style={{ width: `${service.progress}%` }}

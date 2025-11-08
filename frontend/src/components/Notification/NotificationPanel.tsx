@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { X, CheckCheck, Trash2, Bell, Check } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import NotificationItem from "@/components/Notification/NotificationItem";
 import type { Notification } from "../../types/notification.types";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
   onMarkAllAsRead,
   onClearAll,
 }) => {
+  const { theme } = useTheme();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [isClosing, setIsClosing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -100,20 +102,24 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
     <>
       {/* Backdrop */}
       <div 
-        className={`fixed inset-0 bg-black/20 z-40 transition-opacity duration-200 ${
-          isClosing ? 'opacity-0' : 'opacity-100'
-        }`}
+        className={`fixed inset-0 z-40 transition-opacity duration-200 ${
+          theme === "light" ? "bg-black/10" : "bg-black/20"
+        } ${isClosing ? 'opacity-0' : 'opacity-100'}`}
         onClick={handleClose}
       />
 
       {/* Panel */}
       <div
         ref={panelRef}
-        className={`absolute right-0 mt-2 w-96 bg-linear-to-b from-zinc-900 to-zinc-950 border border-zinc-800/50 rounded-2xl shadow-2xl z-50 max-h-[600px] flex flex-col overflow-hidden transition-all duration-200 ${
-          isClosing ? 'opacity-0 translate-y-2 scale-95' : 'opacity-100 translate-y-0 scale-100'
-        }`}
+        className={`absolute right-0 mt-2 w-96 border rounded-2xl shadow-2xl z-50 max-h-[600px] flex flex-col overflow-hidden transition-all duration-200 ${
+          theme === "light"
+            ? "bg-gradient-to-b from-white to-gray-50 border-gray-200"
+            : "bg-linear-to-b from-zinc-900 to-zinc-950 border-zinc-800/50"
+        } ${isClosing ? 'opacity-0 translate-y-2 scale-95' : 'opacity-100 translate-y-0 scale-100'}`}
         style={{
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+          boxShadow: theme === "light" 
+            ? '0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+            : '0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)'
         }}
       >
         {/* Success Toast */}
@@ -125,17 +131,29 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
         )}
 
         {/* Header */}
-        <div className="p-5 border-b border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm">
+        <div className={`p-5 border-b backdrop-blur-sm ${
+          theme === "light"
+            ? "border-gray-200 bg-gray-50/50"
+            : "border-zinc-800/50 bg-zinc-900/50"
+        }`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-orange-500/10 rounded-lg">
                 <Bell className="w-5 h-5 text-orange-500" />
               </div>
-              <h3 className="text-lg font-bold text-white">Notifications</h3>
+              <h3 className={`text-lg font-bold ${
+                theme === "light" ? "text-gray-900" : "text-white"
+              }`}>
+                Notifications
+              </h3>
             </div>
             <button
               onClick={handleClose}
-              className="text-gray-400 hover:text-white p-2 hover:bg-zinc-800/50 rounded-lg transition-all duration-200 hover:scale-110"
+              className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
+                theme === "light"
+                  ? "text-gray-600 hover:text-gray-900 hover:bg-gray-200"
+                  : "text-gray-400 hover:text-white hover:bg-zinc-800/50"
+              }`}
               aria-label="Close"
             >
               <X className="w-5 h-5" />
@@ -144,12 +162,16 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
           {/* Filter & Actions */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-2 bg-zinc-800/30 p-1 rounded-lg">
+            <div className={`flex gap-2 p-1 rounded-lg ${
+              theme === "light" ? "bg-gray-200/50" : "bg-zinc-800/30"
+            }`}>
               <button
                 onClick={() => setFilter("all")}
                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                   filter === "all"
                     ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                    : theme === "light"
+                    ? "text-gray-600 hover:text-gray-900 hover:bg-white"
                     : "text-gray-400 hover:text-white hover:bg-zinc-800/50"
                 }`}
               >
@@ -163,6 +185,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
                 className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
                   filter === "unread"
                     ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                    : theme === "light"
+                    ? "text-gray-600 hover:text-gray-900 hover:bg-white"
                     : "text-gray-400 hover:text-white hover:bg-zinc-800/50"
                 }`}
               >
@@ -201,23 +225,35 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
         </div>
 
         {/* Notifications List */}
-        <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+        <div className={`overflow-y-auto flex-1 scrollbar-thin scrollbar-track-transparent ${
+          theme === "light" ? "scrollbar-thumb-gray-300" : "scrollbar-thumb-zinc-700"
+        }`}>
           {filteredNotifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-6">
-              <div className="p-4 bg-zinc-800/30 rounded-full mb-4">
-                <Bell className="w-12 h-12 text-zinc-600" />
+              <div className={`p-4 rounded-full mb-4 ${
+                theme === "light" ? "bg-gray-100" : "bg-zinc-800/30"
+              }`}>
+                <Bell className={`w-12 h-12 ${
+                  theme === "light" ? "text-gray-400" : "text-zinc-600"
+                }`} />
               </div>
-              <p className="text-lg font-semibold text-gray-300 mb-1">
+              <p className={`text-lg font-semibold mb-1 ${
+                theme === "light" ? "text-gray-900" : "text-gray-300"
+              }`}>
                 {filter === "unread" ? "All caught up!" : "No notifications yet"}
               </p>
-              <p className="text-sm text-gray-500 text-center">
+              <p className={`text-sm text-center ${
+                theme === "light" ? "text-gray-600" : "text-gray-500"
+              }`}>
                 {filter === "unread" 
                   ? "You've read all your notifications" 
                   : "We'll notify you when something arrives"}
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-800/50">
+            <div className={`divide-y ${
+              theme === "light" ? "divide-gray-200" : "divide-zinc-800/50"
+            }`}>
               {filteredNotifications.map((notification, index) => (
                 <div
                   key={notification.id}
@@ -236,7 +272,11 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
         {/* Footer */}
         {filteredNotifications.length > 0 && (
-          <div className="p-3 border-t border-zinc-800/50 bg-zinc-900/50 backdrop-blur-sm">
+          <div className={`p-3 border-t backdrop-blur-sm ${
+            theme === "light"
+              ? "border-gray-200 bg-gray-50/50"
+              : "border-zinc-800/50 bg-zinc-900/50"
+          }`}>
             <button
               onClick={() => {
                 navigate("/notifications");

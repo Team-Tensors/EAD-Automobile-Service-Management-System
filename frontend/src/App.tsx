@@ -19,7 +19,8 @@ import MyAppointmentsPage from "./pages/MyAppointmentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import EmployeeInventory from "./pages/EmployeeInventory";
 import ShiftSchedulingPage from "./pages/ShiftSchedulingPage";
-import ChatPage from '@/pages/ChatPage';
+import MySchedulePage from "./pages/MySchedulePage";
+import ChatPage from "@/pages/ChatPage";
 
 import ServicesPage from "./pages/ServicesPage";
 
@@ -176,10 +177,7 @@ function App() {
       />
 
       {/* Customer Services Route */}
-      <Route
-        path="/services"
-        element={<ServicesPage />}
-      />
+      <Route path="/services" element={<ServicesPage />} />
 
       {/* Employee Inventory Route */}
       <Route
@@ -197,6 +195,16 @@ function App() {
         element={
           <ProtectedRoute requiredRole={UserRole.EMPLOYEE}>
             <ShiftSchedulingPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Employee My Schedule Route */}
+      <Route
+        path="/my-schedule"
+        element={
+          <ProtectedRoute requiredRole={UserRole.EMPLOYEE}>
+            <MySchedulePage />
           </ProtectedRoute>
         }
       />

@@ -1,0 +1,65 @@
+### Admin endpoints for Services and Modifications
+
+### Get all services and modifications (Admin only)
+GET http://localhost:8080/services-modifications/admin/all
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+###
+
+### Get single service or modification by ID (Admin only)
+GET http://localhost:8080/services-modifications/admin/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+###
+
+### Create new service (Admin only)
+POST http://localhost:8080/services-modifications/admin
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+{
+  "type": "SERVICE",
+  "name": "Engine Diagnostics",
+  "description": "Comprehensive engine diagnostic check with computer scan",
+  "estimatedCost": 150.00,
+  "estimatedTimeMinutes": 60
+}
+
+###
+
+### Create new modification (Admin only)
+POST http://localhost:8080/services-modifications/admin
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+{
+  "type": "MODIFICATION",
+  "name": "Performance Exhaust System",
+  "description": "Installation of high-performance exhaust system",
+  "estimatedCost": 800.00,
+  "estimatedTimeMinutes": 180
+}
+
+###
+
+### Update existing service or modification (Admin only)
+PUT http://localhost:8080/services-modifications/admin/550e8400-e29b-41d4-a716-446655440000
+Content-Type: application/json
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+{
+  "type": "SERVICE",
+  "name": "Engine Diagnostics",
+  "description": "Updated comprehensive engine diagnostic check with advanced computer scan",
+  "estimatedCost": 175.00,
+  "estimatedTimeMinutes": 75
+}
+
+###
+
+### Delete service or modification (Admin only)
+DELETE http://localhost:8080/services-modifications/admin/550e8400-e29b-41d4-a716-446655440000
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+###
+

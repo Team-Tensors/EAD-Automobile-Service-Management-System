@@ -12,7 +12,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#1d1c1c] dark:bg-[#1d1c1c] light:bg-gray-100 text-white dark:text-white light:text-gray-900 py-8 px-6 md:px-8">
+    <footer className="bg-neutral-800 dark:bg-neutral-800 light:bg-gray-100 text-white dark:text-white light:text-gray-900 py-8 px-6 md:px-8">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto">
         {/* Bottom Section */}

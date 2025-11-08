@@ -18,4 +18,66 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
     // void deleteByExpiryDateBefore(Instant date);
+
+    // ===================================================================
+    // ANALYTICS QUERIES
+    // ===================================================================
+
+    /**
+     * Get customer insights with appointment statistics
+     */
+    @Query("SELECT u.id, u.fullName, u.email, u.phoneNumber, " +
+            "COUNT(a), " +
+            "COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'CANCELLED' THEN 1 END), " +
+            "MIN(a.appointmentDate), " +
+            "MAX(a.appointmentDate) " +
+            "FROM User u " +
+            "JOIN Appointment a ON a.user.id = u.id " +
+            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY u.id, u.fullName, u.email, u.phoneNumber " +
+            "ORDER BY COUNT(a) DESC")
+    List<Object[]> getCustomerInsights(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate
+    );
+
+    /**
+     * Get customer insights (all time)
+     */
+    @Query("SELECT u.id, u.fullName, u.email, u.phoneNumber, " +
+            "COUNT(a), " +
+            "COUNT(CASE WHEN a.status = 'COMPLETED' THEN 1 END), " +
+            "COUNT(CASE WHEN a.status = 'CANCELLED' THEN 1 END), " +
+            "MIN(a.appointmentDate), " +
+            "MAX(a.appointmentDate) " +
+            "FROM User u " +
+            "JOIN Appointment a ON a.user.id = u.id " +
+            "GROUP BY u.id, u.fullName, u.email, u.phoneNumber " +
+            "ORDER BY COUNT(a) DESC")
+    List<Object[]> getCustomerInsightsAllTime();
+
+    /**
+     * Count customers with multiple appointments (repeat customers)
+     */
+    @Query("SELECT COUNT(DISTINCT u.id) " +
+            "FROM User u " +
+            "JOIN Appointment a ON a.user.id = u.id " +
+            "WHERE a.appointmentDate BETWEEN :startDate AND :endDate " +
+            "GROUP BY u.id " +
+            "HAVING COUNT(a) > 1")
+    Long countRepeatCustomers(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate
+    );
+
+    /**
+     * Get vehicle count per customer
+     */
+    @Query("SELECT u.id, COUNT(v) " +
+            "FROM User u " +
+            "LEFT JOIN Vehicle v ON v.user.id = u.id " +
+            "WHERE u.id IN :userIds " +
+            "GROUP BY u.id")
+    List<Object[]> getVehicleCountByCustomers(@Param("userIds") List<UUID> userIds);
 }

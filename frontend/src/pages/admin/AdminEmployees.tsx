@@ -4,8 +4,9 @@ import type { Employee } from '@/types/admin';
 import type { ServiceCenter } from '@/types/serviceCenter';
 import { getAllEmployees, assignEmployeeToCenter } from '../../services/adminService';
 import { fetchServiceCenters } from '../../services/serviceCenterService';
+import AdminHeader from '../../components/AdminDashboard/AdminHeader';
+import { User } from 'lucide-react';
 import {
-  EmployeeHeader,
   EmployeeStatsCards,
   EmployeeFilters,
   EmployeeTable,
@@ -168,7 +169,16 @@ const AdminEmployees = () => {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      <EmployeeHeader totalEmployees={employees.length} />
+      <AdminHeader 
+        title="Employee Management" 
+        subtitle="Manage employees and assign them to service centers"
+        rightContent={
+          <div className="flex items-center gap-3 bg-zinc-800/50 px-4 py-2 rounded-lg border border-zinc-700">
+            <User className="w-5 h-5 text-gray-400" />
+            <span className="font-semibold text-white">Total: {employees.length}</span>
+          </div>
+        }
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto sm:px-6 md:px-8 lg:px-0 py-8 w-full">

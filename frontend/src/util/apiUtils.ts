@@ -143,25 +143,35 @@ api.interceptors.response.use(
               isRefreshing = false;
             }
           } else {
-            // No refresh token available - clear everything and redirect
+            // No refresh token available - clear everything
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             
-            if (!window.location.pathname.includes('/login')) {
+            // Only redirect to login if on a protected route, not on public pages
+            const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/services'];
+            const currentPath = window.location.pathname;
+            const isPublicPath = publicPaths.some(path => currentPath === path || currentPath.startsWith('/register'));
+            
+            if (!isPublicPath && !currentPath.includes('/login')) {
               window.location.href = '/login';
             }
           }
         } else {
           // Other 401 errors (missing token, etc.)
-          // Don't redirect if this is a login attempt
+          // Don't redirect if this is a login/register attempt
           if (!originalRequest.url?.includes('/auth/login') && 
               !originalRequest.url?.includes('/auth/register')) {
-            // Clear everything and redirect to login
+            // Clear everything
             localStorage.removeItem('token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
             
-            if (!window.location.pathname.includes('/login')) {
+            // Only redirect to login if on a protected route, not on public pages
+            const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/services'];
+            const currentPath = window.location.pathname;
+            const isPublicPath = publicPaths.some(path => currentPath === path || currentPath.startsWith('/register'));
+            
+            if (!isPublicPath && !currentPath.includes('/login')) {
               window.location.href = '/login';
             }
           }
