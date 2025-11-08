@@ -13,7 +13,7 @@
 
 *A comprehensive enterprise application for managing automotive service appointments, time logging, and customer interactions*
 
-[Features](#key-features) • [Tech Stack](#technology-stack) • [Getting Started](#getting-started) • [Documentation](#system-diagrams) • [License](#license)
+[Features](#key-features) • [Tech Stack](#technology-stack) • [Getting Started](#getting-started) • [API Docs](#api-documentation) • [Documentation](#system-diagrams) • [License](#license)
 
 </div>
 
@@ -242,20 +242,36 @@ CREATE DATABASE automobile_service_db;
 
 **Backend (.env file):**
 ```env
+# Database Configuration
 DB_URL=jdbc:postgresql://localhost:5432/automobile_service_db
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
+# Google OAuth2 Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
+# JWT Configuration
 JWT_SECRET=your_jwt_secret_key_at_least_256_bits
-JWT_EXPIRATION=86400000
-JWT_REFRESH_EXPIRATION=604800000
+JWT_EXPIRATION=86400000                # 24 hours in milliseconds
+JWT_REFRESH_EXPIRATION=604800000       # 7 days in milliseconds
 JWT_REFRESH_MAX_TOKENS=5
+
+# AI Chatbot (Groq API)
+GROQ_API_KEY=your_groq_api_key
+
+# Spring Profile (optional)
+# SPRING_PROFILES_ACTIVE=dev    # For development (default)
+# SPRING_PROFILES_ACTIVE=prod   # For production
 ```
+
+**Note:** 
+- Copy `backend/.env.example` to `backend/.env` and fill in your actual values
+- Never commit `.env` file to version control
+- Generate a strong JWT secret (minimum 256 bits / 32 characters)
 
 ### Running Tests
 
