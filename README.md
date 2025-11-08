@@ -51,26 +51,44 @@ This is an **Enterprise Application Development (EAD)** project that implements 
 ## Key Features
 
 ### Customer Portal
-- **User Registration & Authentication**: Secure login system with OAuth2 (Google) support
-- **Vehicle Management**: Add and manage multiple vehicles with details
-- **Appointment Booking**: Schedule service appointments online with real-time availability
-- **Service History**: View comprehensive past and current service records
-- **Real-time Status Tracking**: Monitor service progress with live updates
-- **Notifications**: Receive updates on service status
+- **User Registration & Authentication**: Secure login system with JWT and OAuth2 (Google) support
+- **Vehicle Management**: Add, edit, and manage multiple vehicles with comprehensive details
+- **Appointment Booking**: Schedule service appointments online with real-time slot availability checking
+- **Service History**: View detailed past and current service records with time logs
+- **Real-time Status Tracking**: Monitor service progress with live updates and notifications
+- **Notifications**: Real-time SSE-based notification system for service status updates
+- **Chat Support**: Real-time chat communication with service center staff via WebSocket
+- **AI Chatbot**: Intelligent chatbot assistant for common queries and support
+- **Profile Management**: Update personal information, view active sessions, and manage account security
+- **Service Centers**: Browse nearby service centers with location mapping
 
 ### Employee Dashboard
-- **Staff Dashboard**: Manage daily operations and appointments efficiently
-- **Service Time Logging**: Track actual time spent on services with precision
-- **Appointment Management**: View, update, and manage customer appointments
-- **Service Status Updates**: Real-time updates to customers on service progress
-- **Profile Management**: Manage employee profiles and preferences
+- **Staff Dashboard**: Comprehensive dashboard to manage daily operations and assigned appointments
+- **Service Time Logging**: Track actual time spent on services with precision time log entries
+- **Appointment Management**: View, update status, and manage customer appointments
+- **Service Status Updates**: Real-time status updates (PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED)
+- **Shift Scheduling**: Self-assign to appointments based on availability and workload
+- **Inventory Access**: View and manage inventory items required for services
+- **Chat System**: Real-time communication with customers for service-related queries
+- **Profile Management**: View assigned service center and personal details
 
 ### Administrative Functions
-- **User Management**: Manage customer and staff accounts
-- **Analytics & Reports**: View system analytics and performance metrics
-- **Service Catalog**: Maintain service types and configurations
-- **Inventory Management**: Track parts and supplies
-- **Notification Center**: Centralized notification management
+- **User Management**: Comprehensive user and employee account management
+- **Appointment Administration**: View and manage all appointments (upcoming, ongoing, unassigned)
+- **Employee Assignment**: Assign employees to appointments and service centers
+- **Analytics & Reports**: Advanced analytics dashboard with:
+  - Service distribution charts
+  - Revenue trend analysis
+  - Employee performance metrics
+  - Customer insights and statistics
+- **Service Catalog Management**: Full CRUD operations for services and modifications
+- **Inventory Management**: Complete inventory system with:
+  - Low stock alerts
+  - Category-based organization
+  - Restock and purchase operations
+  - Search and filtering capabilities
+- **Service Center Management**: Manage multiple service center locations
+- **Notification Center**: Centralized notification management for all users
 - **System Configuration**: Configure system settings and parameters
 
 ## System Architecture
@@ -78,30 +96,53 @@ This is an **Enterprise Application Development (EAD)** project that implements 
 ### Technology Stack
 
 #### Frontend
-- **Framework**: React 19.1.1 with TypeScript
+- **Framework**: React 19.1.1 with TypeScript 5.8.3
 - **Build Tool**: Vite 7.1.2
-- **Styling**: TailwindCSS 4.1.13
+- **Styling**: TailwindCSS 4.1.13 with custom animations
 - **Routing**: React Router DOM 7.9.3
-- **UI Components**: Radix UI, Lucide React
-- **Maps**: Leaflet & React-Leaflet
+- **UI Components**: Radix UI, Lucide React, Framer Motion
+- **Charts**: Recharts for analytics visualization
+- **Maps**: Leaflet & React-Leaflet for location services
 - **HTTP Client**: Axios 1.12.2
-- **Features**: Responsive design, real-time updates, intuitive UI
+- **Real-time Communication**: 
+  - WebSocket (SockJS + STOMP) for chat
+  - Server-Sent Events (SSE) for notifications
+- **Additional Libraries**:
+  - React Hot Toast for notifications
+  - jsPDF for PDF generation
+  - Vercel Analytics for performance monitoring
+- **Features**: Responsive design, real-time updates, intuitive UI, offline-ready architecture
 
 #### Backend
 - **Framework**: Spring Boot 3.5.5
 - **Language**: Java 21
-- **Database**: PostgreSQL
-- **ORM**: Spring Data JPA
+- **Database**: PostgreSQL (production), H2 (development/testing)
+- **ORM**: Spring Data JPA with Hibernate
 - **Security**: Spring Security with JWT authentication
-- **OAuth2**: Google OAuth2 integration
+- **OAuth2**: Google OAuth2 integration for social login
+- **Real-time Communication**:
+  - WebSocket support for chat functionality
+  - Server-Sent Events (SSE) for notifications
+- **Email**: Spring Boot Mail for password reset and notifications
+- **API Documentation**: Swagger/OpenAPI 3
 - **Architecture**: RESTful API, Layered Architecture (Controller → Service → Repository)
 - **Build Tool**: Maven
+- **Environment Configuration**: Spring Dotenv for .env file support
 
 #### Database
 - **Primary Database**: PostgreSQL
+- **Development Database**: H2 (in-memory for testing)
 - **Design**: Normalized relational database schema
-- **Key Entities**: User, Vehicle, Appointment, TimeLog, RefreshToken, PasswordResetToken
-- **Features**: Data integrity, ACID compliance, indexing for performance
+- **Key Entities**: 
+  - User, Role (Authentication & Authorization)
+  - Vehicle, Appointment, TimeLog (Core Service Management)
+  - ServiceOrModification, ServiceCenter (Service Catalog)
+  - RefreshToken, PasswordResetToken (Security)
+  - ChatRoom, ChatMessage (Communication)
+  - Notification (Real-time Updates)
+  - InventoryItem (Inventory Management)
+  - EmployeeCenter, ShiftSchedules (Workforce Management)
+- **Features**: Data integrity, ACID compliance, indexing for performance, foreign key constraints
 
 #### Security & Authentication
 - JWT-based authentication with refresh tokens
@@ -201,20 +242,36 @@ CREATE DATABASE automobile_service_db;
 
 **Backend (.env file):**
 ```env
+# Database Configuration
 DB_URL=jdbc:postgresql://localhost:5432/automobile_service_db
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
+# Google OAuth2 Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+# Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
 
+# JWT Configuration
 JWT_SECRET=your_jwt_secret_key_at_least_256_bits
-JWT_EXPIRATION=86400000
-JWT_REFRESH_EXPIRATION=604800000
+JWT_EXPIRATION=86400000                # 24 hours in milliseconds
+JWT_REFRESH_EXPIRATION=604800000       # 7 days in milliseconds
 JWT_REFRESH_MAX_TOKENS=5
+
+# AI Chatbot (Groq API)
+GROQ_API_KEY=your_groq_api_key
+
+# Spring Profile (optional)
+# SPRING_PROFILES_ACTIVE=dev    # For development (default)
+# SPRING_PROFILES_ACTIVE=prod   # For production
 ```
+
+**Note:** 
+- Copy `backend/.env.example` to `backend/.env` and fill in your actual values
+- Never commit `.env` file to version control
+- Generate a strong JWT secret (minimum 256 bits / 32 characters)
 
 ### Running Tests
 
@@ -237,57 +294,179 @@ EAD-Automobile-Service-Management-System/
 │   │   ├── main/
 │   │   │   ├── java/com/ead/backend/
 │   │   │   │   ├── controller/      # REST API controllers
+│   │   │   │   │   ├── AuthController.java
+│   │   │   │   │   ├── VehicleController.java
+│   │   │   │   │   ├── AppointmentBookingController.java
+│   │   │   │   │   ├── CustomerAppointmentController.java
+│   │   │   │   │   ├── AdminAppointmentController.java
+│   │   │   │   │   ├── EmployeeController.java
+│   │   │   │   │   ├── ServiceOrModificationController.java
+│   │   │   │   │   ├── ServiceCenterController.java
+│   │   │   │   │   ├── InventoryController.java
+│   │   │   │   │   ├── AnalyticsController.java
+│   │   │   │   │   ├── ChatController.java
+│   │   │   │   │   ├── ChatBotController.java
+│   │   │   │   │   ├── WebSocketChatController.java
+│   │   │   │   │   ├── NotificationController.java
+│   │   │   │   │   ├── ShiftScheduleController.java
+│   │   │   │   │   └── HealthController.java
 │   │   │   │   ├── service/         # Business logic layer
-│   │   │   │   ├── repository/      # Data access layer
+│   │   │   │   │   ├── AuthService.java
+│   │   │   │   │   ├── AppointmentService.java
+│   │   │   │   │   ├── CustomerAppointmentService.java
+│   │   │   │   │   ├── EmployeeService.java
+│   │   │   │   │   ├── AdminService.java
+│   │   │   │   │   ├── VehicleService.java
+│   │   │   │   │   ├── ServiceCenterService.java
+│   │   │   │   │   ├── InventoryService.java
+│   │   │   │   │   ├── AnalyticsService.java
+│   │   │   │   │   ├── ChatService.java
+│   │   │   │   │   ├── ChatbotService.java
+│   │   │   │   │   ├── NotificationService.java
+│   │   │   │   │   ├── ShiftScheduleService.java
+│   │   │   │   │   ├── EmailService.java
+│   │   │   │   │   ├── RefreshTokenService.java
+│   │   │   │   │   ├── PasswordResetService.java
+│   │   │   │   │   ├── JwtAuthorizationService.java
+│   │   │   │   │   └── CustomUserDetailsService.java
+│   │   │   │   ├── repository/      # Data access layer (JPA)
 │   │   │   │   ├── entity/          # JPA entities
+│   │   │   │   │   ├── User.java, Role.java
+│   │   │   │   │   ├── Vehicle.java
+│   │   │   │   │   ├── Appointment.java, TimeLog.java
+│   │   │   │   │   ├── ServiceOrModification.java
+│   │   │   │   │   ├── ServiceCenter.java
+│   │   │   │   │   ├── EmployeeCenter.java
+│   │   │   │   │   ├── ShiftSchedules.java
+│   │   │   │   │   ├── InventoryItem.java
+│   │   │   │   │   ├── ChatRoom.java, ChatMessage.java
+│   │   │   │   │   ├── Notification.java
+│   │   │   │   │   ├── RefreshToken.java
+│   │   │   │   │   └── PasswordResetToken.java
 │   │   │   │   ├── dto/             # Data transfer objects
 │   │   │   │   ├── config/          # Configuration classes
 │   │   │   │   ├── exception/       # Exception handlers
 │   │   │   │   ├── filter/          # Security filters
+│   │   │   │   ├── annotation/      # Custom annotations
 │   │   │   │   └── util/            # Utility classes
+│   │   │   └── resources/
+│   │   │       ├── application.properties
+│   │   │       └── ...
 │   │   └── test/                    # Unit and integration tests
 │   ├── pom.xml                      # Maven dependencies
+│   ├── .env.example                 # Environment variables template
 │   └── Dockerfile                   # Backend Docker configuration
 ├── frontend/                   # React frontend
 │   ├── src/
 │   │   ├── pages/                   # Page components
 │   │   │   ├── admin/               # Admin dashboard pages
-│   │   │   └── ...                  # Customer & Employee pages
+│   │   │   │   ├── AdminDashboard.tsx
+│   │   │   │   ├── AdminAnalytics.tsx
+│   │   │   │   ├── AdminInventory.tsx
+│   │   │   │   ├── AdminServiceTypes.tsx
+│   │   │   │   ├── AdminEmployees.tsx
+│   │   │   │   └── AdminNotifications.tsx
+│   │   │   ├── CustomerDashboard.tsx
+│   │   │   ├── EmployeeDashboard.tsx
+│   │   │   ├── AppoinmentBookingPage.tsx
+│   │   │   ├── MyAppointmentsPage.tsx
+│   │   │   ├── MyVehiclesPage.tsx
+│   │   │   ├── MySchedulePage.tsx
+│   │   │   ├── ChatPage.tsx
+│   │   │   ├── ProfilePage.tsx
+│   │   │   ├── EmployeeInventory.tsx
+│   │   │   ├── ShiftSchedulingPage.tsx
+│   │   │   ├── NotificationsPage.tsx
+│   │   │   └── ...
 │   │   ├── components/              # Reusable UI components
+│   │   │   ├── Chatbot/             # AI chatbot components
+│   │   │   ├── Notification/        # Notification bell and SSE
+│   │   │   ├── HomePage/            # Landing page components
+│   │   │   └── ui/                  # Shadcn UI components
 │   │   ├── services/                # API service layer
+│   │   │   ├── authService.ts
+│   │   │   ├── appointmentService.ts
+│   │   │   ├── vehicleService.ts
+│   │   │   ├── inventoryService.ts
+│   │   │   ├── analyticsService.ts
+│   │   │   ├── chatService.ts
+│   │   │   ├── notificationService.ts
+│   │   │   └── ...
 │   │   ├── types/                   # TypeScript type definitions
-│   │   └── utils/                   # Utility functions
+│   │   ├── hooks/                   # Custom React hooks
+│   │   ├── utils/                   # Utility functions
+│   │   ├── App.tsx                  # Main app component
+│   │   └── main.tsx                 # Entry point
+│   ├── public/                      # Static assets
 │   ├── package.json                 # npm dependencies
+│   ├── vite.config.ts               # Vite configuration
+│   ├── tailwind.config.js           # Tailwind CSS config
+│   ├── tsconfig.json                # TypeScript config
 │   └── Dockerfile                   # Frontend Docker configuration
 ├── diagrams/                   # System design diagrams
+│   ├── use_case.png                 # Use case diagram
+│   └── er.png                       # Entity relationship diagram
 ├── documents/                  # Project documentation
 ├── docker-compose.yml          # Docker Compose configuration
+├── PERFORMANCE_ISSUES.md       # Performance analysis document
 └── README.md                   # This file
 ```
 
-## API Documentation
+## Recent Updates & Features
 
-The backend provides a RESTful API with the following main endpoints:
+### 🆕 Latest Additions
 
-### Authentication
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password` - Reset password with token
+#### Real-time Communication System
+- **WebSocket Chat**: Real-time chat between customers and service staff using SockJS and STOMP
+- **AI Chatbot**: Intelligent chatbot for answering common questions and providing support
+- **Server-Sent Events**: Live notification updates without polling
 
-### User Management
-- `GET /api/auth/profile` - Get user profile
-- `PUT /api/auth/profile` - Update user profile
+#### Advanced Analytics Dashboard
+- Service distribution visualization
+- Revenue trend analysis with charts
+- Employee performance metrics
+- Customer insights and statistics
+- Custom analytics with filtering capabilities
 
-### Employee Operations
-- `GET /api/employee/appointments` - Get appointments for employee
-- `POST /api/employee/time-logs` - Create time log entry
-- Additional employee-specific endpoints
+#### Inventory Management System
+- Complete CRUD operations for inventory items
+- Category-based organization
+- Low stock alerts and monitoring
+- Restock and purchase tracking
+- Search and filtering capabilities
 
-### Health Check
-- `GET /api/health` - Service health status
+#### Shift Scheduling & Workforce Management
+- Employee self-assignment to appointments
+- Workload balancing algorithms
+- Service center assignment management
+- Availability tracking
+
+#### Enhanced Security Features
+- Multi-device session management
+- Refresh token rotation
+- Active session monitoring
+- Device information tracking
+- Password reset via email with secure tokens
+
+### 🔧 Technical Improvements
+
+- **Performance Optimizations**: Identified and documented in `PERFORMANCE_ISSUES.md`
+- **Real-time Updates**: Replaced polling with WebSocket and SSE where appropriate
+- **Enhanced Validation**: Comprehensive input validation on both frontend and backend
+- **Error Handling**: Consistent error responses across all endpoints
+- **Database Optimizations**: Indexed queries and optimized relationships
+
+### 📱 User Experience Enhancements
+
+- Responsive design for all screen sizes
+- Real-time status updates without page refresh
+- Interactive charts and data visualization
+- Map integration for service center locations
+- PDF generation for reports
+- Toast notifications for user feedback
+- Loading states and skeleton screens
+
+---
 
 ## Contributing
 
@@ -351,10 +530,10 @@ SOFTWARE.**
 
 <div align="center">
 
-**Last Updated**: October 2025
+**Last Updated**: November 2025
 
-Made with love by Team Tensors
+Made with ❤️ by Team Tensors
 
-[Back to Top](#ead-automobile-service-management-system)
+[Back to Top](#drivecare-automobile-service-management-system)
 
 </div>
