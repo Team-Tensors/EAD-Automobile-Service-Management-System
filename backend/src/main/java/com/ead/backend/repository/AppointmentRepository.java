@@ -66,7 +66,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     // Count active appointments for a customer on a specific day (excluding cancelled)
     @Query("SELECT COUNT(a) FROM Appointment a " +
             "WHERE a.user.id = :userId " +
-            "AND DATE(a.appointmentDate) = DATE(:appointmentDate) " +
+            "AND CAST(a.appointmentDate AS date) = CAST(:appointmentDate AS date) " +
             "AND a.status != 'CANCELLED'")
     Long countCustomerAppointmentsForDay(
             @Param("userId") UUID userId,
@@ -90,7 +90,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     // Find all appointments for a service center on a specific date (for slot availability display)
     @Query("SELECT a FROM Appointment a WHERE a.serviceCenter.id = :serviceCenterId " +
-            "AND DATE(a.appointmentDate) = DATE(:date) " +
+            "AND CAST(a.appointmentDate AS date) = CAST(:date AS date) " +
             "AND a.status != 'CANCELLED'")
     List<Appointment> findByServiceCenterAndDate(
             @Param("serviceCenterId") UUID serviceCenterId,
