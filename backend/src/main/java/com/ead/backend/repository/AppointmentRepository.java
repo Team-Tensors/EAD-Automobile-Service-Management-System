@@ -45,6 +45,49 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     // Check if vehicle has any active appointments (non-cancelled)
     boolean existsByVehicleIdAndStatusNot(UUID vehicleId, String status);
 
+    // Check if vehicle has confirmed or in-progress appointments
+    @Query("SELECT COUNT(a) > 0 FROM Appointment a " +
+            "WHERE a.vehicle.id = :vehicleId " +
+            "AND (a.status = 'PENDING' OR a.status = 'IN_PROGRESS')")
+    boolean hasActiveAppointments(@Param("vehicleId") UUID vehicleId);
+
+    // Find pending appointments for a vehicle with a specific appointment type
+    @Query("SELECT a FROM Appointment a " +
+            "WHERE a.vehicle.id = :vehicleId " +
+            "AND a.appointmentType = :appointmentType " +
+            "AND a.status = 'PENDING' " +
+            "AND a.appointmentDate >= :currentDate")
+    List<Appointment> findPendingAppointmentsByVehicleAndType(
+            @Param("vehicleId") UUID vehicleId,
+            @Param("appointmentType") com.ead.backend.enums.AppointmentType appointmentType,
+            @Param("currentDate") LocalDateTime currentDate
+    );
+
+    // Count active appointments for a customer on a specific day (excluding cancelled)
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+            "WHERE a.user.id = :userId " +
+            "AND DATE(a.appointmentDate) = DATE(:appointmentDate) " +
+            "AND a.status != 'CANCELLED'")
+    Long countCustomerAppointmentsForDay(
+            @Param("userId") UUID userId,
+            @Param("appointmentDate") LocalDateTime appointmentDate
+    );
+
+    // Find overlapping appointments for a vehicle (to prevent cross-service conflicts)
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN a.serviceOrModification som " +
+            "WHERE a.vehicle.id = :vehicleId " +
+            "AND a.status NOT IN ('CANCELLED', 'COMPLETED') " +
+            "AND (" +
+            "  (a.appointmentDate < :endTime AND " +
+            "   FUNCTION('TIMESTAMPADD', MINUTE, som.estimatedTimeMinutes, a.appointmentDate) > :startTime)" +
+            ")")
+    List<Appointment> findOverlappingAppointments(
+            @Param("vehicleId") UUID vehicleId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
+    );
+
     // Find all appointments for a service center on a specific date (for slot availability display)
     @Query("SELECT a FROM Appointment a WHERE a.serviceCenter.id = :serviceCenterId " +
             "AND DATE(a.appointmentDate) = DATE(:date) " +

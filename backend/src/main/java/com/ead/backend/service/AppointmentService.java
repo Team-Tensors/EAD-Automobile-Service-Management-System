@@ -27,6 +27,9 @@ public class AppointmentService {
     @Autowired private EmailService emailService;
     @Autowired private NotificationService notificationService;
 
+    // Maximum appointments per day per customer (to prevent overbooking/spamming)
+    private static final int MAX_APPOINTMENTS_PER_DAY = 2;
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("hh:mm a");
 
@@ -145,6 +148,74 @@ public class AppointmentService {
         
         if (!existingAppointments.isEmpty()) {
             throw new RuntimeException("This vehicle already has an appointment scheduled for the selected date and time");
+        }
+
+        // Check for overlapping appointments (cross-service overlap prevention)
+        LocalDateTime appointmentStartTime = appointment.getAppointmentDate();
+        LocalDateTime appointmentEndTime = appointmentStartTime.plusMinutes(som.getEstimatedTimeMinutes());
+        
+        List<Appointment> overlappingAppointments = appointmentRepository
+                .findOverlappingAppointments(
+                        vehicle.getId(),
+                        appointmentStartTime,
+                        appointmentEndTime
+                );
+        
+        if (!overlappingAppointments.isEmpty()) {
+            Appointment conflicting = overlappingAppointments.get(0);
+            String conflictingService = conflicting.getServiceOrModification().getName();
+            LocalDateTime conflictStart = conflicting.getAppointmentDate();
+            LocalDateTime conflictEnd = conflictStart.plusMinutes(
+                    conflicting.getServiceOrModification().getEstimatedTimeMinutes()
+            );
+            
+            throw new RuntimeException(
+                    String.format("This vehicle has a conflicting appointment for '%s' from %s to %s. " +
+                            "Please choose a different time slot.",
+                            conflictingService,
+                            conflictStart.format(DateTimeFormatter.ofPattern("hh:mm a")),
+                            conflictEnd.format(DateTimeFormatter.ofPattern("hh:mm a")))
+            );
+        }
+
+        // Check for pending appointments of the same type at different centers
+        List<Appointment> pendingAppointments = appointmentRepository
+                .findPendingAppointmentsByVehicleAndType(
+                        vehicle.getId(),
+                        appointment.getAppointmentType(),
+                        LocalDateTime.now()
+                );
+        
+        // Filter to check if there's a pending appointment at a different service center
+        boolean hasPendingAtDifferentCenter = pendingAppointments.stream()
+                .anyMatch(existingAppt -> 
+                    !existingAppt.getServiceCenter().getId().equals(serviceCenter.getId())
+                );
+        
+        if (hasPendingAtDifferentCenter) {
+            String appointmentTypeText = appointment.getAppointmentType() == AppointmentType.SERVICE 
+                    ? "service" 
+                    : "modification";
+            throw new RuntimeException(
+                    String.format("This vehicle already has a pending %s appointment at another service center. " +
+                            "Please wait for it to be completed or cancelled before booking at a different center.", 
+                            appointmentTypeText)
+            );
+        }
+
+        // Check maximum appointments per day per customer (prevent overbooking/spamming)
+        Long customerAppointmentsToday = appointmentRepository
+                .countCustomerAppointmentsForDay(
+                        customer.getId(),
+                        appointment.getAppointmentDate()
+                );
+        
+        if (customerAppointmentsToday >= MAX_APPOINTMENTS_PER_DAY) {
+            throw new RuntimeException(
+                    String.format("You have reached the maximum limit of %d appointments per day. " +
+                            "Please select a different date or cancel an existing appointment.", 
+                            MAX_APPOINTMENTS_PER_DAY)
+            );
         }
 
         // Check if service center has available slots for the selected date/time
