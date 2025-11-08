@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -405,13 +406,21 @@ class AppointmentIntegrationTest {
     // ===================================================================
 
     @Test
-    @WithMockUser(username = "appointment-test@example.com", roles = {"CUSTOMER"})
     @DisplayName("Integration: Should enforce service center capacity")
     void testBookAppointment_ServiceCenterCapacity() throws Exception {
         // Book appointments up to capacity
         int capacity = testServiceCenter.getCenterSlot();
         
         for (int i = 0; i < capacity; i++) {
+            // Create unique customer for each appointment to avoid daily limit check
+            User customer = new User();
+            customer.setEmail("capacity-test-" + i + "@example.com");
+            customer.setFullName("Capacity Test User " + i);
+            customer.setPassword("password");
+            customer.setPhoneNumber("555-000" + i);
+            customer.setActive(true);
+            customer = userRepository.save(customer);
+            
             // Create unique vehicle for each appointment
             Vehicle vehicle = new Vehicle();
             vehicle.setBrand("Brand" + i);
@@ -419,7 +428,7 @@ class AppointmentIntegrationTest {
             vehicle.setYear(2023);
             vehicle.setColor("Color" + i);
             vehicle.setLicensePlate("CAP" + i);
-            vehicle.setUser(testCustomer);
+            vehicle.setUser(customer);
             vehicle = vehicleRepository.save(vehicle);
 
             AppointmentBookingRequestDTO request = new AppointmentBookingRequestDTO();
@@ -431,19 +440,28 @@ class AppointmentIntegrationTest {
             request.setDescription("Capacity test " + i);
 
             mockMvc.perform(post("/appointments/book")
+                            .with(user("capacity-test-" + i + "@example.com").roles("CUSTOMER"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated());
         }
 
-        // Try to book one more - should fail
+        // Try to book one more - should fail due to service center capacity
+        User extraCustomer = new User();
+        extraCustomer.setEmail("capacity-test-extra@example.com");
+        extraCustomer.setFullName("Extra Customer");
+        extraCustomer.setPassword("password");
+        extraCustomer.setPhoneNumber("555-9999");
+        extraCustomer.setActive(true);
+        extraCustomer = userRepository.save(extraCustomer);
+        
         Vehicle extraVehicle = new Vehicle();
         extraVehicle.setBrand("Extra");
         extraVehicle.setModel("Extra");
         extraVehicle.setYear(2023);
         extraVehicle.setColor("Extra");
         extraVehicle.setLicensePlate("EXTRA");
-        extraVehicle.setUser(testCustomer);
+        extraVehicle.setUser(extraCustomer);
         extraVehicle = vehicleRepository.save(extraVehicle);
 
         AppointmentBookingRequestDTO extraRequest = new AppointmentBookingRequestDTO();
@@ -454,6 +472,7 @@ class AppointmentIntegrationTest {
         extraRequest.setAppointmentDate(bookingRequest.getAppointmentDate());
 
         mockMvc.perform(post("/appointments/book")
+                        .with(user("capacity-test-extra@example.com").roles("CUSTOMER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(extraRequest)))
                 .andExpect(status().isBadRequest())
