@@ -1,22 +1,28 @@
 package com.ead.backend.service;
 
-import com.ead.backend.dto.ChatCenterLocationDTO;
-import com.ead.backend.dto.ServiceCenterDTO;
-import com.ead.backend.util.LLMUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.ead.backend.dto.ChatCenterLocationDTO;
+import com.ead.backend.dto.ServiceCenterDTO;
+import com.ead.backend.util.LLMUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -57,7 +63,7 @@ public class ChatbotService {
 
     public String getChatResponse(String userMessage, String userIp, ChatCenterLocationDTO locationDTO) {
         if (userMessage == null || userMessage.isBlank()) {
-            return "Please provide a valid message.";
+            return "⚠️ Please provide a valid message.";
         }
 
         try {
@@ -72,12 +78,25 @@ public class ChatbotService {
             return reply;
         } catch (Exception e) {
             log.error("Error processing chat for IP {}: {}", userIp, e.getMessage(), e);
-            return "I'm having trouble processing your request right now. Please try again shortly.";
+            return "⚠️ **System Error**\n\nI'm having trouble processing your request right now. Please try again shortly.";
         }
     }
 
     private String detectIntentFromLLM(String message, String userIp) {
-        if (assistantAskedForDate(userIp) && message.trim().length() <= 30) {
+        // If assistant asked for date and user responds with a short message, assume it's a date
+        if (assistantAskedForDate(userIp) && message.trim().length() <= 50) {
+            return "appointment_info";
+        }
+
+        // Check for explicit appointment-related keywords
+        String normalized = message.toLowerCase();
+        if (normalized.contains("slot") || 
+            normalized.contains("appointment") || 
+            normalized.contains("book") || 
+            normalized.contains("available") ||
+            normalized.contains("availability") ||
+            normalized.contains("reserve") ||
+            normalized.contains("schedule")) {
             return "appointment_info";
         }
 
@@ -129,7 +148,9 @@ public class ChatbotService {
                 .limit(RECENT_MESSAGES_CHECK)
                 .anyMatch(msg -> {
                     String content = msg.content().toLowerCase();
-                    return content.contains("please specify the date") ||
+                    return content.contains("date required") ||
+                            content.contains("specify a date") ||
+                            content.contains("please specify the date") ||
                             content.contains("which date") ||
                             content.contains("what date") ||
                             content.contains("what time");
@@ -147,18 +168,35 @@ public class ChatbotService {
             return truncateResponse(reply, MAX_RESPONSE_LENGTH);
         } catch (Exception e) {
             log.error("Error in general conversation: {}", e.getMessage());
-            return "I apologize, but I'm having trouble responding right now. Please try again.";
+            return "⚠️ I apologize, but I'm having trouble responding right now. Please try again.";
         }
     }
 
     private String getDriveCareContext() {
         return """
-            You are the official DriveCare assistant.
-            DriveCare is a premium automobile service provider in Colombo, Sri Lanka.
-            Services: maintenance, repair, diagnostics, AC, brake, tire, engine, and radiator.
-            Hours: Mon–Fri 8AM–7PM, Sat/Sun 9AM–4PM.
-            Customers can also log in or register and book appointments through our seamless web app at drivecaresl.com.
-            Respond politely and professionally within 300 characters.
+            You are the official DriveCare assistant, a specialized chatbot for DriveCare automobile services.
+            
+            STRICT GUIDELINES:
+            1. ONLY answer questions related to DriveCare services, appointments, operating hours, and automobile service inquiries.
+            2. If a question is NOT related to automobile services, DriveCare, or car maintenance, politely decline with: "I'm sorry, but I can only assist with DriveCare automobile services and appointments. For other inquiries, please contact our customer service."
+            3. If you don't know the answer to a DriveCare-related question, respond with: "I don't have that specific information. Please visit drivecaresl.com or contact our customer service for detailed assistance."
+            4. NEVER make up information, prices, or specific service details that weren't provided.
+            
+            ABOUT DRIVECARE:
+            - Premium automobile service provider in Colombo, Sri Lanka
+            - Services offered: maintenance, repair, diagnostics, AC service, brake service, tire service, engine service, and radiator service
+            - Operating hours: Monday–Friday 8AM–7PM, Saturday/Sunday 9AM–4PM
+            - Website: drivecaresl.com (for appointments, registration, and account management)
+            
+            RESPONSE RULES:
+            - Be polite, professional, and concise (within 300 characters)
+            - Format responses in Markdown for better readability
+            - Use **bold** for important information like service names, hours, or key points
+            - Use bullet points (-) for lists when mentioning multiple services or options
+            - Use emojis sparingly for visual appeal (e.g., 🚗 for car-related topics, ⏰ for time, 📍 for location)
+            - Direct users to [drivecaresl.com](https://drivecaresl.com) for booking, cancellations, and account-related tasks
+            - Stay strictly within your knowledge boundaries
+            - Refuse to discuss topics unrelated to automobile services
         """;
     }
 
@@ -166,11 +204,11 @@ public class ChatbotService {
         try {
             LocalDate targetDate = extractDateFromMessage(userMessage);
             if (targetDate == null) {
-                return "Could you please specify the date or day to check available appointments?";
+                return "📅 **Date Required**\n\nTo check available appointment slots, please specify a date.\n\n**Examples:**\n- 'Check availability for Friday'\n- 'Show slots for November 15th'\n- 'What's available tomorrow?'\n\n🌐 You can also visit [drivecaresl.com](https://drivecaresl.com) to view and book appointments directly.";
             }
 
             if (location == null) {
-                return "Please share your location so I can find nearby DriveCare centers for booking.";
+                return "📍 **Location Needed**\n\nTo show available appointment slots, I need your location.\n\nPlease enable location sharing or visit [drivecaresl.com](https://drivecaresl.com) to select a service center and book your appointment.";
             }
 
             List<ServiceCenterDTO> centers = serviceCenterService.getNearby(
@@ -180,7 +218,7 @@ public class ChatbotService {
             );
 
             if (centers.isEmpty()) {
-                return "No nearby service centers found within 50km of your location.";
+                return "❌ **No Centers Found**\n\nI couldn't find any DriveCare service centers within **50km** of your location.\n\n🌐 Please visit [drivecaresl.com](https://drivecaresl.com) to view all available centers and book an appointment at your preferred location.";
             }
 
             Map<Integer, Integer> slots = appointmentService.getAvailableSlotsByHour(
@@ -188,27 +226,37 @@ public class ChatbotService {
                     targetDate
             );
 
-            return formatAvailableSlots(targetDate, slots);
+            return formatAvailableSlots(targetDate, slots, centers.get(0).getName());
         } catch (Exception e) {
             log.error("Error fetching appointment info: {}", e.getMessage());
-            return "Sorry, I couldn’t retrieve available slots. Please try again or visit drivecaresl.com to book directly.";
+            return "⚠️ **Service Temporarily Unavailable**\n\nI'm unable to retrieve slot information right now.\n\n🌐 Please visit [drivecaresl.com](https://drivecaresl.com) to check availability and book your appointment, or try again in a moment.";
         }
     }
 
-    private String formatAvailableSlots(LocalDate date, Map<Integer, Integer> slots) {
+    private String formatAvailableSlots(LocalDate date, Map<Integer, Integer> slots, String centerName) {
         if (slots == null || slots.isEmpty()) {
-            return String.format("No available slots on %s. You can log in or register at drivecaresl.com to book another date.", date);
+            return String.format("❌ **No appointment slots available**\n\n📅 Date: **%s**\n📍 Center: **%s**\n\n💡 Please visit [drivecaresl.com](https://drivecaresl.com) to check other dates or alternative service centers.", 
+                    date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")), centerName);
         }
 
-        StringBuilder response = new StringBuilder("Available slots on ")
-                .append(date).append(": ");
+        StringBuilder response = new StringBuilder()
+                .append("✅ **Available Appointment Slots**\n\n")
+                .append("📅 **Date:** ").append(date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))).append("\n")
+                .append("📍 **Center:** ").append(centerName).append("\n\n")
+                .append("⏰ **Time Slots:**\n");
 
-        slots.forEach((hour, count) ->
-                response.append(String.format("%02d:00 (%d slots), ", hour, count))
-        );
+        List<Map.Entry<Integer, Integer>> sortedSlots = new ArrayList<>(slots.entrySet());
+        sortedSlots.sort(Map.Entry.comparingByKey());
 
-        String result = response.toString();
-        return result.substring(0, result.length() - 2);
+        for (Map.Entry<Integer, Integer> entry : sortedSlots) {
+            String timeSlot = String.format("%02d:00", entry.getKey());
+            int available = entry.getValue();
+            response.append(String.format("- **%s** — %d slot%s available\n", timeSlot, available, available > 1 ? "s" : ""));
+        }
+        
+        response.append("\n🌐 To book your appointment, please visit [drivecaresl.com](https://drivecaresl.com)");
+        
+        return response.toString();
     }
 
     private String handleBooking(String message) {
@@ -304,14 +352,25 @@ public class ChatbotService {
 
     private String getIntentClassificationPrompt() {
         return """
-            You are a strict intent classifier for the DriveCare assistant.
-            Analyze the conversation context and the latest user message.
-            Allowed outputs (single word only): general, appointment_info.
-            Use "appointment_info" if the message includes words like 
-            "appointment", "book", "booking", "reserve", "slot", "availability", 
-            or mentions a specific day or date (e.g., "Friday", "tomorrow", "10th November").
-            Use "general" for all other messages, including greetings, service inquiries, or unrelated topics.
-            Respond with exactly one of: general or appointment_info.
+            You are a strict intent classifier for the DriveCare automobile service assistant.
+            Analyze the conversation context and the latest user message to determine intent.
+            
+            CLASSIFICATION RULES:
+            1. Return "appointment_info" ONLY if the message clearly requests:
+               - Appointment availability, slots, or scheduling information
+               - Keywords: "appointment", "book", "booking", "reserve", "slot", "availability", "available", "free time"
+               - Mentions specific dates/days: "Friday", "tomorrow", "next week", "10th November", "today"
+               - Questions about when appointments are available or open slots
+            
+            2. Return "general" for:
+               - Greetings and introductions
+               - Service inquiries (what services, prices, hours)
+               - General questions about DriveCare
+               - Any automobile-related questions
+               - All other DriveCare-related conversations
+            
+            OUTPUT FORMAT: Respond with exactly ONE word: "general" or "appointment_info"
+            Do not include explanations or additional text.
         """;
     }
 }
