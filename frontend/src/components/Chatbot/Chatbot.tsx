@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import chatBotService from '@/services/chatBotService';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface Message {
   id: number;
@@ -10,7 +11,7 @@ interface Message {
 const Chatbot: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, from: 'bot', text: "Hi! I'm here to help — ask me anything about the service." },
+    { id: 1, from: 'bot', text: "👋 **Hi! I'm the DriveCare Assistant**\n\nI'm here to help with:\n- 🚗 Service information\n- ⏰ Appointment availability\n- 📍 Center locations\n- ❓ General inquiries\n\nHow can I assist you today?" },
   ]);
   const [input, setInput] = useState('');
   const [locationRequested, setLocationRequested] = useState(false);
@@ -120,7 +121,11 @@ const Chatbot: React.FC = () => {
                       ? 'bg-linear-to-r from-orange-600 to-orange-500 text-white shadow-lg shadow-orange-500/30' 
                       : 'bg-slate-800 text-gray-100 border border-slate-700/50'
                   } max-w-[80%] px-4 py-3 rounded-2xl ${m.from === 'user' ? 'rounded-tr-sm' : 'rounded-tl-sm'} backdrop-blur-sm transition-all duration-200 hover:scale-[1.02]`}> 
-                    <div className="text-sm leading-relaxed">{m.text}</div>
+                    {m.from === 'bot' ? (
+                      <MarkdownRenderer content={m.text} />
+                    ) : (
+                      <div className="text-sm leading-relaxed">{m.text}</div>
+                    )}
                   </div>
                 </div>
               ))}
